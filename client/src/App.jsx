@@ -1,9 +1,21 @@
 import { useState } from 'react';
 import { BarraLateral } from './componentes/layout/barraLateral';
-import { CabecalhoPagina } from './componentes/layout/cabecalhoPagina';
-import { NavegacaoPaginas } from './componentes/layout/navegacaoPaginas';
-import { PainelPrincipal } from './paginas/painelPrincipal';
+import { PaginaClientes } from './paginas/clientes/paginaClientes';
+import { PaginaPadrao } from './paginas/padrao/paginaPadrao';
+import { PaginaProdutos } from './paginas/produtos/paginaProdutos';
 import { paginasPainel } from './utilitarios/paginas';
+
+function renderizarPagina(paginaSelecionada) {
+  if (paginaSelecionada.id === 'clientes') {
+    return <PaginaClientes />;
+  }
+
+  if (paginaSelecionada.id === 'produtos') {
+    return <PaginaProdutos />;
+  }
+
+  return <PaginaPadrao pagina={paginaSelecionada} />;
+}
 
 export default function App() {
   const [paginaAtiva, definirPaginaAtiva] = useState(paginasPainel[0].id);
@@ -21,18 +33,7 @@ export default function App() {
         />
 
         <section className="areaConteudo">
-          <CabecalhoPagina
-            titulo={paginaSelecionada.titulo}
-            descricao={paginaSelecionada.descricao}
-          />
-
-          <NavegacaoPaginas
-            itens={paginasPainel}
-            paginaAtiva={paginaAtiva}
-            aoSelecionarPagina={definirPaginaAtiva}
-          />
-
-          <PainelPrincipal pagina={paginaSelecionada} />
+          {renderizarPagina(paginaSelecionada)}
         </section>
       </div>
     </main>

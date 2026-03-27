@@ -1,3 +1,6 @@
+import { Botao } from '../comuns/botao';
+import { BotaoMenu } from './botaoMenu';
+
 function IconeMenu({ tipo }) {
   const icones = {
     inicio: (
@@ -49,15 +52,14 @@ export function BarraLateral({
 
       <nav className="navegacaoLateral" aria-label="Menu principal">
         {itens.map((item) => (
-          <button
+          <BotaoMenu
             key={item.id}
-            type="button"
-            className={`botaoMenu ${paginaAtiva === item.id ? 'ativo' : ''}`}
+            ativo={paginaAtiva === item.id}
             onClick={() => aoSelecionarPagina(item.id)}
           >
             <IconeMenu tipo={item.icone} />
             <span>{item.rotulo}</span>
-          </button>
+          </BotaoMenu>
         ))}
       </nav>
 
@@ -73,9 +75,9 @@ export function BarraLateral({
           </div>
         </div>
 
-        <button type="button" className="botaoSair">
+        <Botao variante="complementar" className="botaoComplementar" icone="sair">
           Sair
-        </button>
+        </Botao>
       </div>
     </aside>
   );

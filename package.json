@@ -15,7 +15,8 @@
     "start:electron": "electron .",
     "build": "npm run build:web",
     "build:web": "vite build",
-    "build:electron": "npm run build:web && electron-builder"
+    "build:electron": "npm run build:web && electron-builder",
+    "popular:banco": "node server/scripts/popularBanco.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
