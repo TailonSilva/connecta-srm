@@ -1,11 +1,14 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Botao } from '../../componentes/comuns/botao';
-import { CampoPesquisa } from '../../componentes/comuns/campoPesquisa';
+import { ModalBuscaTabela } from '../../componentes/comuns/modalBuscaTabela';
 import { ModalCliente } from '../clientes/modalCliente';
+import { ModalOrcamento } from '../orcamentos/modalOrcamento';
 
 const estadoInicialFormulario = {
   idCliente: '',
   idContato: '',
+  idOrcamento: '',
+  idEtapaOrcamento: '',
   idUsuario: '',
   nomeUsuario: '',
   assunto: '',
@@ -20,17 +23,34 @@ const estadoInicialFormulario = {
 export function ModalAtendimento({
   aberto,
   atendimento,
-  clientes,
-  contatos,
+  clientes = [],
+  contatos = [],
   usuarioLogado,
-  vendedores,
-  ramosAtividade,
-  canaisAtendimento,
-  origensAtendimento,
+  vendedores = [],
+  ramosAtividade = [],
+  canaisAtendimento = [],
+  origensAtendimento = [],
   modo = 'novo',
   permitirExcluir = false,
   idVendedorBloqueado = null,
   aoIncluirCliente,
+  aoIncluirOrcamento,
+  aoAtualizarOrcamento,
+  aoAtualizarStatusOrcamento,
+  aoAbrirPedido,
+  dadosOrcamento,
+  clientesOrcamento = [],
+  contatosOrcamento = [],
+  usuariosOrcamento = [],
+  vendedoresOrcamento = [],
+  prazosPagamento = [],
+  etapasOrcamento = [],
+  motivosPerda = [],
+  orcamentos = [],
+  produtos = [],
+  camposOrcamento = [],
+  empresa,
+  etapaOrcamentoAtualizadaExternamente = null,
   aoFechar,
   aoSalvar,
   aoExcluir
@@ -42,11 +62,17 @@ export function ModalAtendimento({
   const [confirmandoSaida, definirConfirmandoSaida] = useState(false);
   const [modalClienteAberto, definirModalClienteAberto] = useState(false);
   const [modalBuscaClienteAberto, definirModalBuscaClienteAberto] = useState(false);
-  const [pesquisaCliente, definirPesquisaCliente] = useState('');
-  const [indiceClienteAtivo, definirIndiceClienteAtivo] = useState(0);
-  const referenciaPesquisaCliente = useRef(null);
+  const [modalOrcamentoAberto, definirModalOrcamentoAberto] = useState(false);
+  const [modoModalOrcamento, definirModoModalOrcamento] = useState('novo');
+  const [orcamentoSelecionado, definirOrcamentoSelecionado] = useState(null);
+  const [confirmandoPedidoOrcamento, definirConfirmandoPedidoOrcamento] = useState(null);
   const somenteLeitura = modo === 'consulta';
   const modoInclusao = !atendimento;
+  const clientesAtivos = clientes.filter((cliente) => cliente.status !== 0);
+  const contatosAtivos = contatos.filter((contato) => contato.status !== 0);
+  const canaisAtivos = canaisAtendimento.filter((canal) => canal.status !== 0);
+  const origensAtivas = origensAtendimento.filter((origem) => origem.status !== 0);
+  const etapasOrcamentoAtivas = etapasOrcamento.filter((etapa) => etapa.status !== 0);
 
   useEffect(() => {
     if (!aberto) {
@@ -60,55 +86,26 @@ export function ModalAtendimento({
     definirConfirmandoSaida(false);
     definirModalClienteAberto(false);
     definirModalBuscaClienteAberto(false);
-    definirPesquisaCliente('');
-    definirIndiceClienteAtivo(0);
+    definirModalOrcamentoAberto(false);
+    definirModoModalOrcamento('novo');
+    definirOrcamentoSelecionado(null);
+    definirConfirmandoPedidoOrcamento(null);
   }, [aberto, atendimento, usuarioLogado]);
 
-  const clientesFiltradosBusca = useMemo(() => {
-    const termo = String(pesquisaCliente || '').trim().toLowerCase();
-
-    return clientes.filter((cliente) => {
-      if (!termo) {
-        return true;
-      }
-
-      return [
-        cliente.idCliente,
-        cliente.razaoSocial,
-        cliente.nomeFantasia,
-        cliente.cidade,
-        cliente.estado,
-        cliente.cnpj
-      ].some((valor) => String(valor || '').toLowerCase().includes(termo));
-    });
-  }, [clientes, pesquisaCliente]);
-
   useEffect(() => {
-    if (!modalBuscaClienteAberto) {
+    if (!etapaOrcamentoAtualizadaExternamente?.idOrcamento) {
       return;
     }
 
-    definirIndiceClienteAtivo(0);
-
-    const timeout = window.setTimeout(() => {
-      referenciaPesquisaCliente.current?.focus();
-    }, 0);
-
-    return () => {
-      window.clearTimeout(timeout);
-    };
-  }, [modalBuscaClienteAberto]);
-
-  useEffect(() => {
-    if (!clientesFiltradosBusca.length) {
-      definirIndiceClienteAtivo(0);
-      return;
-    }
-
-    if (indiceClienteAtivo > clientesFiltradosBusca.length - 1) {
-      definirIndiceClienteAtivo(clientesFiltradosBusca.length - 1);
-    }
-  }, [clientesFiltradosBusca, indiceClienteAtivo]);
+    definirFormulario((estadoAtual) => (
+      String(estadoAtual.idOrcamento || '') === String(etapaOrcamentoAtualizadaExternamente.idOrcamento)
+        ? {
+          ...estadoAtual,
+          idEtapaOrcamento: String(etapaOrcamentoAtualizadaExternamente.idEtapaOrcamento || '')
+        }
+        : estadoAtual
+    ));
+  }, [etapaOrcamentoAtualizadaExternamente]);
 
   useEffect(() => {
     if (!aberto) {
@@ -118,6 +115,15 @@ export function ModalAtendimento({
     function tratarTecla(evento) {
       if (evento.key === 'Escape' && !salvando) {
         if (modalClienteAberto) {
+          return;
+        }
+
+        if (modalOrcamentoAberto) {
+          return;
+        }
+
+        if (confirmandoPedidoOrcamento) {
+          definirConfirmandoPedidoOrcamento(null);
           return;
         }
 
@@ -145,27 +151,89 @@ export function ModalAtendimento({
     return () => {
       window.removeEventListener('keydown', tratarTecla);
     };
-  }, [aberto, aoFechar, confirmandoExclusao, confirmandoSaida, salvando, modalBuscaClienteAberto, modalClienteAberto]);
+  }, [aberto, aoFechar, confirmandoExclusao, confirmandoPedidoOrcamento, confirmandoSaida, salvando, modalBuscaClienteAberto, modalClienteAberto, modalOrcamentoAberto]);
 
   if (!aberto) {
     return null;
   }
 
   const modoEdicao = Boolean(atendimento?.idAtendimento);
-  const contatosDoCliente = contatos.filter(
+  const contatosDoCliente = contatosAtivos.filter(
     (contato) => String(contato.idCliente) === String(formulario.idCliente)
+  );
+  const orcamentosAbertosDoCliente = orcamentos.filter(
+    (orcamento) => String(orcamento.idCliente) === String(formulario.idCliente)
+  );
+  const orcamentoSelecionadoFormulario = orcamentos.find(
+    (orcamento) => String(orcamento.idOrcamento) === String(formulario.idOrcamento)
   );
   const contatoSelecionado = contatosDoCliente.find(
     (contato) => String(contato.idContato) === String(formulario.idContato)
+  );
+  const dadosOrcamentoAtendimento = montarDadosOrcamentoAPartirDoAtendimentoAtual(
+    formulario,
+    clientesOrcamento,
+    vendedoresOrcamento,
+    usuarioLogado
   );
 
   function alterarCampo(evento) {
     const { name, value, type, checked } = evento.target;
 
+    definirFormulario((estadoAtual) => {
+      const proximoEstado = {
+        ...estadoAtual,
+        ...(name === 'idCliente' ? { idContato: '', idOrcamento: '', idEtapaOrcamento: '' } : {}),
+        [name]: type === 'checkbox' ? checked : value
+      };
+
+      if (name === 'idOrcamento') {
+        const orcamento = orcamentosAbertosDoCliente.find((item) => String(item.idOrcamento) === String(value));
+        proximoEstado.idEtapaOrcamento = orcamento?.idEtapaOrcamento ? String(orcamento.idEtapaOrcamento) : '';
+      }
+
+      if (name === 'idEtapaOrcamento' && !estadoAtual.idOrcamento) {
+        proximoEstado.idEtapaOrcamento = '';
+      }
+
+      return proximoEstado;
+    });
+  }
+
+  function alterarStatusOrcamento(evento) {
+    const proximoValor = String(evento.target.value || '');
+
+    if (!formulario.idOrcamento) {
+      return;
+    }
+
+    if (!proximoValor || String(formulario.idEtapaOrcamento || '') === proximoValor) {
+      definirFormulario((estadoAtual) => ({
+        ...estadoAtual,
+        idEtapaOrcamento: proximoValor
+      }));
+      return;
+    }
+
+    if (precisaPerguntarGeracaoPedido(
+      {
+        ...orcamentoSelecionadoFormulario,
+        idEtapaOrcamento: formulario.idEtapaOrcamento || orcamentoSelecionadoFormulario?.idEtapaOrcamento
+      },
+      proximoValor,
+      etapasOrcamento
+    )) {
+      definirConfirmandoPedidoOrcamento({
+        origem: 'atendimento',
+        proximoIdEtapaOrcamento: proximoValor,
+        orcamento: orcamentoSelecionadoFormulario
+      });
+      return;
+    }
+
     definirFormulario((estadoAtual) => ({
       ...estadoAtual,
-      ...(name === 'idCliente' ? { idContato: '' } : {}),
-      [name]: type === 'checkbox' ? checked : value
+      idEtapaOrcamento: proximoValor
     }));
   }
 
@@ -199,6 +267,12 @@ export function ModalAtendimento({
     definirMensagemErro('');
 
     try {
+      if (formulario.idOrcamento && formulario.idEtapaOrcamento && aoAtualizarStatusOrcamento) {
+        await aoAtualizarStatusOrcamento({
+          idOrcamento: Number(formulario.idOrcamento),
+          idEtapaOrcamento: Number(formulario.idEtapaOrcamento)
+        });
+      }
       await aoSalvar(formulario);
     } catch (erro) {
       definirMensagemErro(erro.message || 'Nao foi possivel salvar o atendimento.');
@@ -283,15 +357,11 @@ export function ModalAtendimento({
       return;
     }
 
-    definirPesquisaCliente('');
-    definirIndiceClienteAtivo(0);
     definirModalBuscaClienteAberto(true);
   }
 
   function fecharModalBuscaCliente() {
     definirModalBuscaClienteAberto(false);
-    definirPesquisaCliente('');
-    definirIndiceClienteAtivo(0);
   }
 
   function selecionarCliente(cliente) {
@@ -302,7 +372,9 @@ export function ModalAtendimento({
     definirFormulario((estadoAtual) => ({
       ...estadoAtual,
       idCliente: String(cliente.idCliente),
-      idContato: ''
+      idContato: '',
+      idOrcamento: '',
+      idEtapaOrcamento: ''
     }));
     fecharModalBuscaCliente();
   }
@@ -318,45 +390,181 @@ export function ModalAtendimento({
     }
   }
 
-  function tratarTeclaBuscaCliente(evento) {
-    if (!modalBuscaClienteAberto) {
+  function abrirModalNovoOrcamento() {
+    if (somenteLeitura || salvando || !aoIncluirOrcamento) {
       return;
     }
 
-    if (evento.key === 'ArrowDown') {
-      evento.preventDefault();
+    definirModoModalOrcamento('novo');
+    definirOrcamentoSelecionado(null);
+    definirModalOrcamentoAberto(true);
+  }
 
-      if (!clientesFiltradosBusca.length) {
-        return;
-      }
-
-      definirIndiceClienteAtivo((indiceAtual) => (
-        indiceAtual >= clientesFiltradosBusca.length - 1 ? 0 : indiceAtual + 1
-      ));
+  function abrirModalConsultaOrcamento() {
+    if (!orcamentoSelecionadoFormulario) {
       return;
     }
 
-    if (evento.key === 'ArrowUp') {
-      evento.preventDefault();
+    definirModoModalOrcamento('consulta');
+    definirOrcamentoSelecionado(orcamentoSelecionadoFormulario);
+    definirModalOrcamentoAberto(true);
+  }
 
-      if (!clientesFiltradosBusca.length) {
-        return;
-      }
-
-      definirIndiceClienteAtivo((indiceAtual) => (
-        indiceAtual <= 0 ? clientesFiltradosBusca.length - 1 : indiceAtual - 1
-      ));
+  function abrirModalEdicaoOrcamento() {
+    if (somenteLeitura || !orcamentoSelecionadoFormulario) {
       return;
     }
 
-    if (evento.key === 'Enter') {
-      if (!clientesFiltradosBusca.length) {
-        return;
+    definirModoModalOrcamento('edicao');
+    definirOrcamentoSelecionado(orcamentoSelecionadoFormulario);
+    definirModalOrcamentoAberto(true);
+  }
+
+  function fecharModalNovoOrcamento() {
+    definirModalOrcamentoAberto(false);
+    definirModoModalOrcamento('novo');
+    definirOrcamentoSelecionado(null);
+  }
+
+  async function salvarNovoOrcamento(dadosNovoOrcamento) {
+    const orcamentoBase = modoModalOrcamento === 'novo' ? null : orcamentoSelecionado;
+    const precisaConfirmarPedido = precisaPerguntarGeracaoPedido(
+      orcamentoBase,
+      dadosNovoOrcamento.idEtapaOrcamento,
+      etapasOrcamento
+    );
+
+    if (precisaConfirmarPedido) {
+      definirConfirmandoPedidoOrcamento({
+        origem: 'orcamento',
+        dadosOrcamento: dadosNovoOrcamento,
+        orcamento: orcamentoBase
+      });
+      return;
+    }
+
+    await persistirOrcamentoSemPedido(dadosNovoOrcamento);
+  }
+
+  async function persistirOrcamentoSemPedido(dadosNovoOrcamento) {
+    const orcamentoSalvo = modoModalOrcamento === 'novo'
+      ? await aoIncluirOrcamento(dadosNovoOrcamento)
+      : await aoAtualizarOrcamento(dadosNovoOrcamento);
+
+    if (orcamentoSalvo?.idOrcamento) {
+      definirFormulario((estadoAtual) => ({
+        ...estadoAtual,
+        idOrcamento: String(orcamentoSalvo.idOrcamento),
+        idEtapaOrcamento: orcamentoSalvo.idEtapaOrcamento ? String(orcamentoSalvo.idEtapaOrcamento) : ''
+      }));
+    }
+
+    fecharModalNovoOrcamento();
+  }
+
+  async function recusarGeracaoPedido() {
+    const confirmacao = confirmandoPedidoOrcamento;
+    definirConfirmandoPedidoOrcamento(null);
+
+    if (!confirmacao) {
+      return;
+    }
+
+    const etapaFechadoSemPedido = obterEtapaFechadoSemPedido(etapasOrcamento);
+
+    if (confirmacao.origem === 'atendimento') {
+      if (etapaFechadoSemPedido?.idEtapaOrcamento && aoAtualizarStatusOrcamento) {
+        await aoAtualizarStatusOrcamento({
+          idOrcamento: Number(confirmacao.orcamento.idOrcamento),
+          idEtapaOrcamento: Number(etapaFechadoSemPedido.idEtapaOrcamento)
+        });
       }
 
-      evento.preventDefault();
-      selecionarCliente(clientesFiltradosBusca[indiceClienteAtivo]);
+      definirFormulario((estadoAtual) => ({
+        ...estadoAtual,
+        idEtapaOrcamento: etapaFechadoSemPedido?.idEtapaOrcamento
+          ? String(etapaFechadoSemPedido.idEtapaOrcamento)
+          : estadoAtual.idEtapaOrcamento
+      }));
+      return;
     }
+
+    if (confirmacao.origem === 'orcamento') {
+      const dadosAjustados = {
+        ...confirmacao.dadosOrcamento,
+        idEtapaOrcamento: etapaFechadoSemPedido?.idEtapaOrcamento
+          ? String(etapaFechadoSemPedido.idEtapaOrcamento)
+          : String(confirmacao.orcamento?.idEtapaOrcamento || '')
+      };
+
+      if (confirmacao.orcamento?.idOrcamento || etapaFechadoSemPedido?.idEtapaOrcamento) {
+        await persistirOrcamentoSemPedido(dadosAjustados);
+      } else if (confirmacao.orcamento?.idEtapaOrcamento && aoAtualizarStatusOrcamento) {
+        await aoAtualizarStatusOrcamento({
+          idOrcamento: Number(confirmacao.orcamento.idOrcamento),
+          idEtapaOrcamento: Number(confirmacao.orcamento.idEtapaOrcamento)
+        });
+      }
+    }
+  }
+
+  async function confirmarGeracaoPedido() {
+    const confirmacao = confirmandoPedidoOrcamento;
+    definirConfirmandoPedidoOrcamento(null);
+
+    if (!confirmacao) {
+      return;
+    }
+
+    if (confirmacao.origem === 'atendimento') {
+      const orcamentoAtualizado = await aoAtualizarStatusOrcamento?.({
+        idOrcamento: Number(confirmacao.orcamento.idOrcamento),
+        idEtapaOrcamento: Number(confirmacao.proximoIdEtapaOrcamento)
+      });
+
+      definirFormulario((estadoAtual) => ({
+        ...estadoAtual,
+        idEtapaOrcamento: String(confirmacao.proximoIdEtapaOrcamento || '')
+      }));
+
+      if (aoAbrirPedido) {
+        const orcamentoBasePedido = enriquecerOrcamentoParaPedidoAtendimento(
+          orcamentoAtualizado || {
+            ...confirmacao.orcamento,
+            idEtapaOrcamento: Number(confirmacao.proximoIdEtapaOrcamento)
+          },
+          prazosPagamento,
+          produtos
+        );
+        aoAbrirPedido(
+          montarDadosIniciaisPedidoAPartirDoOrcamento(orcamentoBasePedido),
+          { idOrcamento: orcamentoBasePedido.idOrcamento, origem: 'atendimento' }
+        );
+      }
+      return;
+    }
+
+    const orcamentoSalvo = modoModalOrcamento === 'novo'
+      ? await aoIncluirOrcamento(confirmacao.dadosOrcamento)
+      : await aoAtualizarOrcamento(confirmacao.dadosOrcamento);
+
+    if (orcamentoSalvo?.idOrcamento) {
+      definirFormulario((estadoAtual) => ({
+        ...estadoAtual,
+        idOrcamento: String(orcamentoSalvo.idOrcamento),
+        idEtapaOrcamento: orcamentoSalvo.idEtapaOrcamento ? String(orcamentoSalvo.idEtapaOrcamento) : ''
+      }));
+
+      if (aoAbrirPedido) {
+        const orcamentoBasePedido = enriquecerOrcamentoParaPedidoAtendimento(orcamentoSalvo, prazosPagamento, produtos);
+        aoAbrirPedido(
+          montarDadosIniciaisPedidoAPartirDoOrcamento(orcamentoBasePedido),
+          { idOrcamento: orcamentoBasePedido.idOrcamento, origem: 'orcamento' }
+        );
+      }
+    }
+
+    fecharModalNovoOrcamento();
   }
 
   function inserirMarcadorDescricao(evento) {
@@ -429,6 +637,11 @@ export function ModalAtendimento({
                 Excluir
               </Botao>
             ) : null}
+            {!somenteLeitura ? (
+              <Botao variante="secundario" type="button" onClick={abrirModalNovoOrcamento} disabled={salvando}>
+                Incluir orcamento
+              </Botao>
+            ) : null}
             <Botao variante="secundario" type="button" onClick={tentarFecharModal} disabled={salvando}>
               {somenteLeitura ? 'Fechar' : 'Cancelar'}
             </Botao>
@@ -485,7 +698,7 @@ export function ModalAtendimento({
                   name="idCliente"
                   value={formulario.idCliente}
                   onChange={alterarCampo}
-                  options={clientes.map((cliente) => ({
+                  options={clientesAtivos.map((cliente) => ({
                     valor: String(cliente.idCliente),
                     label: montarRotuloCliente(cliente)
                   }))}
@@ -530,6 +743,54 @@ export function ModalAtendimento({
                   disabled={somenteLeitura || !formulario.idCliente}
                 />
               </div>
+              <div className="linhaOrcamentoAtendimento">
+                <CampoSelect
+                  label="Orcamento"
+                  name="idOrcamento"
+                  value={formulario.idOrcamento}
+                  onChange={alterarCampo}
+                  options={orcamentosAbertosDoCliente.map((orcamento) => ({
+                    valor: String(orcamento.idOrcamento),
+                    label: montarRotuloOrcamento(orcamento)
+                  }))}
+                  disabled={somenteLeitura || !formulario.idCliente}
+                  acaoExtra={formulario.idOrcamento ? (
+                    <>
+                      <Botao
+                        variante="secundario"
+                        type="button"
+                        icone="consultar"
+                        somenteIcone
+                        title="Consultar orcamento"
+                        aria-label="Consultar orcamento"
+                        onClick={abrirModalConsultaOrcamento}
+                      />
+                      {!somenteLeitura ? (
+                        <Botao
+                          variante="secundario"
+                          type="button"
+                          icone="editar"
+                          somenteIcone
+                          title="Editar orcamento"
+                          aria-label="Editar orcamento"
+                          onClick={abrirModalEdicaoOrcamento}
+                        />
+                      ) : null}
+                    </>
+                  ) : null}
+                />
+                <CampoSelect
+                  label="Status do orcamento"
+                  name="idEtapaOrcamento"
+                  value={formulario.idEtapaOrcamento}
+                  onChange={alterarStatusOrcamento}
+                  options={etapasOrcamentoAtivas.map((etapa) => ({
+                    valor: String(etapa.idEtapaOrcamento),
+                    label: etapa.descricao
+                  }))}
+                  disabled={somenteLeitura || !formulario.idOrcamento}
+                />
+              </div>
               <div className="linhaUsuarioCanalOrigemAtendimento">
                 <CampoFormulario
                   label="Usuario do registro"
@@ -542,7 +803,7 @@ export function ModalAtendimento({
                   name="idCanalAtendimento"
                   value={formulario.idCanalAtendimento}
                   onChange={alterarCampo}
-                  options={canaisAtendimento.map((canal) => ({
+                  options={canaisAtivos.map((canal) => ({
                     valor: String(canal.idCanalAtendimento),
                     label: canal.descricao
                   }))}
@@ -553,7 +814,7 @@ export function ModalAtendimento({
                   name="idOrigemAtendimento"
                   value={formulario.idOrigemAtendimento}
                   onChange={alterarCampo}
-                  options={origensAtendimento.map((origem) => ({
+                  options={origensAtivas.map((origem) => ({
                     valor: String(origem.idOrigemAtendimento),
                     label: origem.descricao
                   }))}
@@ -581,6 +842,35 @@ export function ModalAtendimento({
         </div>
 
         {mensagemErro ? <p className="mensagemErroFormulario">{mensagemErro}</p> : null}
+
+        {confirmandoPedidoOrcamento ? (
+          <div className="camadaConfirmacaoModal" role="presentation" onMouseDown={recusarGeracaoPedido}>
+            <div
+              className="modalConfirmacaoAgenda"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="tituloConfirmacaoPedidoAtendimento"
+              onMouseDown={(evento) => evento.stopPropagation()}
+            >
+              <div className="cabecalhoConfirmacaoModal">
+                <h4 id="tituloConfirmacaoPedidoAtendimento">Criar pedido</h4>
+              </div>
+
+              <div className="corpoConfirmacaoModal">
+                <p>Este orcamento esta sendo fechado. Deseja gerar um pedido a partir dele?</p>
+              </div>
+
+              <div className="acoesConfirmacaoModal">
+                <Botao variante="secundario" type="button" onClick={recusarGeracaoPedido} disabled={salvando}>
+                  Nao
+                </Botao>
+                <Botao variante="primario" type="button" onClick={confirmarGeracaoPedido} disabled={salvando}>
+                  Sim
+                </Botao>
+              </div>
+            </div>
+          </div>
+        ) : null}
 
         {confirmandoSaida ? (
           <div className="camadaConfirmacaoModal" role="presentation" onMouseDown={fecharConfirmacaoSaida}>
@@ -665,79 +955,55 @@ export function ModalAtendimento({
       aoSalvar={salvarNovoCliente}
     />
 
-    {modalBuscaClienteAberto ? (
-      <div className="camadaModalContato" role="presentation" onMouseDown={fecharModalBuscaCliente}>
-        <section
-          className="modalContatoCliente modalBuscaClienteAtendimento"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="tituloModalBuscaClienteAtendimento"
-          onMouseDown={(evento) => evento.stopPropagation()}
-          onKeyDown={tratarTeclaBuscaCliente}
-        >
-          <div className="cabecalhoModalContato">
-            <h3 id="tituloModalBuscaClienteAtendimento">Buscar cliente</h3>
+    <ModalBuscaTabela
+      aberto={modalBuscaClienteAberto}
+      titulo="Buscar cliente"
+      placeholder="Pesquisar cliente no grid"
+      ariaLabelPesquisa="Pesquisar cliente no grid"
+      colunas={[
+        {
+          key: 'codigo',
+          label: 'Codigo',
+          render: (cliente) => `#${String(cliente.idCliente).padStart(4, '0')}`
+        },
+        { key: 'razaoSocial', label: 'Razao social', render: (cliente) => cliente.razaoSocial },
+        { key: 'nomeFantasia', label: 'Nome fantasia', render: (cliente) => cliente.nomeFantasia },
+        { key: 'cidade', label: 'Cidade', render: (cliente) => cliente.cidade || 'Nao informada' },
+        { key: 'estado', label: 'UF', render: (cliente) => cliente.estado || '--' },
+        { key: 'cnpj', label: 'CNPJ', render: (cliente) => cliente.cnpj || 'Nao informado' }
+      ]}
+      registros={clientes}
+      obterTextoBusca={(cliente) => [
+        cliente.idCliente,
+        cliente.razaoSocial,
+        cliente.nomeFantasia,
+        cliente.cidade,
+        cliente.estado,
+        cliente.cnpj
+      ].join(' ')}
+      obterChaveRegistro={(cliente) => cliente.idCliente}
+      aoSelecionar={selecionarCliente}
+      aoFechar={fecharModalBuscaCliente}
+    />
 
-            <div className="acoesFormularioContatoModal">
-              <Botao variante="secundario" type="button" onClick={fecharModalBuscaCliente}>
-                Fechar
-              </Botao>
-            </div>
-          </div>
-
-          <div className="corpoModalContato corpoModalBuscaClienteAtendimento">
-            <CampoPesquisa
-              valor={pesquisaCliente}
-              aoAlterar={definirPesquisaCliente}
-              placeholder="Pesquisar cliente no grid"
-              ariaLabel="Pesquisar cliente no grid"
-              ref={referenciaPesquisaCliente}
-            />
-
-            <div className="gradeContatosModal gradeBuscaClienteAtendimento">
-              <table className="tabelaContatosModal tabelaBuscaClienteAtendimento">
-                <thead>
-                  <tr>
-                    <th>Codigo</th>
-                    <th>Razao social</th>
-                    <th>Nome fantasia</th>
-                    <th>Cidade</th>
-                    <th>UF</th>
-                    <th>CNPJ</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {clientesFiltradosBusca.length > 0 ? (
-                    clientesFiltradosBusca.map((cliente, indice) => (
-                      <tr
-                        key={cliente.idCliente}
-                        className={indice === indiceClienteAtivo ? 'linhaBuscaClienteAtiva' : ''}
-                        onMouseEnter={() => definirIndiceClienteAtivo(indice)}
-                        onDoubleClick={() => selecionarCliente(cliente)}
-                        onClick={() => selecionarCliente(cliente)}
-                      >
-                        <td>#{String(cliente.idCliente).padStart(4, '0')}</td>
-                        <td>{cliente.razaoSocial}</td>
-                        <td>{cliente.nomeFantasia}</td>
-                        <td>{cliente.cidade || 'Nao informada'}</td>
-                        <td>{cliente.estado || '--'}</td>
-                        <td>{cliente.cnpj || 'Nao informado'}</td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={6} className="mensagemTabelaContatosModal">
-                        Nenhum cliente encontrado.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-      </div>
-    ) : null}
+    <ModalOrcamento
+      aberto={modalOrcamentoAberto}
+      orcamento={modoModalOrcamento === 'novo' ? (dadosOrcamentoAtendimento || dadosOrcamento) : orcamentoSelecionado}
+      clientes={clientesOrcamento}
+      contatos={contatosOrcamento}
+      usuarios={usuariosOrcamento}
+      vendedores={vendedoresOrcamento}
+      prazosPagamento={prazosPagamento}
+      etapasOrcamento={etapasOrcamento}
+      motivosPerda={motivosPerda}
+      produtos={produtos}
+      camposOrcamento={camposOrcamento}
+      empresa={empresa}
+      usuarioLogado={usuarioLogado}
+      modo={modoModalOrcamento}
+      aoFechar={fecharModalNovoOrcamento}
+      aoSalvar={salvarNovoOrcamento}
+    />
     </>
   );
 }
@@ -782,6 +1048,8 @@ function criarFormularioInicial(atendimento, usuarioLogado) {
     horaFim: atendimento?.horaFim || '',
     idCliente: normalizarValorFormulario(atendimento?.idCliente),
     idContato: normalizarValorFormulario(atendimento?.idContato),
+    idOrcamento: '',
+    idEtapaOrcamento: '',
     idUsuario: normalizarValorFormulario(atendimento?.idUsuario || usuarioLogado?.idUsuario),
     nomeUsuario: atendimento?.nomeUsuario || usuarioLogado?.nome || '',
     idCanalAtendimento: normalizarValorFormulario(atendimento?.idCanalAtendimento),
@@ -805,6 +1073,21 @@ function montarRotuloCliente(cliente) {
   return localizacao ? `${codigo} - ${nome} - ${localizacao}` : `${codigo} - ${nome}`;
 }
 
+function montarRotuloOrcamento(orcamento) {
+  const codigo = `#${String(orcamento.idOrcamento || '').padStart(4, '0')}`;
+  const total = Array.isArray(orcamento?.itens)
+    ? orcamento.itens.reduce((acumulado, item) => {
+      const valor = Number(String(item.valorTotal ?? 0).replace(/[^\d,.-]/g, '').replace(/\.(?=\d{3}(?:\D|$))/g, '').replace(',', '.'));
+      return acumulado + (Number.isNaN(valor) ? 0 : valor);
+    }, 0)
+    : 0;
+  const valorFormatado = total.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL'
+  });
+  return `${codigo} - ${valorFormatado}`;
+}
+
 function obterDataAtualFormatoInput() {
   const agora = new Date();
   const ano = agora.getFullYear();
@@ -820,4 +1103,100 @@ function obterHoraAtualFormatoInput() {
   const minutos = String(agora.getMinutes()).padStart(2, '0');
 
   return `${horas}:${minutos}`;
+}
+
+function montarDadosOrcamentoAPartirDoAtendimentoAtual(formulario, clientes, vendedores, usuarioLogado) {
+  const cliente = clientes.find((item) => String(item.idCliente) === String(formulario?.idCliente || ''));
+  const vendedor = vendedores.find((item) => String(item.idVendedor) === String(cliente?.idVendedor || ''));
+
+  return {
+    idCliente: formulario?.idCliente || '',
+    idContato: formulario?.idContato || '',
+    idUsuario: formulario?.idUsuario || usuarioLogado?.idUsuario || '',
+    nomeUsuario: formulario?.nomeUsuario || usuarioLogado?.nome || '',
+    idVendedor: cliente?.idVendedor || '',
+    comissao: vendedor?.comissaoPadrao ?? 0,
+    observacao: formulario?.descricao || ''
+  };
+}
+
+function precisaPerguntarGeracaoPedido(orcamento, idEtapaOrcamento, etapasOrcamento) {
+  if (!orcamento || orcamento.idPedidoVinculado || !idEtapaOrcamento) {
+    return false;
+  }
+
+  return etapaAcabouDeFechar(orcamento.idEtapaOrcamento, idEtapaOrcamento, etapasOrcamento);
+}
+
+function etapaAcabouDeFechar(idEtapaAnterior, idEtapaAtual, etapasOrcamento) {
+  const etapaAnterior = etapasOrcamento.find((etapa) => String(etapa.idEtapaOrcamento) === String(idEtapaAnterior || ''));
+  const etapaAtual = etapasOrcamento.find((etapa) => String(etapa.idEtapaOrcamento) === String(idEtapaAtual || ''));
+
+  return !etapaOrcamentoEhFechamento(etapaAnterior) && etapaOrcamentoEhFechamento(etapaAtual);
+}
+
+function etapaOrcamentoEhFechamento(etapa) {
+  const descricao = String(etapa?.descricao || '').trim().toLowerCase();
+  const abreviacao = String(etapa?.abreviacao || '').trim().toLowerCase();
+  return ['fechado', 'fechamento'].includes(descricao) || abreviacao === 'fec';
+}
+
+function obterEtapaFechadoSemPedido(etapasOrcamento) {
+  return etapasOrcamento.find((etapa) => {
+    const descricao = String(etapa?.descricao || '').trim().toLowerCase();
+    const abreviacao = String(etapa?.abreviacao || '').trim().toLowerCase();
+    return descricao === 'fechado sem pedido' || abreviacao === 'fsp';
+  }) || null;
+}
+
+function enriquecerOrcamentoParaPedidoAtendimento(orcamento, prazosPagamento, produtos) {
+  const prazo = prazosPagamento.find((item) => String(item.idPrazoPagamento) === String(orcamento.idPrazoPagamento));
+
+  return {
+    ...orcamento,
+    nomePrazoPagamento: orcamento.nomePrazoPagamento || prazo?.descricaoFormatada || prazo?.descricao || '',
+    nomeMetodoPagamento: orcamento.nomeMetodoPagamento || prazo?.nomeMetodoPagamento || '',
+    itens: Array.isArray(orcamento.itens) ? orcamento.itens.map((item) => {
+      const produto = produtos.find((registro) => String(registro.idProduto) === String(item.idProduto));
+      return {
+        ...item,
+        descricaoProdutoSnapshot: item.descricaoProdutoSnapshot || produto?.descricao || item.nomeProduto || '',
+        referenciaProdutoSnapshot: item.referenciaProdutoSnapshot || produto?.referencia || '',
+        unidadeProdutoSnapshot: item.unidadeProdutoSnapshot || produto?.nomeUnidadeMedida || produto?.siglaUnidadeMedida || '',
+        imagem: item.imagem || produto?.imagem || ''
+      };
+    }) : []
+  };
+}
+
+function montarDadosIniciaisPedidoAPartirDoOrcamento(orcamento) {
+  return {
+    idOrcamento: orcamento.idOrcamento,
+    codigoOrcamentoOrigem: orcamento.idOrcamento,
+    idCliente: orcamento.idCliente,
+    idContato: orcamento.idContato,
+    idUsuario: orcamento.idUsuario,
+    idVendedor: orcamento.idVendedor,
+    idPrazoPagamento: orcamento.idPrazoPagamento,
+    comissao: orcamento.comissao,
+    dataInclusao: obterDataAtualFormatoInput(),
+    nomeClienteSnapshot: orcamento.nomeCliente || '',
+    nomeContatoSnapshot: orcamento.nomeContato || '',
+    nomeUsuarioSnapshot: orcamento.nomeUsuario || '',
+    nomeVendedorSnapshot: orcamento.nomeVendedor || '',
+    nomeMetodoPagamentoSnapshot: orcamento.nomeMetodoPagamento || '',
+    nomePrazoPagamentoSnapshot: orcamento.nomePrazoPagamento || '',
+    observacao: orcamento.observacao || '',
+    itens: Array.isArray(orcamento.itens) ? orcamento.itens.map((item) => ({
+      idProduto: item.idProduto,
+      quantidade: item.quantidade,
+      valorUnitario: item.valorUnitario,
+      valorTotal: item.valorTotal,
+      imagem: item.imagem || '',
+      observacao: item.observacao || '',
+      referenciaProdutoSnapshot: item.referenciaProdutoSnapshot || '',
+      descricaoProdutoSnapshot: item.descricaoProdutoSnapshot || item.nomeProduto || '',
+      unidadeProdutoSnapshot: item.unidadeProdutoSnapshot || ''
+    })) : []
+  };
 }

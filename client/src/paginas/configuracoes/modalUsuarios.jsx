@@ -29,6 +29,7 @@ export function ModalUsuarios({
   aoSalvar,
   aoInativar
 }) {
+  const vendedoresAtivos = vendedores.filter((vendedor) => vendedor.status);
   const [modalFormularioAberto, definirModalFormularioAberto] = useState(false);
   const [modoFormulario, definirModoFormulario] = useState('novo');
   const [usuarioSelecionado, definirUsuarioSelecionado] = useState(null);
@@ -338,7 +339,7 @@ export function ModalUsuarios({
                       name="idVendedor"
                       value={formulario.idVendedor}
                       onChange={alterarCampo}
-                      options={vendedores.map((vendedor) => ({
+                      options={vendedoresAtivos.map((vendedor) => ({
                         valor: String(vendedor.idVendedor),
                         label: vendedor.nome
                       }))}

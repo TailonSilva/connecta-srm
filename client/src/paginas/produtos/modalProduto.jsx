@@ -42,6 +42,9 @@ export function ModalProduto({
   const [confirmandoSaida, definirConfirmandoSaida] = useState(false);
   const somenteLeitura = modo === 'consulta';
   const modoInclusao = !produto;
+  const gruposAtivos = gruposProduto.filter((grupo) => grupo.status !== 0);
+  const marcasAtivas = marcas.filter((marca) => marca.status !== 0);
+  const unidadesAtivas = unidadesMedida.filter((unidade) => unidade.status !== 0);
 
   useEffect(() => {
     if (!aberto) {
@@ -170,7 +173,7 @@ export function ModalProduto({
   return (
     <div className="camadaModal" role="presentation" onMouseDown={fecharAoClicarNoFundo}>
       <form
-        className="modalCliente"
+        className="modalCliente modalClienteComAbas"
         role="dialog"
         aria-modal="true"
         aria-labelledby="tituloModalProduto"
@@ -203,6 +206,7 @@ export function ModalProduto({
               className={`abaModalCliente ${abaAtiva === aba.id ? 'ativa' : ''}`}
               aria-selected={abaAtiva === aba.id}
               onClick={() => definirAbaAtiva(aba.id)}
+              disabled={aba.id === 'vendas' && modoInclusao}
             >
               {aba.label}
             </button>
@@ -246,7 +250,7 @@ export function ModalProduto({
                   name="idGrupo"
                   value={formulario.idGrupo}
                   onChange={alterarCampo}
-                  options={gruposProduto.map((grupo) => ({
+                  options={gruposAtivos.map((grupo) => ({
                     valor: String(grupo.idGrupo),
                     label: grupo.descricao
                   }))}
@@ -258,7 +262,7 @@ export function ModalProduto({
                   name="idMarca"
                   value={formulario.idMarca}
                   onChange={alterarCampo}
-                  options={marcas.map((marca) => ({
+                  options={marcasAtivas.map((marca) => ({
                     valor: String(marca.idMarca),
                     label: marca.descricao
                   }))}
@@ -270,7 +274,7 @@ export function ModalProduto({
                   name="idUnidade"
                   value={formulario.idUnidade}
                   onChange={alterarCampo}
-                  options={unidadesMedida.map((unidade) => ({
+                  options={unidadesAtivas.map((unidade) => ({
                     valor: String(unidade.idUnidade),
                     label: unidade.descricao
                   }))}

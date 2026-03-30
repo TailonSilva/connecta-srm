@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Botao } from '../../componentes/comuns/botao';
 import { ModalFiltros } from '../../componentes/comuns/modalFiltros';
 import { CorpoPagina } from '../../componentes/layout/corpoPagina';
@@ -8,8 +8,25 @@ import {
   listarCanaisAtendimento,
   listarOrigensAtendimento
 } from '../../servicos/atendimentos';
+import {
+  listarCamposOrcamentoConfiguracao,
+  listarCamposPedidoConfiguracao,
+  listarEtapasOrcamentoConfiguracao,
+  listarEtapasPedidoConfiguracao,
+  listarMotivosPerdaConfiguracao,
+  listarPrazosPagamentoConfiguracao
+} from '../../servicos/configuracoes';
 import { listarClientes, listarContatos, listarRamosAtividade, listarVendedores } from '../../servicos/clientes';
 import { listarEmpresas } from '../../servicos/empresa';
+import {
+  atualizarOrcamento,
+  incluirOrcamento,
+  listarOrcamentos
+} from '../../servicos/orcamentos';
+import {
+  incluirPedido
+} from '../../servicos/pedidos';
+import { listarProdutos } from '../../servicos/produtos';
 import { listarUsuarios } from '../../servicos/usuarios';
 import {
   atualizarAgendamento,
@@ -24,6 +41,7 @@ import {
   listarTiposRecurso
 } from '../../servicos/agenda';
 import { ModalAtendimento } from '../atendimentos/modalAtendimento';
+import { ModalPedido } from '../pedidos/modalPedido';
 import { ModalAgendamento } from './modalAgendamento';
 
 const minutosInicioPadrao = 8 * 60;
@@ -63,20 +81,33 @@ export function PaginaAgenda({ usuarioLogado }) {
   const [ramosAtividade, definirRamosAtividade] = useState([]);
   const [canaisAtendimento, definirCanaisAtendimento] = useState([]);
   const [origensAtendimento, definirOrigensAtendimento] = useState([]);
+  const [orcamentos, definirOrcamentos] = useState([]);
+  const [prazosPagamento, definirPrazosPagamento] = useState([]);
+  const [etapasOrcamento, definirEtapasOrcamento] = useState([]);
+  const [etapasPedido, definirEtapasPedido] = useState([]);
+  const [motivosPerda, definirMotivosPerda] = useState([]);
+  const [produtos, definirProdutos] = useState([]);
+  const [camposOrcamento, definirCamposOrcamento] = useState([]);
+  const [camposPedido, definirCamposPedido] = useState([]);
   const [empresa, definirEmpresa] = useState(null);
   const [modalAberto, definirModalAberto] = useState(false);
   const [modalFiltrosAberto, definirModalFiltrosAberto] = useState(false);
   const [modalAtendimentoAberto, definirModalAtendimentoAberto] = useState(false);
+  const [modalPedidoAberto, definirModalPedidoAberto] = useState(false);
   const [confirmacaoAtendimentoAberta, definirConfirmacaoAtendimentoAberta] = useState(false);
   const [menuStatusAgenda, definirMenuStatusAgenda] = useState(null);
   const [dadosIniciaisModal, definirDadosIniciaisModal] = useState(null);
   const [dadosIniciaisAtendimento, definirDadosIniciaisAtendimento] = useState(null);
+  const [dadosIniciaisPedido, definirDadosIniciaisPedido] = useState(null);
+  const [orcamentoPedidoEmCriacao, definirOrcamentoPedidoEmCriacao] = useState(null);
+  const [etapaOrcamentoAtualizadaExternamente, definirEtapaOrcamentoAtualizadaExternamente] = useState(null);
   const [agendamentoPendenteAtendimento, definirAgendamentoPendenteAtendimento] = useState(null);
   const [idAgendamentoSelecionado, definirIdAgendamentoSelecionado] = useState(null);
   const [agendamentoCopiado, definirAgendamentoCopiado] = useState(null);
   const [faixaSelecionada, definirFaixaSelecionada] = useState(null);
   const [arrastandoFaixa, definirArrastandoFaixa] = useState(null);
   const [filtros, definirFiltros] = useState(() => criarFiltrosIniciaisAgenda(usuarioLogado));
+  const temporizadorCliqueAgenda = useRef(null);
 
   const agendamentosFiltrados = useMemo(
     () => filtrarAgendamentos(agendamentos, filtros),
@@ -137,6 +168,12 @@ export function PaginaAgenda({ usuarioLogado }) {
       window.removeEventListener('mouseup', finalizarSelecaoFaixa);
     };
   }, [arrastandoFaixa]);
+
+  useEffect(() => () => {
+    if (temporizadorCliqueAgenda.current) {
+      window.clearTimeout(temporizadorCliqueAgenda.current);
+    }
+  }, []);
 
   useEffect(() => {
     if (!menuStatusAgenda) {
@@ -228,6 +265,14 @@ export function PaginaAgenda({ usuarioLogado }) {
       atendimentosCarregados,
       canaisAtendimentoCarregados,
       origensAtendimentoCarregadas,
+      orcamentosCarregados,
+      prazosCarregados,
+      etapasOrcamentoCarregadas,
+      etapasPedidoCarregadas,
+      motivosPerdaCarregados,
+      produtosCarregados,
+      camposOrcamentoCarregados,
+      camposPedidoCarregados,
       clientesCarregados,
       contatosCarregados,
       vendedoresCarregados,
@@ -244,6 +289,14 @@ export function PaginaAgenda({ usuarioLogado }) {
       listarAtendimentos(),
       listarCanaisAtendimento(),
       listarOrigensAtendimento(),
+      listarOrcamentos(),
+      listarPrazosPagamentoConfiguracao(),
+      listarEtapasOrcamentoConfiguracao(),
+      listarEtapasPedidoConfiguracao(),
+      listarMotivosPerdaConfiguracao(),
+      listarProdutos(),
+      listarCamposOrcamentoConfiguracao(),
+      listarCamposPedidoConfiguracao(),
       listarClientes(),
       listarContatos(),
       listarVendedores(),
@@ -263,6 +316,38 @@ export function PaginaAgenda({ usuarioLogado }) {
     definirCanaisAtendimento(canaisAtendimentoCarregados.filter((canal) => canal.status));
     definirOrigensAtendimento(origensAtendimentoCarregadas.filter((origem) => origem.status));
     definirUsuarios(usuariosCarregados.filter((usuario) => usuario.ativo));
+    definirPrazosPagamento(prazosCarregados.map((prazo) => ({
+      ...prazo,
+      descricaoFormatada: prazo.descricao || [prazo.prazo1, prazo.prazo2, prazo.prazo3, prazo.prazo4, prazo.prazo5, prazo.prazo6]
+        .filter((valor) => valor !== null && valor !== undefined && valor !== '')
+        .join(' / ')
+    })));
+    definirEtapasOrcamento(etapasOrcamentoCarregadas);
+    definirEtapasPedido(etapasPedidoCarregadas.map((etapa) => ({
+      ...etapa,
+      idEtapaPedido: etapa.idEtapaPedido ?? etapa.idEtapa
+    })));
+    definirMotivosPerda(motivosPerdaCarregados);
+    definirProdutos(produtosCarregados.filter((produto) => produto.status !== 0));
+    definirCamposOrcamento(camposOrcamentoCarregados);
+    definirCamposPedido(camposPedidoCarregados);
+    definirOrcamentos(
+      enriquecerOrcamentosAtendimento(
+        orcamentosCarregados,
+        clientesCarregados,
+        contatosCarregados,
+        usuariosCarregados,
+        vendedoresCarregados,
+        prazosCarregados.map((prazo) => ({
+          ...prazo,
+          descricaoFormatada: prazo.descricao || [prazo.prazo1, prazo.prazo2, prazo.prazo3, prazo.prazo4, prazo.prazo5, prazo.prazo6]
+            .filter((valor) => valor !== null && valor !== undefined && valor !== '')
+            .join(' / ')
+        })),
+        etapasOrcamentoCarregadas,
+        produtosCarregados
+      ).filter((orcamento) => orcamentoEstaAberto(orcamento))
+    );
     definirRecursos(enriquecerRecursos(recursosCarregados, tiposRecursoCarregados));
     definirAgendamentos(distribuirAgendamentosPorConflito(enriquecerAgendamentos(
       agendamentosCarregados,
@@ -374,6 +459,32 @@ export function PaginaAgenda({ usuarioLogado }) {
       idStatusVisita: normalizarCampoSelectAgendamento(agendamento.idStatusVisita)
     });
     definirModalAberto(true);
+  }
+
+  function tratarCliqueAgendamento(evento, agendamento) {
+    evento.stopPropagation();
+    definirIdAgendamentoSelecionado(agendamento.idAgendamento);
+
+    if (temporizadorCliqueAgenda.current) {
+      window.clearTimeout(temporizadorCliqueAgenda.current);
+    }
+
+    temporizadorCliqueAgenda.current = window.setTimeout(() => {
+      temporizadorCliqueAgenda.current = null;
+      void tentarGerarAtendimentoPorAgendamento(agendamento);
+    }, 220);
+  }
+
+  function tratarDuploCliqueAgendamento(evento, agendamento) {
+    evento.stopPropagation();
+    definirIdAgendamentoSelecionado(agendamento.idAgendamento);
+
+    if (temporizadorCliqueAgenda.current) {
+      window.clearTimeout(temporizadorCliqueAgenda.current);
+      temporizadorCliqueAgenda.current = null;
+    }
+
+    abrirEdicaoAgendamento(agendamento);
   }
 
   function fecharModalAgendamento() {
@@ -535,6 +646,83 @@ export function PaginaAgenda({ usuarioLogado }) {
     fecharModalAtendimentoAgenda();
   }
 
+  async function incluirOrcamentoPelaAgenda(dadosOrcamento) {
+    const orcamentoSalvo = await incluirOrcamento(normalizarPayloadOrcamento(dadosOrcamento, usuarioLogado));
+    await carregarDados();
+    return orcamentoSalvo;
+  }
+
+  async function atualizarOrcamentoPelaAgenda(dadosOrcamento) {
+    if (!dadosOrcamento?.idOrcamento) {
+      return null;
+    }
+
+    const orcamentoSalvo = await atualizarOrcamento(
+      dadosOrcamento.idOrcamento,
+      normalizarPayloadOrcamento(dadosOrcamento, usuarioLogado)
+    );
+    await carregarDados();
+    return orcamentoSalvo;
+  }
+
+  async function atualizarStatusOrcamentoPelaAgenda({ idOrcamento, idEtapaOrcamento }) {
+    const orcamentoAtual = orcamentos.find((item) => item.idOrcamento === idOrcamento);
+
+    if (!orcamentoAtual || !idEtapaOrcamento || String(orcamentoAtual.idEtapaOrcamento) === String(idEtapaOrcamento)) {
+      return orcamentoAtual || null;
+    }
+
+    const orcamentoSalvo = await atualizarOrcamento(
+      idOrcamento,
+      normalizarPayloadOrcamento(
+        {
+          ...orcamentoAtual,
+          idEtapaOrcamento
+        },
+        usuarioLogado
+      )
+    );
+
+    await carregarDados();
+    return orcamentoSalvo;
+  }
+
+  function abrirPedidoPelaAgenda(dadosPedido, contexto = null) {
+    definirOrcamentoPedidoEmCriacao(contexto);
+    definirDadosIniciaisPedido(dadosPedido);
+    definirModalPedidoAberto(true);
+  }
+
+  async function fecharModalPedidoAgenda() {
+    if (orcamentoPedidoEmCriacao?.idOrcamento) {
+      const etapaFechadoSemPedido = obterEtapaFechadoSemPedido(etapasOrcamento);
+
+      if (etapaFechadoSemPedido?.idEtapaOrcamento) {
+        await atualizarStatusOrcamentoPelaAgenda({
+          idOrcamento: Number(orcamentoPedidoEmCriacao.idOrcamento),
+          idEtapaOrcamento: Number(etapaFechadoSemPedido.idEtapaOrcamento)
+        });
+        definirEtapaOrcamentoAtualizadaExternamente({
+          idOrcamento: Number(orcamentoPedidoEmCriacao.idOrcamento),
+          idEtapaOrcamento: String(etapaFechadoSemPedido.idEtapaOrcamento)
+        });
+      }
+    }
+
+    definirModalPedidoAberto(false);
+    definirDadosIniciaisPedido(null);
+    definirOrcamentoPedidoEmCriacao(null);
+  }
+
+  async function salvarPedidoPelaAgenda(dadosPedido) {
+    await incluirPedido(normalizarPayloadPedido(dadosPedido));
+    await carregarDados();
+    definirModalPedidoAberto(false);
+    definirDadosIniciaisPedido(null);
+    definirOrcamentoPedidoEmCriacao(null);
+    definirEtapaOrcamentoAtualizadaExternamente(null);
+  }
+
   function iniciarSelecaoFaixa(evento, data, horario) {
     evento.preventDefault();
 
@@ -682,16 +870,8 @@ export function PaginaAgenda({ usuarioLogado }) {
                                   agendamento.totalColunasAgenda
                                 )
                               }}
-                                onClick={(evento) => {
-                                  evento.stopPropagation();
-                                  definirIdAgendamentoSelecionado(agendamento.idAgendamento);
-                                  void tentarGerarAtendimentoPorAgendamento(agendamento);
-                                }}
-                              onDoubleClick={(evento) => {
-                                evento.stopPropagation();
-                                definirIdAgendamentoSelecionado(agendamento.idAgendamento);
-                                abrirEdicaoAgendamento(agendamento);
-                              }}
+                              onClick={(evento) => tratarCliqueAgendamento(evento, agendamento)}
+                              onDoubleClick={(evento) => tratarDuploCliqueAgendamento(evento, agendamento)}
                               onContextMenu={(evento) => abrirMenuStatusAgenda(evento, agendamento)}
                             >
                               <strong>{agendamento.assunto || 'Sem assunto'}</strong>
@@ -753,9 +933,47 @@ export function PaginaAgenda({ usuarioLogado }) {
         modo="novo"
         permitirExcluir={false}
         aoIncluirCliente={undefined}
+        aoIncluirOrcamento={incluirOrcamentoPelaAgenda}
+        aoAtualizarOrcamento={atualizarOrcamentoPelaAgenda}
+        dadosOrcamento={montarDadosIniciaisOrcamentoPeloAtendimento(dadosIniciaisAtendimento, clientes, vendedores, usuarioLogado)}
+        clientesOrcamento={clientes}
+        contatosOrcamento={contatos}
+        usuariosOrcamento={usuarios}
+        vendedoresOrcamento={vendedores}
+        prazosPagamento={prazosPagamento}
+        etapasOrcamento={etapasOrcamento}
+        motivosPerda={motivosPerda}
+        orcamentos={orcamentos}
+        produtos={produtos}
+        camposOrcamento={camposOrcamento}
+        camposPedido={camposPedido}
+        etapasPedido={etapasPedido}
+        empresa={empresa}
+        etapaOrcamentoAtualizadaExternamente={etapaOrcamentoAtualizadaExternamente}
+        aoAtualizarStatusOrcamento={atualizarStatusOrcamentoPelaAgenda}
+        aoAbrirPedido={abrirPedidoPelaAgenda}
         aoFechar={fecharModalAtendimentoAgenda}
         aoSalvar={salvarAtendimentoAgenda}
         aoExcluir={undefined}
+      />
+
+      <ModalPedido
+        aberto={modalPedidoAberto}
+        pedido={null}
+        dadosIniciais={dadosIniciaisPedido}
+        clientes={clientes}
+        contatos={contatos}
+        usuarios={usuarios}
+        vendedores={vendedores}
+        prazosPagamento={prazosPagamento}
+        etapasPedido={etapasPedido}
+        produtos={produtos}
+        camposPedido={camposPedido}
+        empresa={empresa}
+        usuarioLogado={usuarioLogado}
+        modo="novo"
+        aoFechar={fecharModalPedidoAgenda}
+        aoSalvar={salvarPedidoPelaAgenda}
       />
 
       {confirmacaoAtendimentoAberta ? (
@@ -1274,7 +1492,6 @@ function distribuirAgendamentosPorConflito(agendamentos) {
 function distribuirGrupoAgendamentos(grupoAgendamentos) {
   const ativos = [];
   const agendamentosDistribuidos = [];
-  let totalColunasGrupo = 1;
 
   grupoAgendamentos.forEach((agendamento) => {
     const inicioAtual = converterHorarioParaMinutos(agendamento.horaInicio);
@@ -1297,17 +1514,109 @@ function distribuirGrupoAgendamentos(grupoAgendamentos) {
       fim: converterHorarioParaMinutos(agendamento.horaFim)
     });
 
-    totalColunasGrupo = Math.max(totalColunasGrupo, ativos.length);
     agendamentosDistribuidos.push({
       ...agendamento,
       indiceColunaAgenda: colunaDisponivel
     });
   });
 
-  return agendamentosDistribuidos.map((agendamento) => ({
-    ...agendamento,
-    totalColunasAgenda: totalColunasGrupo
-  }));
+  return agendamentosDistribuidos.map((agendamento) => {
+    const layoutCalculado = calcularLayoutAgendamento(
+      agendamento,
+      agendamentosDistribuidos
+    );
+
+    return {
+      ...agendamento,
+      indiceColunaAgenda: layoutCalculado.indiceColunaAgenda,
+      totalColunasAgenda: layoutCalculado.totalColunasAgenda
+    };
+  });
+}
+
+function calcularLayoutAgendamento(agendamentoBase, agendamentosGrupo) {
+  const conflitosDiretos = agendamentosGrupo
+    .filter((agendamento) => agendamentosSeSobrepoem(agendamentoBase, agendamento))
+    .sort((primeiro, segundo) => {
+      const diferencaInicio = converterHorarioParaMinutos(primeiro.horaInicio) - converterHorarioParaMinutos(segundo.horaInicio);
+
+      if (diferencaInicio !== 0) {
+        return diferencaInicio;
+      }
+
+      return converterHorarioParaMinutos(primeiro.horaFim) - converterHorarioParaMinutos(segundo.horaFim);
+    });
+
+  const ativos = [];
+  const layoutPorId = new Map();
+
+  conflitosDiretos.forEach((agendamento) => {
+    const inicioAtual = converterHorarioParaMinutos(agendamento.horaInicio);
+
+    for (let indice = ativos.length - 1; indice >= 0; indice -= 1) {
+      if (ativos[indice].fim <= inicioAtual) {
+        ativos.splice(indice, 1);
+      }
+    }
+
+    const colunasOcupadas = new Set(ativos.map((item) => item.coluna));
+    let colunaDisponivel = 0;
+
+    while (colunasOcupadas.has(colunaDisponivel)) {
+      colunaDisponivel += 1;
+    }
+
+    ativos.push({
+      coluna: colunaDisponivel,
+      fim: converterHorarioParaMinutos(agendamento.horaFim)
+    });
+
+    layoutPorId.set(String(agendamento.idAgendamento), {
+      indiceColunaAgenda: colunaDisponivel
+    });
+  });
+
+  const inicioBase = converterHorarioParaMinutos(agendamentoBase.horaInicio);
+  const fimBase = converterHorarioParaMinutos(agendamentoBase.horaFim);
+  const pontosAnalise = new Set([inicioBase]);
+
+  conflitosDiretos.forEach((agendamento) => {
+    const inicioAtual = converterHorarioParaMinutos(agendamento.horaInicio);
+    const fimAtual = converterHorarioParaMinutos(agendamento.horaFim);
+
+    if (inicioAtual < fimBase && fimAtual > inicioBase) {
+      pontosAnalise.add(Math.max(inicioBase, inicioAtual));
+    }
+  });
+
+  let maximoSimultaneos = 1;
+  pontosAnalise.forEach((pontoAnalise) => {
+    const simultaneos = conflitosDiretos.filter((agendamento) => {
+      const inicioAtual = converterHorarioParaMinutos(agendamento.horaInicio);
+      const fimAtual = converterHorarioParaMinutos(agendamento.horaFim);
+      return inicioAtual <= pontoAnalise && fimAtual > pontoAnalise;
+    }).length;
+
+    maximoSimultaneos = Math.max(maximoSimultaneos, simultaneos);
+  });
+
+  return {
+    indiceColunaAgenda: layoutPorId.get(String(agendamentoBase.idAgendamento))?.indiceColunaAgenda ?? 0,
+    totalColunasAgenda: maximoSimultaneos
+  };
+}
+
+function agendamentosSeSobrepoem(primeiro, segundo) {
+  if (String(primeiro.data) !== String(segundo.data)) {
+    return false;
+  }
+
+  const inicioPrimeiro = converterHorarioParaMinutos(primeiro.horaInicio);
+  const fimPrimeiro = converterHorarioParaMinutos(primeiro.horaFim);
+  const inicioSegundo = converterHorarioParaMinutos(segundo.horaInicio);
+  const fimSegundo = converterHorarioParaMinutos(segundo.horaFim);
+
+  return inicioPrimeiro < fimSegundo && fimPrimeiro > inicioSegundo;
 }
 
 function misturarCorComBase(corPrincipal, corBase, intensidadeCorPrincipal) {
@@ -1552,4 +1861,164 @@ function criarDescricaoAtendimentoPorAgendamento(agendamento) {
   }
 
   return linhas.join('\n');
+}
+
+function enriquecerOrcamentosAtendimento(orcamentos, clientes, contatos, usuarios, vendedores, prazosPagamento, etapasOrcamento, produtos) {
+  const clientesPorId = new Map(
+    clientes.map((cliente) => [cliente.idCliente, cliente.nomeFantasia || cliente.razaoSocial || 'Nao informado'])
+  );
+  const contatosPorId = new Map(
+    contatos.map((contato) => [contato.idContato, contato.nome])
+  );
+  const usuariosPorId = new Map(
+    usuarios.map((usuario) => [usuario.idUsuario, usuario.nome])
+  );
+  const vendedoresPorId = new Map(
+    vendedores.map((vendedor) => [vendedor.idVendedor, vendedor.nome])
+  );
+  const prazosPorId = new Map(
+    prazosPagamento.map((prazo) => [prazo.idPrazoPagamento, prazo])
+  );
+  const etapasPorId = new Map(
+    etapasOrcamento.map((etapa) => [etapa.idEtapaOrcamento, etapa])
+  );
+  const produtosPorId = new Map(
+    produtos.map((produto) => [produto.idProduto, produto])
+  );
+
+  return orcamentos.map((orcamento) => ({
+    ...orcamento,
+    nomeCliente: clientesPorId.get(orcamento.idCliente) || 'Nao informado',
+    nomeContato: contatosPorId.get(orcamento.idContato) || '',
+    nomeUsuario: usuariosPorId.get(orcamento.idUsuario) || 'Nao informado',
+    nomeVendedor: vendedoresPorId.get(orcamento.idVendedor) || 'Nao informado',
+    nomePrazoPagamento: prazosPorId.get(orcamento.idPrazoPagamento)?.descricaoFormatada || '',
+    nomeMetodoPagamento: prazosPorId.get(orcamento.idPrazoPagamento)?.nomeMetodoPagamento || '',
+    etapaOrcamento: etapasPorId.get(orcamento.idEtapaOrcamento) || null,
+    itens: Array.isArray(orcamento.itens) ? orcamento.itens.map((item) => {
+      const produto = produtosPorId.get(item.idProduto);
+      return {
+        ...item,
+        descricaoProdutoSnapshot: item.descricaoProdutoSnapshot || produto?.descricao || item.nomeProduto || '',
+        referenciaProdutoSnapshot: item.referenciaProdutoSnapshot || produto?.referencia || '',
+        unidadeProdutoSnapshot: item.unidadeProdutoSnapshot || produto?.nomeUnidadeMedida || produto?.siglaUnidadeMedida || '',
+        imagem: item.imagem || produto?.imagem || ''
+      };
+    }) : []
+  }));
+}
+
+function orcamentoEstaAberto(orcamento) {
+  const descricaoEtapa = String(
+    orcamento?.etapaOrcamento?.descricao
+    || orcamento?.nomeEtapaOrcamento
+    || ''
+  ).trim().toLowerCase();
+
+  return !['encerrado', 'fechado', 'fechamento', 'fechado sem pedido', 'pedido excluido'].includes(descricaoEtapa);
+}
+
+function obterEtapaFechadoSemPedido(etapasOrcamento) {
+  return etapasOrcamento.find((etapa) => {
+    const descricao = String(etapa?.descricao || '').trim().toLowerCase();
+    const abreviacao = String(etapa?.abreviacao || '').trim().toLowerCase();
+    return descricao === 'fechado sem pedido' || abreviacao === 'fsp';
+  }) || null;
+}
+
+function normalizarPayloadOrcamento(dadosOrcamento, usuarioLogado) {
+  return {
+    idCliente: Number(dadosOrcamento.idCliente),
+    idContato: dadosOrcamento.idContato ? Number(dadosOrcamento.idContato) : null,
+    idUsuario: Number(dadosOrcamento.idUsuario || usuarioLogado?.idUsuario),
+    idVendedor: dadosOrcamento.idVendedor ? Number(dadosOrcamento.idVendedor) : null,
+    idPrazoPagamento: dadosOrcamento.idPrazoPagamento ? Number(dadosOrcamento.idPrazoPagamento) : null,
+    idEtapaOrcamento: dadosOrcamento.idEtapaOrcamento ? Number(dadosOrcamento.idEtapaOrcamento) : null,
+    idMotivoPerda: dadosOrcamento.idMotivoPerda ? Number(dadosOrcamento.idMotivoPerda) : null,
+    idPedidoVinculado: dadosOrcamento.idPedidoVinculado ? Number(dadosOrcamento.idPedidoVinculado) : null,
+    comissao: Number(dadosOrcamento.comissao || 0),
+    dataInclusao: dadosOrcamento.dataInclusao || null,
+    dataValidade: dadosOrcamento.dataValidade || null,
+    observacao: String(dadosOrcamento.observacao || '').trim() || null,
+    itens: Array.isArray(dadosOrcamento.itens) ? dadosOrcamento.itens.map((item) => ({
+      idItemOrcamento: item.idItemOrcamento ? Number(item.idItemOrcamento) : undefined,
+      idProduto: Number(item.idProduto),
+      quantidade: Number(item.quantidade || 0),
+      valorUnitario: normalizarNumeroMonetario(item.valorUnitario),
+      valorTotal: normalizarNumeroMonetario(item.valorTotal),
+      observacao: String(item.observacao || '').trim() || null,
+      imagem: item.imagem || null
+    })) : [],
+    campos: Array.isArray(dadosOrcamento.campos) ? dadosOrcamento.campos.map((campo) => ({
+      idCampoOrcamento: Number(campo.idCampoOrcamento),
+      valor: String(campo.valor || '')
+    })) : []
+  };
+}
+
+function normalizarPayloadPedido(dadosPedido) {
+  return {
+    idOrcamento: dadosPedido.idOrcamento ? Number(dadosPedido.idOrcamento) : null,
+    codigoOrcamentoOrigem: dadosPedido.codigoOrcamentoOrigem ? Number(dadosPedido.codigoOrcamentoOrigem) : null,
+    idCliente: Number(dadosPedido.idCliente),
+    idContato: dadosPedido.idContato ? Number(dadosPedido.idContato) : null,
+    idUsuario: Number(dadosPedido.idUsuario),
+    idVendedor: dadosPedido.idVendedor ? Number(dadosPedido.idVendedor) : null,
+    idPrazoPagamento: dadosPedido.idPrazoPagamento ? Number(dadosPedido.idPrazoPagamento) : null,
+    idEtapaPedido: dadosPedido.idEtapaPedido ? Number(dadosPedido.idEtapaPedido) : null,
+    comissao: Number(dadosPedido.comissao || 0),
+    dataInclusao: dadosPedido.dataInclusao || null,
+    dataEntrega: dadosPedido.dataEntrega || null,
+    observacao: String(dadosPedido.observacao || '').trim() || null,
+    nomeClienteSnapshot: dadosPedido.nomeClienteSnapshot || null,
+    nomeContatoSnapshot: dadosPedido.nomeContatoSnapshot || null,
+    nomeUsuarioSnapshot: dadosPedido.nomeUsuarioSnapshot || null,
+    nomeVendedorSnapshot: dadosPedido.nomeVendedorSnapshot || null,
+    nomeMetodoPagamentoSnapshot: dadosPedido.nomeMetodoPagamentoSnapshot || null,
+    nomePrazoPagamentoSnapshot: dadosPedido.nomePrazoPagamentoSnapshot || null,
+    itens: Array.isArray(dadosPedido.itens) ? dadosPedido.itens.map((item) => ({
+      idItemPedido: item.idItemPedido ? Number(item.idItemPedido) : undefined,
+      idProduto: Number(item.idProduto),
+      quantidade: Number(item.quantidade || 0),
+      valorUnitario: normalizarNumeroMonetario(item.valorUnitario),
+      valorTotal: normalizarNumeroMonetario(item.valorTotal),
+      observacao: String(item.observacao || '').trim() || null,
+      imagem: item.imagem || null,
+      referenciaProdutoSnapshot: item.referenciaProdutoSnapshot || '',
+      descricaoProdutoSnapshot: item.descricaoProdutoSnapshot || '',
+      unidadeProdutoSnapshot: item.unidadeProdutoSnapshot || ''
+    })) : [],
+    campos: Array.isArray(dadosPedido.campos) ? dadosPedido.campos.map((campo) => ({
+      idCampoPedido: Number(campo.idCampoPedido),
+      valor: String(campo.valor || '')
+    })) : []
+  };
+}
+
+function normalizarNumeroMonetario(valor) {
+  if (typeof valor === 'number') {
+    return valor;
+  }
+
+  const texto = String(valor || '0')
+    .replace(/[^\d,.-]/g, '')
+    .replace(/\.(?=\d{3}(?:\D|$))/g, '')
+    .replace(',', '.');
+  const numero = Number(texto);
+  return Number.isNaN(numero) ? 0 : numero;
+}
+
+function montarDadosIniciaisOrcamentoPeloAtendimento(atendimento, clientes, vendedores, usuarioLogado) {
+  const cliente = clientes.find((item) => String(item.idCliente) === String(atendimento?.idCliente || ''));
+  const vendedor = vendedores.find((item) => String(item.idVendedor) === String(cliente?.idVendedor || ''));
+
+  return {
+    idCliente: atendimento?.idCliente || '',
+    idContato: atendimento?.idContato || '',
+    idUsuario: atendimento?.idUsuario || usuarioLogado?.idUsuario || '',
+    nomeUsuario: atendimento?.nomeUsuario || usuarioLogado?.nome || '',
+    idVendedor: cliente?.idVendedor || '',
+    comissao: vendedor?.comissaoPadrao ?? 0,
+    observacao: atendimento?.descricao || ''
+  };
 }

@@ -479,7 +479,6 @@ Os dados de teste usam:
 Variaveis CSS principais:
 
 | Papel | Variavel | Hex |
-| --- | --- | --- |
 | Azul principal | `--corPrimaria` | `#1791E2` |
 | Azul forte | `--corPrimariaForte` | `#0D78C8` |
 | Azul suave | `--corPrimariaSuave` | `#5BBDF5` |

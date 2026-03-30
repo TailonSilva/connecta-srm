@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Botao } from '../../componentes/comuns/botao';
+import { CampoSelecaoMultiplaModal } from '../../componentes/comuns/campoSelecaoMultiplaModal';
 import { CampoImagemPadrao } from '../../componentes/comuns/campoImagemPadrao';
 import { buscarCep } from '../../servicos/empresa';
 import { normalizarTelefone } from '../../utilitarios/normalizarTelefone';
@@ -26,6 +27,9 @@ const estadoInicialFormulario = {
   trabalhaSabado: false,
   horaInicioSabado: '08:00',
   horaFimSabado: '12:00',
+  diasValidadeOrcamento: '7',
+  diasEntregaPedido: '7',
+  etapasFiltroPadraoOrcamento: [],
   logradouro: '',
   numero: '',
   complemento: '',
@@ -39,6 +43,7 @@ const estadoInicialFormulario = {
 export function ModalEmpresa({
   aberto,
   empresa,
+  etapasOrcamento = [],
   modo = 'edicao',
   aoFechar,
   aoSalvar
@@ -311,6 +316,24 @@ export function ModalEmpresa({
               <CampoFormulario label="Fim da manha" name="horaFimManha" type="time" value={formulario.horaFimManha} onChange={alterarCampo} disabled={somenteLeitura} />
               <CampoFormulario label="Inicio da tarde" name="horaInicioTarde" type="time" value={formulario.horaInicioTarde} onChange={alterarCampo} disabled={somenteLeitura} />
               <CampoFormulario label="Fim da tarde" name="horaFimTarde" type="time" value={formulario.horaFimTarde} onChange={alterarCampo} disabled={somenteLeitura} />
+              <CampoFormulario label="Validade padrao do orcamento (dias)" name="diasValidadeOrcamento" type="number" min="0" value={formulario.diasValidadeOrcamento} onChange={alterarCampo} disabled={somenteLeitura} />
+              <CampoFormulario label="Prazo padrao de entrega do pedido (dias)" name="diasEntregaPedido" type="number" min="0" value={formulario.diasEntregaPedido} onChange={alterarCampo} disabled={somenteLeitura} />
+              <CampoSelecaoMultiplaModal
+                className="campoFormularioIntegral"
+                label="Filtro padrao de status do orcamento"
+                titulo="Status padrao do orcamento"
+                itens={etapasOrcamento.map((etapa) => ({
+                  valor: String(etapa.idEtapaOrcamento),
+                  label: etapa.descricao
+                }))}
+                valoresSelecionados={formulario.etapasFiltroPadraoOrcamento}
+                placeholder="Todos"
+                disabled={somenteLeitura}
+                aoAlterar={(valores) => definirFormulario((estadoAtual) => ({
+                  ...estadoAtual,
+                  etapasFiltroPadraoOrcamento: valores
+                }))}
+              />
               <CampoCheckbox
                 label="Trabalha aos sabados"
                 name="trabalhaSabado"
@@ -411,6 +434,9 @@ function criarFormularioEmpresa(empresa) {
     trabalhaSabado: Boolean(empresa.trabalhaSabado),
     horaInicioSabado: empresa.horaInicioSabado || '08:00',
     horaFimSabado: empresa.horaFimSabado || '12:00',
+    diasValidadeOrcamento: String(empresa.diasValidadeOrcamento ?? 7),
+    diasEntregaPedido: String(empresa.diasEntregaPedido ?? 7),
+    etapasFiltroPadraoOrcamento: normalizarListaEmpresa(empresa.etapasFiltroPadraoOrcamento),
     logradouro: empresa.logradouro || '',
     numero: empresa.numero || '',
     complemento: empresa.complemento || '',
@@ -420,6 +446,26 @@ function criarFormularioEmpresa(empresa) {
     cep: empresa.cep || '',
     imagem: empresa.imagem || ''
   };
+}
+
+function normalizarListaEmpresa(valor) {
+  if (Array.isArray(valor)) {
+    return valor.map(String);
+  }
+
+  if (!valor) {
+    return [];
+  }
+
+  try {
+    const lista = JSON.parse(valor);
+    return Array.isArray(lista) ? lista.map(String) : [];
+  } catch (_erro) {
+    return String(valor)
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
 }
 
 function obterIniciaisEmpresa(empresa) {

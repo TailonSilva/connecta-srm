@@ -11,7 +11,7 @@ const entidades = [
     rota: '/api/vendedores',
     chavePrimaria: 'idVendedor',
     camposObrigatorios: ['nome', 'email'],
-    camposPermitidos: ['nome', 'email', 'status']
+    camposPermitidos: ['nome', 'email', 'comissaoPadrao', 'status']
   },
   {
     nome: 'grupoProduto',
@@ -162,7 +162,21 @@ const entidades = [
     rota: '/api/etapasOrcamento',
     chavePrimaria: 'idEtapaOrcamento',
     camposObrigatorios: ['abreviacao', 'descricao', 'cor'],
-    camposPermitidos: ['abreviacao', 'descricao', 'cor', 'status']
+    camposPermitidos: ['abreviacao', 'descricao', 'cor', 'obrigarMotivoPerda', 'status']
+  },
+  {
+    nome: 'campoOrcamentoConfiguravel',
+    rota: '/api/camposOrcamento',
+    chavePrimaria: 'idCampoOrcamento',
+    camposObrigatorios: ['titulo'],
+    camposPermitidos: ['titulo', 'descricao', 'descricaoPadrao', 'status']
+  },
+  {
+    nome: 'campoPedidoConfiguravel',
+    rota: '/api/camposPedido',
+    chavePrimaria: 'idCampoPedido',
+    camposObrigatorios: ['titulo'],
+    camposPermitidos: ['titulo', 'descricaoPadrao', 'status']
   },
   {
     nome: 'empresa',
@@ -185,6 +199,9 @@ const entidades = [
       'trabalhaSabado',
       'horaInicioSabado',
       'horaFimSabado',
+      'diasValidadeOrcamento',
+      'diasEntregaPedido',
+      'etapasFiltroPadraoOrcamento',
       'logradouro',
       'numero',
       'complemento',
@@ -277,10 +294,10 @@ const entidades = [
       'status'
     ]
   },
-    {
-      nome: 'atendimento',
-      rota: '/api/atendimentos',
-      chavePrimaria: 'idAtendimento',
+  {
+    nome: 'atendimento',
+    rota: '/api/atendimentos',
+    chavePrimaria: 'idAtendimento',
     camposObrigatorios: [
       'idCliente',
       'idUsuario',
@@ -302,6 +319,91 @@ const entidades = [
       'idCanalAtendimento',
       'idOrigemAtendimento'
     ]
+  },
+  {
+    nome: 'orcamento',
+    rota: '/api/orcamentos',
+    chavePrimaria: 'idOrcamento',
+    camposObrigatorios: ['idCliente'],
+    camposPermitidos: [
+      'idCliente',
+      'idContato',
+      'idUsuario',
+      'idPedidoVinculado',
+      'idVendedor',
+      'comissao',
+      'idPrazoPagamento',
+      'idEtapaOrcamento',
+      'idMotivoPerda',
+      'observacao'
+    ]
+  },
+  {
+    nome: 'itemOrcamento',
+    rota: '/api/itensOrcamento',
+    chavePrimaria: 'idItemOrcamento',
+    camposObrigatorios: ['idOrcamento', 'idProduto', 'quantidade', 'valorUnitario', 'valorTotal'],
+    camposPermitidos: ['idOrcamento', 'idProduto', 'quantidade', 'valorUnitario', 'valorTotal', 'observacao']
+  },
+  {
+    nome: 'valorCampoOrcamento',
+    rota: '/api/valoresCamposOrcamento',
+    chavePrimaria: 'idValorCampoOrcamento',
+    camposObrigatorios: ['idOrcamento', 'idCampoOrcamento'],
+    camposPermitidos: ['idOrcamento', 'idCampoOrcamento', 'valor']
+  },
+  {
+    nome: 'pedido',
+    rota: '/api/pedidos',
+    chavePrimaria: 'idPedido',
+    camposObrigatorios: ['idCliente', 'idUsuario', 'idVendedor'],
+    camposPermitidos: [
+      'idOrcamento',
+      'idCliente',
+      'idContato',
+      'idUsuario',
+      'idVendedor',
+      'comissao',
+      'idPrazoPagamento',
+      'idEtapaPedido',
+      'dataInclusao',
+      'dataEntrega',
+      'dataValidade',
+      'observacao',
+      'codigoOrcamentoOrigem',
+      'nomeClienteSnapshot',
+      'nomeContatoSnapshot',
+      'nomeUsuarioSnapshot',
+      'nomeVendedorSnapshot',
+      'nomeMetodoPagamentoSnapshot',
+      'nomePrazoPagamentoSnapshot',
+      'nomeEtapaPedidoSnapshot'
+    ]
+  },
+  {
+    nome: 'itemPedido',
+    rota: '/api/itensPedido',
+    chavePrimaria: 'idItemPedido',
+    camposObrigatorios: ['idPedido', 'quantidade', 'valorUnitario', 'valorTotal'],
+    camposPermitidos: [
+      'idPedido',
+      'idProduto',
+      'quantidade',
+      'valorUnitario',
+      'valorTotal',
+      'imagem',
+      'observacao',
+      'referenciaProdutoSnapshot',
+      'descricaoProdutoSnapshot',
+      'unidadeProdutoSnapshot'
+    ]
+  },
+  {
+    nome: 'valorCampoPedido',
+    rota: '/api/valoresCamposPedido',
+    chavePrimaria: 'idValorCampoPedido',
+    camposObrigatorios: ['idPedido'],
+    camposPermitidos: ['idPedido', 'idCampoPedido', 'idCampoOrcamento', 'tituloSnapshot', 'valor']
   }
 ];
 

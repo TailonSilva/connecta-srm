@@ -335,6 +335,21 @@ export function ModalCadastroConfiguracao({
 }
 
 function CampoFormulario({ label, name, type = 'text', ...props }) {
+  if (type === 'textarea') {
+    return (
+      <div className="campoFormulario campoFormularioIntegral">
+        <label htmlFor={name}>{label}</label>
+        <textarea
+          id={name}
+          name={name}
+          className="entradaFormulario entradaFormularioTextoLongo"
+          rows={6}
+          {...props}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="campoFormulario">
       <label htmlFor={name}>{label}</label>

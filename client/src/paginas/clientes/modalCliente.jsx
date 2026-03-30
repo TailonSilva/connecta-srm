@@ -89,6 +89,8 @@ export function ModalCliente({
   const vendedorBloqueado = Boolean(idVendedorBloqueado);
   const tipoPessoaFisica = formulario.tipo === 'Pessoa fisica';
   const rotuloDocumento = tipoPessoaFisica ? 'CPF' : 'CNPJ';
+  const vendedoresAtivos = vendedores.filter((vendedor) => vendedor.status !== 0);
+  const ramosAtivos = ramosAtividade.filter((ramo) => ramo.status !== 0);
 
   useEffect(() => {
     if (!aberto) {
@@ -425,7 +427,7 @@ export function ModalCliente({
   return (
     <div className="camadaModal" role="presentation" onMouseDown={fecharAoClicarNoFundo}>
       <form
-        className="modalCliente"
+        className="modalCliente modalClienteComAbas"
         role="dialog"
         aria-modal="true"
         aria-labelledby="tituloModalCliente"
@@ -507,8 +509,8 @@ export function ModalCliente({
                   required
                 />
                 <CampoFormulario label="Inscricao estadual" name="inscricaoEstadual" value={formulario.inscricaoEstadual} onChange={alterarCampo} disabled={somenteLeitura} />
-                <CampoSelect label="Vendedor" name="idVendedor" value={formulario.idVendedor} onChange={alterarCampo} options={vendedores.map((vendedor) => ({ valor: String(vendedor.idVendedor), label: vendedor.nome }))} disabled={somenteLeitura || vendedorBloqueado} required />
-                <CampoSelect label="Ramo de atividade" name="idRamo" value={formulario.idRamo} onChange={alterarCampo} options={ramosAtividade.map((ramo) => ({ valor: String(ramo.idRamo), label: ramo.descricao }))} disabled={somenteLeitura} required />
+                <CampoSelect label="Vendedor" name="idVendedor" value={formulario.idVendedor} onChange={alterarCampo} options={vendedoresAtivos.map((vendedor) => ({ valor: String(vendedor.idVendedor), label: vendedor.nome }))} disabled={somenteLeitura || vendedorBloqueado} required />
+                <CampoSelect label="Ramo de atividade" name="idRamo" value={formulario.idRamo} onChange={alterarCampo} options={ramosAtivos.map((ramo) => ({ valor: String(ramo.idRamo), label: ramo.descricao }))} disabled={somenteLeitura} required />
                 <label className="campoCheckboxFormulario" htmlFor="status">
                   <input id="status" type="checkbox" name="status" checked={formulario.status} onChange={alterarCampo} disabled={somenteLeitura} />
                   <span>Cliente ativo</span>

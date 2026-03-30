@@ -72,6 +72,13 @@ rotaAgendamentos.post('/', async (requisicao, resposta) => {
   try {
     const payload = normalizarPayloadAgendamento(requisicao.body);
     const tipoAgenda = await obterTipoAgenda(payload.idTipoAgenda);
+    const mensagemReferenciasInvalidas = await validarReferenciasAtivasAgendamento(payload);
+
+    if (mensagemReferenciasInvalidas) {
+      resposta.status(400).json({ mensagem: mensagemReferenciasInvalidas });
+      return;
+    }
+
     const camposFaltantes = validarCamposObrigatorios(payload, tipoAgenda);
 
     if (camposFaltantes.length > 0) {
@@ -163,6 +170,13 @@ rotaAgendamentos.put('/:id', async (requisicao, resposta) => {
       ...requisicao.body
     });
     const tipoAgenda = await obterTipoAgenda(payload.idTipoAgenda);
+    const mensagemReferenciasInvalidas = await validarReferenciasAtivasAgendamento(payload);
+
+    if (mensagemReferenciasInvalidas) {
+      resposta.status(400).json({ mensagem: mensagemReferenciasInvalidas });
+      return;
+    }
+
     const camposFaltantes = validarCamposObrigatorios(payload, tipoAgenda);
 
     if (camposFaltantes.length > 0) {
@@ -309,6 +323,16 @@ rotaAgendamentos.put('/:id/status-usuario', async (requisicao, resposta) => {
 
     if (!participante) {
       resposta.status(400).json({ mensagem: 'O usuario informado nao participa desta agenda.' });
+      return;
+    }
+
+    const statusVisita = await consultarUm(
+      'SELECT idStatusVisita FROM statusVisita WHERE idStatusVisita = ? AND status = 1',
+      [idStatusVisita]
+    );
+
+    if (!statusVisita) {
+      resposta.status(400).json({ mensagem: 'O status da agenda informado esta inativo ou nao existe.' });
       return;
     }
 
@@ -463,6 +487,55 @@ async function obterTipoAgenda(idTipoAgenda) {
     'SELECT * FROM tipoAgenda WHERE idTipoAgenda = ?',
     [Number(idTipoAgenda)]
   );
+}
+
+async function validarReferenciasAtivasAgendamento(payload) {
+  const validacoes = [
+    ['tipo de agenda', payload.idTipoAgenda, 'tipoAgenda', 'idTipoAgenda', 'status'],
+    ['status da agenda', payload.idStatusVisita, 'statusVisita', 'idStatusVisita', 'status'],
+    ['local da agenda', payload.idLocal, 'localAgenda', 'idLocal', 'status'],
+    ['cliente', payload.idCliente, 'cliente', 'idCliente', 'status'],
+    ['contato', payload.idContato, 'contato', 'idContato', 'status']
+  ];
+
+  for (const [nome, valor, tabela, chave, campoAtivo] of validacoes) {
+    if (!valor) {
+      continue;
+    }
+
+    const registro = await consultarUm(
+      `SELECT ${chave} FROM ${tabela} WHERE ${chave} = ? AND ${campoAtivo} = 1`,
+      [Number(valor)]
+    );
+
+    if (!registro) {
+      return `O ${nome} informado esta inativo ou nao existe.`;
+    }
+  }
+
+  for (const idUsuario of payload.idsUsuarios || []) {
+    const usuario = await consultarUm(
+      'SELECT idUsuario FROM usuario WHERE idUsuario = ? AND ativo = 1',
+      [Number(idUsuario)]
+    );
+
+    if (!usuario) {
+      return 'Ha usuario inativo vinculado na agenda.';
+    }
+  }
+
+  for (const idRecurso of payload.idsRecursos || []) {
+    const recurso = await consultarUm(
+      'SELECT idRecurso FROM recurso WHERE idRecurso = ? AND status = 1',
+      [Number(idRecurso)]
+    );
+
+    if (!recurso) {
+      return 'Ha recurso inativo vinculado na agenda.';
+    }
+  }
+
+  return '';
 }
 
 function validarCamposObrigatorios(payload, tipoAgenda) {

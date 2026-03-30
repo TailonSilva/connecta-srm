@@ -96,6 +96,54 @@ export function atualizarVendedor(idVendedor, payload) {
   });
 }
 
+export function listarCamposOrcamentoConfiguracao() {
+  return requisitarApi('/camposOrcamento');
+}
+
+export function incluirCampoOrcamento(payload) {
+  return requisitarApi('/camposOrcamento', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+}
+
+export function atualizarCampoOrcamento(idCampoOrcamento, payload) {
+  return requisitarApi(`/camposOrcamento/${idCampoOrcamento}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+}
+
+export function listarCamposPedidoConfiguracao() {
+  return requisitarApi('/camposPedido');
+}
+
+export function incluirCampoPedido(payload) {
+  return requisitarApi('/camposPedido', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+}
+
+export function atualizarCampoPedido(idCampoPedido, payload) {
+  return requisitarApi(`/camposPedido/${idCampoPedido}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+}
+
 export function listarUnidadesMedidaConfiguracao() {
   return requisitarApi('/unidadesMedida');
 }

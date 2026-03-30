@@ -64,6 +64,11 @@ function criarRotaCrud(entidade) {
       const registro = await inserirRegistro(entidade, requisicao.body);
       resposta.status(201).json(registro);
     } catch (erro) {
+      if (erro.statusCode === 400) {
+        resposta.status(400).json({ mensagem: erro.message });
+        return;
+      }
+
       resposta.status(500).json({ mensagem: criarMensagemErro(erro) });
     }
   });
@@ -100,6 +105,11 @@ function criarRotaCrud(entidade) {
 
       resposta.json(registroAtualizado);
     } catch (erro) {
+      if (erro.statusCode === 400) {
+        resposta.status(400).json({ mensagem: erro.message });
+        return;
+      }
+
       resposta.status(500).json({ mensagem: criarMensagemErro(erro) });
     }
   });

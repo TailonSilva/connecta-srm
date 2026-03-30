@@ -5,6 +5,7 @@ const {
   removerArquivoImagem,
   salvarImagemBase64
 } = require('../utilitarios/imagens');
+const { validarReferenciasAtivasDaEntidade } = require('../utilitarios/validarReferenciasAtivas');
 
 function montarCampos(payload, camposPermitidos) {
   return Object.entries(payload).filter(
@@ -31,6 +32,7 @@ async function consultarRegistroPorId(entidade, id) {
 }
 
 async function inserirRegistro(entidade, payload) {
+  await validarReferenciasAtivasDaEntidade(entidade.nome, payload);
   const payloadSemImagemBase64 = prepararPayloadImagemParaPersistencia(payload);
   const campos = montarCampos(payloadSemImagemBase64, entidade.camposPermitidos);
   const nomes = campos.map(([campo]) => campo);
@@ -63,6 +65,10 @@ async function atualizarRegistro(entidade, id, payload) {
     `SELECT * FROM ${entidade.nome} WHERE ${entidade.chavePrimaria} = ?`,
     [id]
   );
+  await validarReferenciasAtivasDaEntidade(entidade.nome, {
+    ...registroAtual,
+    ...payload
+  });
   const payloadSemImagemBase64 = prepararPayloadImagemParaPersistencia(payload);
   const campos = montarCampos(payloadSemImagemBase64, entidade.camposPermitidos);
   const declaracoes = campos.map(([campo]) => `${campo} = ?`);

@@ -38,6 +38,13 @@ export function ModalAgendamento({
   const [salvando, definirSalvando] = useState(false);
   const [mensagemErro, definirMensagemErro] = useState('');
   const [confirmandoExclusao, definirConfirmandoExclusao] = useState(false);
+  const locaisAtivos = locais.filter((local) => local.status !== 0);
+  const recursosAtivos = recursos.filter((recurso) => recurso.status !== 0);
+  const clientesAtivos = clientes.filter((cliente) => cliente.status !== 0);
+  const contatosAtivos = contatos.filter((contato) => contato.status !== 0);
+  const usuariosAtivos = usuarios.filter((usuario) => usuario.ativo !== 0);
+  const tiposAgendaAtivos = tiposAgenda.filter((tipoAgenda) => tipoAgenda.status !== 0);
+  const statusAtivos = statusVisita.filter((status) => status.status !== 0);
 
   useEffect(() => {
     if (!aberto) {
@@ -78,16 +85,16 @@ export function ModalAgendamento({
   }
 
   const modoEdicao = Boolean(formulario.idAgendamento);
-  const contatosDoCliente = contatos.filter(
+  const contatosDoCliente = contatosAtivos.filter(
     (contato) => String(contato.idCliente) === String(formulario.idCliente)
   );
-  const recursosSelecionados = recursos.filter((recurso) => (
+  const recursosSelecionados = recursosAtivos.filter((recurso) => (
     formulario.idsRecursos.includes(String(recurso.idRecurso))
   ));
-  const usuariosSelecionados = usuarios.filter((usuario) => (
+  const usuariosSelecionados = usuariosAtivos.filter((usuario) => (
     formulario.idsUsuarios.includes(String(usuario.idUsuario))
   ));
-  const tipoAgendaSelecionado = tiposAgenda.find(
+  const tipoAgendaSelecionado = tiposAgendaAtivos.find(
     (tipoAgenda) => String(tipoAgenda.idTipoAgenda) === String(formulario.idTipoAgenda)
   );
   const clienteObrigatorio = Boolean(tipoAgendaSelecionado?.obrigarCliente);
@@ -264,7 +271,7 @@ export function ModalAgendamento({
               name="idTipoAgenda"
               value={formulario.idTipoAgenda}
               onChange={alterarCampo}
-              options={tiposAgenda.map((tipoAgenda) => ({
+              options={tiposAgendaAtivos.map((tipoAgenda) => ({
                 valor: String(tipoAgenda.idTipoAgenda),
                 label: tipoAgenda.descricao
               }))}
@@ -275,7 +282,7 @@ export function ModalAgendamento({
               name="idLocal"
               value={formulario.idLocal}
               onChange={alterarCampo}
-              options={locais.map((local) => ({
+              options={locaisAtivos.map((local) => ({
                 valor: String(local.idLocal),
                 label: local.descricao
               }))}
@@ -289,7 +296,7 @@ export function ModalAgendamento({
               name="idCliente"
               value={formulario.idCliente}
               onChange={alterarCampo}
-              options={clientes.map((cliente) => ({
+              options={clientesAtivos.map((cliente) => ({
                 valor: String(cliente.idCliente),
                 label: cliente.nomeFantasia || cliente.razaoSocial
               }))}
@@ -312,7 +319,7 @@ export function ModalAgendamento({
               className="campoAgendamentoTerco"
               label="Recursos"
               titulo="Selecionar recursos"
-              itens={recursos.map((recurso) => ({
+              itens={recursosAtivos.map((recurso) => ({
                 valor: String(recurso.idRecurso),
                 label: recurso.sigla
               }))}
@@ -327,7 +334,7 @@ export function ModalAgendamento({
               className="campoAgendamentoMetade"
               label="Usuarios"
               titulo="Selecionar usuarios"
-              itens={usuarios.map((usuario) => ({
+              itens={usuariosAtivos.map((usuario) => ({
                 valor: String(usuario.idUsuario),
                 label: usuario.nome
               }))}
@@ -344,7 +351,7 @@ export function ModalAgendamento({
               name="idStatusVisita"
               value={formulario.idStatusVisita}
               onChange={alterarCampo}
-              options={statusVisita.map((status) => ({
+              options={statusAtivos.map((status) => ({
                 valor: String(status.idStatusVisita),
                 label: status.descricao
               }))}

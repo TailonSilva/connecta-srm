@@ -66,6 +66,68 @@ function salvarImagemBase64({ nomeEntidade, idRegistro, valorImagem }) {
   return caminhoRelativo;
 }
 
+function salvarImagemItemOrcamento({ idOrcamento, nomeCliente, idItemOrcamento, valorImagem }) {
+  if (!ehDataUrlImagem(valorImagem)) {
+    return valorImagem;
+  }
+
+  garantirDiretorioImagens();
+
+  const correspondencia = String(valorImagem).match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
+
+  if (!correspondencia) {
+    return valorImagem;
+  }
+
+  const [, mimeType, conteudoBase64] = correspondencia;
+  const extensao = mimeType.includes('png') ? 'png' : 'jpg';
+  const nomePastaOrcamento = `${String(idOrcamento).padStart(4, '0')}-${normalizarNomeArquivo(nomeCliente || 'cliente')}`;
+  const diretorioOrcamento = path.join(diretorioImagens, 'orcamentos', nomePastaOrcamento);
+
+  if (!fs.existsSync(diretorioOrcamento)) {
+    fs.mkdirSync(diretorioOrcamento, { recursive: true });
+  }
+
+  const nomeArquivo = `item-${idItemOrcamento}.${extensao}`;
+  const caminhoRelativo = path.posix.join('imagens', 'orcamentos', nomePastaOrcamento, nomeArquivo);
+  const caminhoArquivo = path.join(diretorioOrcamento, nomeArquivo);
+
+  fs.writeFileSync(caminhoArquivo, Buffer.from(conteudoBase64, 'base64'));
+
+  return caminhoRelativo;
+}
+
+function salvarImagemItemPedido({ idPedido, nomeCliente, idItemPedido, valorImagem }) {
+  if (!ehDataUrlImagem(valorImagem)) {
+    return valorImagem;
+  }
+
+  garantirDiretorioImagens();
+
+  const correspondencia = String(valorImagem).match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
+
+  if (!correspondencia) {
+    return valorImagem;
+  }
+
+  const [, mimeType, conteudoBase64] = correspondencia;
+  const extensao = mimeType.includes('png') ? 'png' : 'jpg';
+  const nomePastaPedido = `${String(idPedido).padStart(4, '0')}-${normalizarNomeArquivo(nomeCliente || 'cliente')}`;
+  const diretorioPedido = path.join(diretorioImagens, 'pedidos', nomePastaPedido);
+
+  if (!fs.existsSync(diretorioPedido)) {
+    fs.mkdirSync(diretorioPedido, { recursive: true });
+  }
+
+  const nomeArquivo = `item-${idItemPedido}.${extensao}`;
+  const caminhoRelativo = path.posix.join('imagens', 'pedidos', nomePastaPedido, nomeArquivo);
+  const caminhoArquivo = path.join(diretorioPedido, nomeArquivo);
+
+  fs.writeFileSync(caminhoArquivo, Buffer.from(conteudoBase64, 'base64'));
+
+  return caminhoRelativo;
+}
+
 function normalizarNomeDiretorio(nomeEntidade) {
   const mapaDiretorios = {
     cliente: 'clientes',
@@ -77,10 +139,21 @@ function normalizarNomeDiretorio(nomeEntidade) {
   return mapaDiretorios[nomeEntidade] || `${nomeEntidade}s`;
 }
 
+function normalizarNomeArquivo(valor) {
+  return String(valor || 'arquivo')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .toLowerCase() || 'arquivo';
+}
+
 module.exports = {
   diretorioImagens,
   ehCaminhoImagemLocal,
   ehDataUrlImagem,
   removerArquivoImagem,
-  salvarImagemBase64
+  salvarImagemBase64,
+  salvarImagemItemOrcamento,
+  salvarImagemItemPedido
 };

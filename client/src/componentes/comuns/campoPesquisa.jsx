@@ -5,7 +5,8 @@ export const CampoPesquisa = forwardRef(function CampoPesquisa({
   valor,
   aoAlterar,
   placeholder = 'Pesquisar...',
-  ariaLabel = 'Pesquisar'
+  ariaLabel = 'Pesquisar',
+  ...props
 }, ref) {
   return (
     <label className="campoPesquisa">
@@ -18,6 +19,7 @@ export const CampoPesquisa = forwardRef(function CampoPesquisa({
         onChange={(evento) => aoAlterar(evento.target.value)}
         placeholder={placeholder}
         aria-label={ariaLabel}
+        {...props}
       />
     </label>
   );
