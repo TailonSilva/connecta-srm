@@ -50,6 +50,7 @@ import {
   listarMarcasConfiguracao,
   listarMetodosPagamentoConfiguracao,
   listarMotivosPerdaConfiguracao,
+  obterConfiguracaoAtualizacaoSistema,
   listarOrigensAtendimentoConfiguracao,
   listarPrazosPagamentoConfiguracao,
   listarRecursosConfiguracao,
@@ -58,14 +59,20 @@ import {
   listarTiposAgendaConfiguracao,
   listarTiposRecursoConfiguracao,
   listarUnidadesMedidaConfiguracao,
-  listarVendedoresConfiguracao
+  listarVendedoresConfiguracao,
+  salvarConfiguracaoAtualizacaoSistema
 } from '../../servicos/configuracoes';
 import { atualizarEmpresa, incluirEmpresa, listarEmpresas } from '../../servicos/empresa';
 import { atualizarUsuario, incluirUsuario, listarUsuarios } from '../../servicos/usuarios';
 import { normalizarTelefone } from '../../utilitarios/normalizarTelefone';
+import { ModalAtualizacaoSistema } from './modalAtualizacaoSistema';
 import { ModalCadastroConfiguracao } from './modalCadastroConfiguracao';
 import { ModalEmpresa } from './modalEmpresa';
+import { ModalGruposProduto } from './modalGruposProduto';
+import { ModalMarcas } from './modalMarcas';
 import { ModalPrazosPagamento } from './modalPrazosPagamento';
+import { ModalRamosAtividade } from './modalRamosAtividade';
+import { ModalUnidadesMedida } from './modalUnidadesMedida';
 import { ModalUsuarios } from './modalUsuarios';
 
 const atalhosConfiguracao = [
@@ -178,6 +185,11 @@ const atalhosConfiguracao = [
     id: 'unidadesMedida',
     titulo: 'Unidades',
     icone: 'medida'
+  },
+  {
+    id: 'atualizacaoSistema',
+    titulo: 'Atualizacao do sistema',
+    icone: 'importar'
   }
 ];
 
@@ -185,7 +197,7 @@ const secoesConfiguracao = [
   {
     id: 'gerais',
     titulo: 'Gerais',
-    atalhos: ['empresa', 'usuarios', 'vendedores']
+    atalhos: ['empresa', 'usuarios', 'vendedores', 'atualizacaoSistema']
   },
   {
     id: 'paginaInicial',
@@ -232,6 +244,7 @@ const secoesConfiguracao = [
         'ramosAtividade',
         'gruposProduto',
         'marcas',
+        'atualizacaoSistema',
         'unidadesMedida',
         'tamanhos'
       ].includes(id))
@@ -260,15 +273,19 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
   const [etapasOrcamento, definirEtapasOrcamento] = useState([]);
   const [camposOrcamento, definirCamposOrcamento] = useState([]);
   const [camposPedido, definirCamposPedido] = useState([]);
+  const [configuracaoAtualizacaoSistema, definirConfiguracaoAtualizacaoSistema] = useState(null);
   const [modalEmpresaAberto, definirModalEmpresaAberto] = useState(false);
   const [modalUsuariosAberto, definirModalUsuariosAberto] = useState(false);
+  const [modalAtualizacaoSistemaAberto, definirModalAtualizacaoSistemaAberto] = useState(false);
   const [cadastroConfiguracaoAberto, definirCadastroConfiguracaoAberto] = useState(null);
   const [modoModalEmpresa, definirModoModalEmpresa] = useState('edicao');
   const usuarioSomenteConsulta = usuarioLogado?.tipo === 'Usuario padrao';
+  const usuarioAdministrador = usuarioLogado?.tipo === 'Administrador';
 
   useEffect(() => {
     carregarEmpresa();
     carregarCadastrosConfiguracao();
+    carregarConfiguracaoAtualizacaoSistema();
   }, []);
 
   useEffect(() => {
@@ -307,6 +324,15 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
         nomeVendedor: vendedoresPorId.get(usuario.idVendedor) || ''
       }))
     );
+  }
+
+  async function carregarConfiguracaoAtualizacaoSistema() {
+    try {
+      const configuracao = await obterConfiguracaoAtualizacaoSistema();
+      definirConfiguracaoAtualizacaoSistema(configuracao);
+    } catch (_erro) {
+      definirConfiguracaoAtualizacaoSistema(null);
+    }
   }
 
   async function carregarCadastrosConfiguracao() {
@@ -769,6 +795,14 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
     await carregarCadastrosConfiguracao();
   }
 
+  async function salvarAtualizacaoSistema(dadosAtualizacao) {
+    const configuracaoSalva = await salvarConfiguracaoAtualizacaoSistema({
+      urlRepositorio: String(dadosAtualizacao.urlRepositorio || '').trim()
+    });
+
+    definirConfiguracaoAtualizacaoSistema(configuracaoSalva);
+  }
+
   function abrirConfiguracao(atalho) {
     if (usuarioSomenteConsulta && ['empresa', 'usuarios'].includes(atalho.id)) {
       return;
@@ -782,6 +816,15 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
 
     if (atalho.id === 'usuarios') {
       definirModalUsuariosAberto(true);
+      return;
+    }
+
+    if (atalho.id === 'atualizacaoSistema') {
+      if (!usuarioAdministrador) {
+        return;
+      }
+
+      definirModalAtualizacaoSistemaAberto(true);
       return;
     }
 
@@ -819,8 +862,19 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
     definirModalUsuariosAberto(false);
   }
 
+  function fecharModalAtualizacaoSistema() {
+    definirModalAtualizacaoSistemaAberto(false);
+  }
+
   function fecharCadastroConfiguracao() {
     definirCadastroConfiguracaoAberto(null);
+  }
+
+  function obterAtalhosSecao(secao) {
+    return secao.atalhos
+      .map((idAtalho) => atalhosConfiguracao.find((item) => item.id === idAtalho))
+      .filter(Boolean)
+      .filter((atalho) => atalho.id !== 'atualizacaoSistema' || usuarioAdministrador);
   }
 
   return (
@@ -834,22 +888,18 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
 
       <CorpoPagina>
         <div className="secoesConfiguracao">
-          {secoesConfiguracao.map((secao) => (
-            <section key={secao.id} className="secaoConfiguracao" aria-label={secao.titulo}>
-              <header className="cabecalhoSecaoConfiguracao">
-                <h2>{secao.titulo}</h2>
-              </header>
+          {secoesConfiguracao.map((secao) => {
+            const atalhosSecao = obterAtalhosSecao(secao);
 
-              {secao.atalhos.length > 0 ? (
-                <div className="gradeConfiguracoes">
-                  {secao.atalhos.map((idAtalho) => {
-                    const atalho = atalhosConfiguracao.find((item) => item.id === idAtalho);
+            return (
+              <section key={secao.id} className="secaoConfiguracao" aria-label={secao.titulo}>
+                <header className="cabecalhoSecaoConfiguracao">
+                  <h2>{secao.titulo}</h2>
+                </header>
 
-                    if (!atalho) {
-                      return null;
-                    }
-
-                    return (
+                {atalhosSecao.length > 0 ? (
+                  <div className="gradeConfiguracoes">
+                    {atalhosSecao.map((atalho) => (
                       <button
                         key={atalho.id}
                         type="button"
@@ -868,16 +918,16 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
                           <strong>{atalho.titulo}</strong>
                         </span>
                       </button>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="secaoConfiguracaoVazia">
-                  Nenhum item configurado nesta secao por enquanto.
-                </div>
-              )}
-            </section>
-          ))}
+                    ))}
+                  </div>
+                ) : (
+                  <div className="secaoConfiguracaoVazia">
+                    Nenhum item configurado nesta secao por enquanto.
+                  </div>
+                )}
+              </section>
+            );
+          })}
         </div>
       </CorpoPagina>
 
@@ -898,59 +948,32 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
         aoSalvar={salvarUsuario}
         aoInativar={inativarUsuario}
       />
-      <ModalCadastroConfiguracao
-        aberto={cadastroConfiguracaoAberto === 'gruposProduto'}
-        titulo="Grupos de produtos"
-        rotuloIncluir="Incluir grupo"
-        registros={gruposProduto}
-        chavePrimaria="idGrupo"
-        exibirConsulta={false}
-        somenteConsulta={usuarioSomenteConsulta}
-        colunas={[
-          { key: 'descricao', label: 'Descricao' }
-        ]}
-        camposFormulario={[
-          { name: 'descricao', label: 'Descricao', required: true },
-          { name: 'status', label: 'Registro ativo', type: 'checkbox', defaultValue: true }
-        ]}
-        aoFechar={fecharCadastroConfiguracao}
-        aoSalvar={salvarGrupoProduto}
-        aoInativar={inativarGrupoProduto}
+      <ModalAtualizacaoSistema
+        aberto={modalAtualizacaoSistemaAberto}
+        configuracao={configuracaoAtualizacaoSistema}
+        aoFechar={fecharModalAtualizacaoSistema}
+        aoSalvar={salvarAtualizacaoSistema}
       />
-      <ModalCadastroConfiguracao
+        <ModalGruposProduto
+          aberto={cadastroConfiguracaoAberto === 'gruposProduto'}
+          registros={gruposProduto}
+          somenteConsulta={usuarioSomenteConsulta}
+          aoFechar={fecharCadastroConfiguracao}
+          aoSalvar={salvarGrupoProduto}
+          aoInativar={inativarGrupoProduto}
+        />
+      <ModalMarcas
         aberto={cadastroConfiguracaoAberto === 'marcas'}
-        titulo="Marcas"
-        rotuloIncluir="Incluir marca"
         registros={marcas}
-        chavePrimaria="idMarca"
-        exibirConsulta={false}
         somenteConsulta={usuarioSomenteConsulta}
-        colunas={[
-          { key: 'descricao', label: 'Descricao' }
-        ]}
-        camposFormulario={[
-          { name: 'descricao', label: 'Descricao', required: true },
-          { name: 'status', label: 'Registro ativo', type: 'checkbox', defaultValue: true }
-        ]}
         aoFechar={fecharCadastroConfiguracao}
         aoSalvar={salvarMarca}
         aoInativar={inativarMarca}
       />
-      <ModalCadastroConfiguracao
+      <ModalRamosAtividade
         aberto={cadastroConfiguracaoAberto === 'ramosAtividade'}
-        titulo="Ramos de atividade"
-        rotuloIncluir="Incluir ramo"
         registros={ramosAtividade}
-        chavePrimaria="idRamo"
-        exibirConsulta={false}
         somenteConsulta={usuarioSomenteConsulta}
-        colunas={[
-          { key: 'descricao', label: 'Descricao' }
-        ]}
-        camposFormulario={[
-          { name: 'descricao', label: 'Descricao', required: true },
-          { name: 'status', label: 'Registro ativo', type: 'checkbox', defaultValue: true }
-        ]}
         aoFechar={fecharCadastroConfiguracao}
         aoSalvar={salvarRamoAtividade}
         aoInativar={inativarRamoAtividade}
@@ -978,20 +1001,10 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
         aoSalvar={salvarVendedor}
         aoInativar={inativarVendedor}
       />
-      <ModalCadastroConfiguracao
+      <ModalUnidadesMedida
         aberto={cadastroConfiguracaoAberto === 'unidadesMedida'}
-        titulo="Unidades de medida"
-        rotuloIncluir="Incluir unidade"
         registros={unidadesMedida}
-        chavePrimaria="idUnidade"
         somenteConsulta={usuarioSomenteConsulta}
-        colunas={[
-          { key: 'descricao', label: 'Descricao' }
-        ]}
-        camposFormulario={[
-          { name: 'descricao', label: 'Descricao', required: true },
-          { name: 'status', label: 'Registro ativo', type: 'checkbox', defaultValue: true }
-        ]}
         aoFechar={fecharCadastroConfiguracao}
         aoSalvar={salvarUnidadeMedida}
         aoInativar={inativarUnidadeMedida}

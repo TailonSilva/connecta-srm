@@ -11,6 +11,8 @@ import {
 import { listarUsuarios } from '../../servicos/usuarios';
 import { normalizarTelefone } from '../../utilitarios/normalizarTelefone';
 import { ModalAtendimento } from '../atendimentos/modalAtendimento';
+import { ModalRamosAtividade } from '../configuracoes/modalRamosAtividade';
+import { ModalContatoCliente } from './modalContatoCliente';
 
 const abasModalCliente = [
   { id: 'dadosGerais', label: 'Dados gerais' },
@@ -61,9 +63,13 @@ export function ModalCliente({
   contatos,
   vendedores,
   ramosAtividade,
+  somenteConsultaRamos = false,
+  classNameCamada = 'camadaModal',
   idVendedorBloqueado,
   modo = 'novo',
   aoFechar,
+  aoSalvarRamoAtividade,
+  aoInativarRamoAtividade,
   aoSalvar
 }) {
   const [formulario, definirFormulario] = useState(estadoInicialFormulario);
@@ -84,6 +90,7 @@ export function ModalCliente({
   const [atendimentoSelecionado, definirAtendimentoSelecionado] = useState(null);
   const [modalAtendimentoAberto, definirModalAtendimentoAberto] = useState(false);
   const [confirmandoSaida, definirConfirmandoSaida] = useState(false);
+  const [modalRamosAtividadeAberto, definirModalRamosAtividadeAberto] = useState(false);
   const somenteLeitura = modo === 'consulta';
   const modoInclusao = !cliente;
   const vendedorBloqueado = Boolean(idVendedorBloqueado);
@@ -115,7 +122,8 @@ export function ModalCliente({
     definirAtendimentoSelecionado(null);
     definirModalAtendimentoAberto(false);
     definirConfirmandoSaida(false);
-  }, [aberto, cliente, contatos, idVendedorBloqueado]);
+    definirModalRamosAtividadeAberto(false);
+  }, [aberto, cliente, idVendedorBloqueado]);
 
   useEffect(() => {
     if (!aberto || !cliente?.idCliente) {
@@ -419,21 +427,42 @@ export function ModalCliente({
     definirModalAtendimentoAberto(true);
   }
 
+  function abrirModalRamosAtividade() {
+    if (somenteLeitura || typeof aoSalvarRamoAtividade !== 'function') {
+      return;
+    }
+
+    definirModalRamosAtividadeAberto(true);
+    definirMensagemErro('');
+  }
+
+  function fecharModalRamosAtividade() {
+    definirModalRamosAtividadeAberto(false);
+  }
+
+  function selecionarRamo(registro) {
+    definirFormulario((estadoAtual) => ({
+      ...estadoAtual,
+      idRamo: String(registro?.idRamo || estadoAtual.idRamo || '')
+    }));
+  }
+
   function fecharModalAtendimento() {
     definirAtendimentoSelecionado(null);
     definirModalAtendimentoAberto(false);
   }
 
   return (
-    <div className="camadaModal" role="presentation" onMouseDown={fecharAoClicarNoFundo}>
-      <form
-        className="modalCliente modalClienteComAbas"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="tituloModalCliente"
-        onMouseDown={(evento) => evento.stopPropagation()}
-        onSubmit={submeterFormulario}
-      >
+    <>
+      <div className={classNameCamada} role="presentation" onMouseDown={fecharAoClicarNoFundo}>
+        <form
+          className="modalCliente modalClienteComAbas"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="tituloModalCliente"
+          onMouseDown={(evento) => evento.stopPropagation()}
+          onSubmit={submeterFormulario}
+        >
         <header className="cabecalhoModalCliente">
           <h2 id="tituloModalCliente">
             {somenteLeitura ? 'Consultar cliente' : cliente ? 'Editar cliente' : 'Incluir cliente'}
@@ -510,7 +539,29 @@ export function ModalCliente({
                 />
                 <CampoFormulario label="Inscricao estadual" name="inscricaoEstadual" value={formulario.inscricaoEstadual} onChange={alterarCampo} disabled={somenteLeitura} />
                 <CampoSelect label="Vendedor" name="idVendedor" value={formulario.idVendedor} onChange={alterarCampo} options={vendedoresAtivos.map((vendedor) => ({ valor: String(vendedor.idVendedor), label: vendedor.nome }))} disabled={somenteLeitura || vendedorBloqueado} required />
-                <CampoSelect label="Ramo de atividade" name="idRamo" value={formulario.idRamo} onChange={alterarCampo} options={ramosAtivos.map((ramo) => ({ valor: String(ramo.idRamo), label: ramo.descricao }))} disabled={somenteLeitura} required />
+                <CampoSelect
+                  label="Ramo de atividade"
+                  name="idRamo"
+                  value={formulario.idRamo}
+                  onChange={alterarCampo}
+                  options={ramosAtivos.map((ramo) => ({ valor: String(ramo.idRamo), label: ramo.descricao }))}
+                  disabled={somenteLeitura}
+                  required
+                  acaoExtra={!somenteLeitura ? (
+                    <Botao
+                      variante="secundario"
+                      icone="adicionar"
+                      type="button"
+                      className="botaoCampoAcao"
+                      onClick={abrirModalRamosAtividade}
+                      somenteIcone
+                      title="Abrir ramos de atividade"
+                      aria-label="Abrir ramos de atividade"
+                    >
+                      Abrir ramos de atividade
+                    </Botao>
+                  ) : null}
+                />
                 <label className="campoCheckboxFormulario" htmlFor="status">
                   <input id="status" type="checkbox" name="status" checked={formulario.status} onChange={alterarCampo} disabled={somenteLeitura} />
                   <span>Cliente ativo</span>
@@ -708,61 +759,6 @@ export function ModalCliente({
 
         {mensagemErro ? <p className="mensagemErroFormulario">{mensagemErro}</p> : null}
 
-        {modalContatoAberto ? (
-          <div className="camadaModalContato" role="presentation" onMouseDown={fecharModalContatoNoFundo}>
-            <section className="modalContatoCliente" role="dialog" aria-modal="true" aria-labelledby="tituloModalContato" onMouseDown={(evento) => evento.stopPropagation()}>
-              <div className="cabecalhoModalContato">
-                <h3 id="tituloModalContato">
-                  {modoContato === 'consulta'
-                    ? 'Consultar contato'
-                    : modoContato === 'edicao' ? 'Editar contato' : 'Adicionar contato'}
-                </h3>
-                <div className="acoesFormularioContatoModal">
-                  <Botao variante="secundario" type="button" onClick={fecharModalContato}>
-                    {modoContato === 'consulta' ? 'Fechar' : 'Cancelar'}
-                  </Botao>
-                  {modoContato !== 'consulta' ? (
-                    <Botao variante="primario" type="button" onClick={salvarContatoLocal}>
-                      {modoContato === 'edicao' ? 'Atualizar contato' : 'Adicionar contato'}
-                    </Botao>
-                  ) : null}
-                </div>
-              </div>
-
-              <div className="corpoModalContato">
-                <div className="gradeCamposModalCliente">
-                  <CampoFormulario label="Nome" name="nome" value={formularioContato.nome} onChange={alterarCampoContato} disabled={modoContato === 'consulta'} />
-                  <CampoFormulario label="Cargo" name="cargo" value={formularioContato.cargo} onChange={alterarCampoContato} disabled={modoContato === 'consulta'} />
-                  <CampoFormulario label="E-mail" name="email" type="email" value={formularioContato.email} onChange={alterarCampoContato} disabled={modoContato === 'consulta'} />
-                  <CampoFormulario label="Telefone" name="telefone" value={formularioContato.telefone} onChange={alterarCampoContato} disabled={modoContato === 'consulta'} />
-                  <CampoFormulario label="WhatsApp" name="whatsapp" value={formularioContato.whatsapp} onChange={alterarCampoContato} disabled={modoContato === 'consulta'} />
-                  <label className="campoCheckboxFormulario" htmlFor="statusContato">
-                    <input id="statusContato" type="checkbox" name="status" checked={formularioContato.status} onChange={alterarCampoContato} disabled={modoContato === 'consulta'} />
-                    <span>Contato ativo</span>
-                  </label>
-                  <label className="campoCheckboxFormulario" htmlFor="principalContato">
-                    <input id="principalContato" type="checkbox" name="principal" checked={formularioContato.principal} onChange={alterarCampoContato} disabled={modoContato === 'consulta'} />
-                    <span>Contato principal</span>
-                  </label>
-                </div>
-              </div>
-            </section>
-          </div>
-        ) : null}
-
-        <ModalAtendimento
-          aberto={modalAtendimentoAberto}
-          atendimento={atendimentoSelecionado}
-          clientes={cliente ? [cliente] : []}
-          contatos={contatos}
-          usuarioLogado={null}
-          canaisAtendimento={canaisAtendimento}
-          origensAtendimento={origensAtendimento}
-          modo="consulta"
-          aoFechar={fecharModalAtendimento}
-          aoSalvar={async () => {}}
-        />
-
         {confirmandoSaida ? (
           <div className="camadaConfirmacaoModal" role="presentation" onMouseDown={fecharConfirmacaoSaida}>
             <div
@@ -791,8 +787,42 @@ export function ModalCliente({
             </div>
           </div>
         ) : null}
-      </form>
-    </div>
+        </form>
+      </div>
+
+      <ModalContatoCliente
+        aberto={modalContatoAberto}
+        modo={modoContato}
+        formulario={formularioContato}
+        aoAlterarCampo={alterarCampoContato}
+        aoFechar={fecharModalContato}
+        aoSalvar={salvarContatoLocal}
+      />
+
+      <ModalRamosAtividade
+        aberto={modalRamosAtividadeAberto}
+        registros={ramosAtividade}
+        somenteConsulta={somenteConsultaRamos}
+        fecharAoSalvar
+        aoFechar={fecharModalRamosAtividade}
+        aoSalvar={aoSalvarRamoAtividade}
+        aoInativar={aoInativarRamoAtividade}
+        aoSelecionarRamo={selecionarRamo}
+      />
+
+      <ModalAtendimento
+        aberto={modalAtendimentoAberto}
+        atendimento={atendimentoSelecionado}
+        clientes={cliente ? [cliente] : []}
+        contatos={contatos}
+        usuarioLogado={null}
+        canaisAtendimento={canaisAtendimento}
+        origensAtendimento={origensAtendimento}
+        modo="consulta"
+        aoFechar={fecharModalAtendimento}
+        aoSalvar={async () => {}}
+      />
+    </>
   );
 
   function fecharAoClicarNoFundo(evento) {
@@ -828,16 +858,11 @@ export function ModalCliente({
     definirModoContato('novo');
   }
 
-  function fecharModalContatoNoFundo(evento) {
-    if (evento.target === evento.currentTarget) {
-      fecharModalContato();
-    }
-  }
 }
 
-function CampoFormulario({ label, name, type = 'text', ...props }) {
+function CampoFormulario({ label, name, type = 'text', className = '', ...props }) {
   return (
-    <div className="campoFormulario">
+    <div className={`campoFormulario ${className}`.trim()}>
       <label htmlFor={name}>{label}</label>
       <input id={name} name={name} type={type} className="entradaFormulario" {...props} />
     </div>
@@ -867,18 +892,21 @@ function CampoFormularioComAcao({
   );
 }
 
-function CampoSelect({ label, name, options, ...props }) {
+function CampoSelect({ label, name, options, acaoExtra = null, ...props }) {
   return (
     <div className="campoFormulario">
       <label htmlFor={name}>{label}</label>
-      <select id={name} name={name} className="entradaFormulario" {...props}>
-        <option value="">Selecione</option>
-        {options.map((option) => (
-          <option key={option.valor} value={option.valor}>
-            {option.label}
-          </option>
-        ))}
-      </select>
+      <div className={`campoSelectComAcao ${acaoExtra ? 'temAcao' : ''}`.trim()}>
+        <select id={name} name={name} className="entradaFormulario" {...props}>
+          <option value="">Selecione</option>
+          {options.map((option) => (
+            <option key={option.valor} value={option.valor}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        {acaoExtra}
+      </div>
     </div>
   );
 }

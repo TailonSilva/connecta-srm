@@ -604,6 +604,14 @@ banco.serialize(() => {
   `);
 
   banco.run(`
+    CREATE TABLE IF NOT EXISTS configuracaoAtualizacaoSistema (
+      idConfiguracaoAtualizacao INTEGER PRIMARY KEY CHECK (idConfiguracaoAtualizacao = 1),
+      urlRepositorio VARCHAR(255) NOT NULL,
+      dataAtualizacao DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  banco.run(`
     ALTER TABLE empresa ADD COLUMN slogan VARCHAR(255)
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
@@ -1504,6 +1512,7 @@ banco.serialize(() => {
 });
 
 async function garantirRegistrosObrigatorios() {
+  await garantirConfiguracaoAtualizacaoSistemaPadrao();
   await garantirUsuarioAdministradorPadrao();
   await garantirEtapasOrcamentoObrigatorias();
   await garantirEtapasPedidoObrigatorias();
@@ -1517,6 +1526,35 @@ async function garantirRegistrosObrigatorios() {
   await garantirMetodosPagamentoObrigatorios();
   await garantirPrazosPagamentoObrigatorios();
   await garantirCamposPedidoObrigatorios();
+}
+
+async function garantirConfiguracaoAtualizacaoSistemaPadrao() {
+  const urlRepositorioPadrao = 'https://github.com/TailonSilva/connecta-crm';
+  const existente = await consultarUm(
+    'SELECT idConfiguracaoAtualizacao FROM configuracaoAtualizacaoSistema WHERE idConfiguracaoAtualizacao = 1'
+  );
+
+  if (!existente) {
+    await executar(
+      `
+        INSERT INTO configuracaoAtualizacaoSistema (
+          idConfiguracaoAtualizacao,
+          urlRepositorio
+        ) VALUES (?, ?)
+      `,
+      [1, urlRepositorioPadrao]
+    );
+    return;
+  }
+
+  await executar(
+    `
+      UPDATE configuracaoAtualizacaoSistema
+      SET urlRepositorio = COALESCE(NULLIF(urlRepositorio, ''), ?)
+      WHERE idConfiguracaoAtualizacao = 1
+    `,
+    [urlRepositorioPadrao]
+  );
 }
 
 async function garantirUsuarioAdministradorPadrao() {

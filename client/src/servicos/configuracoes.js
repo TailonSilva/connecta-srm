@@ -455,3 +455,17 @@ export function atualizarOrigemAtendimento(idOrigemAtendimento, payload) {
     body: JSON.stringify(payload)
   });
 }
+
+export function obterConfiguracaoAtualizacaoSistema() {
+  return requisitarApi('/atualizacaoSistema');
+}
+
+export function salvarConfiguracaoAtualizacaoSistema(payload) {
+  return requisitarApi('/atualizacaoSistema', {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+}

@@ -18,6 +18,7 @@ export function ModalCadastroConfiguracao({
   camposFormulario,
   aoFechar,
   aoSalvar,
+  aoSalvarConcluido,
   aoInativar
 }) {
   const [modalFormularioAberto, definirModalFormularioAberto] = useState(false);
@@ -129,10 +130,15 @@ export function ModalCadastroConfiguracao({
     definirMensagemErro('');
 
     try {
-      await aoSalvar({
+      const registroSalvo = await aoSalvar({
         [chavePrimaria]: registroSelecionado?.[chavePrimaria],
         ...formulario
       });
+
+      if (typeof aoSalvarConcluido === 'function') {
+        await aoSalvarConcluido(registroSalvo);
+      }
+
       fecharFormulario();
     } catch (erro) {
       definirMensagemErro(erro.message || `Nao foi possivel salvar ${titulo.toLowerCase()}.`);

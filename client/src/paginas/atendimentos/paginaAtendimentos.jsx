@@ -148,32 +148,27 @@ export function PaginaAtendimentos({ usuarioLogado }) {
         ? clientesCarregados.filter((cliente) => cliente.idVendedor === usuarioLogado.idVendedor)
         : clientesCarregados;
       const idsClientesCarteira = new Set(clientesCarteira.map((cliente) => cliente.idCliente));
+      const contatosCarteira = contatosCarregados.filter((contato) => idsClientesCarteira.has(contato.idCliente));
       const atendimentosVisiveis = usuarioSomenteVendedor
         ? atendimentosCarregados.filter((atendimento) => (
           idsClientesCarteira.has(atendimento.idCliente)
           || String(atendimento.idUsuario) === String(usuarioLogado.idUsuario)
         ))
         : atendimentosCarregados;
-      const idsClientesVisiveis = new Set(
-        atendimentosVisiveis
-          .map((atendimento) => atendimento.idCliente)
-          .filter(Boolean)
-      );
-      const clientesVisiveis = clientesCarregados.filter((cliente) => idsClientesVisiveis.has(cliente.idCliente));
 
       definirAtendimentos(
         enriquecerAtendimentos(
           atendimentosVisiveis,
-          clientesVisiveis,
-          contatosCarregados,
+          clientesCarteira,
+          contatosCarteira,
           usuariosCarregados,
           vendedoresCarregados,
           canaisCarregados,
           origensCarregadas
         )
       );
-      definirClientes(clientesVisiveis);
-      definirContatos(contatosCarregados.filter((contato) => idsClientesVisiveis.has(contato.idCliente)));
+      definirClientes(clientesCarteira);
+      definirContatos(contatosCarteira);
       definirUsuarios(usuariosCarregados);
       definirVendedores(vendedoresCarregados);
       definirOrcamentos(

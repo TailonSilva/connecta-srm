@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Botao } from '../../componentes/comuns/botao';
-import { ModalBuscaTabela } from '../../componentes/comuns/modalBuscaTabela';
+import { ModalBuscaClientes } from '../../componentes/comuns/modalBuscaClientes';
+import { ModalBuscaContatos } from '../../componentes/comuns/modalBuscaContatos';
 import { ModalCliente } from '../clientes/modalCliente';
 import { ModalOrcamento } from '../orcamentos/modalOrcamento';
 
@@ -62,6 +63,7 @@ export function ModalAtendimento({
   const [confirmandoSaida, definirConfirmandoSaida] = useState(false);
   const [modalClienteAberto, definirModalClienteAberto] = useState(false);
   const [modalBuscaClienteAberto, definirModalBuscaClienteAberto] = useState(false);
+  const [modalBuscaContatoAberto, definirModalBuscaContatoAberto] = useState(false);
   const [modalOrcamentoAberto, definirModalOrcamentoAberto] = useState(false);
   const [modoModalOrcamento, definirModoModalOrcamento] = useState('novo');
   const [orcamentoSelecionado, definirOrcamentoSelecionado] = useState(null);
@@ -86,6 +88,7 @@ export function ModalAtendimento({
     definirConfirmandoSaida(false);
     definirModalClienteAberto(false);
     definirModalBuscaClienteAberto(false);
+    definirModalBuscaContatoAberto(false);
     definirModalOrcamentoAberto(false);
     definirModoModalOrcamento('novo');
     definirOrcamentoSelecionado(null);
@@ -132,6 +135,11 @@ export function ModalAtendimento({
           return;
         }
 
+        if (modalBuscaContatoAberto) {
+          fecharModalBuscaContato();
+          return;
+        }
+
         if (confirmandoSaida) {
           definirConfirmandoSaida(false);
           return;
@@ -151,7 +159,7 @@ export function ModalAtendimento({
     return () => {
       window.removeEventListener('keydown', tratarTecla);
     };
-  }, [aberto, aoFechar, confirmandoExclusao, confirmandoPedidoOrcamento, confirmandoSaida, salvando, modalBuscaClienteAberto, modalClienteAberto, modalOrcamentoAberto]);
+  }, [aberto, aoFechar, confirmandoExclusao, confirmandoPedidoOrcamento, confirmandoSaida, salvando, modalBuscaClienteAberto, modalBuscaContatoAberto, modalClienteAberto, modalOrcamentoAberto]);
 
   if (!aberto) {
     return null;
@@ -364,6 +372,18 @@ export function ModalAtendimento({
     definirModalBuscaClienteAberto(false);
   }
 
+  function abrirModalBuscaContato() {
+    if (somenteLeitura || salvando || !formulario.idCliente) {
+      return;
+    }
+
+    definirModalBuscaContatoAberto(true);
+  }
+
+  function fecharModalBuscaContato() {
+    definirModalBuscaContatoAberto(false);
+  }
+
   function selecionarCliente(cliente) {
     if (!cliente) {
       return;
@@ -377,6 +397,18 @@ export function ModalAtendimento({
       idEtapaOrcamento: ''
     }));
     fecharModalBuscaCliente();
+  }
+
+  function selecionarContato(contato) {
+    if (!contato) {
+      return;
+    }
+
+    definirFormulario((estadoAtual) => ({
+      ...estadoAtual,
+      idContato: String(contato.idContato)
+    }));
+    fecharModalBuscaContato();
   }
 
   async function salvarNovoCliente(dadosCliente) {
@@ -608,7 +640,7 @@ export function ModalAtendimento({
 
   return (
     <>
-    <div className="camadaModalContato" role="presentation" onMouseDown={fecharAoClicarNoFundo}>
+    <div className="camadaModalContato camadaModalAtendimento" role="presentation" onMouseDown={fecharAoClicarNoFundo}>
       <form
         className="modalContatoCliente modalAtendimento"
         role="dialog"
@@ -705,30 +737,17 @@ export function ModalAtendimento({
                   disabled={somenteLeitura}
                   required
                   acaoExtra={!somenteLeitura ? (
-                    <>
-                      <Botao
-                        variante="secundario"
-                        type="button"
-                        icone="pesquisa"
-                        somenteIcone
-                        title="Buscar cliente"
-                        aria-label="Buscar cliente"
-                        onClick={abrirModalBuscaCliente}
-                      >
-                        Buscar cliente
-                      </Botao>
-                      <Botao
-                        variante="secundario"
-                        type="button"
-                        icone="adicionar"
-                        somenteIcone
-                        title="Incluir cliente"
-                        aria-label="Incluir cliente"
-                        onClick={abrirModalNovoCliente}
-                      >
-                        Incluir cliente
-                      </Botao>
-                    </>
+                    <Botao
+                      variante="secundario"
+                      type="button"
+                      icone="pesquisa"
+                      somenteIcone
+                      title="Buscar cliente"
+                      aria-label="Buscar cliente"
+                      onClick={abrirModalBuscaCliente}
+                    >
+                      Buscar cliente
+                    </Botao>
                   ) : null}
                 />
                 <CampoSelect
@@ -741,6 +760,19 @@ export function ModalAtendimento({
                     label: contato.nome
                   }))}
                   disabled={somenteLeitura || !formulario.idCliente}
+                  acaoExtra={!somenteLeitura && formulario.idCliente ? (
+                    <Botao
+                      variante="secundario"
+                      type="button"
+                      icone="pesquisa"
+                      somenteIcone
+                      title="Buscar contato"
+                      aria-label="Buscar contato"
+                      onClick={abrirModalBuscaContato}
+                    >
+                      Buscar contato
+                    </Botao>
+                  ) : null}
                 />
               </div>
               <div className="linhaOrcamentoAtendimento">
@@ -950,40 +982,35 @@ export function ModalAtendimento({
       vendedores={vendedores}
       ramosAtividade={ramosAtividade}
       modo="novo"
+      classNameCamada="camadaModal camadaModalSecundaria"
       idVendedorBloqueado={idVendedorBloqueado}
       aoFechar={fecharModalNovoCliente}
       aoSalvar={salvarNovoCliente}
     />
 
-    <ModalBuscaTabela
+    <ModalBuscaClientes
       aberto={modalBuscaClienteAberto}
-      titulo="Buscar cliente"
+      clientes={clientes}
       placeholder="Pesquisar cliente no grid"
       ariaLabelPesquisa="Pesquisar cliente no grid"
-      colunas={[
-        {
-          key: 'codigo',
-          label: 'Codigo',
-          render: (cliente) => `#${String(cliente.idCliente).padStart(4, '0')}`
-        },
-        { key: 'razaoSocial', label: 'Razao social', render: (cliente) => cliente.razaoSocial },
-        { key: 'nomeFantasia', label: 'Nome fantasia', render: (cliente) => cliente.nomeFantasia },
-        { key: 'cidade', label: 'Cidade', render: (cliente) => cliente.cidade || 'Nao informada' },
-        { key: 'estado', label: 'UF', render: (cliente) => cliente.estado || '--' },
-        { key: 'cnpj', label: 'CNPJ', render: (cliente) => cliente.cnpj || 'Nao informado' }
-      ]}
-      registros={clientes}
-      obterTextoBusca={(cliente) => [
-        cliente.idCliente,
-        cliente.razaoSocial,
-        cliente.nomeFantasia,
-        cliente.cidade,
-        cliente.estado,
-        cliente.cnpj
-      ].join(' ')}
-      obterChaveRegistro={(cliente) => cliente.idCliente}
+      rotuloAcaoPrimaria="Incluir cliente"
+      tituloAcaoPrimaria="Incluir cliente"
+      iconeAcaoPrimaria="adicionar"
+      aoAcionarPrimaria={() => {
+        fecharModalBuscaCliente();
+        abrirModalNovoCliente();
+      }}
       aoSelecionar={selecionarCliente}
       aoFechar={fecharModalBuscaCliente}
+    />
+
+    <ModalBuscaContatos
+      aberto={modalBuscaContatoAberto}
+      contatos={contatosDoCliente}
+      placeholder="Pesquisar contatos do cliente"
+      ariaLabelPesquisa="Pesquisar contatos do cliente"
+      aoSelecionar={selecionarContato}
+      aoFechar={fecharModalBuscaContato}
     />
 
     <ModalOrcamento

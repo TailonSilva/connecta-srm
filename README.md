@@ -1,8 +1,8 @@
-# CRM Desktop
+# Connecta CRM
 
-CRM desktop com `Electron`, `React + Vite`, `Express` e `SQLite`, com backend local, banco embarcado e interface em portugues.
+Connecta CRM com `Electron`, `React + Vite`, `Express` e `SQLite`, com backend local, banco embarcado, interface em portugues e fluxo de distribuicao por `GitHub Releases`.
 
-O projeto ja possui autenticacao, controle de acesso por perfil, agenda semanal interativa, cadastros principais de clientes e produtos, tela de configuracoes com diversos cadastros auxiliares e estrutura pronta para expansao de modulos como `Atendimentos`, `Orcamentos` e `Pedidos`.
+Hoje o projeto ja atende um cenario real de desktop comercial, com login, controle por perfil, agenda semanal, pagina inicial com indicadores, cadastros principais, modulo de atendimentos, orcamentos, pedidos, configuracoes auxiliares e atualizacao automatica do aplicativo.
 
 ## Stack
 
@@ -10,6 +10,22 @@ O projeto ja possui autenticacao, controle de acesso por perfil, agenda semanal 
 - `React 19 + Vite` para a interface
 - `Express 5` para a API local
 - `SQLite` para persistencia embarcada
+- `electron-builder` para empacotamento e publicacao
+- `electron-updater` para auto-update via GitHub Releases
+
+## Identidade atual
+
+- Nome do aplicativo: `Connecta CRM`
+- Nome tecnico do pacote: `connecta-crm`
+- Instalador Windows: `Connecta-CRM-Setup-x.y.z.exe`
+- Repositorio de releases e update: `TailonSilva/connecta-crm`
+- `appId` atual: `com.crm.desktop`
+
+Observacao importante:
+
+- O nome visual do app ja mudou para `Connecta CRM`
+- O `appId` foi mantido para preservar continuidade tecnica do aplicativo
+- Em instalacoes antigas, mudar `productName` pode alterar a pasta de dados do Electron, entao essa decisao deve ser tratada com cuidado em novas mudancas de marca
 
 ## Estrutura principal
 
@@ -25,26 +41,23 @@ O projeto ja possui autenticacao, controle de acesso por perfil, agenda semanal 
 - `server/rotas/`: rotas customizadas e autenticacao
 - `server/configuracoes/`: banco SQLite, entidades e infraestrutura compartilhada
 - `server/scripts/`: scripts utilitarios, incluindo populacao do banco
-- `data/crm.sqlite`: arquivo local do banco
 
 ## Convencoes do projeto
 
-- O projeto deve usar portugues em textos, nomes internos e documentacao sempre que nao houver conflito com APIs externas
+- O projeto usa portugues em textos, nomes internos e documentacao sempre que nao houver conflito com APIs externas
 - Todo identificador definido pelo projeto deve usar `camelCase`
 - Componentes, utilitarios, servicos e estilos devem ser reaproveitados ao maximo
 - Todo botao deve sair do componente reutilizavel padrao do projeto
 - Os estilos padrao de botao sao `primario`, `secundario`, `complementar` e `perigo`
-- O projeto usa botoes com texto, icone + texto e somente icone, conforme o contexto
-- Cabecalhos de paginas e modais de configuracao priorizam botoes somente com icone
-- Grades principais devem usar estrutura semantica real de tabela
-- Acoes de linha devem usar o componente central de acoes da interface
-- Selos de codigo devem usar o componente padrao de codigo do projeto
-- Funcoes reutilizaveis do frontend devem ficar em `client/src/utilitarios`
-- Toda alteracao estrutural no banco deve ser acompanhada de ajuste nesta documentacao
+- Grades principais usam estrutura semantica real de tabela
+- Acoes de linha usam o componente central de acoes da interface
+- Selos de codigo usam o componente padrao de codigo do projeto
+- Funcoes reutilizaveis do frontend ficam em `client/src/utilitarios`
+- Sempre que houver mudanca estrutural relevante de banco, fluxo desktop ou release, o README deve ser atualizado
 
 ## Componentes e padroes reutilizaveis
 
-Padroes hoje centralizados no frontend:
+Padroes centralizados no frontend:
 
 - `Botao`: botoes primarios, secundarios, complementares, perigo e somente icone
 - `GradePadrao`: grades principais com cabecalho fixo e rolagem na lista
@@ -53,6 +66,23 @@ Padroes hoje centralizados no frontend:
 - `CampoImagemPadrao`: upload e preview de imagem
 - `ModalFiltros`: modal generico de filtros
 - `CampoSelecaoMultiplaModal`: selecao multipla com botao-resumo e modal com checkbox
+- `ModalBuscaTabela`: base reutilizavel para modais de busca em grade
+- `ModalBuscaClientes`: busca reutilizavel de clientes
+- `ModalBuscaContatos`: busca reutilizavel de contatos
+- `ModalContatoCliente`: formulario reutilizavel de contato
+- `ModalRamosAtividade`: lista e cadastro reutilizavel de ramos
+- `ModalGruposProduto`: lista e cadastro reutilizavel de grupos de produto
+- `ModalMarcas`: lista e cadastro reutilizavel de marcas
+- `ModalUnidadesMedida`: lista e cadastro reutilizavel de unidades
+
+Padroes aplicados recentemente:
+
+- Busca de clientes foi unificada para atendimento e orcamento
+- Busca de contatos foi unificada para atendimento e orcamento
+- O cadastro de cliente reaproveita o mesmo fluxo de `Ramo de Atividade` usado em configuracoes
+- O cadastro de produto reaproveita os mesmos fluxos de configuracao para `Grupo de Produto`, `Marca` e `Unidade`
+- Modais com abas usam cabecalho e faixa de abas fixos, com rolagem apenas no corpo
+- Modais empilhados possuem camadas de z-index separadas para evitar abertura por tras do modal pai
 
 Utilitarios importantes:
 
@@ -60,14 +90,23 @@ Utilitarios importantes:
 - `normalizarPreco.js`: trata exibicao e digitacao de preco em real
 - `obterPrimeiroCodigoDisponivel.js`: encontra o primeiro codigo livre para novos registros
 
-## Modulos ja implementados
+## Modulos implementados
 
 ### Login e sessao
 
-- Tela de login com marca da empresa
+- Tela de login com a marca `Connecta CRM`
+- Logo personalizada na tela inicial
 - Validacao de `usuario` e `senha` via API local
 - Sessao persistida no frontend
 - Rodape da barra lateral com dados do usuario logado
+
+### Pagina inicial
+
+- Painel inicial com indicadores de:
+  - clientes cadastrados
+  - produtos cadastrados
+- Carregamento via API local
+- Mensagem de erro dedicada se os indicadores nao puderem ser carregados
 
 ### Perfis de acesso
 
@@ -79,12 +118,13 @@ Perfis disponiveis:
 
 Regras atualmente aplicadas no frontend:
 
-- `Usuario padrao` nao pode alterar configuracoes
+- `Usuario padrao` nao pode alterar configuracoes administrativas
 - `Usuario padrao` nao acessa `Empresa` nem `Usuarios` na tela de configuracoes
 - `Usuario padrao` consulta produtos, sem incluir, editar, importar ou inativar
-- `Usuario padrao` enxerga apenas clientes do vendedor vinculado a ele
-- Ao incluir cliente, `Usuario padrao` ja recebe o vendedor fixado e bloqueado
+- `Usuario padrao` enxerga apenas clientes da carteira do vendedor vinculado
+- Ao incluir cliente, `Usuario padrao` recebe o vendedor fixado e bloqueado
 - Na agenda, `Usuario padrao` nao pode excluir agendamentos
+- Em configuracoes reutilizadas dentro de cadastros, usuarios sem permissao entram em modo de consulta
 
 Observacao:
 
@@ -99,7 +139,10 @@ Observacao:
 - Thumbnail com codigo do cliente
 - Integracao publica para consulta de `CEP`
 - Integracao publica para consulta de `CNPJ`
-- Aba de contatos com grade propria e modal dedicado para incluir e editar contato
+- Aba de contatos com grade propria
+- Formulario de contato reutilizavel
+- Abertura do mesmo modal de `Ramo de Atividade` usado em configuracoes
+- Inclusao de novo ramo diretamente do cadastro de cliente, sem sair do fluxo
 - Inativacao persiste no banco
 
 Filtros de clientes:
@@ -114,11 +157,15 @@ Filtros de clientes:
 ### Produtos
 
 - Tela com grade, pesquisa e filtro
-- Modal no mesmo padrao de clientes
-- Modo incluir, editar e consultar
+- Modal no mesmo padrao visual de clientes
+- Modos incluir, editar e consultar
 - Codigo automatico ao incluir
 - Upload de imagem no padrao reutilizavel do projeto
 - Campo de preco com mascara e digitacao amigavel em real
+- Campo `Grupo de Produto` com botao de pesquisa para abrir o modal de configuracao
+- Campo `Marca` com botao de pesquisa para abrir o modal de configuracao
+- Campo `Unidade` com botao de pesquisa para abrir o modal de configuracao
+- Inclusao e selecao imediata de registros auxiliares dentro do cadastro de produto
 - Inativacao persiste no banco
 
 Filtros de produtos:
@@ -145,14 +192,6 @@ Filtros de produtos:
 - Suporte visual a conflitos de horario, dividindo o espaco em vez de sobrepor
 - Copiar e colar agendamento com `Ctrl+C` e `Ctrl+V`
 
-Comportamento de copia na agenda:
-
-- Seleciona um card com um clique
-- `Ctrl+C` copia o agendamento selecionado
-- `Ctrl+V` cola na celula ou faixa de horario selecionada
-- Se o destino for uma faixa, a copia usa aquela faixa
-- Se o destino for apenas um horario, mantem a duracao original do agendamento copiado
-
 Campos atuais do agendamento:
 
 - `Assunto`
@@ -167,13 +206,6 @@ Campos atuais do agendamento:
 - `Usuarios` com selecao multipla
 - `Status da visita`
 
-Regras atuais do agendamento:
-
-- `Status` e `Usuario` sao obrigatorios
-- `Contato do cliente` e obrigatorio quando houver cliente
-- `Cliente`, `Local` e `Recurso` podem se tornar obrigatorios conforme o `Tipo de agenda`
-- Um agendamento pode ter varios recursos e varios usuarios vinculados
-
 Filtros da agenda:
 
 - `Usuario` com selecao multipla
@@ -183,10 +215,36 @@ Filtros da agenda:
 - `Recurso` com selecao multipla
 - `Status`
 
-Regra dos filtros multiplos:
+### Atendimentos
 
-- Se selecionar um item, a agenda traz todas as ocorrencias em que ele participa
-- Se selecionar varios usuarios ou varios recursos, a agenda traz apenas os agendamentos em que todos os selecionados aparecem juntos
+- Tela com grade, pesquisa e filtros
+- Modal de atendimento com formulario proprio
+- Campos de cliente, contato e orcamento no mesmo fluxo comercial
+- Busca de cliente por modal reutilizavel
+- Busca de contato por modal reutilizavel
+- Inclusao de cliente dentro da busca de clientes
+- Campo de status do orcamento no proprio atendimento
+- Integracao com abertura de orcamento e pedido a partir do atendimento
+- Usuario administrador visualiza todos os clientes; `Usuario padrao` fica restrito a sua carteira
+
+### Orcamentos
+
+- Pagina propria de orcamentos
+- Modal em abas com `Dados gerais`, `Itens` e `Campos do orcamento`
+- Busca reutilizavel de cliente e contato
+- Itens com busca de produto
+- Controle de etapa do orcamento
+- Motivo da perda obrigatorio quando a etapa exigir
+- Integracao com abertura de pedido ao fechar o orcamento
+- Campos configuraveis extras para o orcamento
+
+### Pedidos
+
+- Pagina propria de pedidos
+- Integracao com pedido originado de orcamento
+- Campos extras configuraveis
+- Itens com snapshots de produto para preservar historico comercial
+- Data de entrega baseada nas configuracoes da empresa
 
 ### Configuracoes
 
@@ -199,21 +257,27 @@ A tela de configuracoes usa cards grandes e modais padrao. Hoje ela cobre:
 - `Grupos de produto`
 - `Marcas`
 - `Unidades`
-- `Forma de pagamento` foi substituido por `Prazos de pagamento`
 - `Metodos de pagamento`
 - `Prazos de pagamento`
 - `Motivo da perda`
 - `Etapas do pedido`
 - `Etapas do orcamento`
+- `Campos do orcamento`
+- `Campos do pedido`
+- `Canais de atendimento`
+- `Origens de atendimento`
 - `Locais da agenda`
 - `Tipos de recurso`
 - `Recursos`
 - `Tipos de agenda`
 - `Status da visita`
+- `Atualizacao do sistema`
 
-Observacao:
+Regras importantes:
 
-- Alguns titulos antigos podem ter sido substituidos visualmente para refletir melhor o processo comercial
+- O card de `Atualizacao do sistema` fica apenas na aba `Gerais`
+- O card de `Atualizacao do sistema` fica visivel apenas para `Administrador`
+- O modal de atualizacao permite salvar o link do repositorio GitHub usado para leitura das releases
 
 ### Empresa
 
@@ -234,12 +298,16 @@ Campos de destaque:
 - Horarios de expediente da manha e da tarde
 - Flag para trabalho aos sabados
 - Horarios de sabado quando aplicavel
+- `diasValidadeOrcamento`
+- `diasEntregaPedido`
 
 Esses dados sao usados em:
 
 - Tela de login
 - Barra lateral
 - Faixa horaria padrao da agenda
+- Validade inicial de orcamentos
+- Previsao inicial de entrega de pedidos
 
 ### Usuarios
 
@@ -262,10 +330,11 @@ Regra importante:
 ### Regras gerais
 
 - Banco utilizado: `SQLite`
-- Arquivo local: `data/crm.sqlite`
+- O banco fica na pasta de dados da instalacao do Electron
 - Chaves primarias usam inteiros autoincrementais
 - Campos booleanos usam `0` e `1`
 - O projeto faz migracoes simples no startup com `ALTER TABLE` e recriacao de tabelas quando necessario
+- Migracoes bem escritas preservam dados existentes; trocar a pasta de dados do app nao preserva automaticamente o mesmo arquivo de banco
 
 ### Tabelas principais do sistema
 
@@ -285,6 +354,18 @@ Cadastros da empresa e acesso:
 - `empresa`
 - `usuario`
 
+Cadastros comerciais e de processo:
+
+- `canalAtendimento`
+- `origemAtendimento`
+- `atendimento`
+- `orcamento`
+- `itemOrcamento`
+- `valorCampoOrcamento`
+- `pedido`
+- `itemPedido`
+- `valorCampoPedido`
+
 Cadastros de configuracao comercial:
 
 - `metodoPagamento`
@@ -292,6 +373,8 @@ Cadastros de configuracao comercial:
 - `motivoPerda`
 - `etapaPedido`
 - `etapaOrcamento`
+- `campoOrcamentoConfiguravel`
+- `campoPedidoConfiguravel`
 
 Cadastros da agenda:
 
@@ -303,81 +386,6 @@ Cadastros da agenda:
 - `agendamento`
 - `agendamentoRecurso`
 - `agendamentoUsuario`
-
-### Campos de destaque por tabela
-
-#### `empresa`
-
-- dados gerais de empresa
-- `slogan`
-- `imagem`
-- endereco
-- expediente da manha e da tarde
-- configuracao de sabado
-
-#### `usuario`
-
-- `nome`
-- `usuario`
-- `senha`
-- `tipo`
-- `ativo`
-- `imagem`
-- `idVendedor`
-
-#### `cliente`
-
-- vendedor, ramo, documento, endereco, observacao e imagem
-- `tipo` pode ser `Fisico` ou `Juridico`
-
-#### `contato`
-
-- nome, cargo, email, telefone, whatsapp, ativo e principal
-
-#### `produto`
-
-- referencia, descricao, grupo, marca, unidade, preco, imagem e ativo
-
-#### `prazoPagamento`
-
-- metodo
-- `prazo1` ate `prazo6`
-- descricao montada a partir do metodo e dos dias
-
-#### `tipoAgenda`
-
-- `descricao`
-- `cor`
-- `obrigarCliente`
-- `obrigarLocal`
-- `obrigarRecurso`
-- `status`
-
-#### `statusVisita`
-
-- `descricao`
-- `icone` com emoji
-- `status`
-
-#### `agendamento`
-
-- `data`
-- `assunto`
-- `horaInicio`
-- `horaFim`
-- `idLocal`
-- `idCliente`
-- `idContato`
-- `idUsuario` legado e principal
-- `idTipoAgenda`
-- `idStatusVisita`
-- `tipo`
-- `status`
-
-Relacionamentos extras do agendamento:
-
-- `agendamentoRecurso`: varios recursos por agendamento
-- `agendamentoUsuario`: varios usuarios por agendamento
 
 ## API
 
@@ -393,7 +401,7 @@ As tabelas registradas em `server/configuracoes/entidades.js` recebem automatica
 | Atualizar | `PUT` | `/api/recurso/:id` |
 | Excluir | `DELETE` | `/api/recurso/:id` |
 
-Rotas cadastradas atualmente:
+Rotas CRUD atualmente expostas:
 
 - `/api/ramosAtividade`
 - `/api/vendedores`
@@ -405,21 +413,35 @@ Rotas cadastradas atualmente:
 - `/api/recursos`
 - `/api/tiposAgenda`
 - `/api/statusVisita`
+- `/api/canaisAtendimento`
+- `/api/origensAtendimento`
 - `/api/metodosPagamento`
 - `/api/prazosPagamento`
 - `/api/motivosPerda`
 - `/api/etapasPedido`
 - `/api/etapasOrcamento`
+- `/api/camposOrcamento`
+- `/api/camposPedido`
 - `/api/empresas`
 - `/api/usuarios`
 - `/api/clientes`
 - `/api/contatos`
 - `/api/produtos`
+- `/api/atendimentos`
+- `/api/itensOrcamento`
+- `/api/valoresCamposOrcamento`
+- `/api/itensPedido`
+- `/api/valoresCamposPedido`
 
 ### Rotas customizadas
 
-- `POST /api/login`: autenticacao
+- `POST /api/auth/login`: autenticacao
 - `/api/agendamentos`: CRUD customizado para agendamento, com suporte a multiplos recursos e multiplos usuarios
+- `/api/orcamentos`: fluxo customizado de orcamentos com itens e campos extras
+- `/api/pedidos`: fluxo customizado de pedidos com itens e campos extras
+- `GET /api/atualizacaoSistema`: leitura da configuracao de update
+- `PUT /api/atualizacaoSistema`: persistencia da configuracao de update
+- `/api/arquivos/imagens`: entrega de imagens locais do sistema
 
 ## Integracoes externas
 
@@ -438,6 +460,7 @@ O script `npm run popular:banco` recria dados de teste e hoje gera principalment
 - etapas padrao de orcamento em formato de funil
 - clientes e contatos de exemplo
 - produtos de exemplo
+- grupos, marcas, unidades e demais configuracoes auxiliares
 
 Os dados de teste usam:
 
@@ -462,23 +485,89 @@ Os dados de teste usam:
 
 - `npm run start:backend`: inicia o backend sem `nodemon`
 - `npm run start:web`: inicia o frontend web
-- `npm run start:electron`: abre o app no Electron
+- `npm run start:electron`: gera a build web e abre o app no Electron
 
 ### Build
 
 - `npm run build`: gera a build web
 - `npm run build:web`: gera a build web em `dist/web`
 - `npm run build:electron`: gera a build web e empacota o Electron em `dist/electron`
+- `npm run release`: gera a build desktop e publica os artefatos no `GitHub Releases`
 
 ### Popular banco
 
 - `npm run popular:banco`: limpa e popula o banco com dados de teste
+
+## Empacotamento desktop
+
+Configuracao atual do instalador Windows:
+
+- `NSIS`
+- `oneClick: false`
+- `allowToChangeInstallationDirectory: true`
+
+Comportamento esperado:
+
+- Na primeira instalacao, o cliente pode escolher a pasta onde o aplicativo sera instalado
+- As atualizacoes seguintes acompanham a instalacao ja existente
+- O banco do sistema continua na pasta de dados do Electron, separado da pasta do executavel
+
+Arquivos gerados em release:
+
+- `Connecta-CRM-Setup-x.y.z.exe`
+- `Connecta-CRM-Setup-x.y.z.exe.blockmap`
+- `latest.yml`
+
+## Atualizacao automatica via GitHub Releases
+
+O projeto esta preparado para buscar atualizacoes publicadas no repositorio `TailonSilva/connecta-crm` usando `electron-updater`.
+
+Como funciona:
+
+- Em build empacotada, o app verifica atualizacoes automaticamente apos abrir
+- O repositorio usado para leitura pode ser configurado pela tela `Configuracoes > Gerais > Atualizacao do sistema`
+- O app pode verificar atualizacao automaticamente ou por acao manual do usuario
+- Se existir versao mais nova no `GitHub Releases`, o download acontece em segundo plano
+- Quando o download termina, o usuario recebe um aviso para reiniciar e concluir a instalacao
+
+Mensagens visuais ja tratadas no modal:
+
+- verificacao em andamento
+- sem atualizacao disponivel
+- nova versao encontrada
+- progresso do download em percentual
+- atualizacao baixada e pronta para reinicio
+- erro de verificacao ou download
+
+Fluxo para publicar uma nova versao:
+
+1. Atualize o campo `version` no `package.json`
+2. Gere a build/release vinculada a uma tag com a mesma versao
+3. Garanta que a release no GitHub esteja publicada, nao como `draft`
+4. Garanta que `latest.yml` e os artefatos estejam anexados
+5. No terminal, defina `GH_TOKEN`
+6. Execute `npm run release`
+
+Exemplo no PowerShell:
+
+```powershell
+$env:GH_TOKEN="seu_token_aqui"
+npm run release
+```
+
+Observacoes importantes:
+
+- O auto-update depende de uma build instalada; nao roda no modo `dev`
+- O repositorio usado pelo updater precisa estar acessivel para os clientes
+- Cada release precisa ter versao maior que a anterior para o Electron detectar corretamente a atualizacao
+- O nome do instalador publicado precisa bater com o `latest.yml`; hoje isso e garantido por `artifactName`
 
 ## Paleta visual atual
 
 Variaveis CSS principais:
 
 | Papel | Variavel | Hex |
+| --- | --- | --- |
 | Azul principal | `--corPrimaria` | `#1791E2` |
 | Azul forte | `--corPrimariaForte` | `#0D78C8` |
 | Azul suave | `--corPrimariaSuave` | `#5BBDF5` |
@@ -502,4 +591,8 @@ Paginas hoje presentes no painel:
 - `Pedidos`
 - `Configuracoes`
 
-Algumas dessas paginas ainda estao em estrutura base, prontas para evolucao futura.
+## Identidade visual aplicada
+
+- Logo do login atualizada para a marca `Connecta CRM`
+- Icone do aplicativo Electron configurado a partir do arquivo de marca em `build/icon.png`
+- Instalador e executavel usando o nome visual da marca

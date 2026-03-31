@@ -13,6 +13,10 @@ export function ModalBuscaTabela({
   obterChaveRegistro,
   aoSelecionar,
   aoFechar,
+  rotuloAcaoPrimaria = '',
+  tituloAcaoPrimaria = '',
+  iconeAcaoPrimaria = 'adicionar',
+  aoAcionarPrimaria = null,
   classNameModal = 'modalContatoCliente modalBuscaClienteAtendimento',
   classNameTabela = 'tabelaContatosModal tabelaBuscaClienteAtendimento',
   mensagemVazio = 'Nenhum registro encontrado.'
@@ -125,6 +129,18 @@ export function ModalBuscaTabela({
         <div className="cabecalhoModalContato">
           <h3>{titulo}</h3>
           <div className="acoesFormularioContatoModal">
+            {typeof aoAcionarPrimaria === 'function' && rotuloAcaoPrimaria ? (
+              <Botao
+                variante="primario"
+                type="button"
+                icone={iconeAcaoPrimaria}
+                title={tituloAcaoPrimaria || rotuloAcaoPrimaria}
+                aria-label={tituloAcaoPrimaria || rotuloAcaoPrimaria}
+                onClick={aoAcionarPrimaria}
+              >
+                {rotuloAcaoPrimaria}
+              </Botao>
+            ) : null}
             <Botao variante="secundario" type="button" onClick={aoFechar}>
               Fechar
             </Botao>

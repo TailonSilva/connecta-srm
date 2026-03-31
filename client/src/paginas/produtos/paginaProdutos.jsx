@@ -9,6 +9,14 @@ import {
   listarProdutos,
   listarUnidadesMedida
 } from '../../servicos/produtos';
+import {
+  atualizarGrupoProduto,
+  atualizarMarca,
+  atualizarUnidadeMedida,
+  incluirGrupoProduto,
+  incluirMarca,
+  incluirUnidadeMedida
+} from '../../servicos/configuracoes';
 import { filtrarProdutos } from '../../utilitarios/filtrarProdutos';
 import { converterPrecoParaNumero } from '../../utilitarios/normalizarPreco';
 import { obterPrimeiroCodigoDisponivel } from '../../utilitarios/obterPrimeiroCodigoDisponivel';
@@ -98,6 +106,78 @@ export function PaginaProdutos({ usuarioLogado }) {
     }
 
     await atualizarProduto(produto.idProduto, { status: 0 });
+    await carregarDados();
+  }
+
+  async function salvarGrupoProduto(dadosGrupo) {
+    const payload = {
+      descricao: dadosGrupo.descricao.trim(),
+      status: dadosGrupo.status ? 1 : 0
+    };
+
+    let grupoSalvo = null;
+
+    if (dadosGrupo.idGrupo) {
+      await atualizarGrupoProduto(dadosGrupo.idGrupo, payload);
+      grupoSalvo = { idGrupo: Number(dadosGrupo.idGrupo), ...payload };
+    } else {
+      grupoSalvo = await incluirGrupoProduto(payload);
+    }
+
+    await carregarDados();
+    return grupoSalvo;
+  }
+
+  async function inativarGrupoProdutoRegistro(registro) {
+    await atualizarGrupoProduto(registro.idGrupo, { status: 0 });
+    await carregarDados();
+  }
+
+  async function salvarMarca(dadosMarca) {
+    const payload = {
+      descricao: dadosMarca.descricao.trim(),
+      status: dadosMarca.status ? 1 : 0
+    };
+
+    let marcaSalva = null;
+
+    if (dadosMarca.idMarca) {
+      await atualizarMarca(dadosMarca.idMarca, payload);
+      marcaSalva = { idMarca: Number(dadosMarca.idMarca), ...payload };
+    } else {
+      marcaSalva = await incluirMarca(payload);
+    }
+
+    await carregarDados();
+    return marcaSalva;
+  }
+
+  async function inativarMarcaRegistro(registro) {
+    await atualizarMarca(registro.idMarca, { status: 0 });
+    await carregarDados();
+  }
+
+  async function salvarUnidadeMedida(dadosUnidade) {
+    const payload = {
+      descricao: dadosUnidade.descricao.trim(),
+      status: dadosUnidade.status ? 1 : 0
+    };
+
+    let unidadeSalva = null;
+
+    if (dadosUnidade.idUnidade) {
+      await atualizarUnidadeMedida(dadosUnidade.idUnidade, payload);
+      unidadeSalva = { idUnidade: Number(dadosUnidade.idUnidade), ...payload };
+    } else {
+      unidadeSalva = await incluirUnidadeMedida(payload);
+    }
+
+    await carregarDados();
+    return unidadeSalva;
+  }
+
+  async function inativarUnidadeMedidaRegistro(registro) {
+    await atualizarUnidadeMedida(registro.idUnidade, { status: 0 });
     await carregarDados();
   }
 
@@ -210,6 +290,15 @@ export function PaginaProdutos({ usuarioLogado }) {
         marcas={marcas}
         unidadesMedida={unidadesMedida}
         modo={modoModalProduto}
+        somenteConsultaGrupos={usuarioSomenteConsulta}
+        aoSalvarGrupoProduto={salvarGrupoProduto}
+        aoInativarGrupoProduto={inativarGrupoProdutoRegistro}
+        somenteConsultaMarcas={usuarioSomenteConsulta}
+        aoSalvarMarca={salvarMarca}
+        aoInativarMarca={inativarMarcaRegistro}
+        somenteConsultaUnidades={usuarioSomenteConsulta}
+        aoSalvarUnidadeMedida={salvarUnidadeMedida}
+        aoInativarUnidadeMedida={inativarUnidadeMedidaRegistro}
         aoFechar={fecharModalProduto}
         aoSalvar={salvarProduto}
       />

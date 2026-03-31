@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Botao } from '../../componentes/comuns/botao';
 import { autenticarUsuario } from '../../servicos/autenticacao';
 import { listarEmpresas } from '../../servicos/empresa';
+import logoConnecta from '../../recursos/imagens/logo-connecta.png';
 
 export function PaginaLogin({ aoEntrar }) {
   const [empresa, definirEmpresa] = useState(null);
@@ -42,19 +43,15 @@ export function PaginaLogin({ aoEntrar }) {
       <section className="cartaoLogin">
         <div className="marcaLogin">
           <div className="logoLateral" aria-hidden="true">
-            {empresa?.imagem ? (
-              <img
-                className="logoLateralImagem"
-                src={empresa.imagem}
-                alt={empresa.nomeFantasia || empresa.razaoSocial || 'Empresa'}
-              />
-            ) : (
-              <span className="logoLateralSimbolo" />
-            )}
+            <img
+              className="logoLateralImagem"
+              src={logoConnecta}
+              alt="Connecta CRM"
+            />
           </div>
 
           <div>
-            <strong>{empresa?.nomeFantasia || empresa?.razaoSocial || 'CRM Desktop'}</strong>
+            <strong>{empresa?.nomeFantasia || empresa?.razaoSocial || 'Connecta CRM'}</strong>
             <p>{empresa?.slogan || 'Acesse sua conta para continuar.'}</p>
           </div>
         </div>

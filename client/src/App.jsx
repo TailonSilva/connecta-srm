@@ -5,6 +5,7 @@ import { BarraLateral } from './componentes/layout/barraLateral';
 import { PopupAvisos } from './componentes/comuns/popupAvisos';
 import { PaginaClientes } from './paginas/clientes/paginaClientes';
 import { PaginaConfiguracoes } from './paginas/configuracoes/paginaConfiguracoes';
+import { PaginaInicio } from './paginas/inicio/paginaInicio';
 import { PaginaLogin } from './paginas/login/paginaLogin';
 import { PaginaOrcamentos } from './paginas/orcamentos/paginaOrcamentos';
 import { PaginaPadrao } from './paginas/padrao/paginaPadrao';
@@ -19,6 +20,10 @@ import {
 import { paginasPainel } from './utilitarios/paginas';
 
 function renderizarPagina(paginaSelecionada, usuarioLogado) {
+  if (paginaSelecionada.id === 'inicio') {
+    return <PaginaInicio />;
+  }
+
   if (paginaSelecionada.id === 'clientes') {
     return <PaginaClientes usuarioLogado={usuarioLogado} />;
   }

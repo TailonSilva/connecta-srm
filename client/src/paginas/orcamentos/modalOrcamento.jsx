@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { Botao } from '../../componentes/comuns/botao';
 import { CampoImagemPadrao } from '../../componentes/comuns/campoImagemPadrao';
 import { CodigoRegistro } from '../../componentes/comuns/codigoRegistro';
+import { ModalBuscaClientes } from '../../componentes/comuns/modalBuscaClientes';
+import { ModalBuscaContatos } from '../../componentes/comuns/modalBuscaContatos';
 import { ModalBuscaTabela } from '../../componentes/comuns/modalBuscaTabela';
 import {
   converterPrecoParaNumero,
@@ -72,6 +74,7 @@ export function ModalOrcamento({
   const [idEtapaPendenteFechamento, definirIdEtapaPendenteFechamento] = useState('');
   const [modalMotivoPerdaAberto, definirModalMotivoPerdaAberto] = useState(false);
   const [modalBuscaClienteAberto, definirModalBuscaClienteAberto] = useState(false);
+  const [modalBuscaContatoAberto, definirModalBuscaContatoAberto] = useState(false);
   const [modalBuscaProdutoAberto, definirModalBuscaProdutoAberto] = useState(false);
   const [modalItemAberto, definirModalItemAberto] = useState(false);
   const [indiceItemEdicao, definirIndiceItemEdicao] = useState(null);
@@ -103,6 +106,7 @@ export function ModalOrcamento({
     definirIdEtapaPendenteFechamento('');
     definirModalMotivoPerdaAberto(false);
     definirModalBuscaClienteAberto(false);
+    definirModalBuscaContatoAberto(false);
     definirModalBuscaProdutoAberto(false);
     definirModalItemAberto(false);
     definirIndiceItemEdicao(null);
@@ -130,6 +134,11 @@ export function ModalOrcamento({
         return;
       }
 
+      if (modalBuscaContatoAberto) {
+        fecharModalBuscaContato();
+        return;
+      }
+
       if (modalMotivoPerdaAberto) {
         definirModalMotivoPerdaAberto(false);
         return;
@@ -153,7 +162,7 @@ export function ModalOrcamento({
     return () => {
       window.removeEventListener('keydown', tratarTecla);
     };
-  }, [aberto, confirmandoFechamento, confirmandoSaida, modalBuscaClienteAberto, modalItemAberto, salvando]);
+  }, [aberto, confirmandoFechamento, confirmandoSaida, modalBuscaClienteAberto, modalBuscaContatoAberto, modalItemAberto, salvando]);
 
   const contatosDoCliente = contatosAtivos.filter((contato) => String(contato.idCliente) === String(formulario.idCliente));
   const etapaSelecionada = etapasAtivas.find((etapa) => String(etapa.idEtapaOrcamento) === String(formulario.idEtapaOrcamento));
@@ -428,6 +437,18 @@ export function ModalOrcamento({
     definirModalBuscaClienteAberto(false);
   }
 
+  function abrirModalBuscaContato() {
+    if (somenteLeitura || salvando || !formulario.idCliente) {
+      return;
+    }
+
+    definirModalBuscaContatoAberto(true);
+  }
+
+  function fecharModalBuscaContato() {
+    definirModalBuscaContatoAberto(false);
+  }
+
   function selecionarCliente(cliente) {
     if (!cliente) {
       return;
@@ -446,6 +467,19 @@ export function ModalOrcamento({
     });
 
     fecharModalBuscaCliente();
+  }
+
+  function selecionarContato(contato) {
+    if (!contato) {
+      return;
+    }
+
+    definirFormulario((estadoAtual) => ({
+      ...estadoAtual,
+      idContato: String(contato.idContato)
+    }));
+
+    fecharModalBuscaContato();
   }
 
   function abrirModalBuscaProduto() {
@@ -485,7 +519,7 @@ export function ModalOrcamento({
   }
 
   return (
-    <div className="camadaModal" role="presentation" onMouseDown={fecharAoClicarNoFundo}>
+    <div className="camadaModal camadaModalSecundaria" role="presentation" onMouseDown={fecharAoClicarNoFundo}>
       <form
         className="modalCliente modalClienteComAbas modalOrcamento"
         role="dialog"
@@ -594,6 +628,17 @@ export function ModalOrcamento({
                     label: contato.nome
                   }))}
                   disabled={somenteLeitura || !formulario.idCliente}
+                  acaoExtra={!somenteLeitura && formulario.idCliente ? (
+                    <Botao
+                      variante="secundario"
+                      type="button"
+                      icone="pesquisa"
+                      somenteIcone
+                      title="Buscar contato"
+                      aria-label="Buscar contato"
+                      onClick={abrirModalBuscaContato}
+                    />
+                  ) : null}
                 />
               </div>
 
@@ -830,35 +875,22 @@ export function ModalOrcamento({
           </div>
         ) : null}
 
-        <ModalBuscaTabela
+        <ModalBuscaClientes
           aberto={modalBuscaClienteAberto}
-          titulo="Buscar cliente"
+          clientes={clientes}
           placeholder="Pesquisar clientes"
           ariaLabelPesquisa="Pesquisar clientes"
-          colunas={[
-            {
-              key: 'codigo',
-              label: 'Codigo',
-              render: (cliente) => `#${String(cliente.idCliente).padStart(4, '0')}`
-            },
-            { key: 'razaoSocial', label: 'Razao social', render: (cliente) => cliente.razaoSocial || '-' },
-            { key: 'nomeFantasia', label: 'Nome fantasia', render: (cliente) => cliente.nomeFantasia || '-' },
-            { key: 'cidade', label: 'Cidade', render: (cliente) => cliente.cidade || '-' },
-            { key: 'estado', label: 'UF', render: (cliente) => cliente.estado || '-' },
-            { key: 'cnpj', label: 'CNPJ', render: (cliente) => cliente.cnpj || '-' }
-          ]}
-          registros={clientes}
-          obterTextoBusca={(cliente) => [
-            cliente.idCliente,
-            cliente.razaoSocial,
-            cliente.nomeFantasia,
-            cliente.cidade,
-            cliente.estado,
-            cliente.cnpj
-          ].join(' ')}
-          obterChaveRegistro={(cliente) => cliente.idCliente}
           aoSelecionar={selecionarCliente}
           aoFechar={fecharModalBuscaCliente}
+        />
+
+        <ModalBuscaContatos
+          aberto={modalBuscaContatoAberto}
+          contatos={contatosDoCliente}
+          placeholder="Pesquisar contatos do cliente"
+          ariaLabelPesquisa="Pesquisar contatos do cliente"
+          aoSelecionar={selecionarContato}
+          aoFechar={fecharModalBuscaContato}
         />
 
         {modalItemAberto ? (

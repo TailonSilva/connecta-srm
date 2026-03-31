@@ -4,6 +4,8 @@ import { CorpoClientes } from './corpoClientes';
 import {
   atualizarCliente,
   atualizarContato,
+  atualizarRamoAtividade,
+  incluirRamoAtividade,
   incluirCliente,
   incluirContato,
   listarClientes,
@@ -40,6 +42,7 @@ export function PaginaClientes({ usuarioLogado }) {
   const [clienteEmEdicao, definirClienteEmEdicao] = useState(null);
   const [modoModalCliente, definirModoModalCliente] = useState('novo');
   const usuarioSomenteVendedor = usuarioLogado?.tipo === 'Usuario padrao' && usuarioLogado?.idVendedor;
+  const usuarioSomenteConsultaConfiguracao = usuarioLogado?.tipo === 'Usuario padrao';
 
   useEffect(() => {
     if (!usuarioSomenteVendedor) {
@@ -112,6 +115,32 @@ export function PaginaClientes({ usuarioLogado }) {
     await carregarDados();
     definirModalAberto(false);
     definirClienteEmEdicao(null);
+  }
+
+  async function salvarRamoAtividade(dadosRamo) {
+    const payload = {
+      descricao: String(dadosRamo.descricao || '').trim(),
+      status: dadosRamo.status ? 1 : 0
+    };
+
+    let ramoSalvo;
+
+    if (dadosRamo.idRamo) {
+      ramoSalvo = await atualizarRamoAtividade(dadosRamo.idRamo, payload);
+    } else {
+      ramoSalvo = await incluirRamoAtividade(payload);
+    }
+
+    const ramosAtualizados = await listarRamosAtividade();
+    definirRamosAtividade(ramosAtualizados);
+
+    return ramoSalvo;
+  }
+
+  async function inativarRamoAtividadeCliente(registro) {
+    await atualizarRamoAtividade(registro.idRamo, { status: 0 });
+    const ramosAtualizados = await listarRamosAtividade();
+    definirRamosAtividade(ramosAtualizados);
   }
 
   function abrirNovoCliente() {
@@ -233,8 +262,11 @@ export function PaginaClientes({ usuarioLogado }) {
         vendedores={vendedoresDisponiveis}
         ramosAtividade={ramosAtividade}
         modo={modoModalCliente}
+        somenteConsultaRamos={usuarioSomenteConsultaConfiguracao}
         idVendedorBloqueado={usuarioSomenteVendedor ? usuarioLogado.idVendedor : null}
         aoFechar={fecharModalCliente}
+        aoSalvarRamoAtividade={salvarRamoAtividade}
+        aoInativarRamoAtividade={inativarRamoAtividadeCliente}
         aoSalvar={salvarCliente}
       />
     </>

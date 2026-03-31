@@ -16,6 +16,26 @@ export function listarRamosAtividade() {
   return requisitarApi('/ramosAtividade');
 }
 
+export function incluirRamoAtividade(payload) {
+  return requisitarApi('/ramosAtividade', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+}
+
+export function atualizarRamoAtividade(idRamo, payload) {
+  return requisitarApi(`/ramosAtividade/${idRamo}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+}
+
 export function incluirCliente(payload) {
   return requisitarApi('/clientes', {
     method: 'POST',
