@@ -72,6 +72,7 @@ Padroes centralizados no frontend:
 - `ModalContatoCliente`: formulario reutilizavel de contato
 - `ModalRamosAtividade`: lista e cadastro reutilizavel de ramos
 - `ModalGruposProduto`: lista e cadastro de grupos de produto com botao dedicado para abrir um submodal compacto de selecao de tamanhos e ordem por grupo
+- `ModalManualUsuario`: manual de uso com sumario lateral, rolagem unica no corpo do modal, navegacao direta por secao, atalhos rapidos e orientacoes operacionais por modulo, aberto pelo atalho `F1`
 - `ModalMarcas`: lista e cadastro reutilizavel de marcas
 - `ModalUnidadesMedida`: lista e cadastro reutilizavel de unidades
 

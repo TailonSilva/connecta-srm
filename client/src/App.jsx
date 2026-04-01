@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { PaginaAgenda } from './paginas/agenda/paginaAgenda';
 import { PaginaAtendimentos } from './paginas/atendimentos/paginaAtendimentos';
 import { BarraLateral } from './componentes/layout/barraLateral';
+import { ModalManualUsuario } from './componentes/comuns/modalManualUsuario';
 import { PopupAvisos } from './componentes/comuns/popupAvisos';
 import { PaginaClientes } from './paginas/clientes/paginaClientes';
 import { PaginaConfiguracoes } from './paginas/configuracoes/paginaConfiguracoes';
@@ -59,6 +60,7 @@ export default function App() {
   const [paginaAtiva, definirPaginaAtiva] = useState(paginasPainel[0].id);
   const [usuarioLogado, definirUsuarioLogado] = useState(obterSessaoUsuario);
   const [avisosPopup, definirAvisosPopup] = useState([]);
+  const [manualAberto, definirManualAberto] = useState(false);
   const avisosNotificadosRef = useRef(new Set());
 
   const paginaSelecionada =
@@ -149,14 +151,37 @@ export default function App() {
     };
   }, [avisosPopup]);
 
+  useEffect(() => {
+    if (!usuarioLogado) {
+      return undefined;
+    }
+
+    function tratarAtalhoManual(evento) {
+      if (evento.key !== 'F1') {
+        return;
+      }
+
+      evento.preventDefault();
+      definirManualAberto(true);
+    }
+
+    window.addEventListener('keydown', tratarAtalhoManual);
+
+    return () => {
+      window.removeEventListener('keydown', tratarAtalhoManual);
+    };
+  }, [usuarioLogado]);
+
   function entrar(usuario) {
     salvarSessaoUsuario(usuario);
     definirUsuarioLogado(usuario);
+    definirManualAberto(false);
   }
 
   function sair() {
     limparSessaoUsuario();
     definirUsuarioLogado(null);
+    definirManualAberto(false);
   }
 
   if (!usuarioLogado) {
@@ -183,6 +208,11 @@ export default function App() {
           aoFechar={(idAviso) => {
             definirAvisosPopup((estadoAtual) => estadoAtual.filter((aviso) => aviso.id !== idAviso));
           }}
+        />
+
+        <ModalManualUsuario
+          aberto={manualAberto}
+          aoFechar={() => definirManualAberto(false)}
         />
       </div>
     </main>
