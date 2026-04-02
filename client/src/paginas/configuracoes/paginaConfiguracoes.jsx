@@ -1,6 +1,7 @@
 import { CorpoPagina } from '../../componentes/layout/corpoPagina';
 import { Icone } from '../../componentes/comuns/icone';
 import { useEffect, useState } from 'react';
+import '../../recursos/estilos/cabecalhoPagina.css';
 import {
   atualizarEtapaPedido,
   atualizarEtapaOrcamento,
@@ -1397,6 +1398,7 @@ function normalizarPayloadEmpresa(dadosEmpresa) {
     trabalhaSabado: dadosEmpresa.trabalhaSabado ? 1 : 0,
     horaInicioSabado: dadosEmpresa.trabalhaSabado ? limparTextoOpcional(dadosEmpresa.horaInicioSabado) : null,
     horaFimSabado: dadosEmpresa.trabalhaSabado ? limparTextoOpcional(dadosEmpresa.horaFimSabado) : null,
+    exibirFunilPaginaInicial: dadosEmpresa.exibirFunilPaginaInicial ? 1 : 0,
     diasValidadeOrcamento: normalizarNumeroInteiro(dadosEmpresa.diasValidadeOrcamento, 7),
     diasEntregaPedido: normalizarNumeroInteiro(dadosEmpresa.diasEntregaPedido, 7),
     etapasFiltroPadraoOrcamento: JSON.stringify(

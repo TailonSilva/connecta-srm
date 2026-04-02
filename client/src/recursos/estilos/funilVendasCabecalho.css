@@ -1,0 +1,91 @@
+.funilVendasCabecalho {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.funilVendasCabecalhoConteudo h2 {
+  margin: 0;
+  font-size: 1.45rem;
+  color: var(--corTextoTitulo);
+}
+
+.funilVendasCabecalhoConteudo p {
+  margin: 8px 0 0;
+  max-width: 560px;
+  color: var(--corTextoSuave);
+  line-height: 1.5;
+}
+
+.funilVendasCabecalhoRotulo {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--corTextoSuave);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.funilVendasCabecalhoResumo {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(170px, 1fr));
+  gap: 12px;
+}
+
+.funilVendasCabecalhoResumoCard {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 18px;
+  border: 1px solid rgba(23, 145, 226, 0.12);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.funilVendasCabecalhoResumoCardConteudo {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.funilVendasCabecalhoResumoCardConteudo span {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--corTexto);
+  line-height: 1.2;
+}
+
+.funilVendasCabecalhoResumoCardConteudo strong {
+  font-size: 1.1rem;
+  color: var(--corTextoTitulo);
+  line-height: 1;
+}
+
+.funilVendasCabecalhoResumoCardIcone {
+  display: grid;
+  place-items: center;
+  width: 50px;
+  height: 50px;
+  flex: 0 0 auto;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(23, 145, 226, 0.16) 0%, rgba(91, 189, 245, 0.22) 100%);
+  color: var(--corPrimariaForte);
+}
+
+.funilVendasCabecalhoResumoCardIcone .iconeBase {
+  width: 24px;
+  height: 24px;
+}
+
+@media (max-width: 960px) {
+  .funilVendasCabecalho {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .funilVendasCabecalhoResumo {
+    grid-template-columns: 1fr;
+  }
+}

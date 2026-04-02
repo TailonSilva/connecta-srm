@@ -1,0 +1,62 @@
+.modalAtendimento {
+  width: min(1220px, 100%);
+}
+
+.layoutModalAtendimento {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.colunaPrincipalModalAtendimento,
+.colunaObservacaoModalAtendimento {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+.colunaObservacaoModalAtendimento {
+  height: 100%;
+}
+
+.colunaObservacaoModalAtendimento .campoFormulario {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100%;
+}
+
+.linhaHorariosAtendimento,
+.linhaUsuarioCanalOrigemAtendimento {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.linhaClienteContatoAtendimento {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr);
+  gap: 16px;
+}
+
+.linhaOrcamentoAtendimento {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);
+  gap: 16px;
+}
+
+.entradaObservacaoModalAtendimento {
+  min-height: 0;
+  height: 100%;
+  align-self: stretch;
+}
+
+@media (max-width: 640px) {
+  .layoutModalAtendimento,
+  .linhaClienteContatoAtendimento,
+  .linhaOrcamentoAtendimento,
+  .linhaUsuarioCanalOrigemAtendimento,
+  .linhaHorariosAtendimento {
+    grid-template-columns: 1fr;
+  }
+}

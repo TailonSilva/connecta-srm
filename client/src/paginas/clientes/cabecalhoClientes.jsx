@@ -1,5 +1,6 @@
 import { Botao } from '../../componentes/comuns/botao';
 import { CampoPesquisa } from '../../componentes/comuns/campoPesquisa';
+import '../../recursos/estilos/cabecalhoPagina.css';
 
 export function CabecalhoClientes({
   pesquisa,

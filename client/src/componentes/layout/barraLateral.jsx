@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Botao } from '../comuns/botao';
+import '../../recursos/estilos/barraLateral.css';
 import { listarEmpresas } from '../../servicos/empresa';
 import { BotaoMenu } from './botaoMenu';
 
@@ -123,7 +124,7 @@ export function BarraLateral({
           </div>
         </div>
 
-        <Botao variante="complementar" className="botaoComplementar" icone="sair" onClick={aoSair}>
+        <Botao variante="complementar" className="barraLateralBotaoSair" icone="sair" onClick={aoSair}>
           Sair
         </Botao>
       </div>

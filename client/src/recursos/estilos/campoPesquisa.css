@@ -1,0 +1,39 @@
+.campoPesquisa {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 240px;
+  height: 44px;
+  padding: 0 14px;
+  border: 1px solid rgba(23, 145, 226, 0.18);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--corTextoSuave);
+}
+
+.campoPesquisaIcone {
+  width: 16px;
+  height: 16px;
+  color: var(--corTextoSuave);
+  flex: 0 0 auto;
+}
+
+.campoPesquisaEntrada {
+  width: 100%;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--corTexto);
+  font: inherit;
+}
+
+.campoPesquisaEntrada::placeholder {
+  color: var(--corTextoSuave);
+}
+
+@media (max-width: 640px) {
+  .campoPesquisa {
+    min-width: 0;
+    width: 100%;
+  }
+}

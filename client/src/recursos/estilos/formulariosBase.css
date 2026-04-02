@@ -1,0 +1,136 @@
+.campoFormulario {
+  display: grid;
+  gap: 8px;
+}
+
+.campoFormularioIntegral {
+  grid-column: 1 / -1;
+}
+
+.campoFormulario label,
+.campoCheckboxFormulario span {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--corTexto);
+}
+
+.entradaFormulario {
+  width: 100%;
+  min-height: 46px;
+  padding: 0 14px;
+  border: 1px solid rgba(23, 145, 226, 0.16);
+  border-radius: 14px;
+  outline: none;
+  background: rgba(255, 255, 255, 0.96);
+  color: var(--corTexto);
+  font: inherit;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.entradaFormulario:focus {
+  border-color: rgba(23, 145, 226, 0.4);
+  box-shadow: 0 0 0 4px rgba(23, 145, 226, 0.12);
+}
+
+.entradaFormularioTextoLongo {
+  min-height: 112px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  resize: vertical;
+}
+
+.entradaFormularioTextoCurto {
+  min-height: 74px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  resize: vertical;
+}
+
+.campoComAcao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.linhaPrazosPagamento {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.gradeFiltrosModal {
+  grid-template-columns: 1fr;
+}
+
+.botaoCampoAcao {
+  flex: 0 0 auto;
+}
+
+.botaoCampoAcao.botaoSomenteIcone {
+  width: 46px;
+  height: 46px;
+}
+
+.campoCheckboxFormulario {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 46px;
+  padding-top: 30px;
+}
+
+.linhaCheckboxFormulario {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  grid-column: 1 / -1;
+  flex-wrap: wrap;
+}
+
+.linhaCheckboxFormulario .campoCheckboxFormulario {
+  padding-top: 0;
+}
+
+.campoCheckboxFormulario input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--corPrimaria);
+}
+
+.mensagemErroFormulario {
+  margin: 0;
+  padding: 0 28px 20px;
+  color: #b34c4c;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.mensagemSucessoFormulario {
+  margin: 0;
+  padding: 0 28px 20px;
+  color: #208353;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .campoComAcao {
+    grid-template-columns: 1fr;
+  }
+
+  .linhaPrazosPagamento {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .campoFormularioIntegral {
+    grid-column: auto;
+  }
+
+  .campoCheckboxFormulario {
+    padding-top: 0;
+  }
+}

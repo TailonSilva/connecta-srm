@@ -118,6 +118,7 @@ export function ModalPedido({
   const somenteLeitura = modo === 'consulta';
   const modoInclusao = !pedido;
   const registroBase = pedido || dadosIniciais || null;
+  const pedidoOriginadoDeOrcamento = Boolean(!pedido && (dadosIniciais?.idOrcamento || registroBase?.idOrcamento));
   const clientesAtivos = clientes.filter((cliente) => cliente.status !== 0);
   const contatosAtivos = contatos.filter((contato) => contato.status !== 0);
   const usuariosAtivos = usuarios.filter((usuario) => usuario.ativo !== 0);
@@ -395,6 +396,11 @@ export function ModalPedido({
   }
 
   function tentarFecharModal() {
+    if (pedidoOriginadoDeOrcamento) {
+      aoFechar();
+      return;
+    }
+
     if (!somenteLeitura && modoInclusao) {
       definirConfirmandoSaida(true);
       return;

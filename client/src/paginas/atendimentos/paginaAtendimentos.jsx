@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import '../../recursos/estilos/cabecalhoPagina.css';
 import { AcoesRegistro } from '../../componentes/comuns/acoesRegistro';
 import { Botao } from '../../componentes/comuns/botao';
 import { CampoPesquisa } from '../../componentes/comuns/campoPesquisa';

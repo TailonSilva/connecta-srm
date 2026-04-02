@@ -1,3 +1,5 @@
+import '../../recursos/estilos/cabecalhoPagina.css';
+
 export function CabecalhoPadrao({ titulo, descricao }) {
   return (
     <header className="cabecalhoPagina">

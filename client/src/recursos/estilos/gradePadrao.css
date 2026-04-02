@@ -1,0 +1,116 @@
+.gradePadrao {
+  border: 1px solid var(--corBorda);
+  border-radius: 20px;
+  background: var(--corSuperficie);
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 148px);
+  overflow: hidden;
+  box-shadow: 0 14px 30px rgba(53, 94, 126, 0.08);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease;
+}
+
+.corpoGradePadrao {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+
+.tabelaGradePadrao {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.cabecaTabelaGradePadrao {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.tabelaGradePadrao th,
+.tabelaGradePadrao td {
+  padding: 10px 16px;
+  vertical-align: middle;
+  text-align: left;
+}
+
+.cabecalhoGradeClientes,
+.cabecalhoGradeProdutos,
+.cabecalhoGradeAtendimentos,
+.cabecalhoGradeOrcamentos,
+.cabecalhoGradePedidos,
+.linhaCliente,
+.linhaProduto,
+.linhaAtendimento,
+.linhaOrcamento,
+.linhaPedido {
+  display: table-row;
+}
+
+.cabecalhoGradeClientes th,
+.cabecalhoGradeProdutos th,
+.cabecalhoGradeAtendimentos th,
+.cabecalhoGradeOrcamentos th,
+.cabecalhoGradePedidos th {
+  border-bottom: 1px solid var(--corBorda);
+  background: linear-gradient(180deg, #f8fbfe 0%, #edf4f8 100%);
+  color: var(--corTextoSuave);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.linhaCliente td,
+.linhaProduto td,
+.linhaAtendimento td,
+.linhaOrcamento td,
+.linhaPedido td {
+  border-bottom: 1px solid rgba(200, 213, 223, 0.6);
+}
+
+.mensagemGradePadrao {
+  margin: 0;
+  padding: 26px 24px 30px;
+  color: var(--corTextoSuave);
+}
+
+.mensagemGradePadraoErro {
+  color: #b34c4c;
+}
+
+@media (max-width: 980px) {
+  .gradePadrao {
+    height: auto;
+    max-height: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .corpoGradePadrao {
+    overflow-y: visible;
+  }
+
+  .cabecaTabelaGradePadrao {
+    display: none;
+  }
+
+  .tabelaGradePadrao,
+  .tabelaGradePadrao tbody,
+  .tabelaGradePadrao tr,
+  .tabelaGradePadrao td {
+    display: block;
+    width: 100%;
+  }
+
+  .tabelaGradePadrao td {
+    padding-top: 8px;
+    padding-bottom: 8px;
+    border-bottom: 0;
+  }
+}

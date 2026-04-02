@@ -214,6 +214,7 @@ const entidades = [
       'trabalhaSabado',
       'horaInicioSabado',
       'horaFimSabado',
+      'exibirFunilPaginaInicial',
       'diasValidadeOrcamento',
       'diasEntregaPedido',
       'etapasFiltroPadraoOrcamento',

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import '../../recursos/estilos/cabecalhoPagina.css';
 import { AcoesRegistro } from '../../componentes/comuns/acoesRegistro';
 import { Botao } from '../../componentes/comuns/botao';
 import { CampoPesquisa } from '../../componentes/comuns/campoPesquisa';
@@ -208,7 +209,9 @@ export function PaginaOrcamentos({ usuarioLogado }) {
       const pendenciaPedido = {
         dadosPedido: montarDadosIniciaisPedidoAPartirDoOrcamento(orcamentoEnriquecido),
         idOrcamento: orcamentoEnriquecido.idOrcamento,
-        idEtapaAnterior: etapaAnterior
+        idEtapaAnterior: etapaAnterior,
+        idEtapaDestino: etapaAtual,
+        etapaJaAtualizada: true
       };
 
       if (dadosOrcamento.solicitarPedidoAoSalvar) {
@@ -262,6 +265,30 @@ export function PaginaOrcamentos({ usuarioLogado }) {
       return;
     }
 
+    if (Number(valorEtapa) === ID_ETAPA_ORCAMENTO_FECHAMENTO) {
+      const orcamentoEnriquecido = enriquecerOrcamentoParaPedido(
+        orcamento,
+        {
+          clientes,
+          contatos,
+          usuarios,
+          vendedores,
+          prazosPagamento,
+          etapasOrcamento,
+          produtos
+        }
+      );
+
+      definirOrcamentoPedidoPendente({
+        dadosPedido: montarDadosIniciaisPedidoAPartirDoOrcamento(orcamentoEnriquecido),
+        idOrcamento: orcamento.idOrcamento,
+        idEtapaAnterior: orcamento.idEtapaOrcamento || null,
+        idEtapaDestino: Number(valorEtapa),
+        etapaJaAtualizada: false
+      });
+      return;
+    }
+
     const registroAtualizado = await alterarEtapaRapidamente(
       orcamento,
       Number(valorEtapa),
@@ -285,7 +312,9 @@ export function PaginaOrcamentos({ usuarioLogado }) {
       definirOrcamentoPedidoPendente({
         dadosPedido: montarDadosIniciaisPedidoAPartirDoOrcamento(orcamentoEnriquecido),
         idOrcamento: orcamento.idOrcamento,
-        idEtapaAnterior: orcamento.idEtapaOrcamento || null
+        idEtapaAnterior: orcamento.idEtapaOrcamento || null,
+        idEtapaDestino: Number(valorEtapa),
+        etapaJaAtualizada: true
       });
     }
   }
@@ -336,13 +365,51 @@ export function PaginaOrcamentos({ usuarioLogado }) {
     await carregarDados();
   }
 
-  function abrirPedidoAPartirDoOrcamento() {
+  async function abrirPedidoAPartirDoOrcamento() {
     if (!orcamentoPedidoPendente) {
       return;
     }
 
-    definirOrcamentoPedidoEmCriacao(orcamentoPedidoPendente);
-    definirDadosIniciaisPedido(orcamentoPedidoPendente.dadosPedido);
+    let pendenciaPedido = orcamentoPedidoPendente;
+
+    if (!pendenciaPedido.etapaJaAtualizada && pendenciaPedido.idOrcamento && pendenciaPedido.idEtapaDestino) {
+      const orcamentoAtual = orcamentos.find((item) => item.idOrcamento === pendenciaPedido.idOrcamento);
+
+      if (!orcamentoAtual) {
+        return;
+      }
+
+      const registroAtualizado = await alterarEtapaRapidamente(
+        orcamentoAtual,
+        Number(pendenciaPedido.idEtapaDestino),
+        orcamentoAtual.idMotivoPerda || null
+      );
+
+      const orcamentoEnriquecido = enriquecerOrcamentoParaPedido(
+        registroAtualizado || {
+          ...orcamentoAtual,
+          idEtapaOrcamento: Number(pendenciaPedido.idEtapaDestino)
+        },
+        {
+          clientes,
+          contatos,
+          usuarios,
+          vendedores,
+          prazosPagamento,
+          etapasOrcamento,
+          produtos
+        }
+      );
+
+      pendenciaPedido = {
+        ...pendenciaPedido,
+        dadosPedido: montarDadosIniciaisPedidoAPartirDoOrcamento(orcamentoEnriquecido),
+        etapaJaAtualizada: true
+      };
+    }
+
+    definirOrcamentoPedidoEmCriacao(pendenciaPedido);
+    definirDadosIniciaisPedido(pendenciaPedido.dadosPedido);
     definirModalPedidoAberto(true);
     definirOrcamentoPedidoPendente(null);
   }
@@ -668,7 +735,9 @@ export function PaginaOrcamentos({ usuarioLogado }) {
                     definirOrcamentoPedidoPendente({
                       dadosPedido: montarDadosIniciaisPedidoAPartirDoOrcamento(orcamentoEnriquecido),
                       idOrcamento: alteracao.orcamento.idOrcamento,
-                      idEtapaAnterior: alteracao.orcamento.idEtapaOrcamento || null
+                      idEtapaAnterior: alteracao.orcamento.idEtapaOrcamento || null,
+                      idEtapaDestino: Number(alteracao.idEtapaOrcamento),
+                      etapaJaAtualizada: true
                     });
                   }
                 }}

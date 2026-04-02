@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Botao } from '../../componentes/comuns/botao';
 import { CampoSelecaoMultiplaModal } from '../../componentes/comuns/campoSelecaoMultiplaModal';
 
@@ -44,18 +44,21 @@ export function ModalAgendamento({
   const contatosAtivos = contatos.filter((contato) => contato.status !== 0);
   const usuariosAtivos = usuarios.filter((usuario) => usuario.ativo !== 0);
   const tiposAgendaAtivos = tiposAgenda.filter((tipoAgenda) => tipoAgenda.status !== 0);
-  const statusAtivos = statusVisita.filter((status) => status.status !== 0);
+  const statusAtivos = useMemo(
+    () => statusVisita.filter((status) => status.status !== 0),
+    [statusVisita]
+  );
 
   useEffect(() => {
     if (!aberto) {
       return;
     }
 
-    definirFormulario(criarFormularioInicial(dadosIniciais, usuarioLogado));
+    definirFormulario(criarFormularioInicial(dadosIniciais, usuarioLogado, statusAtivos));
     definirSalvando(false);
     definirMensagemErro('');
     definirConfirmandoExclusao(false);
-  }, [aberto, dadosIniciais, usuarioLogado]);
+  }, [aberto, dadosIniciais, statusAtivos, usuarioLogado]);
 
   useEffect(() => {
     if (!aberto) {
@@ -430,7 +433,10 @@ function CampoSelect({ label, name, options, className = '', ...props }) {
   );
 }
 
-function criarFormularioInicial(dadosIniciais, usuarioLogado) {
+function criarFormularioInicial(dadosIniciais, usuarioLogado, statusAtivos) {
+  const idStatusVisita = normalizarValorFormularioAgendamento(dadosIniciais?.idStatusVisita)
+    || obterStatusVisitaPadrao(statusAtivos);
+
   return {
     ...estadoInicialFormulario,
     ...dadosIniciais,
@@ -438,7 +444,7 @@ function criarFormularioInicial(dadosIniciais, usuarioLogado) {
     idCliente: normalizarValorFormularioAgendamento(dadosIniciais?.idCliente),
     idContato: normalizarValorFormularioAgendamento(dadosIniciais?.idContato),
     idLocal: normalizarValorFormularioAgendamento(dadosIniciais?.idLocal),
-    idStatusVisita: normalizarValorFormularioAgendamento(dadosIniciais?.idStatusVisita),
+    idStatusVisita,
     idsRecursos: Array.isArray(dadosIniciais?.idsRecursos)
       ? dadosIniciais.idsRecursos.map((idRecurso) => String(idRecurso))
       : [],
@@ -449,6 +455,40 @@ function criarFormularioInicial(dadosIniciais, usuarioLogado) {
         : [],
     idUsuario: String(dadosIniciais?.idUsuario || usuarioLogado?.idUsuario || '')
   };
+}
+
+function obterStatusVisitaPadrao(statusAtivos) {
+  if (!Array.isArray(statusAtivos) || statusAtivos.length === 0) {
+    return '';
+  }
+
+  const statusOrdenados = [...statusAtivos].sort((primeiro, segundo) => {
+    const ordemPrimeira = obterOrdemStatus(primeiro);
+    const ordemSegunda = obterOrdemStatus(segundo);
+
+    if (ordemPrimeira !== ordemSegunda) {
+      return ordemPrimeira - ordemSegunda;
+    }
+
+    return Number(primeiro?.idStatusVisita || 0) - Number(segundo?.idStatusVisita || 0);
+  });
+
+  return String(statusOrdenados[0]?.idStatusVisita || '');
+}
+
+function obterOrdemStatus(status) {
+  const ordem = Number(status?.ordem);
+
+  if (Number.isFinite(ordem) && ordem > 0) {
+    return ordem;
+  }
+
+  const idStatus = Number(status?.idStatusVisita);
+  if (Number.isFinite(idStatus) && idStatus > 0) {
+    return idStatus;
+  }
+
+  return Number.MAX_SAFE_INTEGER;
 }
 
 function normalizarValorFormularioAgendamento(valor) {

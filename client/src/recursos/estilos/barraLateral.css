@@ -1,0 +1,193 @@
+.barraLateral {
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 248px;
+  height: 100vh;
+  padding: 20px 0 22px;
+  background: linear-gradient(180deg, var(--corPrimaria) 0%, var(--corPrimariaForte) 100%);
+  color: #ffffff;
+  box-shadow: 18px 0 40px rgba(10, 77, 125, 0.12);
+  z-index: 1;
+  transition: box-shadow 180ms ease;
+}
+
+.marcaLateral {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 6px 22px 16px;
+}
+
+.logoLateral {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.96);
+  overflow: hidden;
+  flex: 0 0 auto;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.logoLateralImagem {
+  width: 58px;
+  height: 58px;
+  object-fit: contain;
+  display: block;
+}
+
+.logoLateralSimbolo {
+  position: relative;
+  display: block;
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  background: var(--corPrimaria);
+  transform: rotate(45deg);
+}
+
+.logoLateralSimbolo::before,
+.logoLateralSimbolo::after {
+  content: '';
+  position: absolute;
+  background: var(--corPrimaria);
+}
+
+.logoLateralSimbolo::before {
+  top: -12px;
+  left: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+}
+
+.logoLateralSimbolo::after {
+  top: 0;
+  left: 12px;
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+}
+
+.textoMarcaLateral strong {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 1rem;
+  line-height: 1.1;
+}
+
+.textoMarcaLateral p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.84);
+}
+
+.navegacaoLateral {
+  display: grid;
+  gap: 3px;
+  padding: 0 12px;
+}
+
+.rodapeLateral {
+  margin-top: auto;
+  padding: 12px 18px 0;
+}
+
+.usuarioLateral {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.12);
+  transition: background-color 180ms ease, transform 180ms ease;
+}
+
+.usuarioLateral:hover {
+  background: rgba(255, 255, 255, 0.18);
+  transform: translateY(-1px);
+}
+
+.fotoUsuario {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
+  overflow: hidden;
+  flex: 0 0 auto;
+}
+
+.fotoUsuarioImagem {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  display: block;
+}
+
+.fotoUsuario span {
+  position: relative;
+  display: block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--corPrimaria);
+}
+
+.fotoUsuario span::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -12px;
+  width: 28px;
+  height: 18px;
+  border-radius: 20px 20px 10px 10px;
+  background: var(--corPrimaria);
+  transform: translateX(-50%);
+}
+
+.dadosUsuario strong {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 0.92rem;
+}
+
+.dadosUsuario p {
+  margin: 0;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.barraLateralBotaoSair {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.marcaLateral:hover .logoLateral {
+  transform: translateY(-2px) rotate(-3deg);
+  box-shadow: 0 10px 22px rgba(255, 255, 255, 0.18);
+}
+
+@media (max-width: 980px) {
+  .barraLateral {
+    position: static;
+    width: 100%;
+    min-height: auto;
+    height: auto;
+    padding-bottom: 16px;
+    box-shadow: none;
+  }
+
+  .navegacaoLateral {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+
+  .rodapeLateral {
+    padding-top: 14px;
+  }
+}

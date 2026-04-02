@@ -54,6 +54,10 @@ Observacao importante:
 - Selos de codigo usam o componente padrao de codigo do projeto
 - Funcoes reutilizaveis do frontend ficam em `client/src/utilitarios`
 - Sempre que houver mudanca estrutural relevante de banco, fluxo desktop ou release, o README deve ser atualizado
+- Cada componente novo deve ter seu proprio arquivo de estilo com o mesmo nome do componente salvo em `client/src/recursos/estilos/`
+- CSS de pagina deve ficar restrito a layout/composicao da pagina e tambem salvo em `client/src/recursos/estilos/`
+- Classes CSS devem ser prefixadas pelo nome do componente para reduzir acoplamento visual e colisao de seletores
+- Mesmo componentes de pagina devem seguir a mesma regra: `paginaInicio.jsx` usa `client/src/recursos/estilos/paginaInicio.css`, `funilVendas.jsx` usa `client/src/recursos/estilos/funilVendas.css`, e assim por diante
 
 ## Componentes e padroes reutilizaveis
 
@@ -72,7 +76,6 @@ Padroes centralizados no frontend:
 - `ModalContatoCliente`: formulario reutilizavel de contato
 - `ModalRamosAtividade`: lista e cadastro reutilizavel de ramos
 - `ModalGruposProduto`: lista e cadastro de grupos de produto com botao dedicado para abrir um submodal compacto de selecao de tamanhos e ordem por grupo
-- `ModalManualUsuario`: manual de uso com sumario lateral, rolagem unica no corpo do modal, navegacao direta por secao, atalhos rapidos e orientacoes operacionais por modulo, aberto pelo atalho `F1`
 - `ModalMarcas`: lista e cadastro reutilizavel de marcas
 - `ModalUnidadesMedida`: lista e cadastro reutilizavel de unidades
 
@@ -106,6 +109,41 @@ Utilitarios importantes:
 - Painel inicial com indicadores de:
   - clientes cadastrados
   - produtos cadastrados
+  - total de vendas em valores
+  - total de vendas em quantidades
+- A pagina inicial agora possui um botao de filtro proprio para refinar os dados do funil por periodo, vendedor, produto e grupo de produto
+- Os mesmos filtros da pagina inicial tambem sao aplicados aos cards de vendas, usando pedidos como base para valor total e quantidade total vendida
+- Quando o usuario logado for `Usuario padrao` com vendedor vinculado, o filtro da pagina inicial ja abre com esse vendedor selecionado e bloqueado
+- O periodo padrao da pagina inicial sempre abre do dia 01 ate o ultimo dia do mes atual
+- A grade da pagina inicial usa cards fluidos que ocupam toda a largura disponivel da linha, chegando a um arranjo de ate 4 colunas quando houver espaco
+- O funil permanece ocupando toda a largura da grade e ha um respiro adicional entre o cabecalho da pagina e o primeiro conjunto de cards
+- Os cards de resumo da pagina inicial usam titulo no topo com tipografia mais contida, valor abaixo e icone ampliado na direita com corte parcial pelo proprio card
+- Funil de vendas opcional na pagina inicial, controlado pela configuracao da empresa
+- Novas empresas e novas bases passam a vir com o funil habilitado por padrao
+- O funil considera apenas etapas de orcamento com `Considera no Funil de Vendas` ativo
+- O funil ocupa toda a largura disponivel da pagina inicial
+- A coluna da esquerda mostra barras horizontais por etapa, com preenchimento calculado pela mesma porcentagem do valor total usada no card lateral
+- As barras exibem novamente a descricao da etapa diretamente sobre a propria barra, junto do valor
+- A descricao dentro da barra usa a paleta do projeto com variacao baseada na cor da etapa, e o valor aparece em negrito
+- O contraste do texto nas barras prioriza tons mais escuros do design system para manter legibilidade mesmo em etapas com cores claras
+- As barras usam uma largura mais contida e com maior espacamento entre linhas para aliviar a leitura visual
+- A distribuicao vertical das barras respeita a altura disponivel do card lateral sem sobreposicao entre linhas
+- O grafico do funil se ajusta automaticamente quando a quantidade de etapas aumenta, reduzindo proporcoes e espacamentos para manter o layout estavel
+- O cabecalho do funil exibe apenas o titulo principal, sem subtitulo auxiliar
+- A grade do funil prioriza aproximar o valor das barras e reservar mais largura para o card lateral de detalhe
+- O espacamento entre a coluna dos valores e o card lateral foi ampliado para melhorar a leitura
+- A troca de etapa aplica uma transicao curta no card lateral para reforcar a mudanca de contexto
+- A coluna da direita mostra um card resumido da etapa selecionada, com a primeira etapa carregada por padrao
+- O card lateral foi compactado para nao ultrapassar visualmente a altura ocupada pelas barras do funil
+- A altura total das barras passa a respeitar o card lateral como limite visual no desktop
+- Ao clicar em outra barra do funil, o card lateral troca para a etapa correspondente
+- A pagina inicial foi separada em componentes proprios e usa arquivos CSS dedicados para indicadores e funil
+- O cabecalho e cada card de indicador da pagina inicial seguem o padrao de CSS separado por componente
+- O funil da pagina inicial foi dividido em subcomponentes com classes prefixadas por componente (`funilVendas...`, `inicioIndicadorResumo...`, `inicioCabecalho...`)
+- Todos os CSS desses componentes ficam centralizados em `client/src/recursos/estilos/`
+- Componentes-base compartilhados como App, PaginaLogin, BarraLateral, Botao, BotaoMenu, Icone, CampoPesquisa, PopupAvisos, CorpoPagina e CartaoPaginaVazia tambem ja seguem esse padrao
+- `client/src/recursos/estilos/aplicacao.css` agora contem apenas variaveis, reset global e estilos base de tags
+- Blocos compartilhados e remanescentes do legado foram distribuídos em arquivos dedicados como `gradePadrao.css`, `registrosTabela.css`, `formulariosBase.css`, `modaisBase.css`, `modalSecundario.css` e CSS por pagina em `client/src/recursos/estilos/`
 - Carregamento via API local
 - Mensagem de erro dedicada se os indicadores nao puderem ser carregados
 
@@ -207,6 +245,7 @@ Campos atuais do agendamento:
 - `Recursos` com selecao multipla
 - `Usuarios` com selecao multipla
 - `Status da visita`
+- Ao incluir um agendamento, o campo `Status da visita` passa a vir preenchido automaticamente com o status ativo de menor ordem
 
 Filtros da agenda:
 
@@ -238,12 +277,15 @@ Filtros da agenda:
 - Controle de etapa do orcamento
 - Motivo da perda obrigatorio quando a etapa exigir
 - Integracao com abertura de pedido ao fechar o orcamento
+- A troca rapida da etapa para `Fechado` no grid tambem oferece a geracao imediata do pedido
+- Modais de confirmacao do fluxo comercial abrem como sobreposicao fixa acima da pagina, inclusive no lancamento de pedido a partir do grid
 - Campos configuraveis extras para o orcamento
 
 ### Pedidos
 
 - Pagina propria de pedidos
 - Integracao com pedido originado de orcamento
+- O modal de pedido aberto a partir do fechamento de um orcamento permite fechar direto pelo botao, clique fora ou `Escape`, devolvendo o fluxo ao orcamento
 - Campos extras configuraveis
 - Itens com snapshots de produto para preservar historico comercial
 - Data de entrega baseada nas configuracoes da empresa
@@ -300,6 +342,7 @@ Regras importantes:
 O cadastro de empresa tem modal proprio com abas:
 
 - `Dados gerais`
+- `Pagina inicial`
 - `Endereco`
 - `Agenda`
 - `Orcamentos/Pedidos`
@@ -315,6 +358,7 @@ Campos de destaque:
 - Horarios de expediente da manha e da tarde
 - Flag para trabalho aos sabados
 - Horarios de sabado quando aplicavel
+- `Exibir funil de vendas na pagina inicial`
 - `diasValidadeOrcamento`
 - `diasEntregaPedido`
 - `Filtro padrao de status do orcamento`
@@ -323,6 +367,7 @@ Esses dados sao usados em:
 
 - Tela de login
 - Barra lateral
+- Exibicao do funil de vendas da pagina inicial
 - Faixa horaria padrao da agenda
 - Validade inicial de orcamentos
 - Previsao inicial de entrega de pedidos

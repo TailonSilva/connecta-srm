@@ -1,10 +1,12 @@
+import '../../recursos/estilos/botaoMenu.css';
+
 export function BotaoMenu({
   children,
   ativo = false,
   className = '',
   ...props
 }) {
-  const classes = ['botaoMenu', ativo ? 'ativo' : '', className]
+  const classes = ['botaoMenu', ativo ? 'botaoMenuAtivo' : '', className]
     .filter(Boolean)
     .join(' ');
 

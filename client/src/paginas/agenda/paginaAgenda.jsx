@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import '../../recursos/estilos/cabecalhoPagina.css';
 import { Botao } from '../../componentes/comuns/botao';
 import { ModalFiltros } from '../../componentes/comuns/modalFiltros';
 import { CorpoPagina } from '../../componentes/layout/corpoPagina';

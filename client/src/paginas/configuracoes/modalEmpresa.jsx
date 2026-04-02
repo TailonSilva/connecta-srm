@@ -7,6 +7,7 @@ import { normalizarTelefone } from '../../utilitarios/normalizarTelefone';
 
 const abasModalEmpresa = [
   { id: 'dadosGerais', label: 'Dados gerais' },
+  { id: 'paginaInicial', label: 'Pagina inicial' },
   { id: 'endereco', label: 'Endereco' },
   { id: 'agenda', label: 'Agenda' },
   { id: 'orcamentosPedidos', label: 'Orcamentos/Pedidos' }
@@ -28,6 +29,7 @@ const estadoInicialFormulario = {
   trabalhaSabado: false,
   horaInicioSabado: '08:00',
   horaFimSabado: '12:00',
+  exibirFunilPaginaInicial: true,
   diasValidadeOrcamento: '7',
   diasEntregaPedido: '7',
   etapasFiltroPadraoOrcamento: [],
@@ -299,6 +301,28 @@ export function ModalEmpresa({
             </section>
           ) : null}
 
+          {abaAtiva === 'paginaInicial' ? (
+            <section className="gradeCamposModalCliente">
+              <div className="campoFormularioIntegral painelOpcaoEmpresaPaginaInicial">
+                <label className="campoCheckboxFormulario" htmlFor="exibirFunilPaginaInicialEmpresa">
+                  <input
+                    id="exibirFunilPaginaInicialEmpresa"
+                    type="checkbox"
+                    name="exibirFunilPaginaInicial"
+                    checked={formulario.exibirFunilPaginaInicial}
+                    onChange={alterarCampo}
+                    disabled={somenteLeitura}
+                  />
+                  <span>Exibir funil de vendas na pagina inicial</span>
+                </label>
+                <p className="descricaoOpcaoEmpresaPaginaInicial">
+                  Quando habilitado, a pagina inicial mostra as etapas de orcamento marcadas para funil,
+                  com quantidade de orcamentos e valor total em cada etapa.
+                </p>
+              </div>
+            </section>
+          ) : null}
+
           {abaAtiva === 'endereco' ? (
             <section className="gradeCamposModalCliente">
               <CampoFormularioComAcao label="CEP" name="cep" value={formulario.cep} onChange={alterarCampo} aoAcionar={buscarDadosCep} carregando={buscandoCep} rotuloAcao="Buscar CEP" disabled={somenteLeitura} />
@@ -421,7 +445,9 @@ function CampoCheckbox({ label, name, ...props }) {
 
 function criarFormularioEmpresa(empresa) {
   if (!empresa) {
-    return estadoInicialFormulario;
+    return {
+      ...estadoInicialFormulario
+    };
   }
 
   return {
@@ -440,6 +466,9 @@ function criarFormularioEmpresa(empresa) {
     trabalhaSabado: Boolean(empresa.trabalhaSabado),
     horaInicioSabado: empresa.horaInicioSabado || '08:00',
     horaFimSabado: empresa.horaFimSabado || '12:00',
+    exibirFunilPaginaInicial: empresa.exibirFunilPaginaInicial === undefined
+      ? true
+      : Boolean(empresa.exibirFunilPaginaInicial),
     diasValidadeOrcamento: String(empresa.diasValidadeOrcamento ?? 7),
     diasEntregaPedido: String(empresa.diasEntregaPedido ?? 7),
     etapasFiltroPadraoOrcamento: normalizarListaEmpresa(empresa.etapasFiltroPadraoOrcamento),

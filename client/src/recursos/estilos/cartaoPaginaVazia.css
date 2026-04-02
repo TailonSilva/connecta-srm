@@ -1,0 +1,47 @@
+.cartaoPaginaVazia {
+  min-height: 260px;
+  border: 1px solid var(--corBorda);
+  border-radius: 20px;
+  background: var(--corSuperficie);
+  overflow: hidden;
+  box-shadow: 0 14px 30px rgba(53, 94, 126, 0.08);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease;
+}
+
+.cartaoPaginaVazia:hover {
+  transform: translateY(-4px);
+  border-color: rgba(23, 145, 226, 0.18);
+  box-shadow: 0 18px 36px rgba(53, 94, 126, 0.14);
+}
+
+.cartaoPaginaVaziaFaixaDestaque {
+  height: 14px;
+  background: linear-gradient(90deg, var(--corSuperficieSuave), #edf4f8);
+  transition: background 180ms ease;
+}
+
+.cartaoPaginaVazia:hover .cartaoPaginaVaziaFaixaDestaque {
+  background: linear-gradient(90deg, rgba(23, 145, 226, 0.24), #edf4f8);
+}
+
+.cartaoPaginaVaziaConteudo {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: calc(260px - 14px);
+  padding: 26px;
+}
+
+.cartaoPaginaVaziaConteudo h2 {
+  margin: 0 0 8px;
+  font-size: 1.15rem;
+}
+
+.cartaoPaginaVaziaConteudo p {
+  margin: 0;
+  max-width: 34ch;
+  color: var(--corTextoSuave);
+}

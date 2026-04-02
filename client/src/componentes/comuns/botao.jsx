@@ -1,4 +1,5 @@
 import { Icone } from './icone';
+import '../../recursos/estilos/botao.css';
 
 const variantesPermitidas = ['primario', 'secundario', 'complementar', 'perigo'];
 

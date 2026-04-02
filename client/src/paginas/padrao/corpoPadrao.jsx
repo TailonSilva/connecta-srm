@@ -1,5 +1,6 @@
 import { CorpoPagina } from '../../componentes/layout/corpoPagina';
 import { CartaoPaginaVazia } from '../../componentes/layout/cartaoPaginaVazia';
+import '../../recursos/estilos/corpoPadrao.css';
 
 export function CorpoPadrao({ pagina }) {
   return (

@@ -146,6 +146,20 @@ export function ModalFiltros({
                   disabled={campo.disabled}
                   aoAlterar={(valores) => alternarCampoMultiploSubstituir(campo.name, valores)}
                 />
+              ) : campo.type && campo.type !== 'select' ? (
+                <div key={campo.name} className="campoFormulario">
+                  <label htmlFor={campo.name}>{campo.label}</label>
+                  <input
+                    id={campo.name}
+                    name={campo.name}
+                    type={campo.type}
+                    className="entradaFormulario"
+                    value={formulario[campo.name] || ''}
+                    onChange={alterarCampo}
+                    disabled={campo.disabled}
+                    {...campo.inputProps}
+                  />
+                </div>
               ) : (
                 <div key={campo.name} className="campoFormulario">
                   <label htmlFor={campo.name}>{campo.label}</label>
@@ -158,7 +172,7 @@ export function ModalFiltros({
                     disabled={campo.disabled}
                   >
                     <option value="">{campo.placeholder || 'Todos'}</option>
-                    {campo.options.map((opcao) => (
+                    {(campo.options || []).map((opcao) => (
                       <option key={opcao.valor} value={opcao.valor}>
                         {opcao.label}
                       </option>

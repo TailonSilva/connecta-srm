@@ -1,5 +1,5 @@
 const express = require('express');
-const { banco, consultarTodos, consultarUm, executar } = require('../configuracoes/banco');
+const { consultarTodos, consultarUm, executar } = require('../configuracoes/banco');
 
 const rotaAgendamentos = express.Router();
 

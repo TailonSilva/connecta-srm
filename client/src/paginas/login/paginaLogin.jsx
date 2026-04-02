@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Botao } from '../../componentes/comuns/botao';
+import '../../recursos/estilos/paginaLogin.css';
 import { autenticarUsuario } from '../../servicos/autenticacao';
 import { listarEmpresas } from '../../servicos/empresa';
 import logoConnecta from '../../recursos/imagens/logo-connecta.png';
@@ -40,11 +41,11 @@ export function PaginaLogin({ aoEntrar }) {
 
   return (
     <main className="paginaLogin">
-      <section className="cartaoLogin">
-        <div className="marcaLogin">
-          <div className="logoLateral" aria-hidden="true">
+      <section className="paginaLoginCartao">
+        <div className="paginaLoginMarca">
+          <div className="paginaLoginLogo" aria-hidden="true">
             <img
-              className="logoLateralImagem"
+              className="paginaLoginLogoImagem"
               src={logoConnecta}
               alt="Connecta CRM"
             />
@@ -56,7 +57,7 @@ export function PaginaLogin({ aoEntrar }) {
           </div>
         </div>
 
-        <form className="formularioLogin" onSubmit={submeterLogin}>
+        <form className="paginaLoginFormulario" onSubmit={submeterLogin}>
           <div className="campoFormulario">
             <label htmlFor="usuarioLogin">Usuario</label>
             <input
@@ -80,7 +81,7 @@ export function PaginaLogin({ aoEntrar }) {
             />
           </div>
 
-          {mensagemErro ? <p className="mensagemErroFormulario mensagemErroLogin">{mensagemErro}</p> : null}
+          {mensagemErro ? <p className="mensagemErroFormulario paginaLoginMensagemErro">{mensagemErro}</p> : null}
 
           <Botao variante="primario" type="submit" disabled={carregando}>
             {carregando ? 'Entrando...' : 'Entrar'}

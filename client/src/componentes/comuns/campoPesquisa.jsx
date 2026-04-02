@@ -1,4 +1,5 @@
 import { forwardRef } from 'react';
+import '../../recursos/estilos/campoPesquisa.css';
 import { Icone } from './icone';
 
 export const CampoPesquisa = forwardRef(function CampoPesquisa({
@@ -10,10 +11,10 @@ export const CampoPesquisa = forwardRef(function CampoPesquisa({
 }, ref) {
   return (
     <label className="campoPesquisa">
-      <Icone nome="pesquisa" className="iconeCampoPesquisa" />
+      <Icone nome="pesquisa" className="campoPesquisaIcone" />
       <input
         ref={ref}
-        className="entradaCampoPesquisa"
+        className="campoPesquisaEntrada"
         type="search"
         value={valor}
         onChange={(evento) => aoAlterar(evento.target.value)}

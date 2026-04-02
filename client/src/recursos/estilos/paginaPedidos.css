@@ -1,0 +1,29 @@
+.cabecalhoGradePedidos th:nth-child(1),
+.linhaPedido td:nth-child(1) {
+  width: 88px;
+}
+
+.cabecalhoGradePedidos th:nth-child(2),
+.linhaPedido td:nth-child(2) {
+  width: 40%;
+}
+
+.cabecalhoGradePedidos th:nth-child(3),
+.linhaPedido td:nth-child(3) {
+  width: 19%;
+}
+
+.cabecalhoGradePedidos th:nth-child(4),
+.linhaPedido td:nth-child(4) {
+  width: 15%;
+}
+
+.cabecalhoGradePedidos th:nth-child(5),
+.linhaPedido td:nth-child(5) {
+  width: 12%;
+}
+
+.cabecalhoGradePedidos th:nth-child(6),
+.linhaPedido td:nth-child(6) {
+  width: 124px;
+}

@@ -1,0 +1,29 @@
+.app {
+  min-height: 100vh;
+  padding: 0;
+}
+
+.appEstruturaPainel {
+  min-height: 100vh;
+  width: 100%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(244, 249, 253, 0.96) 100%);
+}
+
+.appAreaConteudo {
+  min-height: 100vh;
+  margin-left: 248px;
+  padding: 24px 28px 24px;
+  background: linear-gradient(180deg, #f9fcfe 0%, #edf4f8 100%);
+}
+
+@media (max-width: 980px) {
+  .appAreaConteudo {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .appAreaConteudo {
+    padding: 20px 16px 24px;
+  }
+}

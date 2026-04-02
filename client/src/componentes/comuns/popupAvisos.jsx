@@ -1,4 +1,5 @@
 import { Botao } from './botao';
+import '../../recursos/estilos/popupAvisos.css';
 
 export function PopupAvisos({ avisos, aoFechar }) {
   if (!Array.isArray(avisos) || avisos.length === 0) {
@@ -6,12 +7,12 @@ export function PopupAvisos({ avisos, aoFechar }) {
   }
 
   return (
-    <div className="pilhaPopupAvisos" aria-live="polite" aria-atomic="false">
+    <div className="popupAvisosPilha" aria-live="polite" aria-atomic="false">
       {avisos.map((aviso) => (
-        <div key={aviso.id} className="cartaoPopupAviso" role="status">
-          <div className="cabecalhoPopupAviso">
-            <div className="tituloPopupAviso">
-              <span className="seloPopupAviso">
+        <div key={aviso.id} className="popupAvisosCartao" role="status">
+          <div className="popupAvisosCabecalho">
+            <div className="popupAvisosTitulo">
+              <span className="popupAvisosSelo">
                 {aviso.icone || 'Agenda'}
               </span>
               <div>
@@ -32,7 +33,7 @@ export function PopupAvisos({ avisos, aoFechar }) {
             </Botao>
           </div>
 
-          <div className="conteudoPopupAviso">
+          <div className="popupAvisosConteudo">
             {aviso.mensagem ? <p>{aviso.mensagem}</p> : null}
             {aviso.detalhe ? <span>{aviso.detalhe}</span> : null}
           </div>

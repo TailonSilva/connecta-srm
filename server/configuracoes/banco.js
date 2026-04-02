@@ -713,6 +713,7 @@ banco.serialize(() => {
       trabalhaSabado BOOLEAN NOT NULL DEFAULT 0,
       horaInicioSabado VARCHAR(5),
       horaFimSabado VARCHAR(5),
+      exibirFunilPaginaInicial BOOLEAN NOT NULL DEFAULT 1,
       diasValidadeOrcamento INTEGER NOT NULL DEFAULT 7,
       diasEntregaPedido INTEGER NOT NULL DEFAULT 7,
       etapasFiltroPadraoOrcamento TEXT,
@@ -797,6 +798,14 @@ banco.serialize(() => {
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
       console.error('Nao foi possivel garantir a coluna horaFimSabado da empresa.', erro);
+    }
+  });
+
+  banco.run(`
+    ALTER TABLE empresa ADD COLUMN exibirFunilPaginaInicial BOOLEAN NOT NULL DEFAULT 1
+  `, (erro) => {
+    if (erro && !String(erro.message || '').includes('duplicate column name')) {
+      console.error('Nao foi possivel garantir a coluna exibirFunilPaginaInicial da empresa.', erro);
     }
   });
 
