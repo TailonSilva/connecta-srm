@@ -23,10 +23,13 @@ import {
   listarVendedores
 } from '../../servicos/clientes';
 import {
+  atualizarPrazoPagamento,
+  incluirPrazoPagamento,
   listarCamposPedidoConfiguracao,
   listarCamposOrcamentoConfiguracao,
   listarEtapasPedidoConfiguracao,
   listarEtapasOrcamentoConfiguracao,
+  listarMetodosPagamentoConfiguracao,
   listarMotivosPerdaConfiguracao,
   listarPrazosPagamentoConfiguracao
 } from '../../servicos/configuracoes';
@@ -75,6 +78,7 @@ export function PaginaAtendimentos({ usuarioLogado }) {
   const [usuarios, definirUsuarios] = useState([]);
   const [vendedores, definirVendedores] = useState([]);
   const [orcamentos, definirOrcamentos] = useState([]);
+  const [metodosPagamento, definirMetodosPagamento] = useState([]);
   const [ramosAtividade, definirRamosAtividade] = useState([]);
   const [canaisAtendimento, definirCanaisAtendimento] = useState([]);
   const [origensAtendimento, definirOrigensAtendimento] = useState([]);
@@ -121,6 +125,7 @@ export function PaginaAtendimentos({ usuarioLogado }) {
         ramosCarregados,
         canaisCarregados,
         origensCarregadas,
+        metodosCarregados,
         prazosCarregados,
         etapasOrcamentoCarregadas,
         etapasPedidoCarregadas,
@@ -139,6 +144,7 @@ export function PaginaAtendimentos({ usuarioLogado }) {
         listarRamosAtividade(),
         listarCanaisAtendimento(),
         listarOrigensAtendimento(),
+        listarMetodosPagamentoConfiguracao(),
         listarPrazosPagamentoConfiguracao(),
         listarEtapasOrcamentoConfiguracao(),
         listarEtapasPedidoConfiguracao(),
@@ -183,25 +189,16 @@ export function PaginaAtendimentos({ usuarioLogado }) {
           contatosCarregados,
           usuariosCarregados,
           vendedoresCarregados,
-          prazosCarregados.map((prazo) => ({
-            ...prazo,
-            descricaoFormatada: prazo.descricao || [prazo.prazo1, prazo.prazo2, prazo.prazo3, prazo.prazo4, prazo.prazo5, prazo.prazo6]
-              .filter((valor) => valor !== null && valor !== undefined && valor !== '')
-              .join(' / ')
-          })),
+          enriquecerPrazosPagamento(prazosCarregados, metodosCarregados),
           etapasOrcamentoCarregadas,
           produtosCarregados
         ).filter((orcamento) => orcamentoEstaAberto(orcamento))
       );
+      definirMetodosPagamento(metodosCarregados);
       definirRamosAtividade(ramosCarregados);
       definirCanaisAtendimento(canaisCarregados);
       definirOrigensAtendimento(origensCarregadas);
-      definirPrazosPagamento(prazosCarregados.map((prazo) => ({
-        ...prazo,
-        descricaoFormatada: prazo.descricao || [prazo.prazo1, prazo.prazo2, prazo.prazo3, prazo.prazo4, prazo.prazo5, prazo.prazo6]
-          .filter((valor) => valor !== null && valor !== undefined && valor !== '')
-          .join(' / ')
-      })));
+      definirPrazosPagamento(enriquecerPrazosPagamento(prazosCarregados, metodosCarregados));
       definirEtapasOrcamento(etapasOrcamentoCarregadas);
       definirEtapasPedido(etapasPedidoCarregadas.map((etapa) => ({
         ...etapa,
@@ -270,6 +267,37 @@ export function PaginaAtendimentos({ usuarioLogado }) {
     const orcamentoSalvo = await atualizarOrcamento(dadosOrcamento.idOrcamento, payload);
     await carregarDados();
     return orcamentoSalvo;
+  }
+
+  async function salvarPrazoPagamentoPeloAtendimento(dadosPrazo) {
+    const payload = normalizarPayloadPrazoPagamento(dadosPrazo);
+    const registroSalvo = dadosPrazo?.idPrazoPagamento
+      ? await atualizarPrazoPagamento(dadosPrazo.idPrazoPagamento, payload)
+      : await incluirPrazoPagamento(payload);
+
+    await carregarDados();
+    return enriquecerPrazoPagamento(registroSalvo, metodosPagamento);
+  }
+
+  async function inativarPrazoPagamentoPeloAtendimento(prazo) {
+    if (!prazo?.idPrazoPagamento) {
+      return null;
+    }
+
+    const registroAtual = prazosPagamento.find(
+      (item) => String(item.idPrazoPagamento) === String(prazo.idPrazoPagamento)
+    ) || prazo;
+
+    await atualizarPrazoPagamento(
+      prazo.idPrazoPagamento,
+      normalizarPayloadPrazoPagamento({
+        ...registroAtual,
+        status: false
+      })
+    );
+
+    await carregarDados();
+    return null;
   }
 
   async function atualizarStatusOrcamentoPeloAtendimento({ idOrcamento, idEtapaOrcamento }) {
@@ -511,6 +539,7 @@ export function PaginaAtendimentos({ usuarioLogado }) {
         contatosOrcamento={contatos}
         usuariosOrcamento={usuarios}
         vendedoresOrcamento={vendedores}
+        metodosPagamento={metodosPagamento}
         prazosPagamento={prazosPagamento}
         etapasOrcamento={etapasOrcamento}
         motivosPerda={motivosPerda}
@@ -523,6 +552,8 @@ export function PaginaAtendimentos({ usuarioLogado }) {
         etapaOrcamentoAtualizadaExternamente={etapaOrcamentoAtualizadaExternamente}
         aoAtualizarStatusOrcamento={atualizarStatusOrcamentoPeloAtendimento}
         aoAbrirPedido={abrirPedidoPeloAtendimento}
+        aoSalvarPrazoPagamento={salvarPrazoPagamentoPeloAtendimento}
+        aoInativarPrazoPagamento={inativarPrazoPagamentoPeloAtendimento}
         aoFechar={fecharModal}
         aoSalvar={salvarAtendimento}
         aoExcluir={excluirRegistroAtendimento}
@@ -536,6 +567,7 @@ export function PaginaAtendimentos({ usuarioLogado }) {
         contatos={contatos}
         usuarios={usuarios}
         vendedores={vendedores}
+        metodosPagamento={metodosPagamento}
         prazosPagamento={prazosPagamento}
         etapasPedido={etapasPedido}
         produtos={produtos}
@@ -545,6 +577,8 @@ export function PaginaAtendimentos({ usuarioLogado }) {
         modo="novo"
         aoFechar={fecharModalPedido}
         aoSalvar={salvarPedidoPeloAtendimento}
+        aoSalvarPrazoPagamento={salvarPrazoPagamentoPeloAtendimento}
+        aoInativarPrazoPagamento={inativarPrazoPagamentoPeloAtendimento}
       />
     </>
   );
@@ -857,6 +891,47 @@ function normalizarPayloadOrcamento(dadosOrcamento, usuarioLogado) {
       valor: limparTextoOpcional(campo.valor)
     })) : []
   };
+}
+
+function normalizarPayloadPrazoPagamento(dadosPrazo) {
+  const payload = {
+    descricao: limparTextoOpcional(dadosPrazo.descricao),
+    idMetodoPagamento: Number(dadosPrazo.idMetodoPagamento),
+    status: dadosPrazo.status ? 1 : 0
+  };
+
+  ['prazo1', 'prazo2', 'prazo3', 'prazo4', 'prazo5', 'prazo6'].forEach((chave) => {
+    const valor = String(dadosPrazo[chave] || '').trim();
+    payload[chave] = valor ? Number(valor) : null;
+  });
+
+  return payload;
+}
+
+function enriquecerPrazosPagamento(prazosPagamento, metodosPagamento = []) {
+  const metodosPorId = new Map(
+    metodosPagamento.map((metodo) => [metodo.idMetodoPagamento, metodo.descricao])
+  );
+
+  return prazosPagamento.map((prazo) => {
+    const parcelas = [prazo.prazo1, prazo.prazo2, prazo.prazo3, prazo.prazo4, prazo.prazo5, prazo.prazo6]
+      .filter((valor) => valor !== null && valor !== undefined && valor !== '')
+      .join(' / ');
+
+    return {
+      ...prazo,
+      nomeMetodoPagamento: metodosPorId.get(prazo.idMetodoPagamento) || '',
+      descricaoFormatada: prazo.descricao || (parcelas ? `${parcelas} dias` : 'Prazo sem descricao')
+    };
+  });
+}
+
+function enriquecerPrazoPagamento(prazo, metodosPagamento = []) {
+  if (!prazo) {
+    return null;
+  }
+
+  return enriquecerPrazosPagamento([prazo], metodosPagamento)[0] || null;
 }
 
 function normalizarNumeroDecimal(valor) {

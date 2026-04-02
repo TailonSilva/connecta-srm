@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Botao } from './botao';
 import { CampoPesquisa } from './campoPesquisa';
+import { filtrarRegistrosAtivos } from '../../servicos/listas';
 
 export function ModalBuscaTabela({
   aberto,
@@ -19,23 +20,29 @@ export function ModalBuscaTabela({
   aoAcionarPrimaria = null,
   classNameModal = 'modalContatoCliente modalBuscaClienteAtendimento',
   classNameTabela = 'tabelaContatosModal tabelaBuscaClienteAtendimento',
+  filtrarInativos = true,
   mensagemVazio = 'Nenhum registro encontrado.'
 }) {
   const [pesquisa, definirPesquisa] = useState('');
   const [indiceAtivo, definirIndiceAtivo] = useState(0);
   const referenciaPesquisa = useRef(null);
 
+  const registrosDisponiveis = useMemo(
+    () => filtrarRegistrosAtivos(registros, { incluirInativos: !filtrarInativos }),
+    [filtrarInativos, registros]
+  );
+
   const registrosFiltrados = useMemo(() => {
     const termo = String(pesquisa || '').trim().toLowerCase();
 
-    return registros.filter((registro) => {
+    return registrosDisponiveis.filter((registro) => {
       if (!termo) {
         return true;
       }
 
       return String(obterTextoBusca(registro) || '').toLowerCase().includes(termo);
     });
-  }, [registros, pesquisa, obterTextoBusca]);
+  }, [registrosDisponiveis, pesquisa, obterTextoBusca]);
 
   useEffect(() => {
     if (!aberto) {

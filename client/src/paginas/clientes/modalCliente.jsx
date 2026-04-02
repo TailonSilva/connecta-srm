@@ -1,14 +1,21 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Botao } from '../../componentes/comuns/botao';
 import { BotaoAcaoGrade } from '../../componentes/comuns/botaoAcaoGrade';
 import { CampoImagemPadrao } from '../../componentes/comuns/campoImagemPadrao';
+import { ModalFiltros } from '../../componentes/comuns/modalFiltros';
 import { atualizarContato, buscarCep, buscarCnpj } from '../../servicos/clientes';
 import {
   listarAtendimentos,
   listarCanaisAtendimento,
   listarOrigensAtendimento
 } from '../../servicos/atendimentos';
+import { listarPrazosPagamentoConfiguracao, listarEtapasPedidoConfiguracao } from '../../servicos/configuracoes';
+import { listarEmpresas } from '../../servicos/empresa';
+import { ModalPedido } from '../pedidos/modalPedido';
+import { listarPedidos } from '../../servicos/pedidos';
+import { listarProdutos } from '../../servicos/produtos';
 import { listarUsuarios } from '../../servicos/usuarios';
+import { normalizarPreco } from '../../utilitarios/normalizarPreco';
 import { normalizarTelefone } from '../../utilitarios/normalizarTelefone';
 import { ModalAtendimento } from '../atendimentos/modalAtendimento';
 import { ModalRamosAtividade } from '../configuracoes/modalRamosAtividade';
@@ -56,6 +63,33 @@ const estadoInicialContato = {
   principal: false
 };
 
+function criarFiltrosIniciaisHistorico() {
+  const { dataInicio, dataFim } = obterPeriodoMesAtual();
+
+  return {
+    dataInicio,
+    dataFim
+  };
+}
+
+function criarFiltrosIniciaisAtendimentos() {
+  return {
+    ...criarFiltrosIniciaisHistorico(),
+    assunto: '',
+    idCanalAtendimento: '',
+    idUsuario: ''
+  };
+}
+
+function criarFiltrosIniciaisVendas() {
+  return {
+    ...criarFiltrosIniciaisHistorico(),
+    codigoPedido: '',
+    idEtapaPedido: '',
+    idVendedor: ''
+  };
+}
+
 export function ModalCliente({
   aberto,
   cliente,
@@ -87,8 +121,22 @@ export function ModalCliente({
   const [origensAtendimento, definirOrigensAtendimento] = useState([]);
   const [carregandoAtendimentos, definirCarregandoAtendimentos] = useState(false);
   const [mensagemErroAtendimentos, definirMensagemErroAtendimentos] = useState('');
+  const [filtrosAtendimentos, definirFiltrosAtendimentos] = useState(criarFiltrosIniciaisAtendimentos);
+  const [modalFiltrosAtendimentosAberto, definirModalFiltrosAtendimentosAberto] = useState(false);
   const [atendimentoSelecionado, definirAtendimentoSelecionado] = useState(null);
   const [modalAtendimentoAberto, definirModalAtendimentoAberto] = useState(false);
+  const [pedidosCliente, definirPedidosCliente] = useState([]);
+  const [usuariosHistorico, definirUsuariosHistorico] = useState([]);
+  const [prazosPagamentoPedidos, definirPrazosPagamentoPedidos] = useState([]);
+  const [etapasPedido, definirEtapasPedido] = useState([]);
+  const [produtosPedidos, definirProdutosPedidos] = useState([]);
+  const [empresaPedidos, definirEmpresaPedidos] = useState(null);
+  const [carregandoPedidos, definirCarregandoPedidos] = useState(false);
+  const [mensagemErroPedidos, definirMensagemErroPedidos] = useState('');
+  const [filtrosPedidos, definirFiltrosPedidos] = useState(criarFiltrosIniciaisVendas);
+  const [modalFiltrosPedidosAberto, definirModalFiltrosPedidosAberto] = useState(false);
+  const [pedidoSelecionado, definirPedidoSelecionado] = useState(null);
+  const [modalPedidoAberto, definirModalPedidoAberto] = useState(false);
   const [confirmandoSaida, definirConfirmandoSaida] = useState(false);
   const [modalRamosAtividadeAberto, definirModalRamosAtividadeAberto] = useState(false);
   const somenteLeitura = modo === 'consulta';
@@ -115,12 +163,26 @@ export function ModalCliente({
     definirBuscandoCep(false);
     definirBuscandoCnpj(false);
     definirAtendimentosCliente([]);
+    definirPedidosCliente([]);
     definirCanaisAtendimento([]);
     definirOrigensAtendimento([]);
+    definirUsuariosHistorico([]);
+    definirPrazosPagamentoPedidos([]);
+    definirEtapasPedido([]);
+    definirProdutosPedidos([]);
+    definirEmpresaPedidos(null);
     definirCarregandoAtendimentos(false);
     definirMensagemErroAtendimentos('');
+    definirFiltrosAtendimentos(criarFiltrosIniciaisAtendimentos());
+    definirModalFiltrosAtendimentosAberto(false);
+    definirCarregandoPedidos(false);
+    definirMensagemErroPedidos('');
+    definirFiltrosPedidos(criarFiltrosIniciaisVendas());
+    definirModalFiltrosPedidosAberto(false);
     definirAtendimentoSelecionado(null);
     definirModalAtendimentoAberto(false);
+    definirPedidoSelecionado(null);
+    definirModalPedidoAberto(false);
     definirConfirmandoSaida(false);
     definirModalRamosAtividadeAberto(false);
   }, [aberto, cliente, idVendedorBloqueado]);
@@ -132,29 +194,46 @@ export function ModalCliente({
 
     let cancelado = false;
 
-    async function carregarAtendimentosCliente() {
+    async function carregarHistoricoCliente() {
       definirCarregandoAtendimentos(true);
       definirMensagemErroAtendimentos('');
+      definirCarregandoPedidos(true);
+      definirMensagemErroPedidos('');
 
       try {
         const [
           atendimentosCarregados,
+          pedidosCarregados,
           usuariosCarregados,
           canaisCarregados,
-          origensCarregadas
+          origensCarregadas,
+          prazosCarregados,
+          etapasPedidoCarregadas,
+          produtosCarregados,
+          empresasCarregadas
         ] = await Promise.all([
           listarAtendimentos(),
+          listarPedidos(),
           listarUsuarios(),
           listarCanaisAtendimento(),
-          listarOrigensAtendimento()
+          listarOrigensAtendimento(),
+          listarPrazosPagamentoConfiguracao(),
+          listarEtapasPedidoConfiguracao(),
+          listarProdutos(),
+          listarEmpresas()
         ]);
 
         if (cancelado) {
           return;
         }
 
+        definirUsuariosHistorico(usuariosCarregados);
         definirCanaisAtendimento(canaisCarregados);
         definirOrigensAtendimento(origensCarregadas);
+        definirPrazosPagamentoPedidos(prazosCarregados);
+        definirEtapasPedido(normalizarEtapasPedidoHistorico(etapasPedidoCarregadas));
+        definirProdutosPedidos(produtosCarregados);
+        definirEmpresaPedidos(empresasCarregadas[0] || null);
         definirAtendimentosCliente(
           enriquecerAtendimentosCliente(
             atendimentosCarregados,
@@ -165,23 +244,34 @@ export function ModalCliente({
             origensCarregadas
           )
         );
+        definirPedidosCliente(
+          enriquecerPedidosCliente(
+            pedidosCarregados,
+            cliente.idCliente,
+            usuariosCarregados,
+            vendedores,
+            etapasPedidoCarregadas
+          )
+        );
       } catch (erro) {
         if (!cancelado) {
           definirMensagemErroAtendimentos('Nao foi possivel carregar os atendimentos deste cliente.');
+          definirMensagemErroPedidos('Nao foi possivel carregar os pedidos deste cliente.');
         }
       } finally {
         if (!cancelado) {
           definirCarregandoAtendimentos(false);
+          definirCarregandoPedidos(false);
         }
       }
     }
 
-    carregarAtendimentosCliente();
+    carregarHistoricoCliente();
 
     return () => {
       cancelado = true;
     };
-  }, [aberto, cliente?.idCliente, contatos]);
+  }, [aberto, cliente?.idCliente, contatos, vendedores]);
 
   useEffect(() => {
     if (!aberto) {
@@ -195,6 +285,16 @@ export function ModalCliente({
         return;
       }
 
+      if (evento.key === 'Escape' && modalFiltrosAtendimentosAberto) {
+        definirModalFiltrosAtendimentosAberto(false);
+        return;
+      }
+
+      if (evento.key === 'Escape' && modalFiltrosPedidosAberto) {
+        definirModalFiltrosPedidosAberto(false);
+        return;
+      }
+
       if (evento.key === 'Escape' && !salvando) {
         tentarFecharModal();
       }
@@ -205,11 +305,7 @@ export function ModalCliente({
     return () => {
       window.removeEventListener('keydown', tratarTecla);
     };
-  }, [aberto, aoFechar, salvando, modalContatoAberto]);
-
-  if (!aberto) {
-    return null;
-  }
+  }, [aberto, aoFechar, salvando, modalContatoAberto, modalFiltrosAtendimentosAberto, modalFiltrosPedidosAberto]);
 
   async function submeterFormulario(evento) {
     evento.preventDefault();
@@ -427,6 +523,11 @@ export function ModalCliente({
     definirModalAtendimentoAberto(true);
   }
 
+  function consultarPedido(pedido) {
+    definirPedidoSelecionado(pedido);
+    definirModalPedidoAberto(true);
+  }
+
   function abrirModalRamosAtividade() {
     if (somenteLeitura || typeof aoSalvarRamoAtividade !== 'function') {
       return;
@@ -450,6 +551,26 @@ export function ModalCliente({
   function fecharModalAtendimento() {
     definirAtendimentoSelecionado(null);
     definirModalAtendimentoAberto(false);
+  }
+
+  function fecharModalPedido() {
+    definirPedidoSelecionado(null);
+    definirModalPedidoAberto(false);
+  }
+
+  const atendimentosFiltrados = useMemo(
+    () => filtrarAtendimentosCliente(atendimentosCliente, filtrosAtendimentos),
+    [atendimentosCliente, filtrosAtendimentos]
+  );
+  const pedidosFiltrados = useMemo(
+    () => filtrarPedidosCliente(pedidosCliente, filtrosPedidos),
+    [pedidosCliente, filtrosPedidos]
+  );
+  const filtrosAtendimentosAtivos = filtrosHistoricoEstaoAtivos(filtrosAtendimentos, criarFiltrosIniciaisAtendimentos());
+  const filtrosPedidosAtivos = filtrosHistoricoEstaoAtivos(filtrosPedidos, criarFiltrosIniciaisVendas());
+
+  if (!aberto) {
+    return null;
   }
 
   return (
@@ -495,7 +616,7 @@ export function ModalCliente({
           ))}
         </div>
 
-        <div className={`corpoModalCliente ${abaAtiva === 'atendimento' ? 'corpoModalClienteSemRolagem' : ''}`.trim()}>
+        <div className={`corpoModalCliente ${['atendimento', 'vendas'].includes(abaAtiva) ? 'corpoModalClienteSemRolagem' : ''}`.trim()}>
           {abaAtiva === 'dadosGerais' ? (
             <section className="painelDadosGeraisCliente">
               <CampoImagemPadrao
@@ -679,9 +800,17 @@ export function ModalCliente({
             <section className="painelContatosModalCliente painelAtendimentosCliente">
               <div className="cabecalhoGradeContatosModal">
                 <div>
-                  <h3>Ultimos atendimentos</h3>
-                  <p className="subtituloGradeAtendimentoCliente">Exibindo os 30 registros mais recentes deste cliente.</p>
+                  <h3>Ultimos Atendimentos</h3>
                 </div>
+                <Botao
+                  variante={filtrosAtendimentosAtivos ? 'primario' : 'secundario'}
+                  type="button"
+                  icone="filtro"
+                  somenteIcone
+                  title="Filtrar atendimentos"
+                  aria-label="Filtrar atendimentos"
+                  onClick={() => definirModalFiltrosAtendimentosAberto(true)}
+                />
               </div>
 
               <div className="gradeContatosModal gradeAtendimentosCliente">
@@ -714,8 +843,8 @@ export function ModalCliente({
                           Os atendimentos ficarao disponiveis apos salvar o cliente.
                         </td>
                       </tr>
-                    ) : atendimentosCliente.length > 0 ? (
-                      atendimentosCliente.map((atendimento) => (
+                    ) : atendimentosFiltrados.length > 0 ? (
+                      atendimentosFiltrados.map((atendimento) => (
                         <tr key={atendimento.idAtendimento}>
                           <td>{formatarDataAtendimento(atendimento.data)}</td>
                           <td>
@@ -740,7 +869,7 @@ export function ModalCliente({
                     ) : (
                       <tr>
                         <td colSpan={5} className="mensagemTabelaContatosModal">
-                          Nenhum atendimento encontrado para este cliente.
+                          Nenhum atendimento encontrado com os filtros informados.
                         </td>
                       </tr>
                     )}
@@ -751,8 +880,87 @@ export function ModalCliente({
           ) : null}
 
           {abaAtiva === 'vendas' ? (
-            <section className="painelVazioModalCliente">
-              <p>Conteudo em construcao.</p>
+            <section className="painelContatosModalCliente painelPedidosCliente">
+              <div className="cabecalhoGradeContatosModal">
+                <div>
+                  <h3>Ultimos Pedidos</h3>
+                </div>
+                <Botao
+                  variante={filtrosPedidosAtivos ? 'primario' : 'secundario'}
+                  type="button"
+                  icone="filtro"
+                  somenteIcone
+                  title="Filtrar pedidos"
+                  aria-label="Filtrar pedidos"
+                  onClick={() => definirModalFiltrosPedidosAberto(true)}
+                />
+              </div>
+
+              <div className="gradeContatosModal gradePedidosCliente">
+                <table className="tabelaContatosModal tabelaPedidosCliente">
+                  <thead>
+                    <tr>
+                      <th>Data</th>
+                      <th>Pedido</th>
+                      <th>Etapa</th>
+                      <th>Vendedor</th>
+                      <th>Total</th>
+                      <th className="cabecalhoAcoesContato">Acoes</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {carregandoPedidos ? (
+                      <tr>
+                        <td colSpan={6} className="mensagemTabelaContatosModal">
+                          Carregando pedidos...
+                        </td>
+                      </tr>
+                    ) : mensagemErroPedidos ? (
+                      <tr>
+                        <td colSpan={6} className="mensagemTabelaContatosModal">
+                          {mensagemErroPedidos}
+                        </td>
+                      </tr>
+                    ) : !cliente?.idCliente ? (
+                      <tr>
+                        <td colSpan={6} className="mensagemTabelaContatosModal">
+                          Os pedidos ficarao disponiveis apos salvar o cliente.
+                        </td>
+                      </tr>
+                    ) : pedidosFiltrados.length > 0 ? (
+                      pedidosFiltrados.map((pedido) => (
+                        <tr key={pedido.idPedido}>
+                          <td>{formatarDataAtendimento(pedido.dataInclusao)}</td>
+                          <td>
+                            <div className="celulaContatoModal">
+                              <strong>{`#${String(pedido.idPedido).padStart(4, '0')}`}</strong>
+                              <span>{pedido.nomeContatoSnapshot || 'Sem contato'}</span>
+                            </div>
+                          </td>
+                          <td>{pedido.nomeEtapaPedidoSnapshot || 'Sem etapa'}</td>
+                          <td>{pedido.nomeVendedorSnapshot || 'Nao informado'}</td>
+                          <td>{normalizarPreco(pedido.totalPedido)}</td>
+                          <td>
+                            <div className="acoesContatoModal">
+                              <BotaoAcaoGrade
+                                icone="consultar"
+                                titulo="Consultar pedido"
+                                onClick={() => consultarPedido(pedido)}
+                              />
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={6} className="mensagemTabelaContatosModal">
+                          Nenhum pedido encontrado com os filtros informados.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </section>
           ) : null}
         </div>
@@ -821,6 +1029,132 @@ export function ModalCliente({
         modo="consulta"
         aoFechar={fecharModalAtendimento}
         aoSalvar={async () => {}}
+      />
+
+      <ModalFiltros
+        aberto={modalFiltrosAtendimentosAberto}
+        titulo="Filtros de atendimentos"
+        filtros={filtrosAtendimentos}
+        campos={[
+          {
+            name: 'dataInicio',
+            label: 'Data inicial',
+            type: 'date',
+            inputProps: {
+              max: filtrosAtendimentos.dataFim || undefined
+            }
+          },
+          {
+            name: 'dataFim',
+            label: 'Data final',
+            type: 'date',
+            inputProps: {
+              min: filtrosAtendimentos.dataInicio || undefined
+            }
+          },
+          {
+            name: 'assunto',
+            label: 'Assunto',
+            type: 'text',
+            inputProps: {
+              placeholder: 'Todos'
+            }
+          },
+          {
+            name: 'idCanalAtendimento',
+            label: 'Canal',
+            options: canaisAtendimento.map((canal) => ({
+              valor: String(canal.idCanalAtendimento),
+              label: canal.descricao
+            }))
+          },
+          {
+            name: 'idUsuario',
+            label: 'Usuario',
+            options: usuariosHistorico.map((usuario) => ({
+              valor: String(usuario.idUsuario),
+              label: usuario.nome
+            }))
+          }
+        ]}
+        aoFechar={() => definirModalFiltrosAtendimentosAberto(false)}
+        aoAplicar={(proximosFiltros) => {
+          definirFiltrosAtendimentos(proximosFiltros);
+          definirModalFiltrosAtendimentosAberto(false);
+        }}
+        aoLimpar={() => definirFiltrosAtendimentos(criarFiltrosIniciaisAtendimentos())}
+      />
+
+      <ModalPedido
+        aberto={modalPedidoAberto}
+        pedido={pedidoSelecionado}
+        clientes={cliente ? [cliente] : []}
+        contatos={contatos}
+        usuarios={usuariosHistorico}
+        vendedores={vendedores}
+        prazosPagamento={prazosPagamentoPedidos}
+        etapasPedido={etapasPedido}
+        produtos={produtosPedidos}
+        camposPedido={[]}
+        empresa={empresaPedidos}
+        usuarioLogado={null}
+        modo="consulta"
+        aoFechar={fecharModalPedido}
+        aoSalvar={async () => {}}
+      />
+
+      <ModalFiltros
+        aberto={modalFiltrosPedidosAberto}
+        titulo="Filtros de pedidos"
+        filtros={filtrosPedidos}
+        campos={[
+          {
+            name: 'dataInicio',
+            label: 'Data inicial',
+            type: 'date',
+            inputProps: {
+              max: filtrosPedidos.dataFim || undefined
+            }
+          },
+          {
+            name: 'dataFim',
+            label: 'Data final',
+            type: 'date',
+            inputProps: {
+              min: filtrosPedidos.dataInicio || undefined
+            }
+          },
+          {
+            name: 'codigoPedido',
+            label: 'Pedido',
+            type: 'text',
+            inputProps: {
+              placeholder: 'Todos'
+            }
+          },
+          {
+            name: 'idEtapaPedido',
+            label: 'Etapa',
+            options: etapasPedido.map((etapa) => ({
+              valor: String(etapa.idEtapaPedido),
+              label: etapa.descricao
+            }))
+          },
+          {
+            name: 'idVendedor',
+            label: 'Vendedor',
+            options: vendedores.map((vendedor) => ({
+              valor: String(vendedor.idVendedor),
+              label: vendedor.nome
+            }))
+          }
+        ]}
+        aoFechar={() => definirModalFiltrosPedidosAberto(false)}
+        aoAplicar={(proximosFiltros) => {
+          definirFiltrosPedidos(proximosFiltros);
+          definirModalFiltrosPedidosAberto(false);
+        }}
+        aoLimpar={() => definirFiltrosPedidos(criarFiltrosIniciaisVendas())}
       />
     </>
   );
@@ -1071,6 +1405,108 @@ function enriquecerAtendimentosCliente(
     }));
 }
 
+function enriquecerPedidosCliente(pedidos, idCliente, usuarios, vendedores, etapasPedido) {
+  const usuariosPorId = new Map(
+    (usuarios || []).map((usuario) => [usuario.idUsuario, usuario.nome])
+  );
+  const vendedoresPorId = new Map(
+    (vendedores || []).map((vendedor) => [vendedor.idVendedor, vendedor.nome])
+  );
+  const etapasNormalizadas = normalizarEtapasPedidoHistorico(etapasPedido);
+  const etapasPorId = new Map(
+    etapasNormalizadas.map((etapa) => [etapa.idEtapaPedido, etapa])
+  );
+
+  return (pedidos || [])
+    .filter((pedido) => String(pedido.idCliente) === String(idCliente))
+    .sort((pedidoA, pedidoB) => {
+      const dataHoraA = `${pedidoA.dataInclusao || ''}T00:00:00`;
+      const dataHoraB = `${pedidoB.dataInclusao || ''}T00:00:00`;
+      return new Date(dataHoraB).getTime() - new Date(dataHoraA).getTime();
+    })
+    .slice(0, 30)
+    .map((pedido) => ({
+      ...pedido,
+      totalPedido: Array.isArray(pedido.itens)
+        ? pedido.itens.reduce((total, item) => total + (Number(item.valorTotal) || 0), 0)
+        : 0,
+      nomeUsuarioSnapshot: pedido.nomeUsuarioSnapshot || usuariosPorId.get(pedido.idUsuario) || '',
+      nomeVendedorSnapshot: pedido.nomeVendedorSnapshot || vendedoresPorId.get(pedido.idVendedor) || '',
+      nomeEtapaPedidoSnapshot: pedido.nomeEtapaPedidoSnapshot || etapasPorId.get(pedido.idEtapaPedido)?.descricao || ''
+    }));
+}
+
+function filtrarAtendimentosCliente(atendimentos, filtros) {
+  return (atendimentos || []).filter((atendimento) => {
+    const data = String(atendimento.data || '');
+    const assunto = String(atendimento.assunto || '').toLowerCase();
+
+    return (
+      (!filtros.dataInicio || data >= filtros.dataInicio)
+      && (!filtros.dataFim || data <= filtros.dataFim)
+      && (!String(filtros.assunto || '').trim() || assunto.includes(String(filtros.assunto || '').trim().toLowerCase()))
+      && (!filtros.idCanalAtendimento || String(atendimento.idCanalAtendimento) === String(filtros.idCanalAtendimento))
+      && (!filtros.idUsuario || String(atendimento.idUsuario) === String(filtros.idUsuario))
+    );
+  });
+}
+
+function filtrarPedidosCliente(pedidos, filtros) {
+  return (pedidos || []).filter((pedido) => {
+    const data = String(pedido.dataInclusao || '');
+    const codigoPedido = String(pedido.idPedido || '');
+
+    return (
+      (!filtros.dataInicio || data >= filtros.dataInicio)
+      && (!filtros.dataFim || data <= filtros.dataFim)
+      && (!String(filtros.codigoPedido || '').trim() || codigoPedido.includes(String(filtros.codigoPedido || '').trim()))
+      && (!filtros.idEtapaPedido || String(pedido.idEtapaPedido) === String(filtros.idEtapaPedido))
+      && (!filtros.idVendedor || String(pedido.idVendedor) === String(filtros.idVendedor))
+    );
+  });
+}
+
+function filtrosHistoricoEstaoAtivos(filtros, filtrosIniciais) {
+  return JSON.stringify(filtros) !== JSON.stringify(filtrosIniciais);
+}
+
+function normalizarEtapasPedidoHistorico(etapasPedido) {
+  if (!Array.isArray(etapasPedido)) {
+    return [];
+  }
+
+  return etapasPedido
+    .map((etapa) => ({
+      ...etapa,
+      idEtapaPedido: etapa.idEtapaPedido ?? etapa.idEtapa
+    }))
+    .sort((etapaA, etapaB) => {
+      const ordemA = obterValorOrdemEtapaHistorico(etapaA?.ordem, etapaA?.idEtapaPedido);
+      const ordemB = obterValorOrdemEtapaHistorico(etapaB?.ordem, etapaB?.idEtapaPedido);
+
+      if (ordemA !== ordemB) {
+        return ordemA - ordemB;
+      }
+
+      return Number(etapaA?.idEtapaPedido || 0) - Number(etapaB?.idEtapaPedido || 0);
+    });
+}
+
+function obterValorOrdemEtapaHistorico(ordem, fallback) {
+  const ordemNumerica = Number(ordem);
+
+  if (Number.isFinite(ordemNumerica) && ordemNumerica > 0) {
+    return ordemNumerica;
+  }
+
+  const fallbackNumerico = Number(fallback);
+  if (Number.isFinite(fallbackNumerico) && fallbackNumerico > 0) {
+    return fallbackNumerico;
+  }
+
+  return Number.MAX_SAFE_INTEGER;
+}
+
 function ordenarAtendimentosMaisRecentes(atendimentoA, atendimentoB) {
   const dataHoraA = `${atendimentoA.data || ''}T${atendimentoA.horaInicio || '00:00'}`;
   const dataHoraB = `${atendimentoB.data || ''}T${atendimentoB.horaInicio || '00:00'}`;
@@ -1084,4 +1520,23 @@ function formatarDataAtendimento(data) {
   }
 
   return new Intl.DateTimeFormat('pt-BR').format(new Date(`${data}T00:00:00`));
+}
+
+function obterPeriodoMesAtual() {
+  const agora = new Date();
+  const inicio = new Date(agora.getFullYear(), agora.getMonth(), 1);
+  const fim = new Date(agora.getFullYear(), agora.getMonth() + 1, 0);
+
+  return {
+    dataInicio: formatarDataInput(inicio),
+    dataFim: formatarDataInput(fim)
+  };
+}
+
+function formatarDataInput(data) {
+  const ano = data.getFullYear();
+  const mes = String(data.getMonth() + 1).padStart(2, '0');
+  const dia = String(data.getDate()).padStart(2, '0');
+
+  return `${ano}-${mes}-${dia}`;
 }

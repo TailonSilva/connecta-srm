@@ -53,6 +53,8 @@ Observacao importante:
 - Acoes de linha usam o componente central de acoes da interface
 - Selos de codigo usam o componente padrao de codigo do projeto
 - Funcoes reutilizaveis do frontend ficam em `client/src/utilitarios`
+- Servicos auxiliares de listagem usados por campos de busca e selecao retornam apenas registros ativos por padrao; listas principais de entidades continuam completas e modais de busca reutilizaveis filtram inativos automaticamente
+- Campos de formulario com botoes laterais de busca, consulta ou cadastro devem usar os contêineres compartilhados de acao do formulario para manter o botao ao lado do input/select sem quebrar a grade
 - Sempre que houver mudanca estrutural relevante de banco, fluxo desktop ou release, o README deve ser atualizado
 - Cada componente novo deve ter seu proprio arquivo de estilo com o mesmo nome do componente salvo em `client/src/recursos/estilos/`
 - CSS de pagina deve ficar restrito a layout/composicao da pagina e tambem salvo em `client/src/recursos/estilos/`
@@ -84,6 +86,7 @@ Padroes aplicados recentemente:
 - Busca de clientes foi unificada para atendimento e orcamento
 - Busca de contatos foi unificada para atendimento e orcamento
 - O cadastro de cliente reaproveita o mesmo fluxo de `Ramo de Atividade` usado em configuracoes
+- No modal de cliente, as abas `Atendimento` e `Vendas` possuem grade propria com botao de filtro; os filtros de data abrem por padrao no mes corrente
 - O cadastro de produto reaproveita os mesmos fluxos de configuracao para `Grupo de Produto`, `Marca` e `Unidade`
 - Modais com abas usam cabecalho e faixa de abas fixos, com rolagem apenas no corpo
 - Modais empilhados possuem camadas de z-index separadas para evitar abertura por tras do modal pai
@@ -111,7 +114,7 @@ Utilitarios importantes:
   - produtos cadastrados
   - total de vendas em valores
   - total de vendas em quantidades
-- A pagina inicial agora possui um botao de filtro proprio para refinar os dados do funil por periodo, vendedor, produto e grupo de produto
+- A pagina inicial agora possui um botao de filtro proprio para refinar os dados do funil por periodo, com selecao multipla em `Vendedor`, `Produto`, `Grupo de produto` e `Marca`
 - Os mesmos filtros da pagina inicial tambem sao aplicados aos cards de vendas, usando pedidos como base para valor total e quantidade total vendida
 - Quando o usuario logado for `Usuario padrao` com vendedor vinculado, o filtro da pagina inicial ja abre com esse vendedor selecionado e bloqueado
 - O periodo padrao da pagina inicial sempre abre do dia 01 ate o ultimo dia do mes atual
@@ -280,6 +283,7 @@ Filtros da agenda:
 - A troca rapida da etapa para `Fechado` no grid tambem oferece a geracao imediata do pedido
 - Modais de confirmacao do fluxo comercial abrem como sobreposicao fixa acima da pagina, inclusive no lancamento de pedido a partir do grid
 - Campos configuraveis extras para o orcamento
+- Os campos `Prazo de pagamento` nos modais de orcamento e pedido reutilizam o mesmo grid de `Prazos de pagamento` da area de Configuracoes, permitindo cadastrar, editar, inativar e selecionar o prazo sem sair do fluxo
 
 ### Pedidos
 

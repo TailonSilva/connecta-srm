@@ -310,7 +310,7 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
   }, [vendedores]);
 
   async function carregarEmpresa() {
-    const empresas = await listarEmpresas();
+    const empresas = await listarEmpresas({ incluirInativos: true });
     definirEmpresa(empresas[0] || null);
   }
 
@@ -330,7 +330,7 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
   }
 
   async function carregarUsuarios() {
-    const usuariosCarregados = await listarUsuarios();
+    const usuariosCarregados = await listarUsuarios({ incluirInativos: true });
     const vendedoresPorId = new Map(
       vendedores.map((vendedor) => [vendedor.idVendedor, vendedor.nome])
     );
@@ -354,26 +354,26 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
 
   async function carregarCadastrosConfiguracao() {
     const resultados = await Promise.allSettled([
-      listarGruposProdutoConfiguracao(),
-      listarMarcasConfiguracao(),
-      listarRamosAtividadeConfiguracao(),
-      listarVendedoresConfiguracao(),
-      listarUnidadesMedidaConfiguracao(),
-      listarMetodosPagamentoConfiguracao(),
-      listarPrazosPagamentoConfiguracao(),
-      listarLocaisAgendaConfiguracao(),
-      listarTiposRecursoConfiguracao(),
-      listarRecursosConfiguracao(),
-      listarTiposAgendaConfiguracao(),
-      listarCanaisAtendimentoConfiguracao(),
-      listarOrigensAtendimentoConfiguracao(),
-        listarStatusVisitaConfiguracao(),
-        listarMotivosPerdaConfiguracao(),
-        listarEtapasPedidoConfiguracao(),
-        listarEtapasOrcamentoConfiguracao(),
-        listarCamposOrcamentoConfiguracao(),
-        listarCamposPedidoConfiguracao(),
-        listarTamanhosConfiguracao()
+      listarGruposProdutoConfiguracao({ incluirInativos: true }),
+      listarMarcasConfiguracao({ incluirInativos: true }),
+      listarRamosAtividadeConfiguracao({ incluirInativos: true }),
+      listarVendedoresConfiguracao({ incluirInativos: true }),
+      listarUnidadesMedidaConfiguracao({ incluirInativos: true }),
+      listarMetodosPagamentoConfiguracao({ incluirInativos: true }),
+      listarPrazosPagamentoConfiguracao({ incluirInativos: true }),
+      listarLocaisAgendaConfiguracao({ incluirInativos: true }),
+      listarTiposRecursoConfiguracao({ incluirInativos: true }),
+      listarRecursosConfiguracao({ incluirInativos: true }),
+      listarTiposAgendaConfiguracao({ incluirInativos: true }),
+      listarCanaisAtendimentoConfiguracao({ incluirInativos: true }),
+      listarOrigensAtendimentoConfiguracao({ incluirInativos: true }),
+        listarStatusVisitaConfiguracao({ incluirInativos: true }),
+        listarMotivosPerdaConfiguracao({ incluirInativos: true }),
+        listarEtapasPedidoConfiguracao({ incluirInativos: true }),
+        listarEtapasOrcamentoConfiguracao({ incluirInativos: true }),
+        listarCamposOrcamentoConfiguracao({ incluirInativos: true }),
+        listarCamposPedidoConfiguracao({ incluirInativos: true }),
+        listarTamanhosConfiguracao({ incluirInativos: true })
       ]);
 
     definirGruposProduto(obterResultadoLista(resultados[0]));

@@ -1,4 +1,5 @@
 import { requisitarApi } from './api';
+import { requisitarListaApi } from './listas';
 
 export function listarProdutos() {
   return requisitarApi('/produtos');
@@ -24,14 +25,14 @@ export function atualizarProduto(idProduto, payload) {
   });
 }
 
-export function listarGruposProduto() {
-  return requisitarApi('/gruposProduto');
+export function listarGruposProduto(opcoes) {
+  return requisitarListaApi('/gruposProduto', opcoes);
 }
 
-export function listarMarcas() {
-  return requisitarApi('/marcas');
+export function listarMarcas(opcoes) {
+  return requisitarListaApi('/marcas', opcoes);
 }
 
-export function listarUnidadesMedida() {
-  return requisitarApi('/unidadesMedida');
+export function listarUnidadesMedida(opcoes) {
+  return requisitarListaApi('/unidadesMedida', opcoes);
 }

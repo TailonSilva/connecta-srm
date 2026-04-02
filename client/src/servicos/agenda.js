@@ -1,4 +1,5 @@
 import { requisitarApi } from './api';
+import { requisitarListaApi } from './listas';
 
 export function listarAgendamentos() {
   return requisitarApi('/agendamentos');
@@ -40,22 +41,22 @@ export function excluirAgendamento(idAgendamento) {
   });
 }
 
-export function listarLocaisAgenda() {
-  return requisitarApi('/locaisAgenda');
+export function listarLocaisAgenda(opcoes) {
+  return requisitarListaApi('/locaisAgenda', opcoes);
 }
 
-export function listarRecursosAgenda() {
-  return requisitarApi('/recursos');
+export function listarRecursosAgenda(opcoes) {
+  return requisitarListaApi('/recursos', opcoes);
 }
 
-export function listarTiposRecurso() {
-  return requisitarApi('/tiposRecurso');
+export function listarTiposRecurso(opcoes) {
+  return requisitarListaApi('/tiposRecurso', opcoes);
 }
 
-export function listarTiposAgenda() {
-  return requisitarApi('/tiposAgenda');
+export function listarTiposAgenda(opcoes) {
+  return requisitarListaApi('/tiposAgenda', opcoes);
 }
 
-export function listarStatusVisita() {
-  return requisitarApi('/statusVisita');
+export function listarStatusVisita(opcoes) {
+  return requisitarListaApi('/statusVisita', opcoes);
 }

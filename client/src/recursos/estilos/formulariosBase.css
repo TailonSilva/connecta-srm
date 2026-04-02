@@ -56,6 +56,29 @@
   align-items: center;
 }
 
+.campoSelectComAcao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+  min-width: 0;
+}
+
+.campoSelectComAcao.temAcao {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.campoSelectComAcao .entradaFormulario {
+  min-width: 0;
+}
+
+.acoesCampoSelect {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
 .linhaPrazosPagamento {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));

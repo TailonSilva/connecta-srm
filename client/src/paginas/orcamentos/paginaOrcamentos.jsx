@@ -9,6 +9,8 @@ import { ModalFiltros } from '../../componentes/comuns/modalFiltros';
 import { CorpoPagina } from '../../componentes/layout/corpoPagina';
 import { listarClientes, listarContatos, listarVendedores } from '../../servicos/clientes';
 import {
+  atualizarPrazoPagamento,
+  incluirPrazoPagamento,
   listarCamposPedidoConfiguracao,
   listarEtapasPedidoConfiguracao,
   listarCamposOrcamentoConfiguracao,
@@ -135,6 +137,7 @@ export function PaginaOrcamentos({ usuarioLogado }) {
       const clientesCarteira = usuarioSomenteVendedor
         ? clientesCarregados.filter((cliente) => cliente.idVendedor === usuarioLogado.idVendedor)
         : clientesCarregados;
+      const etapasCarregadasOrdenadas = ordenarEtapasPorOrdem(etapasCarregadas, 'idEtapaOrcamento');
       const idsClientesCarteira = new Set(clientesCarteira.map((cliente) => cliente.idCliente));
       const orcamentosVisiveis = usuarioSomenteVendedor
         ? orcamentosCarregados.filter((orcamento) => (
@@ -153,7 +156,7 @@ export function PaginaOrcamentos({ usuarioLogado }) {
           usuariosCarregados,
           vendedoresCarregados,
           enriquecerPrazosPagamento(prazosCarregados, metodosCarregados),
-          etapasCarregadas,
+          etapasCarregadasOrdenadas,
           produtosCarregados
         )
       );
@@ -163,7 +166,7 @@ export function PaginaOrcamentos({ usuarioLogado }) {
       definirVendedores(vendedoresCarregados);
       definirMetodosPagamento(metodosCarregados);
       definirPrazosPagamento(enriquecerPrazosPagamento(prazosCarregados, metodosCarregados));
-      definirEtapasOrcamento(etapasCarregadas);
+      definirEtapasOrcamento(etapasCarregadasOrdenadas);
       definirMotivosPerda(motivosPerdaCarregados);
       definirProdutos(produtosCarregados.filter((produto) => produto.status !== 0));
       definirCamposOrcamento(camposCarregados);
@@ -223,6 +226,37 @@ export function PaginaOrcamentos({ usuarioLogado }) {
 
       definirOrcamentoPedidoPendente(pendenciaPedido);
     }
+  }
+
+  async function salvarPrazoPagamento(dadosPrazo) {
+    const payload = normalizarPayloadPrazoPagamento(dadosPrazo);
+    const registroSalvo = dadosPrazo?.idPrazoPagamento
+      ? await atualizarPrazoPagamento(dadosPrazo.idPrazoPagamento, payload)
+      : await incluirPrazoPagamento(payload);
+
+    await carregarDados();
+    return enriquecerPrazoPagamento(registroSalvo, metodosPagamento);
+  }
+
+  async function inativarPrazoPagamento(prazo) {
+    if (!prazo?.idPrazoPagamento) {
+      return null;
+    }
+
+    const registroAtual = prazosPagamento.find(
+      (item) => String(item.idPrazoPagamento) === String(prazo.idPrazoPagamento)
+    ) || prazo;
+
+    await atualizarPrazoPagamento(
+      prazo.idPrazoPagamento,
+      normalizarPayloadPrazoPagamento({
+        ...registroAtual,
+        status: false
+      })
+    );
+
+    await carregarDados();
+    return null;
   }
 
   async function alterarEtapaRapidamente(orcamento, idEtapaOrcamento, idMotivoPerda = null) {
@@ -586,6 +620,7 @@ export function PaginaOrcamentos({ usuarioLogado }) {
         contatos={contatos}
         usuarios={usuarios}
         vendedores={vendedores}
+        metodosPagamento={metodosPagamento}
         prazosPagamento={prazosPagamento}
         etapasOrcamento={etapasOrcamento}
         motivosPerda={motivosPerda}
@@ -596,6 +631,8 @@ export function PaginaOrcamentos({ usuarioLogado }) {
         modo={modoModal}
         aoFechar={fecharModal}
         aoSalvar={salvarOrcamento}
+        aoSalvarPrazoPagamento={salvarPrazoPagamento}
+        aoInativarPrazoPagamento={inativarPrazoPagamento}
       />
 
       <ModalPedido
@@ -606,6 +643,7 @@ export function PaginaOrcamentos({ usuarioLogado }) {
         contatos={contatos}
         usuarios={usuarios}
         vendedores={vendedores}
+        metodosPagamento={metodosPagamento}
         prazosPagamento={prazosPagamento}
         etapasPedido={etapasPedido}
         produtos={produtos}
@@ -615,6 +653,8 @@ export function PaginaOrcamentos({ usuarioLogado }) {
         modo="novo"
         aoFechar={fecharModalPedido}
         aoSalvar={salvarPedido}
+        aoSalvarPrazoPagamento={salvarPrazoPagamento}
+        aoInativarPrazoPagamento={inativarPrazoPagamento}
       />
 
       {orcamentoExclusaoPendente ? (
@@ -884,6 +924,38 @@ function filtrarOrcamentos(orcamentos, pesquisa, filtros) {
   });
 }
 
+function ordenarEtapasPorOrdem(etapas, chaveId) {
+  if (!Array.isArray(etapas)) {
+    return [];
+  }
+
+  return [...etapas].sort((etapaA, etapaB) => {
+    const ordemA = obterValorOrdemEtapa(etapaA?.ordem, etapaA?.[chaveId]);
+    const ordemB = obterValorOrdemEtapa(etapaB?.ordem, etapaB?.[chaveId]);
+
+    if (ordemA !== ordemB) {
+      return ordemA - ordemB;
+    }
+
+    return Number(etapaA?.[chaveId] || 0) - Number(etapaB?.[chaveId] || 0);
+  });
+}
+
+function obterValorOrdemEtapa(ordem, fallback) {
+  const ordemNumerica = Number(ordem);
+
+  if (Number.isFinite(ordemNumerica) && ordemNumerica > 0) {
+    return ordemNumerica;
+  }
+
+  const fallbackNumerico = Number(fallback);
+  if (Number.isFinite(fallbackNumerico) && fallbackNumerico > 0) {
+    return fallbackNumerico;
+  }
+
+  return Number.MAX_SAFE_INTEGER;
+}
+
 function enriquecerOrcamentos(orcamentos, clientes, contatos, usuarios, vendedores, prazosPagamento, etapasOrcamento, produtos) {
   const clientesPorId = new Map(
     clientes.map((cliente) => [cliente.idCliente, cliente])
@@ -955,6 +1027,29 @@ function enriquecerPrazosPagamento(prazosPagamento, metodosPagamento = []) {
       descricaoFormatada
     };
   });
+}
+
+function enriquecerPrazoPagamento(prazo, metodosPagamento = []) {
+  if (!prazo) {
+    return null;
+  }
+
+  return enriquecerPrazosPagamento([prazo], metodosPagamento)[0] || null;
+}
+
+function normalizarPayloadPrazoPagamento(dadosPrazo) {
+  const payload = {
+    descricao: limparTextoOpcional(dadosPrazo.descricao),
+    idMetodoPagamento: Number(dadosPrazo.idMetodoPagamento),
+    status: dadosPrazo.status ? 1 : 0
+  };
+
+  ['prazo1', 'prazo2', 'prazo3', 'prazo4', 'prazo5', 'prazo6'].forEach((chave) => {
+    const valor = String(dadosPrazo[chave] || '').trim();
+    payload[chave] = valor ? Number(valor) : null;
+  });
+
+  return payload;
 }
 
 function normalizarPayloadOrcamento(dadosOrcamento, usuarioLogado) {

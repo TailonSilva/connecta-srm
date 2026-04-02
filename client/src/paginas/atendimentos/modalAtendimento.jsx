@@ -47,6 +47,7 @@ export function ModalAtendimento({
   contatosOrcamento = [],
   usuariosOrcamento = [],
   vendedoresOrcamento = [],
+  metodosPagamento = [],
   prazosPagamento = [],
   etapasOrcamento = [],
   motivosPerda = [],
@@ -55,6 +56,8 @@ export function ModalAtendimento({
   camposOrcamento = [],
   empresa,
   etapaOrcamentoAtualizadaExternamente = null,
+  aoSalvarPrazoPagamento,
+  aoInativarPrazoPagamento,
   aoFechar,
   aoSalvar,
   aoExcluir
@@ -747,6 +750,7 @@ export function ModalAtendimento({
                       variante="secundario"
                       type="button"
                       icone="pesquisa"
+                      className="botaoCampoAcao"
                       somenteIcone
                       title="Buscar cliente"
                       aria-label="Buscar cliente"
@@ -771,6 +775,7 @@ export function ModalAtendimento({
                       variante="secundario"
                       type="button"
                       icone="pesquisa"
+                      className="botaoCampoAcao"
                       somenteIcone
                       title="Buscar contato"
                       aria-label="Buscar contato"
@@ -793,11 +798,12 @@ export function ModalAtendimento({
                   }))}
                   disabled={somenteLeitura || !formulario.idCliente}
                   acaoExtra={formulario.idOrcamento ? (
-                    <>
+                    <div className="acoesCampoSelect">
                       <Botao
                         variante="secundario"
                         type="button"
                         icone="consultar"
+                        className="botaoCampoAcao"
                         somenteIcone
                         title="Consultar orcamento"
                         aria-label="Consultar orcamento"
@@ -808,13 +814,14 @@ export function ModalAtendimento({
                           variante="secundario"
                           type="button"
                           icone="editar"
+                          className="botaoCampoAcao"
                           somenteIcone
                           title="Editar orcamento"
                           aria-label="Editar orcamento"
                           onClick={abrirModalEdicaoOrcamento}
                         />
                       ) : null}
-                    </>
+                    </div>
                   ) : null}
                 />
                 <CampoSelect
@@ -1026,6 +1033,7 @@ export function ModalAtendimento({
       contatos={contatosOrcamento}
       usuarios={usuariosOrcamento}
       vendedores={vendedoresOrcamento}
+      metodosPagamento={metodosPagamento}
       prazosPagamento={prazosPagamento}
       etapasOrcamento={etapasOrcamento}
       motivosPerda={motivosPerda}
@@ -1036,6 +1044,8 @@ export function ModalAtendimento({
       modo={modoModalOrcamento}
       aoFechar={fecharModalNovoOrcamento}
       aoSalvar={salvarNovoOrcamento}
+      aoSalvarPrazoPagamento={aoSalvarPrazoPagamento}
+      aoInativarPrazoPagamento={aoInativarPrazoPagamento}
     />
     </>
   );

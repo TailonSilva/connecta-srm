@@ -8,7 +8,14 @@ import { GradePadrao } from '../../componentes/comuns/gradePadrao';
 import { ModalFiltros } from '../../componentes/comuns/modalFiltros';
 import { CorpoPagina } from '../../componentes/layout/corpoPagina';
 import { listarClientes, listarContatos, listarVendedores } from '../../servicos/clientes';
-import { listarCamposPedidoConfiguracao, listarEtapasPedidoConfiguracao, listarPrazosPagamentoConfiguracao } from '../../servicos/configuracoes';
+import {
+  atualizarPrazoPagamento,
+  incluirPrazoPagamento,
+  listarCamposPedidoConfiguracao,
+  listarEtapasPedidoConfiguracao,
+  listarMetodosPagamentoConfiguracao,
+  listarPrazosPagamentoConfiguracao
+} from '../../servicos/configuracoes';
 import { listarEmpresas } from '../../servicos/empresa';
 import { atualizarPedido, excluirPedido, incluirPedido, listarPedidos } from '../../servicos/pedidos';
 import { listarProdutos } from '../../servicos/produtos';
@@ -44,6 +51,7 @@ export function PaginaPedidos({ usuarioLogado }) {
   const [contatos, definirContatos] = useState([]);
   const [usuarios, definirUsuarios] = useState([]);
   const [vendedores, definirVendedores] = useState([]);
+  const [metodosPagamento, definirMetodosPagamento] = useState([]);
   const [prazosPagamento, definirPrazosPagamento] = useState([]);
   const [produtos, definirProdutos] = useState([]);
   const [camposPedido, definirCamposPedido] = useState([]);
@@ -74,6 +82,7 @@ export function PaginaPedidos({ usuarioLogado }) {
         contatosCarregados,
         usuariosCarregados,
         vendedoresCarregados,
+        metodosCarregados,
         prazosCarregados,
         produtosCarregados,
         camposCarregados,
@@ -85,6 +94,7 @@ export function PaginaPedidos({ usuarioLogado }) {
         listarContatos(),
         listarUsuarios(),
         listarVendedores(),
+        listarMetodosPagamentoConfiguracao(),
         listarPrazosPagamentoConfiguracao(),
         listarProdutos(),
         listarCamposPedidoConfiguracao(),
@@ -99,7 +109,8 @@ export function PaginaPedidos({ usuarioLogado }) {
       definirContatos(contatosCarregados);
       definirUsuarios(usuariosCarregados);
       definirVendedores(vendedoresCarregados);
-      definirPrazosPagamento(prazosCarregados);
+      definirMetodosPagamento(metodosCarregados);
+      definirPrazosPagamento(enriquecerPrazosPagamento(prazosCarregados, metodosCarregados));
       definirProdutos(produtosCarregados);
       definirCamposPedido(camposCarregados);
       definirEmpresa(empresasCarregadas[0] || null);
@@ -145,6 +156,37 @@ export function PaginaPedidos({ usuarioLogado }) {
 
     await carregarDados();
     fecharModal();
+  }
+
+  async function salvarPrazoPagamento(dadosPrazo) {
+    const payload = normalizarPayloadPrazoPagamento(dadosPrazo);
+    const registroSalvo = dadosPrazo?.idPrazoPagamento
+      ? await atualizarPrazoPagamento(dadosPrazo.idPrazoPagamento, payload)
+      : await incluirPrazoPagamento(payload);
+
+    await carregarDados();
+    return enriquecerPrazoPagamento(registroSalvo, metodosPagamento);
+  }
+
+  async function inativarPrazoPagamento(prazo) {
+    if (!prazo?.idPrazoPagamento) {
+      return null;
+    }
+
+    const registroAtual = prazosPagamento.find(
+      (item) => String(item.idPrazoPagamento) === String(prazo.idPrazoPagamento)
+    ) || prazo;
+
+    await atualizarPrazoPagamento(
+      prazo.idPrazoPagamento,
+      normalizarPayloadPrazoPagamento({
+        ...registroAtual,
+        status: false
+      })
+    );
+
+    await carregarDados();
+    return null;
   }
 
   function abrirExclusaoPedido(pedido) {
@@ -284,6 +326,7 @@ export function PaginaPedidos({ usuarioLogado }) {
         contatos={contatos}
         usuarios={usuarios}
         vendedores={vendedores}
+        metodosPagamento={metodosPagamento}
         prazosPagamento={prazosPagamento}
         etapasPedido={etapasPedido}
         produtos={produtos}
@@ -293,6 +336,8 @@ export function PaginaPedidos({ usuarioLogado }) {
         modo={modoModal}
         aoFechar={fecharModal}
         aoSalvar={salvarPedido}
+        aoSalvarPrazoPagamento={salvarPrazoPagamento}
+        aoInativarPrazoPagamento={inativarPrazoPagamento}
       />
 
       {pedidoExclusaoPendente ? (
@@ -467,6 +512,47 @@ function normalizarPayloadPedido(dadosPedido) {
       valor: limparTextoOpcional(campo.valor)
     })) : []
   };
+}
+
+function normalizarPayloadPrazoPagamento(dadosPrazo) {
+  const payload = {
+    descricao: limparTextoOpcional(dadosPrazo.descricao),
+    idMetodoPagamento: Number(dadosPrazo.idMetodoPagamento),
+    status: dadosPrazo.status ? 1 : 0
+  };
+
+  ['prazo1', 'prazo2', 'prazo3', 'prazo4', 'prazo5', 'prazo6'].forEach((chave) => {
+    const valor = String(dadosPrazo[chave] || '').trim();
+    payload[chave] = valor ? Number(valor) : null;
+  });
+
+  return payload;
+}
+
+function enriquecerPrazosPagamento(prazosPagamento, metodosPagamento = []) {
+  const metodosPorId = new Map(
+    metodosPagamento.map((metodo) => [metodo.idMetodoPagamento, metodo.descricao])
+  );
+
+  return prazosPagamento.map((prazo) => {
+    const parcelas = [prazo.prazo1, prazo.prazo2, prazo.prazo3, prazo.prazo4, prazo.prazo5, prazo.prazo6]
+      .filter((valor) => valor !== null && valor !== undefined && valor !== '')
+      .join(' / ');
+
+    return {
+      ...prazo,
+      nomeMetodoPagamento: metodosPorId.get(prazo.idMetodoPagamento) || '',
+      descricaoFormatada: prazo.descricao || (parcelas ? `${parcelas} dias` : 'Prazo sem descricao')
+    };
+  });
+}
+
+function enriquecerPrazoPagamento(prazo, metodosPagamento = []) {
+  if (!prazo) {
+    return null;
+  }
+
+  return enriquecerPrazosPagamento([prazo], metodosPagamento)[0] || null;
 }
 
 function limparTextoOpcional(valor) {

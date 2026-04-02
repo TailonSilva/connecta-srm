@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Botao } from '../../componentes/comuns/botao';
 import { CampoImagemPadrao } from '../../componentes/comuns/campoImagemPadrao';
 import { CodigoRegistro } from '../../componentes/comuns/codigoRegistro';
+import { ModalPrazosPagamento } from '../configuracoes/modalPrazosPagamento';
 import {
   converterPrecoParaNumero,
   desformatarPreco,
@@ -96,6 +97,7 @@ export function ModalPedido({
   contatos,
   usuarios,
   vendedores,
+  metodosPagamento = [],
   prazosPagamento,
   etapasPedido,
   produtos,
@@ -103,8 +105,11 @@ export function ModalPedido({
   empresa,
   usuarioLogado,
   modo = 'consulta',
+  somenteConsultaPrazos = false,
   aoFechar,
-  aoSalvar
+  aoSalvar,
+  aoSalvarPrazoPagamento,
+  aoInativarPrazoPagamento
 }) {
   const [formulario, definirFormulario] = useState(estadoInicialFormulario);
   const [abaAtiva, definirAbaAtiva] = useState(abasModalPedido[0].id);
@@ -114,6 +119,7 @@ export function ModalPedido({
   const [indiceItemEdicao, definirIndiceItemEdicao] = useState(null);
   const [itemFormulario, definirItemFormulario] = useState(estadoInicialItem);
   const [modalItemAberto, definirModalItemAberto] = useState(false);
+  const [modalPrazosPagamentoAberto, definirModalPrazosPagamentoAberto] = useState(false);
   const [mensagemErroItem, definirMensagemErroItem] = useState('');
   const somenteLeitura = modo === 'consulta';
   const modoInclusao = !pedido;
@@ -154,6 +160,7 @@ export function ModalPedido({
     definirIndiceItemEdicao(null);
     definirItemFormulario(estadoInicialItem);
     definirModalItemAberto(false);
+    definirModalPrazosPagamentoAberto(false);
     definirMensagemErroItem('');
   }, [aberto, chaveRegistroBase, usuarioLogado?.idUsuario, quantidadeCamposPedido, chaveEmpresa]);
 
@@ -172,6 +179,11 @@ export function ModalPedido({
         return;
       }
 
+      if (modalPrazosPagamentoAberto) {
+        fecharModalPrazosPagamento();
+        return;
+      }
+
       if (confirmandoSaida) {
         definirConfirmandoSaida(false);
         return;
@@ -185,7 +197,7 @@ export function ModalPedido({
     return () => {
       window.removeEventListener('keydown', tratarTecla);
     };
-  }, [aberto, confirmandoSaida, modalItemAberto, salvando]);
+  }, [aberto, confirmandoSaida, modalItemAberto, modalPrazosPagamentoAberto, salvando]);
 
   if (!aberto) {
     return null;
@@ -414,6 +426,31 @@ export function ModalPedido({
     aoFechar();
   }
 
+  function abrirModalPrazosPagamento() {
+    if (somenteLeitura || salvando || !aoSalvarPrazoPagamento) {
+      return;
+    }
+
+    definirModalPrazosPagamentoAberto(true);
+  }
+
+  function fecharModalPrazosPagamento() {
+    definirModalPrazosPagamentoAberto(false);
+  }
+
+  function selecionarPrazoPagamento(prazo) {
+    if (!prazo?.idPrazoPagamento) {
+      return;
+    }
+
+    definirFormulario((estadoAtual) => ({
+      ...estadoAtual,
+      idPrazoPagamento: String(prazo.idPrazoPagamento),
+      nomePrazoPagamentoSnapshot: prazo.descricaoFormatada || prazo.descricao || '',
+      nomeMetodoPagamentoSnapshot: prazo.nomeMetodoPagamento || ''
+    }));
+  }
+
   return (
     <div className="camadaModal" role="presentation" onMouseDown={fecharAoClicarNoFundo}>
       <form
@@ -542,6 +579,18 @@ export function ModalPedido({
                         label: prazo.descricaoFormatada || prazo.descricao || 'Prazo'
                       }))}
                       disabled={somenteLeitura}
+                      acaoExtra={!somenteLeitura && aoSalvarPrazoPagamento ? (
+                        <Botao
+                          variante="secundario"
+                          type="button"
+                          icone="pesquisa"
+                          className="botaoCampoAcao"
+                          somenteIcone
+                          title="Abrir prazos de pagamento"
+                          aria-label="Abrir prazos de pagamento"
+                          onClick={abrirModalPrazosPagamento}
+                        />
+                      ) : null}
                     />
                   </>
                 ) : (
@@ -803,6 +852,20 @@ export function ModalPedido({
             </div>
           </div>
         ) : null}
+
+        <ModalPrazosPagamento
+          aberto={modalPrazosPagamentoAberto}
+          prazosPagamento={prazosPagamento}
+          metodosPagamento={metodosPagamento}
+          somenteConsulta={somenteConsultaPrazos}
+          fecharAoSalvar
+          aoFechar={fecharModalPrazosPagamento}
+          aoSalvar={aoSalvarPrazoPagamento}
+          aoInativar={aoInativarPrazoPagamento}
+          aoSelecionarPrazo={async (prazo) => {
+            selecionarPrazoPagamento(prazo);
+          }}
+        />
       </form>
     </div>
   );
@@ -817,18 +880,21 @@ function CampoFormulario({ label, name, type = 'text', ...props }) {
   );
 }
 
-function CampoSelect({ label, name, options, ...props }) {
+function CampoSelect({ label, name, options, acaoExtra = null, ...props }) {
   return (
     <div className="campoFormulario">
       <label htmlFor={name}>{label}</label>
-      <select id={name} name={name} className="entradaFormulario" {...props}>
-        <option value="">Selecione</option>
-        {options.map((option, indice) => (
-          <option key={`${option.valor ?? option.label ?? 'opcao'}-${indice}`} value={option.valor ?? ''}>
-            {option.label}
-          </option>
-        ))}
-      </select>
+      <div className={`campoSelectComAcao ${acaoExtra ? 'temAcao' : ''}`.trim()}>
+        <select id={name} name={name} className="entradaFormulario" {...props}>
+          <option value="">Selecione</option>
+          {options.map((option, indice) => (
+            <option key={`${option.valor ?? option.label ?? 'opcao'}-${indice}`} value={option.valor ?? ''}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        {acaoExtra ? <div className="acoesCampoSelect">{acaoExtra}</div> : null}
+      </div>
     </div>
   );
 }

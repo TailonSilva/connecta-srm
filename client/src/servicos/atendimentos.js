@@ -1,4 +1,5 @@
 import { requisitarApi } from './api';
+import { requisitarListaApi } from './listas';
 
 export function listarAtendimentos() {
   return requisitarApi('/atendimentos');
@@ -30,10 +31,10 @@ export function excluirAtendimento(idAtendimento) {
   });
 }
 
-export function listarCanaisAtendimento() {
-  return requisitarApi('/canaisAtendimento');
+export function listarCanaisAtendimento(opcoes) {
+  return requisitarListaApi('/canaisAtendimento', opcoes);
 }
 
-export function listarOrigensAtendimento() {
-  return requisitarApi('/origensAtendimento');
+export function listarOrigensAtendimento(opcoes) {
+  return requisitarListaApi('/origensAtendimento', opcoes);
 }

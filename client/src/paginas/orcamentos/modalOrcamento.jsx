@@ -5,6 +5,7 @@ import { CodigoRegistro } from '../../componentes/comuns/codigoRegistro';
 import { ModalBuscaClientes } from '../../componentes/comuns/modalBuscaClientes';
 import { ModalBuscaContatos } from '../../componentes/comuns/modalBuscaContatos';
 import { ModalBuscaTabela } from '../../componentes/comuns/modalBuscaTabela';
+import { ModalPrazosPagamento } from '../configuracoes/modalPrazosPagamento';
 import {
   converterPrecoParaNumero,
   desformatarPreco,
@@ -55,6 +56,7 @@ export function ModalOrcamento({
   contatos,
   usuarios,
   vendedores,
+  metodosPagamento = [],
   prazosPagamento,
   etapasOrcamento,
   motivosPerda,
@@ -63,8 +65,11 @@ export function ModalOrcamento({
   empresa,
   usuarioLogado,
   modo = 'novo',
+  somenteConsultaPrazos = false,
   aoFechar,
-  aoSalvar
+  aoSalvar,
+  aoSalvarPrazoPagamento,
+  aoInativarPrazoPagamento
 }) {
   const [formulario, definirFormulario] = useState(estadoInicialFormulario);
   const [abaAtiva, definirAbaAtiva] = useState(abasModalOrcamento[0].id);
@@ -77,6 +82,7 @@ export function ModalOrcamento({
   const [modalMotivoPerdaAberto, definirModalMotivoPerdaAberto] = useState(false);
   const [modalBuscaClienteAberto, definirModalBuscaClienteAberto] = useState(false);
   const [modalBuscaContatoAberto, definirModalBuscaContatoAberto] = useState(false);
+  const [modalPrazosPagamentoAberto, definirModalPrazosPagamentoAberto] = useState(false);
   const [modalBuscaProdutoAberto, definirModalBuscaProdutoAberto] = useState(false);
   const [modalItemAberto, definirModalItemAberto] = useState(false);
   const [indiceItemEdicao, definirIndiceItemEdicao] = useState(null);
@@ -112,6 +118,7 @@ export function ModalOrcamento({
     definirModalMotivoPerdaAberto(false);
     definirModalBuscaClienteAberto(false);
     definirModalBuscaContatoAberto(false);
+    definirModalPrazosPagamentoAberto(false);
     definirModalBuscaProdutoAberto(false);
     definirModalItemAberto(false);
     definirIndiceItemEdicao(null);
@@ -144,6 +151,11 @@ export function ModalOrcamento({
         return;
       }
 
+      if (modalPrazosPagamentoAberto) {
+        fecharModalPrazosPagamento();
+        return;
+      }
+
       if (modalMotivoPerdaAberto) {
         definirModalMotivoPerdaAberto(false);
         return;
@@ -167,7 +179,7 @@ export function ModalOrcamento({
     return () => {
       window.removeEventListener('keydown', tratarTecla);
     };
-  }, [aberto, confirmandoFechamento, confirmandoSaida, modalBuscaClienteAberto, modalBuscaContatoAberto, modalItemAberto, salvando]);
+  }, [aberto, confirmandoFechamento, confirmandoSaida, modalBuscaClienteAberto, modalBuscaContatoAberto, modalItemAberto, modalPrazosPagamentoAberto, salvando]);
 
   const contatosDoCliente = contatosAtivos.filter((contato) => String(contato.idCliente) === String(formulario.idCliente));
   const etapaSelecionada = etapasAtivas.find((etapa) => String(etapa.idEtapaOrcamento) === String(formulario.idEtapaOrcamento));
@@ -454,6 +466,29 @@ export function ModalOrcamento({
     definirModalBuscaContatoAberto(false);
   }
 
+  function abrirModalPrazosPagamento() {
+    if (somenteLeitura || salvando || !aoSalvarPrazoPagamento) {
+      return;
+    }
+
+    definirModalPrazosPagamentoAberto(true);
+  }
+
+  function fecharModalPrazosPagamento() {
+    definirModalPrazosPagamentoAberto(false);
+  }
+
+  function selecionarPrazoPagamento(prazo) {
+    if (!prazo?.idPrazoPagamento) {
+      return;
+    }
+
+    definirFormulario((estadoAtual) => ({
+      ...estadoAtual,
+      idPrazoPagamento: String(prazo.idPrazoPagamento)
+    }));
+  }
+
   function selecionarCliente(cliente) {
     if (!cliente) {
       return;
@@ -616,6 +651,7 @@ export function ModalOrcamento({
                       variante="secundario"
                       type="button"
                       icone="pesquisa"
+                      className="botaoCampoAcao"
                       somenteIcone
                       title="Buscar cliente"
                       aria-label="Buscar cliente"
@@ -638,6 +674,7 @@ export function ModalOrcamento({
                       variante="secundario"
                       type="button"
                       icone="pesquisa"
+                      className="botaoCampoAcao"
                       somenteIcone
                       title="Buscar contato"
                       aria-label="Buscar contato"
@@ -670,6 +707,18 @@ export function ModalOrcamento({
                     label: prazo.descricaoFormatada
                   }))}
                   disabled={somenteLeitura}
+                  acaoExtra={!somenteLeitura && aoSalvarPrazoPagamento ? (
+                    <Botao
+                      variante="secundario"
+                      type="button"
+                      icone="pesquisa"
+                      className="botaoCampoAcao"
+                      somenteIcone
+                      title="Abrir prazos de pagamento"
+                      aria-label="Abrir prazos de pagamento"
+                      onClick={abrirModalPrazosPagamento}
+                    />
+                  ) : null}
                 />
                 <CampoFormulario
                   label="Comissao (%)"
@@ -898,6 +947,20 @@ export function ModalOrcamento({
           aoFechar={fecharModalBuscaContato}
         />
 
+        <ModalPrazosPagamento
+          aberto={modalPrazosPagamentoAberto}
+          prazosPagamento={prazosPagamento}
+          metodosPagamento={metodosPagamento}
+          somenteConsulta={somenteConsultaPrazos}
+          fecharAoSalvar
+          aoFechar={fecharModalPrazosPagamento}
+          aoSalvar={aoSalvarPrazoPagamento}
+          aoInativar={aoInativarPrazoPagamento}
+          aoSelecionarPrazo={async (prazo) => {
+            selecionarPrazoPagamento(prazo);
+          }}
+        />
+
         {modalItemAberto ? (
           <div className="camadaModalContato" role="presentation" onMouseDown={fecharModalItem}>
             <div
@@ -954,6 +1017,7 @@ export function ModalOrcamento({
                           variante="secundario"
                           type="button"
                           icone="pesquisa"
+                          className="botaoCampoAcao"
                           somenteIcone
                           title="Buscar produto"
                           aria-label="Buscar produto"

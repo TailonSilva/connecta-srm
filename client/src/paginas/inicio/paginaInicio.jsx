@@ -8,7 +8,7 @@ import { listarEtapasOrcamentoConfiguracao } from '../../servicos/configuracoes'
 import { listarEmpresas } from '../../servicos/empresa';
 import { listarOrcamentos } from '../../servicos/orcamentos';
 import { listarPedidos } from '../../servicos/pedidos';
-import { listarGruposProduto, listarProdutos } from '../../servicos/produtos';
+import { listarGruposProduto, listarMarcas, listarProdutos } from '../../servicos/produtos';
 import { normalizarPreco } from '../../utilitarios/normalizarPreco';
 import { CabecalhoInicio } from './componentes/cabecalhoInicio';
 import { IndicadorResumoInicio } from './componentes/indicadorResumoInicio';
@@ -24,6 +24,7 @@ export function PaginaInicio({ usuarioLogado }) {
   const [pedidos, definirPedidos] = useState([]);
   const [produtos, definirProdutos] = useState([]);
   const [gruposProduto, definirGruposProduto] = useState([]);
+  const [marcas, definirMarcas] = useState([]);
   const [vendedores, definirVendedores] = useState([]);
   const [etapasOrcamento, definirEtapasOrcamento] = useState([]);
   const [filtros, definirFiltros] = useState(criarFiltrosIniciaisPaginaInicio);
@@ -72,10 +73,11 @@ export function PaginaInicio({ usuarioLogado }) {
       definirMensagemErroFunil('');
 
       try {
-        const [clientes, produtosCarregados, gruposCarregados, vendedoresCarregados, empresas, etapasCarregadas, orcamentosCarregados, pedidosCarregados] = await Promise.all([
+        const [clientes, produtosCarregados, gruposCarregados, marcasCarregadas, vendedoresCarregados, empresas, etapasCarregadas, orcamentosCarregados, pedidosCarregados] = await Promise.all([
           listarClientes(),
           listarProdutos(),
           listarGruposProduto(),
+          listarMarcas(),
           listarVendedores(),
           listarEmpresas(),
           listarEtapasOrcamentoConfiguracao(),
@@ -92,6 +94,7 @@ export function PaginaInicio({ usuarioLogado }) {
         definirEmpresa(empresas[0] || null);
         definirProdutos(Array.isArray(produtosCarregados) ? produtosCarregados : []);
         definirGruposProduto(Array.isArray(gruposCarregados) ? gruposCarregados : []);
+        definirMarcas(Array.isArray(marcasCarregadas) ? marcasCarregadas : []);
         definirVendedores(Array.isArray(vendedoresCarregados) ? vendedoresCarregados : []);
         definirEtapasOrcamento(Array.isArray(etapasCarregadas) ? etapasCarregadas : []);
         definirOrcamentos(Array.isArray(orcamentosCarregados) ? orcamentosCarregados : []);
@@ -200,6 +203,8 @@ export function PaginaInicio({ usuarioLogado }) {
             {
               name: 'idVendedor',
               label: 'Vendedor',
+              multiple: true,
+              tituloSelecao: 'Selecionar vendedores',
               disabled: Boolean(usuarioSomenteVendedor),
               options: vendedores.map((vendedor) => ({
                 valor: String(vendedor.idVendedor),
@@ -209,6 +214,8 @@ export function PaginaInicio({ usuarioLogado }) {
             {
               name: 'idProduto',
               label: 'Produto',
+              multiple: true,
+              tituloSelecao: 'Selecionar produtos',
               options: produtos
                 .filter((produto) => produto.status !== 0)
                 .map((produto) => ({
@@ -219,11 +226,25 @@ export function PaginaInicio({ usuarioLogado }) {
             {
               name: 'idGrupo',
               label: 'Grupo de produto',
+              multiple: true,
+              tituloSelecao: 'Selecionar grupos de produto',
               options: gruposProduto
                 .filter((grupo) => grupo.status !== 0)
                 .map((grupo) => ({
                   valor: String(grupo.idGrupo),
                   label: grupo.descricao
+                }))
+            },
+            {
+              name: 'idMarca',
+              label: 'Marca',
+              multiple: true,
+              tituloSelecao: 'Selecionar marcas',
+              options: marcas
+                .filter((marca) => marca.status !== 0)
+                .map((marca) => ({
+                  valor: String(marca.idMarca),
+                  label: marca.descricao
                 }))
             }
           ]}
@@ -241,15 +262,16 @@ export function PaginaInicio({ usuarioLogado }) {
 
 function criarFiltrosIniciaisPaginaInicio(usuarioLogado) {
   const idVendedor = usuarioLogado?.tipo === 'Usuario padrao' && usuarioLogado?.idVendedor
-    ? String(usuarioLogado.idVendedor)
-    : '';
+    ? [String(usuarioLogado.idVendedor)]
+    : [];
 
   return {
     dataInicio: obterPrimeiroDiaMesAtual(),
     dataFim: obterUltimoDiaMesAtual(),
     idVendedor,
-    idProduto: '',
-    idGrupo: ''
+    idProduto: [],
+    idGrupo: [],
+    idMarca: []
   };
 }
 
@@ -275,16 +297,20 @@ function normalizarFiltrosPaginaInicio(filtros, filtrosPadrao, usuarioLogado) {
   const dataInicio = filtros?.dataInicio || filtrosPadrao.dataInicio;
   const dataFim = filtros?.dataFim || filtrosPadrao.dataFim;
   const idVendedor = usuarioLogado?.tipo === 'Usuario padrao' && usuarioLogado?.idVendedor
-    ? String(usuarioLogado.idVendedor)
-    : filtros?.idVendedor || '';
+    ? [String(usuarioLogado.idVendedor)]
+    : normalizarValoresFiltroMultiplo(filtros?.idVendedor);
+  const idProduto = normalizarValoresFiltroMultiplo(filtros?.idProduto);
+  const idGrupo = normalizarValoresFiltroMultiplo(filtros?.idGrupo);
+  const idMarca = normalizarValoresFiltroMultiplo(filtros?.idMarca);
 
   if (dataInicio <= dataFim) {
     return {
       dataInicio,
       dataFim,
       idVendedor,
-      idProduto: filtros?.idProduto || '',
-      idGrupo: filtros?.idGrupo || ''
+      idProduto,
+      idGrupo,
+      idMarca
     };
   }
 
@@ -292,9 +318,20 @@ function normalizarFiltrosPaginaInicio(filtros, filtrosPadrao, usuarioLogado) {
     dataInicio: dataFim,
     dataFim: dataInicio,
     idVendedor,
-    idProduto: filtros?.idProduto || '',
-    idGrupo: filtros?.idGrupo || ''
+    idProduto,
+    idGrupo,
+    idMarca
   };
+}
+
+function normalizarValoresFiltroMultiplo(valores) {
+  if (!Array.isArray(valores)) {
+    return [];
+  }
+
+  return valores
+    .map((valor) => String(valor || '').trim())
+    .filter(Boolean);
 }
 
 function obterValorTotalPedido(pedido) {

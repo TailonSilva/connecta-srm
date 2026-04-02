@@ -98,8 +98,8 @@ export function ModalGruposProduto({
 
     try {
       const [tamanhosCarregados, relacoesCarregadas] = await Promise.all([
-        listarTamanhosConfiguracao(),
-        listarGruposProdutoTamanhosConfiguracao()
+        listarTamanhosConfiguracao({ incluirInativos: true }),
+        listarGruposProdutoTamanhosConfiguracao({ incluirInativos: true })
       ]);
 
       definirTamanhos(tamanhosCarregados);

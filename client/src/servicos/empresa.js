@@ -1,8 +1,9 @@
 import { requisitarApi } from './api';
+import { requisitarListaApi } from './listas';
 import { buscarCep } from './clientes';
 
-export function listarEmpresas() {
-  return requisitarApi('/empresas');
+export function listarEmpresas(opcoes) {
+  return requisitarListaApi('/empresas', opcoes);
 }
 
 export function incluirEmpresa(payload) {

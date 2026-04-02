@@ -1,7 +1,12 @@
 import { requisitarApi } from './api';
+import { requisitarListaApi } from './listas';
 
-export function listarGruposProdutoConfiguracao() {
-  return requisitarApi('/gruposProduto');
+function listarCadastroConfiguracao(caminho, opcoes) {
+  return requisitarListaApi(caminho, opcoes);
+}
+
+export function listarGruposProdutoConfiguracao(opcoes) {
+  return listarCadastroConfiguracao('/gruposProduto', opcoes);
 }
 
 export function incluirGrupoProduto(payload) {
@@ -24,8 +29,8 @@ export function atualizarGrupoProduto(idGrupo, payload) {
   });
 }
 
-export function listarTamanhosConfiguracao() {
-  return requisitarApi('/tamanhos');
+export function listarTamanhosConfiguracao(opcoes) {
+  return listarCadastroConfiguracao('/tamanhos', opcoes);
 }
 
 export function incluirTamanho(payload) {
@@ -48,8 +53,8 @@ export function atualizarTamanho(idTamanho, payload) {
   });
 }
 
-export function listarGruposProdutoTamanhosConfiguracao() {
-  return requisitarApi('/gruposProdutoTamanhos');
+export function listarGruposProdutoTamanhosConfiguracao(opcoes) {
+  return listarCadastroConfiguracao('/gruposProdutoTamanhos', opcoes);
 }
 
 export function incluirGrupoProdutoTamanho(payload) {
@@ -78,8 +83,8 @@ export function excluirGrupoProdutoTamanho(idGrupoProdutoTamanho) {
   });
 }
 
-export function listarMarcasConfiguracao() {
-  return requisitarApi('/marcas');
+export function listarMarcasConfiguracao(opcoes) {
+  return listarCadastroConfiguracao('/marcas', opcoes);
 }
 
 export function incluirMarca(payload) {
@@ -102,8 +107,8 @@ export function atualizarMarca(idMarca, payload) {
   });
 }
 
-export function listarRamosAtividadeConfiguracao() {
-  return requisitarApi('/ramosAtividade');
+export function listarRamosAtividadeConfiguracao(opcoes) {
+  return listarCadastroConfiguracao('/ramosAtividade', opcoes);
 }
 
 export function incluirRamoAtividade(payload) {
@@ -126,8 +131,8 @@ export function atualizarRamoAtividade(idRamo, payload) {
   });
 }
 
-export function listarVendedoresConfiguracao() {
-  return requisitarApi('/vendedores');
+export function listarVendedoresConfiguracao(opcoes) {
+  return listarCadastroConfiguracao('/vendedores', opcoes);
 }
 
 export function incluirVendedor(payload) {
@@ -150,8 +155,8 @@ export function atualizarVendedor(idVendedor, payload) {
   });
 }
 
-export function listarCamposOrcamentoConfiguracao() {
-  return requisitarApi('/camposOrcamento');
+export function listarCamposOrcamentoConfiguracao(opcoes) {
+  return listarCadastroConfiguracao('/camposOrcamento', opcoes);
 }
 
 export function incluirCampoOrcamento(payload) {
@@ -174,8 +179,8 @@ export function atualizarCampoOrcamento(idCampoOrcamento, payload) {
   });
 }
 
-export function listarCamposPedidoConfiguracao() {
-  return requisitarApi('/camposPedido');
+export function listarCamposPedidoConfiguracao(opcoes) {
+  return listarCadastroConfiguracao('/camposPedido', opcoes);
 }
 
 export function incluirCampoPedido(payload) {
@@ -198,8 +203,8 @@ export function atualizarCampoPedido(idCampoPedido, payload) {
   });
 }
 
-export function listarUnidadesMedidaConfiguracao() {
-  return requisitarApi('/unidadesMedida');
+export function listarUnidadesMedidaConfiguracao(opcoes) {
+  return listarCadastroConfiguracao('/unidadesMedida', opcoes);
 }
 
 export function incluirUnidadeMedida(payload) {
@@ -222,8 +227,8 @@ export function atualizarUnidadeMedida(idUnidade, payload) {
   });
 }
 
-export function listarMetodosPagamentoConfiguracao() {
-  return requisitarApi('/metodosPagamento');
+export function listarMetodosPagamentoConfiguracao(opcoes) {
+  return listarCadastroConfiguracao('/metodosPagamento', opcoes);
 }
 
 export function incluirMetodoPagamento(payload) {
@@ -246,8 +251,8 @@ export function atualizarMetodoPagamento(idMetodoPagamento, payload) {
   });
 }
 
-export function listarPrazosPagamentoConfiguracao() {
-  return requisitarApi('/prazosPagamento');
+export function listarPrazosPagamentoConfiguracao(opcoes) {
+  return listarCadastroConfiguracao('/prazosPagamento', opcoes);
 }
 
 export function incluirPrazoPagamento(payload) {
@@ -270,8 +275,8 @@ export function atualizarPrazoPagamento(idPrazoPagamento, payload) {
   });
 }
 
-export function listarMotivosPerdaConfiguracao() {
-  return requisitarApi('/motivosPerda');
+export function listarMotivosPerdaConfiguracao(opcoes) {
+  return listarCadastroConfiguracao('/motivosPerda', opcoes);
 }
 
 export function incluirMotivoPerda(payload) {
@@ -294,8 +299,8 @@ export function atualizarMotivoPerda(idMotivo, payload) {
   });
 }
 
-export function listarEtapasPedidoConfiguracao() {
-  return requisitarApi('/etapasPedido');
+export function listarEtapasPedidoConfiguracao(opcoes) {
+  return listarCadastroConfiguracao('/etapasPedido', opcoes);
 }
 
 export function incluirEtapaPedido(payload) {
@@ -318,8 +323,8 @@ export function atualizarEtapaPedido(idEtapa, payload) {
   });
 }
 
-export function listarEtapasOrcamentoConfiguracao() {
-  return requisitarApi('/etapasOrcamento');
+export function listarEtapasOrcamentoConfiguracao(opcoes) {
+  return listarCadastroConfiguracao('/etapasOrcamento', opcoes);
 }
 
 export function incluirEtapaOrcamento(payload) {
@@ -342,8 +347,8 @@ export function atualizarEtapaOrcamento(idEtapaOrcamento, payload) {
   });
 }
 
-export function listarLocaisAgendaConfiguracao() {
-  return requisitarApi('/locaisAgenda');
+export function listarLocaisAgendaConfiguracao(opcoes) {
+  return listarCadastroConfiguracao('/locaisAgenda', opcoes);
 }
 
 export function incluirLocalAgenda(payload) {
@@ -366,8 +371,8 @@ export function atualizarLocalAgenda(idLocal, payload) {
   });
 }
 
-export function listarTiposRecursoConfiguracao() {
-  return requisitarApi('/tiposRecurso');
+export function listarTiposRecursoConfiguracao(opcoes) {
+  return listarCadastroConfiguracao('/tiposRecurso', opcoes);
 }
 
 export function incluirTipoRecurso(payload) {
@@ -390,8 +395,8 @@ export function atualizarTipoRecurso(idTipoRecurso, payload) {
   });
 }
 
-export function listarRecursosConfiguracao() {
-  return requisitarApi('/recursos');
+export function listarRecursosConfiguracao(opcoes) {
+  return listarCadastroConfiguracao('/recursos', opcoes);
 }
 
 export function incluirRecurso(payload) {
@@ -414,8 +419,8 @@ export function atualizarRecurso(idRecurso, payload) {
   });
 }
 
-export function listarTiposAgendaConfiguracao() {
-  return requisitarApi('/tiposAgenda');
+export function listarTiposAgendaConfiguracao(opcoes) {
+  return listarCadastroConfiguracao('/tiposAgenda', opcoes);
 }
 
 export function incluirTipoAgenda(payload) {
@@ -438,8 +443,8 @@ export function atualizarTipoAgenda(idTipoAgenda, payload) {
   });
 }
 
-export function listarStatusVisitaConfiguracao() {
-  return requisitarApi('/statusVisita');
+export function listarStatusVisitaConfiguracao(opcoes) {
+  return listarCadastroConfiguracao('/statusVisita', opcoes);
 }
 
 export function incluirStatusVisita(payload) {
@@ -462,8 +467,8 @@ export function atualizarStatusVisita(idStatusVisita, payload) {
   });
 }
 
-export function listarCanaisAtendimentoConfiguracao() {
-  return requisitarApi('/canaisAtendimento');
+export function listarCanaisAtendimentoConfiguracao(opcoes) {
+  return listarCadastroConfiguracao('/canaisAtendimento', opcoes);
 }
 
 export function incluirCanalAtendimento(payload) {
@@ -486,8 +491,8 @@ export function atualizarCanalAtendimento(idCanalAtendimento, payload) {
   });
 }
 
-export function listarOrigensAtendimentoConfiguracao() {
-  return requisitarApi('/origensAtendimento');
+export function listarOrigensAtendimentoConfiguracao(opcoes) {
+  return listarCadastroConfiguracao('/origensAtendimento', opcoes);
 }
 
 export function incluirOrigemAtendimento(payload) {

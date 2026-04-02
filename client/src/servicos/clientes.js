@@ -1,4 +1,5 @@
 import { requisitarApi } from './api';
+import { requisitarListaApi } from './listas';
 
 export function listarClientes() {
   return requisitarApi('/clientes');
@@ -8,12 +9,12 @@ export function listarContatos() {
   return requisitarApi('/contatos');
 }
 
-export function listarVendedores() {
-  return requisitarApi('/vendedores');
+export function listarVendedores(opcoes) {
+  return requisitarListaApi('/vendedores', opcoes);
 }
 
-export function listarRamosAtividade() {
-  return requisitarApi('/ramosAtividade');
+export function listarRamosAtividade(opcoes) {
+  return requisitarListaApi('/ramosAtividade', opcoes);
 }
 
 export function incluirRamoAtividade(payload) {

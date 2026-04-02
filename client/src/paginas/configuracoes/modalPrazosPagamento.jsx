@@ -23,9 +23,11 @@ export function ModalPrazosPagamento({
   prazosPagamento,
   metodosPagamento,
   somenteConsulta = false,
+  fecharAoSalvar = false,
   aoFechar,
   aoSalvar,
-  aoInativar
+  aoInativar,
+  aoSelecionarPrazo
 }) {
   const [modalFormularioAberto, definirModalFormularioAberto] = useState(false);
   const [modoFormulario, definirModoFormulario] = useState('novo');
@@ -169,10 +171,32 @@ export function ModalPrazosPagamento({
     definirMensagemErro('');
 
     try {
-      await aoSalvar({
+      const registroSalvo = await aoSalvar({
         idPrazoPagamento: prazoSelecionado?.idPrazoPagamento,
         ...formulario
       });
+
+      if (typeof aoSelecionarPrazo === 'function') {
+        await aoSelecionarPrazo({
+          ...registroSalvo,
+          idPrazoPagamento: Number(registroSalvo?.idPrazoPagamento || prazoSelecionado?.idPrazoPagamento),
+          idMetodoPagamento: Number(registroSalvo?.idMetodoPagamento || formulario.idMetodoPagamento),
+          descricao: registroSalvo?.descricao || formulario.descricao,
+          prazo1: registroSalvo?.prazo1 ?? formulario.prazo1,
+          prazo2: registroSalvo?.prazo2 ?? formulario.prazo2,
+          prazo3: registroSalvo?.prazo3 ?? formulario.prazo3,
+          prazo4: registroSalvo?.prazo4 ?? formulario.prazo4,
+          prazo5: registroSalvo?.prazo5 ?? formulario.prazo5,
+          prazo6: registroSalvo?.prazo6 ?? formulario.prazo6,
+          status: registroSalvo?.status ?? (formulario.status ? 1 : 0)
+        });
+      }
+
+      if (fecharAoSalvar) {
+        aoFechar();
+        return;
+      }
+
       fecharFormulario();
     } catch (erro) {
       definirMensagemErro(erro.message || 'Nao foi possivel salvar o prazo de pagamento.');

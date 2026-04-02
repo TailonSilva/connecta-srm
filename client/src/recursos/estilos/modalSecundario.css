@@ -333,6 +333,15 @@
   gap: 14px;
 }
 
+.painelPedidosCliente {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  flex: 1 1 auto;
+  height: 100%;
+  min-height: 0;
+  gap: 14px;
+}
+
 .subtituloGradeAtendimentoCliente {
   margin: 4px 0 0;
   color: var(--corTextoSuave);
@@ -340,6 +349,13 @@
 }
 
 .gradeAtendimentosCliente {
+  min-height: 0;
+  max-height: 420px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.gradePedidosCliente {
   min-height: 0;
   max-height: 420px;
   overflow-x: hidden;
@@ -368,6 +384,36 @@
 
 .tabelaAtendimentosCliente th:nth-child(5),
 .tabelaAtendimentosCliente td:nth-child(5) {
+  width: 112px;
+}
+
+.tabelaPedidosCliente th:nth-child(1),
+.tabelaPedidosCliente td:nth-child(1) {
+  width: 112px;
+}
+
+.tabelaPedidosCliente th:nth-child(2),
+.tabelaPedidosCliente td:nth-child(2) {
+  width: auto;
+}
+
+.tabelaPedidosCliente th:nth-child(3),
+.tabelaPedidosCliente td:nth-child(3) {
+  width: 160px;
+}
+
+.tabelaPedidosCliente th:nth-child(4),
+.tabelaPedidosCliente td:nth-child(4) {
+  width: 160px;
+}
+
+.tabelaPedidosCliente th:nth-child(5),
+.tabelaPedidosCliente td:nth-child(5) {
+  width: 130px;
+}
+
+.tabelaPedidosCliente th:nth-child(6),
+.tabelaPedidosCliente td:nth-child(6) {
   width: 112px;
 }
 

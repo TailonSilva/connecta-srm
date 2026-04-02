@@ -9,16 +9,30 @@ export function filtrarOrcamentosPaginaInicio(orcamentos, filtros, produtos) {
 
   return orcamentos.filter((orcamento) => {
     const atendeData = validarPeriodo(orcamento?.dataInclusao, filtros?.dataInicio, filtros?.dataFim);
-    const atendeVendedor = !filtros?.idVendedor || String(orcamento?.idVendedor || '') === String(filtros.idVendedor);
+    const idsVendedor = normalizarValoresFiltro(filtros?.idVendedor);
+    const idsProduto = normalizarValoresFiltro(filtros?.idProduto);
+    const idsGrupo = normalizarValoresFiltro(filtros?.idGrupo);
+    const idsMarca = normalizarValoresFiltro(filtros?.idMarca);
+    const atendeVendedor = idsVendedor.length === 0 || idsVendedor.includes(String(orcamento?.idVendedor || ''));
     const itens = Array.isArray(orcamento?.itens) ? orcamento.itens : [];
-    const atendeProduto = !filtros?.idProduto || itens.some((item) => String(item?.idProduto || '') === String(filtros.idProduto));
-    const atendeGrupo = !filtros?.idGrupo || itens.some((item) => {
+    const atendeProduto = idsProduto.length === 0 || itens.some((item) => idsProduto.includes(String(item?.idProduto || '')));
+    const atendeGrupo = idsGrupo.length === 0 || itens.some((item) => {
       const produto = produtosPorId.get(String(item?.idProduto || ''));
-      return String(produto?.idGrupo || '') === String(filtros.idGrupo);
+      return idsGrupo.includes(String(produto?.idGrupo || ''));
+    });
+    const atendeMarca = idsMarca.length === 0 || itens.some((item) => {
+      const produto = produtosPorId.get(String(item?.idProduto || ''));
+      return idsMarca.includes(String(produto?.idMarca || ''));
     });
 
-    return atendeData && atendeVendedor && atendeProduto && atendeGrupo;
+    return atendeData && atendeVendedor && atendeProduto && atendeGrupo && atendeMarca;
   });
+}
+
+function normalizarValoresFiltro(valores) {
+  return Array.isArray(valores)
+    ? valores.map((valor) => String(valor || '').trim()).filter(Boolean)
+    : [];
 }
 
 function validarPeriodo(dataValor, dataInicio, dataFim) {

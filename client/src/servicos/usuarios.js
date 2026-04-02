@@ -1,7 +1,11 @@
 import { requisitarApi } from './api';
+import { requisitarListaApi } from './listas';
 
-export function listarUsuarios() {
-  return requisitarApi('/usuarios');
+export function listarUsuarios(opcoes) {
+  return requisitarListaApi('/usuarios', {
+    campoAtivo: 'ativo',
+    ...opcoes
+  });
 }
 
 export function incluirUsuario(payload) {
