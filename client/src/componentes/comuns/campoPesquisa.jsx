@@ -7,10 +7,11 @@ export const CampoPesquisa = forwardRef(function CampoPesquisa({
   aoAlterar,
   placeholder = 'Pesquisar...',
   ariaLabel = 'Pesquisar',
+  className = '',
   ...props
 }, ref) {
   return (
-    <label className="campoPesquisa">
+    <label className={`campoPesquisa ${className}`.trim()}>
       <Icone nome="pesquisa" className="campoPesquisaIcone" />
       <input
         ref={ref}

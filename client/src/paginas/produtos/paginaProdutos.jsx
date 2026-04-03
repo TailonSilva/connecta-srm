@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { CabecalhoProdutos } from './cabecalhoProdutos';
 import { CorpoProdutos } from './corpoProdutos';
 import {
   atualizarProduto,
+  importarProdutosPlanilha,
   incluirProduto,
   listarGruposProduto,
   listarMarcas,
@@ -23,6 +24,7 @@ import { obterPrimeiroCodigoDisponivel } from '../../utilitarios/obterPrimeiroCo
 import { normalizarFiltrosPorPadrao, useFiltrosPersistidos } from '../../utilitarios/useFiltrosPersistidos';
 import { ModalFiltros } from '../../componentes/comuns/modalFiltros';
 import { ModalProduto } from './modalProduto';
+import { ModalImportacaoCadastro } from '../../componentes/comuns/modalImportacaoCadastro';
 import { ModalManualProdutos } from './modalManualProdutos';
 
 const filtrosIniciaisProdutos = {
@@ -49,6 +51,9 @@ export function PaginaProdutos({ usuarioLogado }) {
   const [modalAberto, definirModalAberto] = useState(false);
   const [modalManualAberto, definirModalManualAberto] = useState(false);
   const [modalFiltrosAberto, definirModalFiltrosAberto] = useState(false);
+  const [modalImportacaoAberto, definirModalImportacaoAberto] = useState(false);
+  const [resultadoImportacao, definirResultadoImportacao] = useState(null);
+  const [importando, definirImportando] = useState(false);
   const [produtoSelecionado, definirProdutoSelecionado] = useState(null);
   const [modoModalProduto, definirModoModalProduto] = useState('novo');
   const usuarioSomenteConsulta = usuarioLogado?.tipo === 'Usuario padrao';
@@ -65,7 +70,7 @@ export function PaginaProdutos({ usuarioLogado }) {
 
       evento.preventDefault();
 
-      if (!modalAberto && !modalManualAberto && !modalFiltrosAberto) {
+      if (!modalAberto && !modalManualAberto && !modalFiltrosAberto && !modalImportacaoAberto) {
         definirModalManualAberto(true);
       }
     }
@@ -75,7 +80,7 @@ export function PaginaProdutos({ usuarioLogado }) {
     return () => {
       window.removeEventListener('keydown', tratarAtalhosProdutos);
     };
-  }, [modalAberto, modalManualAberto, modalFiltrosAberto]);
+  }, [modalAberto, modalManualAberto, modalFiltrosAberto, modalImportacaoAberto]);
 
   async function carregarDados() {
     definirCarregando(true);
@@ -126,6 +131,18 @@ export function PaginaProdutos({ usuarioLogado }) {
 
     await carregarDados();
     fecharModalProduto();
+  }
+
+  async function importarProdutos(linhas) {
+    definirImportando(true);
+
+    try {
+      const resultado = await importarProdutosPlanilha({ linhas });
+      definirResultadoImportacao(resultado);
+      await carregarDados();
+    } finally {
+      definirImportando(false);
+    }
   }
 
   async function inativarProduto(produto) {
@@ -245,6 +262,26 @@ export function PaginaProdutos({ usuarioLogado }) {
   const produtosFiltrados = filtrarProdutos(produtos, pesquisa, filtros);
   const proximoCodigoProduto = obterPrimeiroCodigoDisponivel(produtos, 'idProduto');
   const filtrosAtivos = Object.values(filtros).some(Boolean);
+  const referenciasImportacaoProdutos = useMemo(() => ({
+    grupoProduto: {
+      opcoes: gruposProduto.map((grupo) => ({
+        valor: grupo.descricao || '',
+        label: grupo.descricao || '-'
+      }))
+    },
+    marca: {
+      opcoes: marcas.map((marca) => ({
+        valor: marca.descricao || '',
+        label: marca.descricao || '-'
+      }))
+    },
+    unidadeMedida: {
+      opcoes: unidadesMedida.map((unidade) => ({
+        valor: unidade.descricao || '',
+        label: unidade.descricao || '-'
+      }))
+    }
+  }), [gruposProduto, marcas, unidadesMedida]);
 
   return (
     <>
@@ -252,6 +289,10 @@ export function PaginaProdutos({ usuarioLogado }) {
         pesquisa={pesquisa}
         aoAlterarPesquisa={definirPesquisa}
         aoAbrirFiltros={() => definirModalFiltrosAberto(true)}
+        aoAbrirImportacao={() => {
+          definirResultadoImportacao(null);
+          definirModalImportacaoAberto(true);
+        }}
         aoNovoProduto={abrirNovoProduto}
         filtrosAtivos={filtrosAtivos}
         somenteConsulta={usuarioSomenteConsulta}
@@ -339,6 +380,18 @@ export function PaginaProdutos({ usuarioLogado }) {
         unidadesMedida={unidadesMedida}
         filtros={filtros}
         usuarioLogado={usuarioLogado}
+      />
+      <ModalImportacaoCadastro
+        aberto={modalImportacaoAberto}
+        tipo="produtos"
+        carregando={importando}
+        resultado={resultadoImportacao}
+        referenciasRelacionais={referenciasImportacaoProdutos}
+        onFechar={() => {
+          definirModalImportacaoAberto(false);
+          definirResultadoImportacao(null);
+        }}
+        onImportar={importarProdutos}
       />
     </>
   );

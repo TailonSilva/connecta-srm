@@ -95,7 +95,7 @@ export function ModalManualConfiguracoes({
             'Grupos de empresa e seus contatos abastecem o cadastro de clientes com heranca de contatos.',
             'A empresa define se o CRM usa o codigo padrao do cliente ou o Codigo alternativo como identificador principal nos grids que exibem codigo.',
             'Metodos, prazos, etapas e campos personalizados abastecem Orcamentos e Pedidos.',
-            'Parametros da empresa influenciam layout de PDF, expediente e leitura da pagina inicial.'
+            'Parametros da empresa influenciam layout de PDF, expediente, pagina inicial simplificada e regras operacionais do cadastro.'
           ]
         }
       ]}

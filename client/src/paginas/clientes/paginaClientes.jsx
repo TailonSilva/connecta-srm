@@ -10,6 +10,7 @@ import {
   incluirRamoAtividade,
   incluirCliente,
   incluirContato,
+  importarClientesPlanilha,
   listarClientes,
   listarContatos,
   listarGruposEmpresa,
@@ -28,6 +29,7 @@ import { obterPrimeiroCodigoDisponivel } from '../../utilitarios/obterPrimeiroCo
 import { normalizarFiltrosPorPadrao, useFiltrosPersistidos } from '../../utilitarios/useFiltrosPersistidos';
 import { ModalFiltros } from '../../componentes/comuns/modalFiltros';
 import { ModalCliente } from './modalCliente';
+import { ModalImportacaoCadastro } from '../../componentes/comuns/modalImportacaoCadastro';
 import { ModalManualClientes } from './modalManualClientes';
 
 const filtrosIniciaisClientes = {
@@ -54,6 +56,9 @@ export function PaginaClientes({ usuarioLogado }) {
   const [modalAberto, definirModalAberto] = useState(false);
   const [modalManualAberto, definirModalManualAberto] = useState(false);
   const [modalFiltrosAberto, definirModalFiltrosAberto] = useState(false);
+  const [modalImportacaoAberto, definirModalImportacaoAberto] = useState(false);
+  const [resultadoImportacao, definirResultadoImportacao] = useState(null);
+  const [importando, definirImportando] = useState(false);
   const [clienteEmEdicao, definirClienteEmEdicao] = useState(null);
   const [modoModalCliente, definirModoModalCliente] = useState('novo');
   const usuarioSomenteVendedor = usuarioLogado?.tipo === 'Usuario padrao' && usuarioLogado?.idVendedor;
@@ -104,7 +109,7 @@ export function PaginaClientes({ usuarioLogado }) {
 
       evento.preventDefault();
 
-      if (!modalAberto && !modalManualAberto && !modalFiltrosAberto) {
+      if (!modalAberto && !modalManualAberto && !modalFiltrosAberto && !modalImportacaoAberto) {
         definirModalManualAberto(true);
       }
     }
@@ -114,7 +119,7 @@ export function PaginaClientes({ usuarioLogado }) {
     return () => {
       window.removeEventListener('keydown', tratarAtalhosClientes);
     };
-  }, [modalAberto, modalManualAberto, modalFiltrosAberto]);
+  }, [modalAberto, modalManualAberto, modalFiltrosAberto, modalImportacaoAberto]);
 
   async function carregarDados() {
     definirCarregando(true);
@@ -181,6 +186,22 @@ export function PaginaClientes({ usuarioLogado }) {
     await carregarDados();
     definirModalAberto(false);
     definirClienteEmEdicao(null);
+  }
+
+  async function importarClientes(linhas) {
+    definirImportando(true);
+
+    try {
+      const resultado = await importarClientesPlanilha({
+        linhas,
+        idVendedorPadrao: usuarioSomenteVendedor ? usuarioLogado.idVendedor : null
+      });
+
+      definirResultadoImportacao(resultado);
+      await carregarDados();
+    } finally {
+      definirImportando(false);
+    }
   }
 
   async function salvarRamoAtividade(dadosRamo) {
@@ -293,6 +314,28 @@ export function PaginaClientes({ usuarioLogado }) {
   const vendedoresDisponiveis = usuarioSomenteVendedor
     ? vendedores.filter((vendedor) => vendedor.idVendedor === usuarioLogado.idVendedor)
     : vendedores;
+  const referenciasImportacaoClientes = useMemo(() => ({
+    vendedor: {
+      opcoes: vendedoresDisponiveis.map((vendedor) => ({
+        valor: vendedor.nome || '',
+        label: vendedor.nome || '-'
+      }))
+    },
+    ramoAtividade: {
+      opcoes: ramosAtividade.map((ramo) => ({
+        valor: ramo.descricao || '',
+        label: ramo.descricao || '-'
+      }))
+    },
+    grupoEmpresa: {
+      opcoes: gruposEmpresa
+        .filter((grupo) => Number(grupo.status ?? 1) !== 0)
+        .map((grupo) => ({
+          valor: grupo.descricao || '',
+          label: grupo.descricao || '-'
+        }))
+    }
+  }), [gruposEmpresa, ramosAtividade, vendedoresDisponiveis]);
 
   return (
     <>
@@ -300,6 +343,10 @@ export function PaginaClientes({ usuarioLogado }) {
         pesquisa={pesquisa}
         aoAlterarPesquisa={definirPesquisa}
         aoAbrirFiltros={() => definirModalFiltrosAberto(true)}
+        aoAbrirImportacao={() => {
+          definirResultadoImportacao(null);
+          definirModalImportacaoAberto(true);
+        }}
         aoNovoCliente={abrirNovoCliente}
         filtrosAtivos={filtrosAtivos}
       />
@@ -401,6 +448,18 @@ export function PaginaClientes({ usuarioLogado }) {
         ramosAtividade={ramosAtividade}
         filtros={filtros}
         usuarioLogado={usuarioLogado}
+      />
+      <ModalImportacaoCadastro
+        aberto={modalImportacaoAberto}
+        tipo="clientes"
+        carregando={importando}
+        resultado={resultadoImportacao}
+        referenciasRelacionais={referenciasImportacaoClientes}
+        onFechar={() => {
+          definirModalImportacaoAberto(false);
+          definirResultadoImportacao(null);
+        }}
+        onImportar={importarClientes}
       />
     </>
   );

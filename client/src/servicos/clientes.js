@@ -82,6 +82,16 @@ export function atualizarCliente(idCliente, payload) {
   });
 }
 
+export function importarClientesPlanilha(payload) {
+  return requisitarApi('/importacao/clientes', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+}
+
 export function incluirContato(payload) {
   return requisitarApi('/contatos', {
     method: 'POST',

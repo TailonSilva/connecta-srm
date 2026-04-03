@@ -8,8 +8,8 @@ import { normalizarValorEntradaFormulario } from '../../utilitarios/normalizarTe
 
 const abasModalEmpresa = [
   { id: 'dadosGerais', label: 'Dados gerais' },
-  { id: 'paginaInicial', label: 'Pagina inicial' },
   { id: 'endereco', label: 'Endereco' },
+  { id: 'paginaInicial', label: 'Pagina inicial' },
   { id: 'agenda', label: 'Agenda' },
   { id: 'orcamentosPedidos', label: 'Orcamentos/Pedidos' }
 ];
@@ -326,20 +326,8 @@ export function ModalEmpresa({
           {abaAtiva === 'paginaInicial' ? (
             <section className="gradeCamposModalCliente">
               <div className="campoFormularioIntegral painelOpcaoEmpresaPaginaInicial">
-                <label className="campoCheckboxFormulario" htmlFor="exibirFunilPaginaInicialEmpresa">
-                  <input
-                    id="exibirFunilPaginaInicialEmpresa"
-                    type="checkbox"
-                    name="exibirFunilPaginaInicial"
-                    checked={formulario.exibirFunilPaginaInicial}
-                    onChange={alterarCampo}
-                    disabled={somenteLeitura}
-                  />
-                  <span>Exibir funil de vendas na pagina inicial</span>
-                </label>
                 <p className="descricaoOpcaoEmpresaPaginaInicial">
-                  Quando habilitado, a pagina inicial mostra as etapas de orcamento marcadas para funil,
-                  com quantidade de orcamentos e valor total em cada etapa.
+                  A pagina inicial foi simplificada nesta etapa e nao possui configuracoes disponiveis dentro do cadastro da empresa.
                 </p>
               </div>
             </section>

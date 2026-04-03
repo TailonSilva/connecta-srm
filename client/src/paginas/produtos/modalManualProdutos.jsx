@@ -30,7 +30,7 @@ export function ModalManualProdutos({
         {
           titulo: 'Catalogo visivel',
           descricao: `${produtos.length} produto(s) no recorte atual da grade.`,
-          detalhe: 'A listagem mostra referencia, descricao, grupo, marca, unidade e preco.',
+          detalhe: 'A listagem mostra a referencia com prefixo REF.:, descricao, grupo, marca, unidade e preco.',
           icone: 'caixa'
         },
         {
@@ -73,6 +73,16 @@ export function ModalManualProdutos({
           icone: 'editar'
         },
         {
+          titulo: 'Abrir vendas do produto',
+          descricao: 'Dentro do modal do produto, a aba Vendas abre o mesmo historico amplo reutilizavel do cliente, mas filtrado automaticamente para esse produto e exibindo apenas os itens dos pedidos, com busca por digitacao no cabecalho e filtros para prazo, referencia e descricao.',
+          icone: 'pedido'
+        },
+        {
+          titulo: 'Importar por planilha',
+          descricao: 'O botao de importacao abre um modal com download do modelo e, ao final do processo, lista as linhas rejeitadas; quando grupo, marca ou unidade falham, o proprio modal permite escolher um registro existente para reprocessar.',
+          icone: 'importar'
+        },
+        {
           titulo: 'Inativar com seguranca',
           descricao: 'Quando permitido, a remocao operacional acontece por inativacao, preservando historico e referencias.',
           icone: 'confirmar'
@@ -86,7 +96,11 @@ export function ModalManualProdutos({
             'O codigo do produto e sugerido automaticamente pelo primeiro codigo disponivel.',
             'Preco e convertido para numero antes do salvamento para manter consistencia no backend.',
             'Imagem e um campo opcional, com recorte proprio para thumbnail final em 320 x 320 px, e valores vazios sao normalizados para null.',
-            'Grupo, marca e unidade podem ser cadastrados no fluxo sem sair do modal, se houver permissao.'
+            'Grupo, marca e unidade podem ser cadastrados no fluxo sem sair do modal, se houver permissao.',
+            'A aba Vendas do modal do produto abre um historico amplo filtrado pelo produto atual e mostra apenas os itens dos pedidos, com colunas separadas para data de inclusao e data de entrega.',
+            'A importacao por planilha usa um modelo com aba de instrucoes, incluindo obrigatoriedades, tipo de dado e limite de caracteres por coluna.',
+            'Quando uma linha falha na importacao, o retorno agora diferencia melhor preco invalido ou negativo, status incorreto e referencias auxiliares inativas ou inexistentes.',
+            'Se grupo, marca ou unidade nao forem resolvidos durante a importacao, o modal exibe um grid de pendencias para escolher um cadastro existente e reenviar apenas essas linhas.'
           ]
         },
         {

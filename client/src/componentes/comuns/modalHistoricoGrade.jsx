@@ -1,13 +1,18 @@
 import { Botao } from './botao';
+import { CampoPesquisa } from './campoPesquisa';
 import '../../recursos/estilos/modalHistoricoGrade.css';
 
 export function ModalHistoricoGrade({
   aberto,
   titulo,
   subtitulo = '',
+  className = '',
   filtrosAtivos = false,
   tituloFiltro = 'Filtrar',
   ariaFiltro = 'Filtrar',
+  valorPesquisa = '',
+  onAlterarPesquisa,
+  placeholderPesquisa = 'Pesquisar no historico...',
   onAbrirFiltros,
   onFechar,
   abas = [],
@@ -26,7 +31,7 @@ export function ModalHistoricoGrade({
   return (
     <div className="camadaModal camadaModalSecundaria" role="presentation" onMouseDown={onFechar}>
       <section
-        className="modalCliente modalHistoricoGrade"
+        className={`modalCliente modalHistoricoGrade ${className}`.trim()}
         role="dialog"
         aria-modal="true"
         aria-labelledby={`titulo${normalizarIdModal(titulo)}`}
@@ -69,6 +74,15 @@ export function ModalHistoricoGrade({
                   >
                     {tituloFiltro}
                   </Botao>
+                ) : null}
+                {typeof onAlterarPesquisa === 'function' ? (
+                  <CampoPesquisa
+                    valor={valorPesquisa}
+                    aoAlterar={onAlterarPesquisa}
+                    placeholder={placeholderPesquisa}
+                    ariaLabel={placeholderPesquisa}
+                    className="modalHistoricoGradePesquisa"
+                  />
                 ) : null}
               </div>
             ) : null}

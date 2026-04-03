@@ -25,6 +25,16 @@ export function atualizarProduto(idProduto, payload) {
   });
 }
 
+export function importarProdutosPlanilha(payload) {
+  return requisitarApi('/importacao/produtos', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+}
+
 export function listarGruposProduto(opcoes) {
   return requisitarListaApi('/gruposProduto', opcoes);
 }

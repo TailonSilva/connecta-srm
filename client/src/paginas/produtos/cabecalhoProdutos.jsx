@@ -6,6 +6,7 @@ export function CabecalhoProdutos({
   pesquisa,
   aoAlterarPesquisa,
   aoAbrirFiltros,
+  aoAbrirImportacao,
   aoNovoProduto,
   filtrosAtivos = false,
   somenteConsulta = false
@@ -38,6 +39,7 @@ export function CabecalhoProdutos({
           somenteIcone
           title="Importar"
           aria-label="Importar"
+          onClick={aoAbrirImportacao}
           disabled={somenteConsulta}
         />
         <Botao

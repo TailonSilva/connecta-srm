@@ -60,6 +60,7 @@ export function ModalAtendimento({
   empresa,
   somenteConsultaPrazos = false,
   etapaOrcamentoAtualizadaExternamente = null,
+  classNameCamada = 'camadaModalContato camadaModalAtendimento',
   aoSalvarPrazoPagamento,
   aoInativarPrazoPagamento,
   aoFechar,
@@ -654,7 +655,7 @@ export function ModalAtendimento({
 
   return (
     <>
-    <div className="camadaModalContato camadaModalAtendimento" role="presentation" onMouseDown={fecharAoClicarNoFundo}>
+    <div className={classNameCamada} role="presentation" onMouseDown={fecharAoClicarNoFundo}>
       <form
         className="modalContatoCliente modalAtendimento"
         role="dialog"

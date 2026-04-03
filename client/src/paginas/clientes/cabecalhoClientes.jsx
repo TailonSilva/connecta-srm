@@ -6,6 +6,7 @@ export function CabecalhoClientes({
   pesquisa,
   aoAlterarPesquisa,
   aoAbrirFiltros,
+  aoAbrirImportacao,
   aoNovoCliente,
   filtrosAtivos = false
 }) {
@@ -31,7 +32,7 @@ export function CabecalhoClientes({
           aria-label="Filtrar"
           onClick={aoAbrirFiltros}
         />
-        <Botao variante="secundario" icone="importar" somenteIcone title="Importar" aria-label="Importar" />
+        <Botao variante="secundario" icone="importar" somenteIcone title="Importar" aria-label="Importar" onClick={aoAbrirImportacao} />
         <Botao
           variante="primario"
           icone="adicionar"

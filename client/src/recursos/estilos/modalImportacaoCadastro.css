@@ -1,0 +1,231 @@
+.modalContatoCliente.modalImportacaoCadastro {
+  width: min(1260px, calc(100vw - 24px));
+  max-width: calc(100vw - 24px);
+}
+
+.modalImportacaoCadastroCabecalho {
+  align-items: flex-start;
+}
+
+.modalImportacaoCadastroCabecalho p {
+  margin: 6px 0 0;
+  color: var(--corTextoSuave);
+}
+
+.modalImportacaoCadastroCorpo {
+  display: grid;
+  gap: 18px;
+}
+
+.modalImportacaoCadastroBloco {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid rgba(23, 145, 226, 0.14);
+  border-radius: 20px;
+  background: rgba(248, 251, 254, 0.84);
+}
+
+.modalImportacaoCadastroAcoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.modalImportacaoCadastroCampoArquivo {
+  display: none;
+}
+
+.modalImportacaoCadastroResumoArquivo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: var(--corTextoSuave);
+}
+
+.modalImportacaoCadastroListaOrientacoes {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 18px;
+  color: var(--corTextoSuave);
+}
+
+.modalImportacaoCadastroIndicadores {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.modalImportacaoCadastroIndicador {
+  display: grid;
+  gap: 4px;
+  padding: 16px;
+  border-radius: 18px;
+  background: #ffffff;
+  border: 1px solid rgba(200, 213, 223, 0.8);
+}
+
+.modalImportacaoCadastroIndicador strong {
+  font-size: 1.5rem;
+  color: var(--corTexto);
+}
+
+.modalImportacaoCadastroIndicador span {
+  color: var(--corTextoSuave);
+}
+
+.modalImportacaoCadastroIndicador.sucesso {
+  border-color: rgba(34, 197, 94, 0.24);
+}
+
+.modalImportacaoCadastroIndicador.erro {
+  border-color: rgba(239, 68, 68, 0.24);
+}
+
+.modalImportacaoCadastroGrade {
+  max-height: 320px;
+  overflow-x: auto;
+  overflow-y: auto;
+}
+
+.modalImportacaoCadastroTabela,
+.modalImportacaoCadastroTabelaPendencias {
+  width: 100%;
+  min-width: 100%;
+  table-layout: fixed;
+}
+
+.modalImportacaoCadastroTabela td,
+.modalImportacaoCadastroTabelaPendencias td {
+  vertical-align: top;
+}
+
+.modalImportacaoCadastroTabela td:nth-child(3),
+.modalImportacaoCadastroTabelaPendencias td:nth-child(3),
+.modalImportacaoCadastroTabelaPendencias td:nth-child(4) {
+  word-break: break-word;
+}
+
+.modalImportacaoCadastroColLinha {
+  width: 6%;
+}
+
+.modalImportacaoCadastroColIdentificacao {
+  width: 18%;
+}
+
+.modalImportacaoCadastroColMotivos {
+  width: 76%;
+}
+
+.modalImportacaoCadastroColCampo {
+  width: 180px;
+}
+
+.modalImportacaoCadastroColInformado {
+  width: 190px;
+}
+
+.modalImportacaoCadastroColEscolha {
+  width: 280px;
+}
+
+.modalImportacaoCadastroTabela th:nth-child(1),
+.modalImportacaoCadastroTabela td:nth-child(1),
+.modalImportacaoCadastroTabelaPendencias th:nth-child(1),
+.modalImportacaoCadastroTabelaPendencias td:nth-child(1) {
+  width: 6% !important;
+  max-width: 72px;
+  padding-left: 10px;
+  padding-right: 10px;
+  white-space: nowrap;
+}
+
+.modalImportacaoCadastroTabela th:nth-child(2),
+.modalImportacaoCadastroTabela td:nth-child(2),
+.modalImportacaoCadastroTabelaPendencias th:nth-child(2),
+.modalImportacaoCadastroTabelaPendencias td:nth-child(2) {
+  width: 18% !important;
+  max-width: 220px;
+  padding-left: 10px;
+  padding-right: 10px;
+  white-space: nowrap;
+}
+
+.modalImportacaoCadastroTabela th:nth-child(3),
+.modalImportacaoCadastroTabela td:nth-child(3) {
+  width: 76% !important;
+  min-width: 0;
+}
+
+.modalImportacaoCadastroSucesso {
+  margin: 0;
+  color: var(--corTextoSuave);
+}
+
+.modalImportacaoCadastroPendenciasCabecalho {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.modalImportacaoCadastroPendenciasCabecalho h4 {
+  margin: 0;
+  color: var(--corTexto);
+}
+
+.modalImportacaoCadastroPendenciasCabecalho p {
+  margin: 6px 0 0;
+  color: var(--corTextoSuave);
+}
+
+.modalImportacaoCadastroGradePendencias {
+  max-height: 360px;
+}
+
+.modalImportacaoCadastroTabelaPendencias th:nth-child(1),
+.modalImportacaoCadastroTabelaPendencias td:nth-child(1) {
+  white-space: nowrap;
+}
+
+.modalImportacaoCadastroTabelaPendencias th:nth-child(2),
+.modalImportacaoCadastroTabelaPendencias td:nth-child(2) {
+  white-space: nowrap;
+}
+
+.modalImportacaoCadastroTabelaPendencias th:nth-child(3),
+.modalImportacaoCadastroTabelaPendencias td:nth-child(3) {
+  min-width: 0;
+}
+
+.modalImportacaoCadastroTabelaPendencias th:nth-child(4),
+.modalImportacaoCadastroTabelaPendencias td:nth-child(4) {
+  min-width: 0;
+}
+
+.modalImportacaoCadastroTabelaPendencias th:nth-child(5),
+.modalImportacaoCadastroTabelaPendencias td:nth-child(5) {
+  min-width: 0;
+}
+
+.modalImportacaoCadastroSelect {
+  min-width: 240px;
+}
+
+@media (max-width: 640px) {
+  .modalContatoCliente.modalImportacaoCadastro {
+    width: min(100%, calc(100vw - 12px));
+    max-width: calc(100vw - 12px);
+  }
+
+  .modalImportacaoCadastroIndicadores {
+    grid-template-columns: 1fr;
+  }
+
+  .modalImportacaoCadastroSelect {
+    min-width: 210px;
+  }
+}

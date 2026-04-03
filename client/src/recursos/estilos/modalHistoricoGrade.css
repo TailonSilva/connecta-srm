@@ -30,16 +30,24 @@
   min-width: 0;
 }
 
+.modalHistoricoGradePesquisa {
+  min-width: 220px;
+  width: min(280px, 100%);
+}
+
 .modalHistoricoGradeAbasCabecalho {
   display: flex;
   align-items: center;
   gap: 8px;
-  min-width: 0;
-  overflow: hidden;
+  flex: 0 0 auto;
+  min-width: max-content;
+  padding-inline: 2px;
+  overflow: visible;
 }
 
 .modalHistoricoGradeAbasCabecalho .abaModalCliente {
   flex: 0 0 auto;
+  min-width: max-content;
   padding-block: 9px;
 }
 
@@ -63,9 +71,14 @@
     justify-content: stretch;
   }
 
+  .modalHistoricoGradePesquisa {
+    width: 100%;
+    min-width: 0;
+  }
+
   .modalHistoricoGradeAbasCabecalho {
     width: 100%;
-    overflow-x: auto;
-    overflow-x: auto;
+    min-width: 0;
+    overflow: visible;
   }
 }

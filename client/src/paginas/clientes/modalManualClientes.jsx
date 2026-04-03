@@ -78,6 +78,11 @@ export function ModalManualClientes({
           icone: 'consultar'
         },
         {
+          titulo: 'Importar por planilha',
+          descricao: 'O botao de importacao abre um modal com download do modelo em planilha, mostra as linhas rejeitadas e, nas pendencias de vendedor, ramo ou grupo, permite escolher um registro existente para reprocessar.',
+          icone: 'importar'
+        },
+        {
           titulo: 'Abrir historicos amplos',
           descricao: 'Atendimento e Vendas agora abrem modais amplos separados para priorizar a leitura dos grids sem comprimir o restante do cadastro.',
           icone: 'pedido'
@@ -100,6 +105,9 @@ export function ModalManualClientes({
             'O cadastro de contatos diretos e salvo junto com o cliente, mantendo o vinculo por idCliente.',
             'Ramos de atividade e grupos de empresa podem ser mantidos sem sair do modal, sem perder o preenchimento ja feito no cliente.',
             'Ao concluir um novo ramo ou grupo pelo atalho do campo, o registro criado volta selecionado automaticamente no formulario do cliente.',
+            'O modelo de importacao traz uma aba de instrucoes com campos obrigatorios, tipo esperado e limite de caracteres para facilitar o preenchimento.',
+            'Na importacao, o sistema aponta com mais precisao quando CNPJ/CPF, codigo, UF, CEP, email, status ou referencias de apoio estiverem invalidos, inativos ou nao encontrados.',
+            'Quando vendedor, ramo de atividade ou grupo de empresa nao forem resolvidos na importacao, o proprio modal apresenta um grid para vincular um registro existente e reenviar apenas essas linhas.',
             'Quando a empresa estiver configurada para usar o Codigo alternativo como principal, os grids que exibem codigo passam a priorizar esse valor e usam o codigo padrao como fallback se o alternativo estiver vazio.'
           ]
         },
@@ -112,7 +120,7 @@ export function ModalManualClientes({
             'A busca tambem considera o Codigo alternativo quando ele estiver preenchido.',
             'O contato principal e enriquecido para aparecer diretamente na grade.',
             'A listagem ja considera a carteira do vendedor quando o perfil e restrito.',
-            'Atendimento e Vendas sairam do corpo principal do cliente e agora abrem modais quase em tela cheia; em Vendas, continuam as duas visoes de Pedidos e Itens do pedido.'
+            'Atendimento e Vendas sairam do corpo principal do cliente e agora abrem modais quase em tela cheia; ambos ganharam busca por digitacao no cabecalho e filtros mais completos. Em Atendimento, a grade separa Data, Inicio, Fim, Assunto e Contato; em Vendas, continuam as duas visoes de Pedidos e Itens do pedido com colunas separadas de Inclusao e Entrega e filtros pelos dois periodos.'
           ]
         }
       ]}

@@ -1,10 +1,18 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Botao } from '../../componentes/comuns/botao';
 import { CampoImagemPadrao } from '../../componentes/comuns/campoImagemPadrao';
 import { CodigoRegistro } from '../../componentes/comuns/codigoRegistro';
+import { ModalFiltros } from '../../componentes/comuns/modalFiltros';
+import { listarClientes, listarContatos, listarVendedores } from '../../servicos/clientes';
+import { listarEtapasPedidoConfiguracao, listarPrazosPagamentoConfiguracao } from '../../servicos/configuracoes';
+import { listarEmpresas } from '../../servicos/empresa';
+import { ModalPedido } from '../pedidos/modalPedido';
+import { listarPedidos } from '../../servicos/pedidos';
+import { ModalHistoricoVendasProduto } from './modalHistoricoVendasProduto';
 import { ModalGruposProduto } from '../configuracoes/modalGruposProduto';
 import { ModalMarcas } from '../configuracoes/modalMarcas';
 import { ModalUnidadesMedida } from '../configuracoes/modalUnidadesMedida';
+import { listarUsuarios } from '../../servicos/usuarios';
 import {
   desformatarPreco,
   normalizarPreco,
@@ -14,7 +22,7 @@ import { normalizarValorEntradaFormulario } from '../../utilitarios/normalizarTe
 
 const abasModalProduto = [
   { id: 'dadosGerais', label: 'Dados gerais' },
-  { id: 'vendas', label: 'Vendas' }
+  { id: 'vendas', label: 'Vendas', abreModal: 'vendas' }
 ];
 
 const estadoInicialFormulario = {
@@ -56,6 +64,22 @@ export function ModalProduto({
   const [modalGruposProdutoAberto, definirModalGruposProdutoAberto] = useState(false);
   const [modalMarcasAberto, definirModalMarcasAberto] = useState(false);
   const [modalUnidadesAberto, definirModalUnidadesAberto] = useState(false);
+  const [clientesPedidos, definirClientesPedidos] = useState([]);
+  const [contatosPedidos, definirContatosPedidos] = useState([]);
+  const [usuariosHistorico, definirUsuariosHistorico] = useState([]);
+  const [vendedoresHistorico, definirVendedoresHistorico] = useState([]);
+  const [prazosPagamentoPedidos, definirPrazosPagamentoPedidos] = useState([]);
+  const [etapasPedido, definirEtapasPedido] = useState([]);
+  const [empresaPedidos, definirEmpresaPedidos] = useState(null);
+  const [pedidosProduto, definirPedidosProduto] = useState([]);
+  const [carregandoPedidos, definirCarregandoPedidos] = useState(false);
+  const [mensagemErroPedidos, definirMensagemErroPedidos] = useState('');
+  const [modalHistoricoVendasAberto, definirModalHistoricoVendasAberto] = useState(false);
+  const [modalFiltrosPedidosAberto, definirModalFiltrosPedidosAberto] = useState(false);
+  const [pedidoSelecionado, definirPedidoSelecionado] = useState(null);
+  const [modalPedidoAberto, definirModalPedidoAberto] = useState(false);
+  const [filtrosPedidos, definirFiltrosPedidos] = useState(criarFiltrosIniciaisVendasProduto());
+  const [pesquisaRapidaVendas, definirPesquisaRapidaVendas] = useState('');
   const somenteLeitura = modo === 'consulta';
   const modoInclusao = !produto;
   const gruposAtivos = gruposProduto.filter((grupo) => grupo.status !== 0);
@@ -75,7 +99,83 @@ export function ModalProduto({
     definirModalGruposProdutoAberto(false);
     definirModalMarcasAberto(false);
     definirModalUnidadesAberto(false);
+    definirModalHistoricoVendasAberto(false);
+    definirModalFiltrosPedidosAberto(false);
+    definirPedidoSelecionado(null);
+    definirModalPedidoAberto(false);
+    definirFiltrosPedidos(criarFiltrosIniciaisVendasProduto());
+    definirPesquisaRapidaVendas('');
   }, [aberto, produto]);
+
+  useEffect(() => {
+    if (!aberto || !produto?.idProduto) {
+      return;
+    }
+
+    let cancelado = false;
+
+    async function carregarHistoricoProduto() {
+      definirCarregandoPedidos(true);
+      definirMensagemErroPedidos('');
+
+      try {
+        const [
+          pedidosCarregados,
+          clientesCarregados,
+          contatosCarregados,
+          usuariosCarregados,
+          vendedoresCarregados,
+          prazosCarregados,
+          etapasCarregadas,
+          empresasCarregadas
+        ] = await Promise.all([
+          listarPedidos(),
+          listarClientes(),
+          listarContatos(),
+          listarUsuarios(),
+          listarVendedores(),
+          listarPrazosPagamentoConfiguracao(),
+          listarEtapasPedidoConfiguracao(),
+          listarEmpresas()
+        ]);
+
+        if (cancelado) {
+          return;
+        }
+
+        definirClientesPedidos(clientesCarregados);
+        definirContatosPedidos(contatosCarregados);
+        definirUsuariosHistorico(usuariosCarregados);
+        definirVendedoresHistorico(vendedoresCarregados);
+        definirPrazosPagamentoPedidos(prazosCarregados);
+        definirEtapasPedido(normalizarEtapasPedidoHistorico(etapasCarregadas));
+        definirEmpresaPedidos(empresasCarregadas[0] || null);
+        definirPedidosProduto(
+          enriquecerPedidosProduto(
+            pedidosCarregados,
+            produto.idProduto,
+            clientesCarregados,
+            vendedoresCarregados,
+            etapasCarregadas
+          )
+        );
+      } catch (_erro) {
+        if (!cancelado) {
+          definirMensagemErroPedidos('Nao foi possivel carregar as vendas deste produto.');
+        }
+      } finally {
+        if (!cancelado) {
+          definirCarregandoPedidos(false);
+        }
+      }
+    }
+
+    carregarHistoricoProduto();
+
+    return () => {
+      cancelado = true;
+    };
+  }, [aberto, produto?.idProduto]);
 
   useEffect(() => {
     if (!aberto) {
@@ -94,10 +194,6 @@ export function ModalProduto({
       window.removeEventListener('keydown', tratarTecla);
     };
   }, [aberto, aoFechar, salvando]);
-
-  if (!aberto) {
-    return null;
-  }
 
   async function submeterFormulario(evento) {
     evento.preventDefault();
@@ -250,6 +346,50 @@ export function ModalProduto({
     }));
   }
 
+  function abrirModalHistoricoVendas() {
+    definirModalHistoricoVendasAberto(true);
+  }
+
+  function fecharModalHistoricoVendas() {
+    definirModalHistoricoVendasAberto(false);
+  }
+
+  function consultarPedido(pedido) {
+    definirPedidoSelecionado(pedido);
+    definirModalPedidoAberto(true);
+  }
+
+  function fecharModalPedido() {
+    definirPedidoSelecionado(null);
+    definirModalPedidoAberto(false);
+  }
+
+  function selecionarAbaProduto(aba) {
+    if (aba.abreModal === 'vendas') {
+      abrirModalHistoricoVendas();
+      return;
+    }
+
+    definirAbaAtiva(aba.id);
+  }
+
+  const itensPedidosFiltrados = useMemo(
+    () => filtrarItensPedidosDigitacaoProduto(
+      criarItensPedidosProduto(pedidosProduto, produto?.idProduto, filtrosPedidos),
+      pesquisaRapidaVendas
+    ),
+    [pedidosProduto, produto?.idProduto, filtrosPedidos, pesquisaRapidaVendas]
+  );
+  const produtosConsultaPedido = useMemo(
+    () => (produto ? [produto] : []),
+    [produto]
+  );
+  const filtrosPedidosAtivos = filtrosHistoricoEstaoAtivos(filtrosPedidos, criarFiltrosIniciaisVendasProduto());
+
+  if (!aberto) {
+    return null;
+  }
+
   return (
     <>
       <div className="camadaModal" role="presentation" onMouseDown={fecharAoClicarNoFundo}>
@@ -283,10 +423,10 @@ export function ModalProduto({
               <button
                 key={aba.id}
                 type="button"
-                role="tab"
+                role={aba.abreModal ? undefined : 'tab'}
                 className={`abaModalCliente ${abaAtiva === aba.id ? 'ativa' : ''}`}
-                aria-selected={abaAtiva === aba.id}
-                onClick={() => definirAbaAtiva(aba.id)}
+                aria-selected={aba.abreModal ? undefined : abaAtiva === aba.id}
+                onClick={() => selecionarAbaProduto(aba)}
                 disabled={aba.id === 'vendas' && modoInclusao}
               >
                 {aba.label}
@@ -431,12 +571,6 @@ export function ModalProduto({
                 </div>
               </section>
             ) : null}
-
-            {abaAtiva === 'vendas' ? (
-              <section className="painelVazioModalCliente">
-                <p>Conteudo em construcao.</p>
-              </section>
-            ) : null}
           </div>
 
           {mensagemErro ? <p className="mensagemErroFormulario">{mensagemErro}</p> : null}
@@ -504,6 +638,133 @@ export function ModalProduto({
         aoInativar={aoInativarUnidadeMedida}
         aoSelecionarUnidade={selecionarUnidade}
       />
+
+      <ModalHistoricoVendasProduto
+        aberto={modalHistoricoVendasAberto}
+        produto={produto}
+        carregando={carregandoPedidos}
+        mensagemErro={mensagemErroPedidos}
+        itensPedidos={itensPedidosFiltrados}
+        filtrosAtivos={filtrosPedidosAtivos}
+        valorPesquisa={pesquisaRapidaVendas}
+        onAlterarPesquisa={definirPesquisaRapidaVendas}
+        onFechar={fecharModalHistoricoVendas}
+        onAbrirFiltros={() => definirModalFiltrosPedidosAberto(true)}
+        onConsultarPedido={consultarPedido}
+      />
+
+      <ModalPedido
+        aberto={modalPedidoAberto}
+        pedido={pedidoSelecionado}
+        clientes={clientesPedidos}
+        contatos={contatosPedidos}
+        usuarios={usuariosHistorico}
+        vendedores={vendedoresHistorico}
+        prazosPagamento={prazosPagamentoPedidos}
+        etapasPedido={etapasPedido}
+        produtos={produtosConsultaPedido}
+        camposPedido={[]}
+        empresa={empresaPedidos}
+        usuarioLogado={null}
+        modo="consulta"
+        camadaSecundaria
+        aoFechar={fecharModalPedido}
+        aoSalvar={async () => {}}
+      />
+
+      <ModalFiltros
+        aberto={modalFiltrosPedidosAberto}
+        titulo="Filtros de itens vendidos"
+        filtros={filtrosPedidos}
+        campos={[
+          {
+            name: 'dataInclusaoInicio',
+            label: 'Inclusao inicial',
+            type: 'date',
+            inputProps: {
+              max: filtrosPedidos.dataInclusaoFim || undefined
+            }
+          },
+          {
+            name: 'dataInclusaoFim',
+            label: 'Inclusao final',
+            type: 'date',
+            inputProps: {
+              min: filtrosPedidos.dataInclusaoInicio || undefined
+            }
+          },
+          {
+            name: 'dataEntregaInicio',
+            label: 'Entrega inicial',
+            type: 'date',
+            inputProps: {
+              max: filtrosPedidos.dataEntregaFim || undefined
+            }
+          },
+          {
+            name: 'dataEntregaFim',
+            label: 'Entrega final',
+            type: 'date',
+            inputProps: {
+              min: filtrosPedidos.dataEntregaInicio || undefined
+            }
+          },
+          {
+            name: 'codigoPedido',
+            label: 'Pedido',
+            type: 'text',
+            inputProps: {
+              placeholder: 'Todos'
+            }
+          },
+          {
+            name: 'prazoPagamento',
+            label: 'Prazo de pagamento',
+            type: 'text',
+            inputProps: {
+              placeholder: 'Todos'
+            }
+          },
+          {
+            name: 'referenciaProduto',
+            label: 'Referencia',
+            type: 'text',
+            inputProps: {
+              placeholder: 'Todas'
+            }
+          },
+          {
+            name: 'descricaoProduto',
+            label: 'Descricao',
+            type: 'text',
+            inputProps: {
+              placeholder: 'Todas'
+            }
+          },
+          {
+            name: 'idEtapaPedido',
+            label: 'Etapa',
+            options: etapasPedido.map((etapa) => ({
+              valor: String(etapa.idEtapaPedido),
+              label: etapa.descricao
+            }))
+          },
+          {
+            name: 'idVendedor',
+            label: 'Vendedor',
+            options: vendedoresHistorico.map((vendedor) => ({
+              valor: String(vendedor.idVendedor),
+              label: vendedor.nome
+            }))
+          }
+        ]}
+        aoFechar={() => definirModalFiltrosPedidosAberto(false)}
+        aoAplicar={(proximosFiltros) => {
+          definirFiltrosPedidos(proximosFiltros);
+          definirModalFiltrosPedidosAberto(false);
+        }}
+        aoLimpar={() => definirFiltrosPedidos(criarFiltrosIniciaisVendasProduto())}
+      />
     </>
   );
 }
@@ -557,4 +818,152 @@ function obterIniciaisProduto(produto) {
   const textoBase = produto.referencia || produto.descricao || 'PR';
 
   return textoBase.slice(0, 2).toUpperCase();
+}
+
+function enriquecerPedidosProduto(pedidos, idProduto, clientes, vendedores, etapasPedido) {
+  const clientesPorId = new Map((clientes || []).map((cliente) => [cliente.idCliente, cliente.nomeFantasia || cliente.razaoSocial || '']));
+  const vendedoresPorId = new Map((vendedores || []).map((vendedor) => [vendedor.idVendedor, vendedor.nome]));
+  const etapasNormalizadas = normalizarEtapasPedidoHistorico(etapasPedido);
+  const etapasPorId = new Map(etapasNormalizadas.map((etapa) => [etapa.idEtapaPedido, etapa]));
+
+  return (pedidos || [])
+    .filter((pedido) => Array.isArray(pedido.itens) && pedido.itens.some((item) => String(item.idProduto) === String(idProduto)))
+    .sort((pedidoA, pedidoB) => {
+      const dataHoraA = `${pedidoA.dataInclusao || ''}T00:00:00`;
+      const dataHoraB = `${pedidoB.dataInclusao || ''}T00:00:00`;
+      return new Date(dataHoraB).getTime() - new Date(dataHoraA).getTime();
+    })
+    .map((pedido) => ({
+      ...pedido,
+      totalPedido: Array.isArray(pedido.itens)
+        ? pedido.itens.reduce((total, item) => total + (Number(item.valorTotal) || 0), 0)
+        : 0,
+      nomeClienteSnapshot: pedido.nomeClienteSnapshot || clientesPorId.get(pedido.idCliente) || '',
+      nomeVendedorSnapshot: pedido.nomeVendedorSnapshot || vendedoresPorId.get(pedido.idVendedor) || '',
+      nomeEtapaPedidoSnapshot: pedido.nomeEtapaPedidoSnapshot || etapasPorId.get(pedido.idEtapaPedido)?.descricao || ''
+    }));
+}
+
+function criarItensPedidosProduto(pedidos, idProduto, filtros) {
+  return (pedidos || []).flatMap((pedido) => (
+    Array.isArray(pedido.itens)
+      ? pedido.itens
+        .filter((item) => String(item.idProduto) === String(idProduto))
+        .filter((item) => itemPedidoAtendeFiltrosProduto(pedido, item, filtros))
+        .map((item, indice) => ({
+          chave: `${pedido.idPedido || 'pedido'}-${item.idItemPedido || indice}`,
+          idPedido: pedido.idPedido,
+          dataInclusao: pedido.dataInclusao,
+          dataEntrega: pedido.dataEntrega,
+          nomeCliente: pedido.nomeClienteSnapshot || 'Cliente nao informado',
+          referenciaProduto: item.referenciaProdutoSnapshot || '',
+          descricaoProduto: item.descricaoProdutoSnapshot || 'Produto nao informado',
+          valorUnitario: Number(item.valorUnitario) || 0,
+          quantidade: item.quantidade || 0,
+          valorTotal: Number(item.valorTotal) || 0,
+          pedido
+        }))
+      : []
+  ));
+}
+
+function criarFiltrosIniciaisVendasProduto() {
+  return {
+    dataInclusaoInicio: '',
+    dataInclusaoFim: '',
+    dataEntregaInicio: '',
+    dataEntregaFim: '',
+    codigoPedido: '',
+    prazoPagamento: '',
+    referenciaProduto: '',
+    descricaoProduto: '',
+    idEtapaPedido: '',
+    idVendedor: ''
+  };
+}
+
+function itemPedidoAtendeFiltrosProduto(pedido, item, filtros) {
+  const dataInclusao = String(pedido?.dataInclusao || '');
+  const dataEntrega = String(pedido?.dataEntrega || '');
+  const codigoPedido = String(pedido?.idPedido || '');
+  const prazoPagamento = String(pedido?.nomePrazoPagamentoSnapshot || '').toLowerCase();
+  const referencia = String(item?.referenciaProdutoSnapshot || '').toLowerCase();
+  const descricao = String(item?.descricaoProdutoSnapshot || '').toLowerCase();
+
+  return (
+    (!filtros.dataInclusaoInicio || dataInclusao >= filtros.dataInclusaoInicio)
+    && (!filtros.dataInclusaoFim || dataInclusao <= filtros.dataInclusaoFim)
+    && (!filtros.dataEntregaInicio || (dataEntrega && dataEntrega >= filtros.dataEntregaInicio))
+    && (!filtros.dataEntregaFim || (dataEntrega && dataEntrega <= filtros.dataEntregaFim))
+    && (!String(filtros.codigoPedido || '').trim() || codigoPedido.includes(String(filtros.codigoPedido || '').trim()))
+    && (!String(filtros.prazoPagamento || '').trim() || prazoPagamento.includes(String(filtros.prazoPagamento || '').trim().toLowerCase()))
+    && (!String(filtros.referenciaProduto || '').trim() || referencia.includes(String(filtros.referenciaProduto || '').trim().toLowerCase()))
+    && (!String(filtros.descricaoProduto || '').trim() || descricao.includes(String(filtros.descricaoProduto || '').trim().toLowerCase()))
+    && (!filtros.idEtapaPedido || String(pedido?.idEtapaPedido) === String(filtros.idEtapaPedido))
+    && (!filtros.idVendedor || String(pedido?.idVendedor) === String(filtros.idVendedor))
+  );
+}
+
+function filtrarItensPedidosDigitacaoProduto(itensPedidos, pesquisa) {
+  const termo = String(pesquisa || '').trim().toLowerCase();
+
+  if (!termo) {
+    return itensPedidos;
+  }
+
+  return (itensPedidos || []).filter((item) => [
+    item.idPedido,
+    item.dataInclusao,
+    item.dataEntrega,
+    item.nomeCliente,
+    item.referenciaProduto,
+    item.descricaoProduto,
+    item.valorUnitario,
+    item.quantidade,
+    item.valorTotal,
+    item.pedido?.nomePrazoPagamentoSnapshot,
+    item.pedido?.nomeEtapaPedidoSnapshot,
+    item.pedido?.nomeVendedorSnapshot
+  ].some((valor) => String(valor || '').toLowerCase().includes(termo)));
+}
+
+function filtrosHistoricoEstaoAtivos(filtros, filtrosPadrao) {
+  return Object.keys(filtrosPadrao).some((chave) => String(filtros?.[chave] || '') !== String(filtrosPadrao[chave] || ''));
+}
+
+function normalizarEtapasPedidoHistorico(etapasPedido) {
+  if (!Array.isArray(etapasPedido)) {
+    return [];
+  }
+
+  return etapasPedido
+    .map((etapa) => ({
+      ...etapa,
+      idEtapaPedido: etapa.idEtapaPedido ?? etapa.idEtapa
+    }))
+    .sort((etapaA, etapaB) => {
+      const ordemA = obterValorOrdemEtapaHistorico(etapaA?.ordem, etapaA?.idEtapaPedido);
+      const ordemB = obterValorOrdemEtapaHistorico(etapaB?.ordem, etapaB?.idEtapaPedido);
+
+      if (ordemA !== ordemB) {
+        return ordemA - ordemB;
+      }
+
+      return Number(etapaA?.idEtapaPedido || 0) - Number(etapaB?.idEtapaPedido || 0);
+    });
+}
+
+function obterValorOrdemEtapaHistorico(ordem, fallback) {
+  const ordemNumerica = Number(ordem);
+
+  if (Number.isFinite(ordemNumerica) && ordemNumerica > 0) {
+    return ordemNumerica;
+  }
+
+  const fallbackNumerico = Number(fallback);
+  if (Number.isFinite(fallbackNumerico) && fallbackNumerico > 0) {
+    return fallbackNumerico;
+  }
+
+  return Number.MAX_SAFE_INTEGER;
 }

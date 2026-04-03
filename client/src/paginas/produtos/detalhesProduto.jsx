@@ -4,7 +4,7 @@ export function DetalhesProduto({ produto }) {
   return (
     <div className="celulaRegistroDetalhes">
       <div className="topoRegistroDetalhes">
-        <strong>{produto.referencia || 'Referencia nao informada'}</strong>
+        <strong>{produto.referencia ? `REF.: ${produto.referencia}` : 'REF.: nao informada'}</strong>
         <CodigoRegistro valor={produto.idProduto} />
       </div>
 

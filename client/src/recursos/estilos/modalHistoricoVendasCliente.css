@@ -1,9 +1,85 @@
+.modalCliente.modalHistoricoVendasCadastro {
+  width: min(1720px, calc(100vw - 24px));
+  max-width: calc(100vw - 24px);
+}
+
 .modalHistoricoVendasClientePainel {
   height: 100%;
+  width: 100%;
 }
 
 .modalHistoricoVendasClienteGrade {
   height: 100%;
+  width: 100%;
   max-height: none;
+  overflow-x: auto;
   overflow-y: auto;
+}
+
+.modalCliente.modalHistoricoVendasCadastro .tabelaContatosModal {
+  min-width: 1440px;
+  table-layout: auto;
+}
+
+.modalCliente.modalHistoricoVendasCadastro .tabelaContatosModal th,
+.modalCliente.modalHistoricoVendasCadastro .tabelaContatosModal td {
+  white-space: nowrap;
+}
+
+.modalCliente.modalHistoricoVendasCadastro .colunaHistoricoData {
+  width: 120px;
+}
+
+.modalCliente.modalHistoricoVendasCadastro .colunaHistoricoPedido {
+  width: 96px;
+}
+
+.modalCliente.modalHistoricoVendasCadastro .colunaHistoricoCliente {
+  width: 240px;
+}
+
+.modalCliente.modalHistoricoVendasCadastro .colunaHistoricoEtapa {
+  width: 180px;
+}
+
+.modalCliente.modalHistoricoVendasCadastro .colunaHistoricoVendedor {
+  width: 180px;
+}
+
+.modalCliente.modalHistoricoVendasCadastro .colunaHistoricoPrazoPagamento {
+  width: 220px;
+  white-space: normal;
+}
+
+.modalCliente.modalHistoricoVendasCadastro .colunaHistoricoReferencia {
+  width: 180px;
+}
+
+.modalCliente.modalHistoricoVendasCadastro .colunaHistoricoDescricao {
+  min-width: 320px;
+  white-space: normal;
+}
+
+.modalCliente.modalHistoricoVendasCadastro .colunaHistoricoValor,
+.modalCliente.modalHistoricoVendasCadastro .colunaHistoricoValorTotal {
+  width: 140px;
+}
+
+.modalCliente.modalHistoricoVendasCadastro .colunaHistoricoQuantidade {
+  width: 120px;
+}
+
+.modalCliente.modalHistoricoVendasCadastro .tabelaPedidosCliente th.cabecalhoAcoesContato,
+.modalCliente.modalHistoricoVendasCadastro .tabelaItensPedidosCliente th.cabecalhoAcoesContato {
+  width: 92px;
+}
+
+@media (max-width: 640px) {
+  .modalCliente.modalHistoricoVendasCadastro {
+    width: min(100%, calc(100vw - 12px));
+  }
+
+  .modalCliente.modalHistoricoVendasCadastro .tabelaContatosModal {
+    min-width: 920px;
+  }
 }

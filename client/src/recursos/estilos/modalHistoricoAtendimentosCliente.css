@@ -1,9 +1,62 @@
+.modalCliente.modalHistoricoAtendimentosCliente {
+  width: min(1580px, calc(100vw - 24px));
+  max-width: calc(100vw - 24px);
+}
+
 .modalHistoricoAtendimentosClientePainel {
   height: 100%;
+  width: 100%;
 }
 
 .modalHistoricoAtendimentosClienteGrade {
   height: 100%;
+  width: 100%;
   max-height: none;
+  overflow-x: auto;
   overflow-y: auto;
+}
+
+.modalCliente.modalHistoricoAtendimentosCliente .tabelaContatosModal {
+  min-width: 1360px;
+  table-layout: auto;
+}
+
+.modalCliente.modalHistoricoAtendimentosCliente .colunaHistoricoAtendimentoData {
+  width: 120px;
+}
+
+.modalCliente.modalHistoricoAtendimentosCliente .colunaHistoricoAtendimentoHora {
+  width: 96px;
+}
+
+.modalCliente.modalHistoricoAtendimentosCliente .colunaHistoricoAtendimentoAssunto {
+  min-width: 260px;
+  white-space: normal;
+}
+
+.modalCliente.modalHistoricoAtendimentosCliente .colunaHistoricoAtendimentoContato {
+  min-width: 240px;
+  white-space: normal;
+}
+
+.modalCliente.modalHistoricoAtendimentosCliente .colunaHistoricoAtendimentoCanal {
+  width: 180px;
+}
+
+.modalCliente.modalHistoricoAtendimentosCliente .colunaHistoricoAtendimentoUsuario {
+  width: 200px;
+}
+
+.modalCliente.modalHistoricoAtendimentosCliente .tabelaAtendimentosCliente th.cabecalhoAcoesContato {
+  width: 92px;
+}
+
+@media (max-width: 640px) {
+  .modalCliente.modalHistoricoAtendimentosCliente {
+    width: min(100%, calc(100vw - 12px));
+  }
+
+  .modalCliente.modalHistoricoAtendimentosCliente .tabelaContatosModal {
+    min-width: 980px;
+  }
 }

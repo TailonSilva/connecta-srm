@@ -78,6 +78,7 @@ Padroes centralizados no frontend:
 - `ModalBuscaClientes`: busca reutilizavel de clientes
 - `ModalBuscaContatos`: busca reutilizavel de contatos
 - `ModalHistoricoGrade`: base reutilizavel para modais amplos de historico em grade, com cabecalho, abas opcionais e acao de filtro
+- `ModalImportacaoCadastro`: modal reutilizavel para importacao por planilha, com download de modelo e tabela de linhas rejeitadas
 - `ModalContatoCliente`: formulario reutilizavel de contato
 - `ModalRamosAtividade`: lista e cadastro reutilizavel de ramos
 - `ModalGruposProduto`: lista e cadastro de grupos de produto com botao dedicado para abrir um submodal compacto de selecao de tamanhos e ordem por grupo
@@ -116,8 +117,6 @@ Utilitarios importantes:
 - A pagina inicial foi reduzida ao minimo e agora exibe apenas o titulo `Painel inicial`
 - Todos os cards, graficos, rankings, funil, filtros visuais e conteudos complementares da home foram removidos nesta etapa
 - O restante da infraestrutura do sistema permanece no projeto; apenas a composicao visual da pagina inicial foi zerada
-- Funil de vendas opcional na pagina inicial, controlado pela configuracao da empresa
-- Novas empresas e novas bases passam a vir com o funil habilitado por padrao
 - As barras exibem novamente a descricao da etapa diretamente sobre a propria barra, junto do valor
 - A descricao dentro da barra usa a paleta do projeto com variacao baseada na cor da etapa, e o valor aparece em negrito
 - As barras usam uma largura mais contida e com maior espacamento entre linhas para aliviar a leitura visual
@@ -171,12 +170,20 @@ Observacao:
 - Modal em abas para incluir, editar e consultar
 - Abas principais do cadastro: `Dados gerais`, `Endereco`, `Observacoes` e `Contato`
 - Os antigos grids de `Atendimento` e `Vendas` agora abrem em modais amplos separados, quase em tela cheia, para facilitar leitura operacional
-- Dentro do modal amplo de `Vendas`, continuam duas visoes: `Pedidos` e `Itens do pedido`
+- No historico de `Atendimentos`, a grade mostra `Data`, `Inicio`, `Fim`, `Assunto`, `Contato`, `Canal`, `Usuario` e `Acoes`
+- O historico de `Atendimentos` tambem oferece busca por digitacao no cabecalho e filtros para data, assunto, contato, horario, canal e usuario
+- Dentro do modal amplo de `Vendas`, continuam duas visoes: `Pedidos` e `Itens do pedido`, agora no mesmo componente reutilizavel usado tambem em produtos
 - O grid de `Pedidos` da aba Vendas nao exibe mais o nome do contato
-- O grid de `Itens do pedido` mostra `Data`, `Pedido`, `Produto`, `Valor`, `Quantidade` e `Valor total`
+- O grid de `Pedidos` mostra `Inclusao`, `Entrega`, `Pedido`, `Cliente` quando aplicavel, `Etapa`, `Vendedor`, `Prazo de pagamento`, `Total` e `Acoes`
+- Os grids de `Pedidos` e `Itens do pedido` mostram colunas separadas de `Inclusao` e `Entrega`, e o filtro desse historico tambem separa os dois periodos
+- O grid de `Itens do pedido` mostra `Inclusao`, `Entrega`, `Pedido`, `Referencia`, `Descricao`, `Valor`, `Quantidade` e `Valor total`
+- O historico de `Vendas` tambem oferece busca por digitacao no cabecalho e filtros para prazo de pagamento, referencia e descricao, alem dos filtros por data, etapa, vendedor e codigo do pedido
 - Thumbnail com codigo do cliente
 - O cadastro de cliente aceita um `Codigo alternativo` numerico e opcional
 - A empresa pode definir se o CRM exibe como principal o codigo padrao do cliente ou o `Codigo alternativo`; quando o alternativo estiver vazio, o sistema volta automaticamente ao codigo padrao
+- O botao de importacao de clientes abre um modal com download de modelo em planilha; apos importar, o sistema informa as linhas rejeitadas e o motivo de cada uma
+- Quando uma linha de clientes falha por vendedor, ramo de atividade ou grupo de empresa nao encontrado/inativo, o modal de importacao passa a exibir um grid de pendencias para escolher um registro existente e reprocessar apenas essas linhas
+- A importacao de clientes valida com mensagens especificas campos como CNPJ/CPF, codigo numerico, vendedor, ramo, grupo, UF, CEP, email e status antes de inserir cada linha
 - Integracao publica para consulta de `CEP`
 - Integracao publica para consulta de `CNPJ`
 - Aba de contatos com grade propria
@@ -206,6 +213,8 @@ Filtros de clientes:
 - Manual visual da pagina de produtos acessado por `F1`, com regras de catalogo, classificacoes auxiliares e permissoes do perfil
 - Modal no mesmo padrao visual de clientes
 - Modos incluir, editar e consultar
+- No modal do produto, a aba `Vendas` abre o mesmo historico amplo reutilizavel do cliente, filtrado automaticamente pelo produto selecionado e exibindo apenas itens dos pedidos
+- Nesse historico do produto, os filtros consideram separadamente `Data de inclusao` e `Data de entrega`
 - Codigo automatico ao incluir
 - Upload de imagem no padrao reutilizavel do projeto, com recorte final em 320 x 320 px para a foto principal do produto
 - Campo de preco com mascara e digitacao amigavel em real
@@ -213,6 +222,9 @@ Filtros de clientes:
 - O modal de `Grupo de Produto` permite definir quais `Tamanhos` estao disponiveis para cada grupo e em qual ordem devem aparecer
 - Campo `Marca` com botao de pesquisa para abrir o modal de configuracao
 - Campo `Unidade` com botao de pesquisa para abrir o modal de configuracao
+- O botao de importacao de produtos abre um modal com download de modelo em planilha; apos importar, o sistema informa as linhas rejeitadas e o motivo de cada uma
+- Quando uma linha de produtos falha por grupo, marca ou unidade nao encontrado/inativo, o modal de importacao passa a exibir um grid de pendencias para escolher um registro existente e reprocessar apenas essas linhas
+- A importacao de produtos diferencia referencias auxiliares inativas de referencias inexistentes e tambem valida preco, codigo numerico e status com mensagens mais objetivas
 - Inclusao e selecao imediata de registros auxiliares dentro do cadastro de produto
 - Inativacao persiste no banco
 
@@ -419,7 +431,6 @@ O cadastro de empresa tem modal proprio com abas:
 - Horarios de expediente da manha e da tarde
 - Flag para trabalho aos sabados
 - Horarios de sabado quando aplicavel
-- `Exibir funil de vendas na pagina inicial`
 - `diasValidadeOrcamento`
 - `diasEntregaPedido`
 - `Filtro padrao de status do orcamento`
@@ -428,7 +439,6 @@ Esses dados sao usados em:
 
 - Tela de login
 - Barra lateral
-- Exibicao do funil de vendas da pagina inicial
 - Faixa horaria padrao da agenda
 - Validade inicial de orcamentos
 - Previsao inicial de entrega de pedidos

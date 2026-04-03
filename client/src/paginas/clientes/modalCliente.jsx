@@ -88,15 +88,26 @@ function criarFiltrosIniciaisAtendimentos() {
   return {
     ...criarFiltrosIniciaisHistorico(),
     assunto: '',
+    contato: '',
+    horaInicioMin: '',
+    horaFimMax: '',
     idCanalAtendimento: '',
     idUsuario: ''
   };
 }
 
 function criarFiltrosIniciaisVendas() {
+  const { dataInicio, dataFim } = obterPeriodoMesAtual();
+
   return {
-    ...criarFiltrosIniciaisHistorico(),
+    dataInclusaoInicio: dataInicio,
+    dataInclusaoFim: dataFim,
+    dataEntregaInicio: '',
+    dataEntregaFim: '',
     codigoPedido: '',
+    prazoPagamento: '',
+    referenciaProduto: '',
+    descricaoProduto: '',
     idEtapaPedido: '',
     idVendedor: ''
   };
@@ -158,6 +169,8 @@ export function ModalCliente({
   const [modalPedidoAberto, definirModalPedidoAberto] = useState(false);
   const [modalHistoricoVendasAberto, definirModalHistoricoVendasAberto] = useState(false);
   const [abaVendasAtiva, definirAbaVendasAtiva] = useState(abasVendasCliente[0].id);
+  const [pesquisaRapidaAtendimentos, definirPesquisaRapidaAtendimentos] = useState('');
+  const [pesquisaRapidaVendas, definirPesquisaRapidaVendas] = useState('');
   const [confirmandoSaida, definirConfirmandoSaida] = useState(false);
   const [modalRamosAtividadeAberto, definirModalRamosAtividadeAberto] = useState(false);
   const [modalGruposEmpresaAberto, definirModalGruposEmpresaAberto] = useState(false);
@@ -235,6 +248,8 @@ export function ModalCliente({
     definirPedidoSelecionado(null);
     definirModalPedidoAberto(false);
     definirModalHistoricoVendasAberto(false);
+    definirPesquisaRapidaAtendimentos('');
+    definirPesquisaRapidaVendas('');
     definirConfirmandoSaida(false);
     definirModalRamosAtividadeAberto(false);
     definirModalGruposEmpresaAberto(false);
@@ -678,16 +693,25 @@ export function ModalCliente({
   }
 
   const atendimentosFiltrados = useMemo(
-    () => filtrarAtendimentosCliente(atendimentosCliente, filtrosAtendimentos),
-    [atendimentosCliente, filtrosAtendimentos]
+    () => filtrarAtendimentosDigitacao(
+      filtrarAtendimentosCliente(atendimentosCliente, filtrosAtendimentos),
+      pesquisaRapidaAtendimentos
+    ),
+    [atendimentosCliente, filtrosAtendimentos, pesquisaRapidaAtendimentos]
   );
   const pedidosFiltrados = useMemo(
-    () => filtrarPedidosCliente(pedidosCliente, filtrosPedidos),
-    [pedidosCliente, filtrosPedidos]
+    () => filtrarPedidosDigitacao(
+      filtrarPedidosCliente(pedidosCliente, filtrosPedidos),
+      pesquisaRapidaVendas
+    ),
+    [pedidosCliente, filtrosPedidos, pesquisaRapidaVendas]
   );
   const itensPedidosFiltrados = useMemo(
-    () => criarItensPedidosCliente(pedidosFiltrados),
-    [pedidosFiltrados]
+    () => filtrarItensPedidosDigitacao(
+      criarItensPedidosCliente(pedidosCliente, filtrosPedidos),
+      pesquisaRapidaVendas
+    ),
+    [pedidosCliente, filtrosPedidos, pesquisaRapidaVendas]
   );
   const filtrosAtendimentosAtivos = filtrosHistoricoEstaoAtivos(filtrosAtendimentos, filtrosIniciaisAtendimentos);
   const filtrosPedidosAtivos = filtrosHistoricoEstaoAtivos(filtrosPedidos, filtrosIniciaisPedidos);
@@ -1007,6 +1031,8 @@ export function ModalCliente({
         mensagemErro={mensagemErroAtendimentos}
         atendimentos={atendimentosFiltrados}
         filtrosAtivos={filtrosAtendimentosAtivos}
+        valorPesquisa={pesquisaRapidaAtendimentos}
+        onAlterarPesquisa={definirPesquisaRapidaAtendimentos}
         onFechar={fecharModalHistoricoAtendimentos}
         onAbrirFiltros={() => definirModalFiltrosAtendimentosAberto(true)}
         onConsultarAtendimento={consultarAtendimento}
@@ -1022,6 +1048,8 @@ export function ModalCliente({
         pedidos={pedidosFiltrados}
         itensPedidos={itensPedidosFiltrados}
         filtrosAtivos={filtrosPedidosAtivos}
+        valorPesquisa={pesquisaRapidaVendas}
+        onAlterarPesquisa={definirPesquisaRapidaVendas}
         onFechar={fecharModalHistoricoVendas}
         onAbrirFiltros={() => definirModalFiltrosPedidosAberto(true)}
         onConsultarPedido={consultarPedido}
@@ -1059,6 +1087,7 @@ export function ModalCliente({
         canaisAtendimento={canaisAtendimento}
         origensAtendimento={origensAtendimento}
         modo="consulta"
+        classNameCamada="camadaModalContato"
         aoFechar={fecharModalAtendimento}
         aoSalvar={async () => {}}
       />
@@ -1091,6 +1120,24 @@ export function ModalCliente({
             inputProps: {
               placeholder: 'Todos'
             }
+          },
+          {
+            name: 'contato',
+            label: 'Contato',
+            type: 'text',
+            inputProps: {
+              placeholder: 'Todos'
+            }
+          },
+          {
+            name: 'horaInicioMin',
+            label: 'Inicio a partir de',
+            type: 'time'
+          },
+          {
+            name: 'horaFimMax',
+            label: 'Fim ate',
+            type: 'time'
           },
           {
             name: 'idCanalAtendimento',
@@ -1142,19 +1189,35 @@ export function ModalCliente({
         filtros={filtrosPedidos}
         campos={[
           {
-            name: 'dataInicio',
-            label: 'Data inicial',
+            name: 'dataInclusaoInicio',
+            label: 'Inclusao inicial',
             type: 'date',
             inputProps: {
-              max: filtrosPedidos.dataFim || undefined
+              max: filtrosPedidos.dataInclusaoFim || undefined
             }
           },
           {
-            name: 'dataFim',
-            label: 'Data final',
+            name: 'dataInclusaoFim',
+            label: 'Inclusao final',
             type: 'date',
             inputProps: {
-              min: filtrosPedidos.dataInicio || undefined
+              min: filtrosPedidos.dataInclusaoInicio || undefined
+            }
+          },
+          {
+            name: 'dataEntregaInicio',
+            label: 'Entrega inicial',
+            type: 'date',
+            inputProps: {
+              max: filtrosPedidos.dataEntregaFim || undefined
+            }
+          },
+          {
+            name: 'dataEntregaFim',
+            label: 'Entrega final',
+            type: 'date',
+            inputProps: {
+              min: filtrosPedidos.dataEntregaInicio || undefined
             }
           },
           {
@@ -1163,6 +1226,30 @@ export function ModalCliente({
             type: 'text',
             inputProps: {
               placeholder: 'Todos'
+            }
+          },
+          {
+            name: 'prazoPagamento',
+            label: 'Prazo de pagamento',
+            type: 'text',
+            inputProps: {
+              placeholder: 'Todos'
+            }
+          },
+          {
+            name: 'referenciaProduto',
+            label: 'Referencia',
+            type: 'text',
+            inputProps: {
+              placeholder: 'Todas'
+            }
+          },
+          {
+            name: 'descricaoProduto',
+            label: 'Descricao',
+            type: 'text',
+            inputProps: {
+              placeholder: 'Todas'
             }
           },
           {
@@ -1229,6 +1316,21 @@ export function ModalCliente({
 
 function normalizarFiltrosHistoricoCliente(filtros, filtrosPadrao) {
   const filtrosNormalizados = normalizarFiltrosPorPadrao(filtros, filtrosPadrao);
+  if ('dataInclusaoInicio' in filtrosPadrao || 'dataEntregaInicio' in filtrosPadrao) {
+    const dataInclusaoInicio = filtrosNormalizados.dataInclusaoInicio || filtrosPadrao.dataInclusaoInicio;
+    const dataInclusaoFim = filtrosNormalizados.dataInclusaoFim || filtrosPadrao.dataInclusaoFim;
+    const dataEntregaInicio = filtrosNormalizados.dataEntregaInicio || filtrosPadrao.dataEntregaInicio;
+    const dataEntregaFim = filtrosNormalizados.dataEntregaFim || filtrosPadrao.dataEntregaFim;
+
+    return {
+      ...filtrosNormalizados,
+      dataInclusaoInicio: dataInclusaoInicio && dataInclusaoFim && dataInclusaoInicio > dataInclusaoFim ? dataInclusaoFim : dataInclusaoInicio,
+      dataInclusaoFim: dataInclusaoInicio && dataInclusaoFim && dataInclusaoInicio > dataInclusaoFim ? dataInclusaoInicio : dataInclusaoFim,
+      dataEntregaInicio: dataEntregaInicio && dataEntregaFim && dataEntregaInicio > dataEntregaFim ? dataEntregaFim : dataEntregaInicio,
+      dataEntregaFim: dataEntregaInicio && dataEntregaFim && dataEntregaInicio > dataEntregaFim ? dataEntregaInicio : dataEntregaFim
+    };
+  }
+
   const dataInicio = filtrosNormalizados.dataInicio || filtrosPadrao.dataInicio;
   const dataFim = filtrosNormalizados.dataFim || filtrosPadrao.dataFim;
 
@@ -1504,12 +1606,17 @@ function enriquecerPedidosCliente(pedidos, idCliente, usuarios, vendedores, etap
     }));
 }
 
-function criarItensPedidosCliente(pedidos) {
+function criarItensPedidosCliente(pedidos, filtros = {}) {
   return (pedidos || []).flatMap((pedido) => (
-    Array.isArray(pedido.itens) ? pedido.itens.map((item, indice) => ({
+    Array.isArray(pedido.itens) ? pedido.itens
+      .filter((item) => itemPedidoClienteAtendeFiltros(item, filtros))
+      .map((item, indice) => ({
       chave: `${pedido.idPedido || 'pedido'}-${item.idItemPedido || indice}`,
       idPedido: pedido.idPedido,
-      dataPedido: pedido.dataInclusao,
+      dataInclusao: pedido.dataInclusao,
+      dataEntrega: pedido.dataEntrega,
+      pedido,
+      referenciaProduto: item.referenciaProdutoSnapshot || '',
       descricaoProduto: item.descricaoProdutoSnapshot || 'Produto nao informado',
       valorUnitario: Number(item.valorUnitario) || 0,
       quantidade: item.quantidade || 0,
@@ -1522,11 +1629,17 @@ function filtrarAtendimentosCliente(atendimentos, filtros) {
   return (atendimentos || []).filter((atendimento) => {
     const data = String(atendimento.data || '');
     const assunto = String(atendimento.assunto || '').toLowerCase();
+    const contato = String(atendimento.nomeContato || '').toLowerCase();
+    const horaInicio = String(atendimento.horaInicio || '');
+    const horaFim = String(atendimento.horaFim || '');
 
     return (
       (!filtros.dataInicio || data >= filtros.dataInicio)
       && (!filtros.dataFim || data <= filtros.dataFim)
       && (!String(filtros.assunto || '').trim() || assunto.includes(String(filtros.assunto || '').trim().toLowerCase()))
+      && (!String(filtros.contato || '').trim() || contato.includes(String(filtros.contato || '').trim().toLowerCase()))
+      && (!filtros.horaInicioMin || (horaInicio && horaInicio >= filtros.horaInicioMin))
+      && (!filtros.horaFimMax || (horaFim && horaFim <= filtros.horaFimMax))
       && (!filtros.idCanalAtendimento || String(atendimento.idCanalAtendimento) === String(filtros.idCanalAtendimento))
       && (!filtros.idUsuario || String(atendimento.idUsuario) === String(filtros.idUsuario))
     );
@@ -1535,17 +1648,119 @@ function filtrarAtendimentosCliente(atendimentos, filtros) {
 
 function filtrarPedidosCliente(pedidos, filtros) {
   return (pedidos || []).filter((pedido) => {
-    const data = String(pedido.dataInclusao || '');
+    const dataInclusao = String(pedido.dataInclusao || '');
+    const dataEntrega = String(pedido.dataEntrega || '');
     const codigoPedido = String(pedido.idPedido || '');
+    const prazoPagamento = String(pedido.nomePrazoPagamentoSnapshot || '').toLowerCase();
 
     return (
-      (!filtros.dataInicio || data >= filtros.dataInicio)
-      && (!filtros.dataFim || data <= filtros.dataFim)
+      (!filtros.dataInclusaoInicio || dataInclusao >= filtros.dataInclusaoInicio)
+      && (!filtros.dataInclusaoFim || dataInclusao <= filtros.dataInclusaoFim)
+      && (!filtros.dataEntregaInicio || (dataEntrega && dataEntrega >= filtros.dataEntregaInicio))
+      && (!filtros.dataEntregaFim || (dataEntrega && dataEntrega <= filtros.dataEntregaFim))
       && (!String(filtros.codigoPedido || '').trim() || codigoPedido.includes(String(filtros.codigoPedido || '').trim()))
+      && (!String(filtros.prazoPagamento || '').trim() || prazoPagamento.includes(String(filtros.prazoPagamento || '').trim().toLowerCase()))
+      && pedidoTemItemCompativelComFiltrosVenda(pedido, filtros)
       && (!filtros.idEtapaPedido || String(pedido.idEtapaPedido) === String(filtros.idEtapaPedido))
       && (!filtros.idVendedor || String(pedido.idVendedor) === String(filtros.idVendedor))
     );
   });
+}
+
+function itemPedidoClienteAtendeFiltros(item, filtros) {
+  const referencia = String(item?.referenciaProdutoSnapshot || '').toLowerCase();
+  const descricao = String(item?.descricaoProdutoSnapshot || '').toLowerCase();
+
+  return (
+    (!String(filtros.referenciaProduto || '').trim() || referencia.includes(String(filtros.referenciaProduto || '').trim().toLowerCase()))
+    && (!String(filtros.descricaoProduto || '').trim() || descricao.includes(String(filtros.descricaoProduto || '').trim().toLowerCase()))
+  );
+}
+
+function pedidoTemItemCompativelComFiltrosVenda(pedido, filtros) {
+  const possuiFiltroItem = Boolean(String(filtros.referenciaProduto || '').trim() || String(filtros.descricaoProduto || '').trim());
+
+  if (!possuiFiltroItem) {
+    return true;
+  }
+
+  return Array.isArray(pedido?.itens) && pedido.itens.some((item) => itemPedidoClienteAtendeFiltros(item, filtros));
+}
+
+function filtrarAtendimentosDigitacao(atendimentos, pesquisa) {
+  const termo = normalizarTextoBuscaHistorico(pesquisa);
+
+  if (!termo) {
+    return atendimentos;
+  }
+
+  return (atendimentos || []).filter((atendimento) => [
+    atendimento.data,
+    atendimento.horaInicio,
+    atendimento.horaFim,
+    atendimento.assunto,
+    atendimento.nomeContato,
+    atendimento.nomeCanalAtendimento,
+    atendimento.nomeUsuario
+  ].some((valor) => textoIncluiBuscaHistorico(valor, termo)));
+}
+
+function filtrarPedidosDigitacao(pedidos, pesquisa) {
+  const termo = normalizarTextoBuscaHistorico(pesquisa);
+
+  if (!termo) {
+    return pedidos;
+  }
+
+  return (pedidos || []).filter((pedido) => {
+    const valoresPedido = [
+      pedido.idPedido,
+      pedido.dataInclusao,
+      pedido.dataEntrega,
+      pedido.nomeClienteSnapshot,
+      pedido.nomeEtapaPedidoSnapshot,
+      pedido.nomeVendedorSnapshot,
+      pedido.nomePrazoPagamentoSnapshot,
+      pedido.totalPedido
+    ];
+
+    if (valoresPedido.some((valor) => textoIncluiBuscaHistorico(valor, termo))) {
+      return true;
+    }
+
+    return Array.isArray(pedido?.itens) && pedido.itens.some((item) => [
+      item.referenciaProdutoSnapshot,
+      item.descricaoProdutoSnapshot
+    ].some((valor) => textoIncluiBuscaHistorico(valor, termo)));
+  });
+}
+
+function filtrarItensPedidosDigitacao(itensPedidos, pesquisa) {
+  const termo = normalizarTextoBuscaHistorico(pesquisa);
+
+  if (!termo) {
+    return itensPedidos;
+  }
+
+  return (itensPedidos || []).filter((item) => [
+    item.idPedido,
+    item.dataInclusao,
+    item.dataEntrega,
+    item.nomeCliente,
+    item.referenciaProduto,
+    item.descricaoProduto,
+    item.valorUnitario,
+    item.quantidade,
+    item.valorTotal
+  ].some((valor) => textoIncluiBuscaHistorico(valor, termo)));
+}
+
+function normalizarTextoBuscaHistorico(valor) {
+  return String(valor || '').trim().toLowerCase();
+}
+
+function textoIncluiBuscaHistorico(valor, termo) {
+  return String(valor || '').toLowerCase().includes(termo);
 }
 
 
