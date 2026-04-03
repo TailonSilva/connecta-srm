@@ -5,6 +5,7 @@ import { CodigoRegistro } from '../../componentes/comuns/codigoRegistro';
 import { ModalBuscaClientes } from '../../componentes/comuns/modalBuscaClientes';
 import { ModalBuscaContatos } from '../../componentes/comuns/modalBuscaContatos';
 import { ModalBuscaTabela } from '../../componentes/comuns/modalBuscaTabela';
+import { PopupAvisos } from '../../componentes/comuns/popupAvisos';
 import { ModalPrazosPagamento } from '../configuracoes/modalPrazosPagamento';
 import {
   converterPrecoParaNumero,
@@ -12,6 +13,8 @@ import {
   normalizarPreco,
   normalizarPrecoDigitado
 } from '../../utilitarios/normalizarPreco';
+import { desktopTemExportacaoPdf } from '../../servicos/desktop';
+import { exportarOrcamentoPdf } from './utilitarios/exportarOrcamentoPdf';
 
 const abasModalOrcamento = [
   { id: 'dadosGerais', label: 'Dados gerais' },
@@ -62,6 +65,7 @@ export function ModalOrcamento({
   motivosPerda,
   produtos,
   camposOrcamento,
+  camposPedido = [],
   empresa,
   usuarioLogado,
   modo = 'novo',
@@ -74,7 +78,9 @@ export function ModalOrcamento({
   const [formulario, definirFormulario] = useState(estadoInicialFormulario);
   const [abaAtiva, definirAbaAtiva] = useState(abasModalOrcamento[0].id);
   const [salvando, definirSalvando] = useState(false);
+  const [gerandoPdf, definirGerandoPdf] = useState(false);
   const [mensagemErro, definirMensagemErro] = useState('');
+  const [avisosPopup, definirAvisosPopup] = useState([]);
   const [confirmandoSaida, definirConfirmandoSaida] = useState(false);
   const [confirmandoFechamento, definirConfirmandoFechamento] = useState(false);
   const [idEtapaAnteriorFechamento, definirIdEtapaAnteriorFechamento] = useState('');
@@ -89,7 +95,8 @@ export function ModalOrcamento({
   const [itemFormulario, definirItemFormulario] = useState(estadoInicialItem);
   const [mensagemErroItem, definirMensagemErroItem] = useState('');
   const somenteLeitura = modo === 'consulta';
-  const modoInclusao = !orcamento;
+  const modoInclusao = modo === 'novo';
+  const modoEdicao = modo === 'edicao';
   const clientesAtivos = clientes.filter((cliente) => cliente.status !== 0);
   const contatosAtivos = contatos.filter((contato) => contato.status !== 0);
   const usuariosAtivos = usuarios.filter((usuario) => usuario.ativo !== 0);
@@ -101,6 +108,7 @@ export function ModalOrcamento({
   );
   const motivosAtivos = motivosPerda.filter((motivo) => motivo.status !== 0);
   const produtosAtivos = produtos.filter((produto) => produto.status !== 0);
+  const exportacaoPdfDisponivel = desktopTemExportacaoPdf();
 
   useEffect(() => {
     if (!aberto) {
@@ -110,7 +118,9 @@ export function ModalOrcamento({
     definirFormulario(criarFormularioInicial(orcamento, usuarioLogado, camposOrcamento, empresa));
     definirAbaAtiva(abasModalOrcamento[0].id);
     definirSalvando(false);
+    definirGerandoPdf(false);
     definirMensagemErro('');
+    definirAvisosPopup([]);
     definirConfirmandoSaida(false);
     definirConfirmandoFechamento(false);
     definirIdEtapaAnteriorFechamento('');
@@ -127,12 +137,26 @@ export function ModalOrcamento({
   }, [aberto, orcamento, usuarioLogado, camposOrcamento, empresa]);
 
   useEffect(() => {
+    if (avisosPopup.length === 0) {
+      return undefined;
+    }
+
+    const temporizadores = avisosPopup.map((aviso) => window.setTimeout(() => {
+      definirAvisosPopup((estadoAtual) => estadoAtual.filter((item) => item.id !== aviso.id));
+    }, 12000));
+
+    return () => {
+      temporizadores.forEach((temporizador) => window.clearTimeout(temporizador));
+    };
+  }, [avisosPopup]);
+
+  useEffect(() => {
     if (!aberto) {
       return undefined;
     }
 
     function tratarTecla(evento) {
-      if (evento.key !== 'Escape' || salvando) {
+      if (evento.key !== 'Escape' || salvando || gerandoPdf) {
         return;
       }
 
@@ -179,7 +203,7 @@ export function ModalOrcamento({
     return () => {
       window.removeEventListener('keydown', tratarTecla);
     };
-  }, [aberto, confirmandoFechamento, confirmandoSaida, modalBuscaClienteAberto, modalBuscaContatoAberto, modalItemAberto, modalPrazosPagamentoAberto, salvando]);
+  }, [aberto, confirmandoFechamento, confirmandoSaida, gerandoPdf, modalBuscaClienteAberto, modalBuscaContatoAberto, modalItemAberto, modalPrazosPagamentoAberto, salvando]);
 
   const contatosDoCliente = contatosAtivos.filter((contato) => String(contato.idCliente) === String(formulario.idCliente));
   const etapaSelecionada = etapasAtivas.find((etapa) => String(etapa.idEtapaOrcamento) === String(formulario.idEtapaOrcamento));
@@ -301,6 +325,71 @@ export function ModalOrcamento({
       definirMensagemErro(erro.message || 'Nao foi possivel salvar o orcamento.');
       definirSalvando(false);
     }
+  }
+
+  async function gerarPdfFormularioAtual() {
+    if (gerandoPdf) {
+      return;
+    }
+
+    if (!String(formulario.idCliente || '').trim()) {
+      adicionarAvisoPdf('erro', 'Nao foi possivel gerar o PDF.', 'Selecione o cliente antes de exportar o PDF do orcamento.');
+      definirAbaAtiva('dadosGerais');
+      return;
+    }
+
+    if (!Array.isArray(formulario.itens) || formulario.itens.length === 0) {
+      adicionarAvisoPdf('erro', 'Nao foi possivel gerar o PDF.', 'Inclua ao menos um item antes de exportar o PDF do orcamento.');
+      definirAbaAtiva('itens');
+      return;
+    }
+
+    definirGerandoPdf(true);
+
+    try {
+      const resultado = await exportarOrcamentoPdf({
+        formulario,
+        orcamento,
+        clientes,
+        contatos,
+        usuarios,
+        vendedores,
+        prazosPagamento,
+        etapasOrcamento,
+        produtos,
+        empresa,
+        camposPedido
+      });
+
+      if (resultado.cancelado) {
+        return;
+      }
+
+      if (!resultado.sucesso) {
+        adicionarAvisoPdf('erro', 'Nao foi possivel gerar o PDF.', resultado.mensagem || 'Nao foi possivel exportar o PDF do orcamento.');
+        return;
+      }
+
+      adicionarAvisoPdf('sucesso', 'PDF gerado com sucesso.', '');
+    } catch (erro) {
+      adicionarAvisoPdf('erro', 'Nao foi possivel gerar o PDF.', erro.message || 'Nao foi possivel exportar o PDF do orcamento.');
+    } finally {
+      definirGerandoPdf(false);
+    }
+  }
+
+  function adicionarAvisoPdf(tipo, titulo, mensagem) {
+    const id = `pdf-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+    definirAvisosPopup((estadoAtual) => ([
+      {
+        id,
+        icone: tipo === 'sucesso' ? 'confirmar' : 'alerta',
+        titulo,
+        mensagem: mensagem || undefined
+      },
+      ...estadoAtual
+    ].slice(0, 4)));
   }
 
   function tentarFecharModal() {
@@ -572,13 +661,22 @@ export function ModalOrcamento({
           <div className="cabecalhoModalOrcamento">
             <div>
               <h2 id="tituloModalOrcamento">
-                {somenteLeitura ? 'Consultar orcamento' : orcamento ? 'Editar orcamento' : 'Incluir orcamento'}
+                {somenteLeitura ? 'Consultar orcamento' : modoEdicao ? 'Editar orcamento' : 'Incluir orcamento'}
               </h2>
             </div>
             {orcamento?.idOrcamento ? <CodigoRegistro valor={orcamento.idOrcamento} /> : null}
           </div>
 
           <div className="acoesCabecalhoModalCliente">
+            <Botao
+              variante="secundario"
+              type="button"
+              onClick={gerarPdfFormularioAtual}
+              disabled={salvando || gerandoPdf}
+              title={exportacaoPdfDisponivel ? 'Gerar PDF do orcamento' : 'Abrir impressao para salvar como PDF no navegador'}
+            >
+              {gerandoPdf ? 'Gerando PDF...' : 'Gerar PDF'}
+            </Botao>
             <Botao variante="secundario" type="button" onClick={tentarFecharModal} disabled={salvando}>
               {somenteLeitura ? 'Fechar' : 'Cancelar'}
             </Botao>
@@ -958,6 +1056,13 @@ export function ModalOrcamento({
           aoInativar={aoInativarPrazoPagamento}
           aoSelecionarPrazo={async (prazo) => {
             selecionarPrazoPagamento(prazo);
+          }}
+        />
+
+        <PopupAvisos
+          avisos={avisosPopup}
+          aoFechar={(idAviso) => {
+            definirAvisosPopup((estadoAtual) => estadoAtual.filter((aviso) => aviso.id !== idAviso));
           }}
         />
 

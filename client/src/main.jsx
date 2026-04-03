@@ -7,6 +7,7 @@ import './recursos/estilos/registrosTabela.css';
 import './recursos/estilos/formulariosBase.css';
 import './recursos/estilos/modaisBase.css';
 import './recursos/estilos/modalSecundario.css';
+import './recursos/estilos/modalManualPagina.css';
 import './recursos/estilos/campoImagemPadrao.css';
 import './recursos/estilos/paginaAgenda.css';
 import './recursos/estilos/paginaConfiguracoes.css';

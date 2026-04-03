@@ -17,6 +17,7 @@ import { listarProdutos } from '../../servicos/produtos';
 import { listarUsuarios } from '../../servicos/usuarios';
 import { normalizarPreco } from '../../utilitarios/normalizarPreco';
 import { normalizarTelefone } from '../../utilitarios/normalizarTelefone';
+import { normalizarFiltrosPorPadrao, useFiltrosPersistidos } from '../../utilitarios/useFiltrosPersistidos';
 import { ModalAtendimento } from '../atendimentos/modalAtendimento';
 import { ModalRamosAtividade } from '../configuracoes/modalRamosAtividade';
 import { ModalContatoCliente } from './modalContatoCliente';
@@ -93,6 +94,7 @@ function criarFiltrosIniciaisVendas() {
 export function ModalCliente({
   aberto,
   cliente,
+  usuarioLogado,
   codigoSugerido,
   contatos,
   vendedores,
@@ -121,7 +123,6 @@ export function ModalCliente({
   const [origensAtendimento, definirOrigensAtendimento] = useState([]);
   const [carregandoAtendimentos, definirCarregandoAtendimentos] = useState(false);
   const [mensagemErroAtendimentos, definirMensagemErroAtendimentos] = useState('');
-  const [filtrosAtendimentos, definirFiltrosAtendimentos] = useState(criarFiltrosIniciaisAtendimentos);
   const [modalFiltrosAtendimentosAberto, definirModalFiltrosAtendimentosAberto] = useState(false);
   const [atendimentoSelecionado, definirAtendimentoSelecionado] = useState(null);
   const [modalAtendimentoAberto, definirModalAtendimentoAberto] = useState(false);
@@ -133,7 +134,6 @@ export function ModalCliente({
   const [empresaPedidos, definirEmpresaPedidos] = useState(null);
   const [carregandoPedidos, definirCarregandoPedidos] = useState(false);
   const [mensagemErroPedidos, definirMensagemErroPedidos] = useState('');
-  const [filtrosPedidos, definirFiltrosPedidos] = useState(criarFiltrosIniciaisVendas);
   const [modalFiltrosPedidosAberto, definirModalFiltrosPedidosAberto] = useState(false);
   const [pedidoSelecionado, definirPedidoSelecionado] = useState(null);
   const [modalPedidoAberto, definirModalPedidoAberto] = useState(false);
@@ -146,6 +146,26 @@ export function ModalCliente({
   const rotuloDocumento = tipoPessoaFisica ? 'CPF' : 'CNPJ';
   const vendedoresAtivos = vendedores.filter((vendedor) => vendedor.status !== 0);
   const ramosAtivos = ramosAtividade.filter((ramo) => ramo.status !== 0);
+  const filtrosIniciaisAtendimentos = useMemo(
+    () => criarFiltrosIniciaisAtendimentos(),
+    [usuarioLogado?.idUsuario]
+  );
+  const filtrosIniciaisPedidos = useMemo(
+    () => criarFiltrosIniciaisVendas(),
+    [usuarioLogado?.idUsuario]
+  );
+  const [filtrosAtendimentos, definirFiltrosAtendimentos] = useFiltrosPersistidos({
+    chave: 'modalCliente.atendimentos',
+    usuario: usuarioLogado,
+    filtrosPadrao: filtrosIniciaisAtendimentos,
+    normalizarFiltros: normalizarFiltrosHistoricoCliente
+  });
+  const [filtrosPedidos, definirFiltrosPedidos] = useFiltrosPersistidos({
+    chave: 'modalCliente.pedidos',
+    usuario: usuarioLogado,
+    filtrosPadrao: filtrosIniciaisPedidos,
+    normalizarFiltros: normalizarFiltrosHistoricoCliente
+  });
 
   useEffect(() => {
     if (!aberto) {
@@ -173,11 +193,9 @@ export function ModalCliente({
     definirEmpresaPedidos(null);
     definirCarregandoAtendimentos(false);
     definirMensagemErroAtendimentos('');
-    definirFiltrosAtendimentos(criarFiltrosIniciaisAtendimentos());
     definirModalFiltrosAtendimentosAberto(false);
     definirCarregandoPedidos(false);
     definirMensagemErroPedidos('');
-    definirFiltrosPedidos(criarFiltrosIniciaisVendas());
     definirModalFiltrosPedidosAberto(false);
     definirAtendimentoSelecionado(null);
     definirModalAtendimentoAberto(false);
@@ -566,8 +584,8 @@ export function ModalCliente({
     () => filtrarPedidosCliente(pedidosCliente, filtrosPedidos),
     [pedidosCliente, filtrosPedidos]
   );
-  const filtrosAtendimentosAtivos = filtrosHistoricoEstaoAtivos(filtrosAtendimentos, criarFiltrosIniciaisAtendimentos());
-  const filtrosPedidosAtivos = filtrosHistoricoEstaoAtivos(filtrosPedidos, criarFiltrosIniciaisVendas());
+  const filtrosAtendimentosAtivos = filtrosHistoricoEstaoAtivos(filtrosAtendimentos, filtrosIniciaisAtendimentos);
+  const filtrosPedidosAtivos = filtrosHistoricoEstaoAtivos(filtrosPedidos, filtrosIniciaisPedidos);
 
   if (!aberto) {
     return null;
@@ -1082,7 +1100,7 @@ export function ModalCliente({
           definirFiltrosAtendimentos(proximosFiltros);
           definirModalFiltrosAtendimentosAberto(false);
         }}
-        aoLimpar={() => definirFiltrosAtendimentos(criarFiltrosIniciaisAtendimentos())}
+        aoLimpar={() => definirFiltrosAtendimentos(filtrosIniciaisAtendimentos)}
       />
 
       <ModalPedido
@@ -1154,7 +1172,7 @@ export function ModalCliente({
           definirFiltrosPedidos(proximosFiltros);
           definirModalFiltrosPedidosAberto(false);
         }}
-        aoLimpar={() => definirFiltrosPedidos(criarFiltrosIniciaisVendas())}
+        aoLimpar={() => definirFiltrosPedidos(filtrosIniciaisPedidos)}
       />
     </>
   );
@@ -1192,6 +1210,26 @@ export function ModalCliente({
     definirModoContato('novo');
   }
 
+}
+
+function normalizarFiltrosHistoricoCliente(filtros, filtrosPadrao) {
+  const filtrosNormalizados = normalizarFiltrosPorPadrao(filtros, filtrosPadrao);
+  const dataInicio = filtrosNormalizados.dataInicio || filtrosPadrao.dataInicio;
+  const dataFim = filtrosNormalizados.dataFim || filtrosPadrao.dataFim;
+
+  if (dataInicio && dataFim && dataInicio > dataFim) {
+    return {
+      ...filtrosNormalizados,
+      dataInicio: dataFim,
+      dataFim: dataInicio
+    };
+  }
+
+  return {
+    ...filtrosNormalizados,
+    dataInicio,
+    dataFim
+  };
 }
 
 function CampoFormulario({ label, name, type = 'text', className = '', ...props }) {

@@ -31,6 +31,7 @@ Observacao importante:
 
 - `client/`: aplicacao React
 - `client/src/componentes/`: componentes reutilizaveis da interface
+- `client/src/idex.html`: pagina estatica de vendas em arquivo unico para apresentacao comercial da ferramenta
 - `client/src/paginas/`: paginas do sistema
 - `client/src/servicos/`: comunicacao com a API
 - `client/src/utilitarios/`: funcoes auxiliares e regras compartilhadas do frontend
@@ -80,13 +81,14 @@ Padroes centralizados no frontend:
 - `ModalGruposProduto`: lista e cadastro de grupos de produto com botao dedicado para abrir um submodal compacto de selecao de tamanhos e ordem por grupo
 - `ModalMarcas`: lista e cadastro reutilizavel de marcas
 - `ModalUnidadesMedida`: lista e cadastro reutilizavel de unidades
+- `DocumentoOrcamentoPdf`: layout isolado usado para exportacao do orcamento em PDF
 
 Padroes aplicados recentemente:
 
 - Busca de clientes foi unificada para atendimento e orcamento
 - Busca de contatos foi unificada para atendimento e orcamento
 - O cadastro de cliente reaproveita o mesmo fluxo de `Ramo de Atividade` usado em configuracoes
-- No modal de cliente, as abas `Atendimento` e `Vendas` possuem grade propria com botao de filtro; os filtros de data abrem por padrao no mes corrente
+- No modal de cliente, as abas `Atendimento` e `Vendas` possuem grade propria com botao de filtro; os filtros de data abrem por padrao no mes corrente e o ultimo filtro aplicado fica salvo entre aberturas do modal, independentemente do cliente aberto
 - O cadastro de produto reaproveita os mesmos fluxos de configuracao para `Grupo de Produto`, `Marca` e `Unidade`
 - Modais com abas usam cabecalho e faixa de abas fixos, com rolagem apenas no corpo
 - Modais empilhados possuem camadas de z-index separadas para evitar abertura por tras do modal pai
@@ -100,15 +102,15 @@ Utilitarios importantes:
 ## Modulos implementados
 
 ### Login e sessao
-
 - Tela de login com a marca `Connecta CRM`
 - Logo personalizada na tela inicial
 - Validacao de `usuario` e `senha` via API local
 - Sessao persistida no frontend
-- Rodape da barra lateral com dados do usuario logado
+- Filtros das paginas principais ficam persistidos por usuario no `localStorage` do app Electron e reabrem com o ultimo estado aplicado
 
 ### Pagina inicial
 
+- Manual visual da pagina inicial acessado por `F1`, com leitura dos indicadores, filtros analiticos e regras do funil
 - Painel inicial com indicadores de:
   - clientes cadastrados
   - produtos cadastrados
@@ -117,18 +119,11 @@ Utilitarios importantes:
 - A pagina inicial agora possui um botao de filtro proprio para refinar os dados do funil por periodo, com selecao multipla em `Vendedor`, `Produto`, `Grupo de produto` e `Marca`
 - Os mesmos filtros da pagina inicial tambem sao aplicados aos cards de vendas, usando pedidos como base para valor total e quantidade total vendida
 - Quando o usuario logado for `Usuario padrao` com vendedor vinculado, o filtro da pagina inicial ja abre com esse vendedor selecionado e bloqueado
-- O periodo padrao da pagina inicial sempre abre do dia 01 ate o ultimo dia do mes atual
-- A grade da pagina inicial usa cards fluidos que ocupam toda a largura disponivel da linha, chegando a um arranjo de ate 4 colunas quando houver espaco
-- O funil permanece ocupando toda a largura da grade e ha um respiro adicional entre o cabecalho da pagina e o primeiro conjunto de cards
 - Os cards de resumo da pagina inicial usam titulo no topo com tipografia mais contida, valor abaixo e icone ampliado na direita com corte parcial pelo proprio card
 - Funil de vendas opcional na pagina inicial, controlado pela configuracao da empresa
 - Novas empresas e novas bases passam a vir com o funil habilitado por padrao
-- O funil considera apenas etapas de orcamento com `Considera no Funil de Vendas` ativo
-- O funil ocupa toda a largura disponivel da pagina inicial
-- A coluna da esquerda mostra barras horizontais por etapa, com preenchimento calculado pela mesma porcentagem do valor total usada no card lateral
 - As barras exibem novamente a descricao da etapa diretamente sobre a propria barra, junto do valor
 - A descricao dentro da barra usa a paleta do projeto com variacao baseada na cor da etapa, e o valor aparece em negrito
-- O contraste do texto nas barras prioriza tons mais escuros do design system para manter legibilidade mesmo em etapas com cores claras
 - As barras usam uma largura mais contida e com maior espacamento entre linhas para aliviar a leitura visual
 - A distribuicao vertical das barras respeita a altura disponivel do card lateral sem sobreposicao entre linhas
 - O grafico do funil se ajusta automaticamente quando a quantidade de etapas aumenta, reduzindo proporcoes e espacamentos para manter o layout estavel
@@ -176,6 +171,7 @@ Observacao:
 ### Clientes
 
 - Tela com grade, pesquisa e filtro
+- Manual visual da pagina de clientes acessado por `F1`, com fluxo do cadastro, carteira e filtros persistidos
 - Modal em abas para incluir, editar e consultar
 - Abas atuais: `Dados gerais`, `Endereco`, `Observacoes`, `Contato`, `Atendimento` e `Vendas`
 - Thumbnail com codigo do cliente
@@ -199,6 +195,7 @@ Filtros de clientes:
 ### Produtos
 
 - Tela com grade, pesquisa e filtro
+- Manual visual da pagina de produtos acessado por `F1`, com regras de catalogo, classificacoes auxiliares e permissoes do perfil
 - Modal no mesmo padrao visual de clientes
 - Modos incluir, editar e consultar
 - Codigo automatico ao incluir
@@ -234,6 +231,7 @@ Filtros de produtos:
 - Cards coloridos conforme o tipo de agenda
 - Suporte visual a conflitos de horario, dividindo o espaco em vez de sobrepor
 - Copiar e colar agendamento com `Ctrl+C` e `Ctrl+V`
+- Manual visual da agenda acessado por `F1`, com regras, obrigatoriedades, configuracoes e logicas reais da tela
 
 Campos atuais do agendamento:
 
@@ -263,6 +261,7 @@ Filtros da agenda:
 
 - Tela com grade, pesquisa e filtros
 - Modal de atendimento com formulario proprio
+- Manual visual da pagina acessado por `F1`, com fluxo, validacoes, permissoes e atalhos reais da tela
 - Campos de cliente, contato e orcamento no mesmo fluxo comercial
 - Busca de cliente por modal reutilizavel
 - Busca de contato por modal reutilizavel
@@ -274,6 +273,7 @@ Filtros da agenda:
 ### Orcamentos
 
 - Pagina propria de orcamentos
+- Manual visual da pagina de orcamentos acessado por `F1`, com fluxo do funil, fechamento, motivos de perda e pedido derivado
 - Modal em abas com `Dados gerais`, `Itens` e `Campos do orcamento`
 - Busca reutilizavel de cliente e contato
 - Itens com busca de produto
@@ -284,10 +284,19 @@ Filtros da agenda:
 - Modais de confirmacao do fluxo comercial abrem como sobreposicao fixa acima da pagina, inclusive no lancamento de pedido a partir do grid
 - Campos configuraveis extras para o orcamento
 - Os campos `Prazo de pagamento` nos modais de orcamento e pedido reutilizam o mesmo grid de `Prazos de pagamento` da area de Configuracoes, permitindo cadastrar, editar, inativar e selecionar o prazo sem sair do fluxo
+- Os atalhos que abrem tabelas configuraveis dentro dos modais tambem respeitam as permissoes do perfil; para `Usuario padrao`, os atalhos de configuracao sensiveis abrem em modo de consulta
+- Em `Prazos de pagamento`, os dias sao opcionais; quando nenhum dia for informado, a descricao automatica fica apenas com o nome do metodo de pagamento
+- O modal de orcamento permite exportar um PDF com cabecalho da empresa, dados do cliente, tabela de itens, total e observacoes
+- No aplicativo web, o botao de PDF abre a janela de impressao do navegador para salvar o documento como PDF; no Electron, usa a exportacao nativa com escolha de arquivo
+- A tabela de itens do PDF do orcamento exibe uma coluna propria de foto entre o numero do item e a descricao, com a miniatura centralizada quando a imagem estiver disponivel
+- As observacoes do PDF incluem a observacao principal do orcamento, os campos extras preenchidos no orcamento e os textos padrao ativos configurados em `Campos do pedido`
+- O layout do PDF do orcamento foi separado em componente proprio para facilitar ajustes ou reversao da feature sem afetar o formulario principal
+- O modal de orcamento em modo de inclusao pede confirmacao antes de fechar por `Cancelar`, `Escape` ou clique fora, inclusive quando aberto a partir do atendimento
 
 ### Pedidos
 
 - Pagina propria de pedidos
+- Manual visual da pagina de pedidos acessado por `F1`, com acompanhamento operacional, etapas, pagamento e permissoes
 - Integracao com pedido originado de orcamento
 - O modal de pedido aberto a partir do fechamento de um orcamento permite fechar direto pelo botao, clique fora ou `Escape`, devolvendo o fluxo ao orcamento
 - Campos extras configuraveis
@@ -295,6 +304,9 @@ Filtros da agenda:
 - Data de entrega baseada nas configuracoes da empresa
 
 ### Configuracoes
+
+- Manual visual da pagina de configuracoes acessado por `F1`, com organizacao das secoes, permissoes e impacto dos cadastros no restante do CRM
+- Sempre que uma regra, fluxo, validacao ou configuracao relevante de qualquer pagina mudar, o respectivo manual visual tambem deve ser atualizado para continuar refletindo o comportamento real da tela
 
 A tela de configuracoes usa cards grandes e modais padrao. Hoje ela cobre:
 
@@ -376,6 +388,21 @@ Esses dados sao usados em:
 - Validade inicial de orcamentos
 - Previsao inicial de entrega de pedidos
 
+### Layout Orcamento
+
+Na secao `Orcamentos/Pedidos` da pagina de `Configuracoes`, existe um card proprio chamado `Layout Orcamento`.
+
+Campos de destaque:
+
+- `Cor primaria do PDF do orcamento`
+- `Cor secundaria do PDF do orcamento`
+- `Cor de destaque do PDF do orcamento`
+- `Primeiro plano dos itens do PDF do orcamento` para priorizar `Descricao` ou `Referencia`
+
+Esses dados sao usados em:
+
+- Identidade visual usada na exportacao em PDF do orcamento
+
 ### Usuarios
 
 Usuarios possuem:
@@ -397,11 +424,12 @@ Regra importante:
 ### Regras gerais
 
 - Banco utilizado: `SQLite`
-- O banco fica na pasta de dados da instalacao do Electron
+- Em build desktop, o banco principal fica na pasta persistente do usuario em `AppData/Roaming/Connecta CRM/data`
 - Chaves primarias usam inteiros autoincrementais
 - Campos booleanos usam `0` e `1`
 - O projeto faz migracoes simples no startup com `ALTER TABLE` e recriacao de tabelas quando necessario
-- Migracoes bem escritas preservam dados existentes; trocar a pasta de dados do app nao preserva automaticamente o mesmo arquivo de banco
+- Migracoes bem escritas preservam dados existentes; trocar a pasta de dados do app nao preserva automaticamente o mesmo arquivo de banco sem rotina de migracao
+- O startup do Electron tenta migrar automaticamente bancos legados encontrados em pastas antigas de `AppData`, no diretório do executável, em `resources/data` e em caminhos antigos do app
 
 ### Tabelas principais do sistema
 
@@ -565,6 +593,14 @@ Os dados de teste usam:
 - `npm run build:electron`: gera a build web e empacota o Electron em `dist/electron`
 - `npm run release`: gera a build desktop e publica os artefatos no `GitHub Releases`
 
+Observacao sobre empacotamento Electron:
+
+- O `electron-builder` cria a pasta intermediaria `dist/electron/win-unpacked` para montar o instalador Windows
+- Essa pasta nao e um modo portatil publicado para o cliente; e apenas uma etapa interna do empacotamento
+- O projeto agora empacota primeiro em uma pasta temporaria fora do OneDrive e copia de volta apenas os artefatos finais para `dist/electron`
+- Ao final de `npm run build:electron` e `npm run release`, `win-unpacked` nao permanece em `dist/electron`
+- Quando o release conclui com sucesso, o arquivo de atualizacao `latest.yml` deve aparecer junto dos artefatos finais
+
 ### Popular banco
 
 - `npm run popular:banco`: limpa e popula o banco com dados de teste
@@ -595,11 +631,12 @@ O projeto esta preparado para buscar atualizacoes publicadas no repositorio `Tai
 
 Como funciona:
 
-- Em build empacotada, o app verifica atualizacoes automaticamente apos abrir
+- Em build empacotada, a verificacao de atualizacao acontece somente por acao manual do cliente em `Configuracoes > Gerais > Atualizacao do sistema`
 - O repositorio usado para leitura pode ser configurado pela tela `Configuracoes > Gerais > Atualizacao do sistema`
-- O app pode verificar atualizacao automaticamente ou por acao manual do usuario
-- Se existir versao mais nova no `GitHub Releases`, o download acontece em segundo plano
+- Antes de iniciar a atualizacao manual, o modal oferece um botao para gerar e salvar um backup do banco de dados
+- Se existir versao mais nova no `GitHub Releases`, o download acontece em segundo plano somente apos a acao manual do usuario
 - Quando o download termina, o usuario recebe um aviso para reiniciar e concluir a instalacao
+- Antes de instalar a atualizacao, o app cria um backup de seguranca dos dados em `AppData/Roaming/Connecta CRM/backups`
 
 Mensagens visuais ja tratadas no modal:
 

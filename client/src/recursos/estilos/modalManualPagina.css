@@ -1,0 +1,350 @@
+.modalManualPagina {
+  width: min(1100px, calc(100vw - 48px));
+  max-height: min(880px, calc(100vh - 40px));
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(19, 54, 82, 0.16);
+  background:
+    radial-gradient(circle at top left, rgba(92, 168, 214, 0.16), transparent 32%),
+    linear-gradient(180deg, #f7fbfd 0%, #eef4f8 100%);
+  box-shadow: 0 24px 80px rgba(17, 39, 57, 0.22);
+}
+
+.modalManualPaginaCabecalho {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 28px 30px 20px;
+  border-bottom: 1px solid rgba(19, 54, 82, 0.1);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.48));
+}
+
+.modalManualPaginaCabecalhoTitulo {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.modalManualPaginaCabecalhoTitulo h3 {
+  margin: 0;
+  font-size: 1.55rem;
+  color: #143752;
+}
+
+.modalManualPaginaCabecalhoTitulo p {
+  margin: 6px 0 0;
+  max-width: 640px;
+  color: #4d6577;
+  line-height: 1.6;
+}
+
+.modalManualPaginaSelo,
+.modalManualPaginaCardIcone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18px;
+  color: #fff;
+  background: linear-gradient(135deg, #143752, #2b7894);
+  box-shadow: 0 14px 32px rgba(20, 55, 82, 0.22);
+}
+
+.modalManualPaginaSelo {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+}
+
+.modalManualPaginaCorpo {
+  overflow: auto;
+  padding: 0 30px 30px;
+}
+
+.modalManualPaginaHero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(280px, 0.95fr);
+  gap: 22px;
+  margin-top: 24px;
+  padding: 24px;
+  border-radius: 24px;
+  background:
+    linear-gradient(135deg, rgba(20, 55, 82, 0.94), rgba(43, 120, 148, 0.9)),
+    #143752;
+  color: #fff;
+}
+
+.modalManualPaginaEyebrow,
+.modalManualPaginaTag {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.modalManualPaginaEyebrow {
+  background: rgba(255, 255, 255, 0.16);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.modalManualPaginaHeroConteudo h4 {
+  margin: 16px 0 10px;
+  font-size: 1.7rem;
+}
+
+.modalManualPaginaHeroConteudo p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.7;
+}
+
+.modalManualPaginaHeroPainel {
+  display: grid;
+  gap: 12px;
+}
+
+.modalManualPaginaHeroPainel div {
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
+}
+
+.modalManualPaginaHeroPainel strong {
+  display: block;
+  font-size: 1.35rem;
+  margin-bottom: 4px;
+}
+
+.modalManualPaginaHeroPainel span {
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1.5;
+}
+
+.modalManualPaginaSecao {
+  margin-top: 24px;
+}
+
+.modalManualPaginaSecaoCabecalho {
+  margin-bottom: 14px;
+}
+
+.modalManualPaginaTag {
+  margin-bottom: 10px;
+  background: rgba(43, 120, 148, 0.12);
+  color: #1d5874;
+}
+
+.modalManualPaginaSecaoCabecalho h4 {
+  margin: 0;
+  color: #143752;
+  font-size: 1.2rem;
+}
+
+.modalManualPaginaGradeResumo,
+.modalManualPaginaGradeFluxo,
+.modalManualPaginaSecaoDupla {
+  display: grid;
+  gap: 16px;
+}
+
+.modalManualPaginaGradeResumo {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.modalManualPaginaGradeFluxo,
+.modalManualPaginaSecaoDupla {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.modalManualPaginaCardResumo,
+.modalManualPaginaCardFluxo,
+.modalManualPaginaPainelLista {
+  border-radius: 22px;
+  border: 1px solid rgba(19, 54, 82, 0.12);
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 16px 38px rgba(20, 55, 82, 0.09);
+}
+
+.modalManualPaginaCardResumo,
+.modalManualPaginaPainelLista {
+  padding: 20px;
+}
+
+.modalManualPaginaCardFluxo {
+  display: flex;
+  gap: 14px;
+  padding: 18px;
+  align-items: flex-start;
+}
+
+.modalManualPaginaCardIcone {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+}
+
+.modalManualPaginaCardResumo strong,
+.modalManualPaginaCardFluxo strong {
+  display: block;
+  margin: 14px 0 8px;
+  color: #143752;
+  font-size: 1rem;
+}
+
+.modalManualPaginaCardFluxo strong {
+  margin-top: 0;
+}
+
+.modalManualPaginaCardResumo p,
+.modalManualPaginaCardFluxo p,
+.modalManualPaginaListaTexto li {
+  margin: 0;
+  color: #486072;
+  line-height: 1.65;
+}
+
+.modalManualPaginaCardResumo small {
+  display: block;
+  margin-top: 10px;
+  color: #6c8394;
+  line-height: 1.55;
+}
+
+.modalManualPaginaListaTexto {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 10px;
+}
+
+.modalManualPaginaListaBlocos {
+  display: grid;
+  gap: 12px;
+}
+
+.modalManualPaginaListaBloco {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(244, 249, 253, 0.9), rgba(252, 254, 255, 0.96));
+  border: 1px solid rgba(19, 54, 82, 0.1);
+}
+
+.modalManualPaginaListaBlocoCabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.modalManualPaginaListaBlocoCabecalho strong {
+  color: #143752;
+  font-size: 0.92rem;
+}
+
+.modalManualPaginaListaChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.modalManualPaginaChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 10px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.modalManualPaginaChip.obrigatorio {
+  background: rgba(22, 155, 88, 0.12);
+  color: #147148;
+}
+
+.modalManualPaginaChip.opcional {
+  background: rgba(23, 145, 226, 0.1);
+  color: #0f6c9f;
+}
+
+.modalManualPaginaCorTipo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--corTipoAgendaManual) 22%, white);
+  color: color-mix(in srgb, var(--corTipoAgendaManual) 68%, #163044);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.modalManualPaginaEstadoVazio {
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(255, 244, 230, 0.72);
+  color: #8f5c16;
+}
+
+.modalManualPaginaEstadoVazio p {
+  margin: 0;
+  color: currentColor;
+  line-height: 1.55;
+}
+
+.modalManualPaginaEstadoVazio .iconeBase {
+  width: 22px;
+  height: 22px;
+  color: currentColor;
+}
+
+.modalManualPaginaCardRegra {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(236, 244, 249, 0.96));
+}
+
+@media (max-width: 900px) {
+  .modalManualPagina {
+    width: min(100vw - 18px, 1100px);
+    max-height: calc(100vh - 18px);
+  }
+
+  .modalManualPaginaCabecalho,
+  .modalManualPaginaCorpo {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .modalManualPaginaCabecalho {
+    flex-direction: column;
+  }
+
+  .modalManualPaginaHero {
+    grid-template-columns: 1fr;
+    padding: 18px;
+  }
+}
+
+@media (max-width: 640px) {
+  .modalManualPaginaCabecalhoTitulo {
+    flex-direction: column;
+  }
+
+  .modalManualPaginaSelo {
+    width: 48px;
+    height: 48px;
+  }
+
+  .modalManualPaginaHeroConteudo h4 {
+    font-size: 1.35rem;
+  }
+}

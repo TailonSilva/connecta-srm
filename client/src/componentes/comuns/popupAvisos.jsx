@@ -1,4 +1,5 @@
 import { Botao } from './botao';
+import { Icone } from './icone';
 import '../../recursos/estilos/popupAvisos.css';
 
 export function PopupAvisos({ avisos, aoFechar }) {
@@ -12,8 +13,8 @@ export function PopupAvisos({ avisos, aoFechar }) {
         <div key={aviso.id} className="popupAvisosCartao" role="status">
           <div className="popupAvisosCabecalho">
             <div className="popupAvisosTitulo">
-              <span className="popupAvisosSelo">
-                {aviso.icone || 'Agenda'}
+              <span className="popupAvisosSelo" aria-hidden="true">
+                <Icone nome={normalizarIconeAviso(aviso.icone)} />
               </span>
               <div>
                 <strong>{aviso.titulo}</strong>
@@ -41,4 +42,14 @@ export function PopupAvisos({ avisos, aoFechar }) {
       ))}
     </div>
   );
+}
+
+function normalizarIconeAviso(icone) {
+  const nome = String(icone || '').trim().toLowerCase();
+
+  if (['agenda', 'confirmar', 'fechar', 'mensagem', 'pagamento', 'orcamento', 'pedido', 'clientes', 'contato', 'configuracoes', 'alerta'].includes(nome)) {
+    return nome;
+  }
+
+  return 'agenda';
 }

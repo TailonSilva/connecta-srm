@@ -471,7 +471,7 @@ banco.serialize(() => {
       idPrazoPagamento INTEGER PRIMARY KEY AUTOINCREMENT,
       descricao VARCHAR(150),
       idMetodoPagamento INTEGER NOT NULL,
-      prazo1 INTEGER NOT NULL,
+      prazo1 INTEGER,
       prazo2 INTEGER,
       prazo3 INTEGER,
       prazo4 INTEGER,
@@ -717,6 +717,10 @@ banco.serialize(() => {
       diasValidadeOrcamento INTEGER NOT NULL DEFAULT 7,
       diasEntregaPedido INTEGER NOT NULL DEFAULT 7,
       etapasFiltroPadraoOrcamento TEXT,
+      corPrimariaOrcamento VARCHAR(7) NOT NULL DEFAULT '#111827',
+      corSecundariaOrcamento VARCHAR(7) NOT NULL DEFAULT '#ef4444',
+      corDestaqueOrcamento VARCHAR(7) NOT NULL DEFAULT '#f59e0b',
+      destaqueItemOrcamentoPdf VARCHAR(20) NOT NULL DEFAULT 'descricao',
       logradouro VARCHAR(255),
       numero VARCHAR(10),
       complemento VARCHAR(100),
@@ -830,6 +834,38 @@ banco.serialize(() => {
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
       console.error('Nao foi possivel garantir a coluna etapasFiltroPadraoOrcamento da empresa.', erro);
+    }
+  });
+
+  banco.run(`
+    ALTER TABLE empresa ADD COLUMN corPrimariaOrcamento VARCHAR(7) NOT NULL DEFAULT '#111827'
+  `, (erro) => {
+    if (erro && !String(erro.message || '').includes('duplicate column name')) {
+      console.error('Nao foi possivel garantir a coluna corPrimariaOrcamento da empresa.', erro);
+    }
+  });
+
+  banco.run(`
+    ALTER TABLE empresa ADD COLUMN corSecundariaOrcamento VARCHAR(7) NOT NULL DEFAULT '#ef4444'
+  `, (erro) => {
+    if (erro && !String(erro.message || '').includes('duplicate column name')) {
+      console.error('Nao foi possivel garantir a coluna corSecundariaOrcamento da empresa.', erro);
+    }
+  });
+
+  banco.run(`
+    ALTER TABLE empresa ADD COLUMN corDestaqueOrcamento VARCHAR(7) NOT NULL DEFAULT '#f59e0b'
+  `, (erro) => {
+    if (erro && !String(erro.message || '').includes('duplicate column name')) {
+      console.error('Nao foi possivel garantir a coluna corDestaqueOrcamento da empresa.', erro);
+    }
+  });
+
+  banco.run(`
+    ALTER TABLE empresa ADD COLUMN destaqueItemOrcamentoPdf VARCHAR(20) NOT NULL DEFAULT 'descricao'
+  `, (erro) => {
+    if (erro && !String(erro.message || '').includes('duplicate column name')) {
+      console.error('Nao foi possivel garantir a coluna destaqueItemOrcamentoPdf da empresa.', erro);
     }
   });
 
@@ -1647,6 +1683,7 @@ async function garantirRegistrosObrigatorios() {
   await garantirConfiguracaoAtualizacaoSistemaPadrao();
   await removerColunaAbreviacaoDasEtapas();
   await removerColunaSiglaDosRecursos();
+  await garantirPrazosPagamentoComDiasOpcionais();
   await garantirUsuarioAdministradorPadrao();
   await garantirEtapasOrcamentoObrigatorias();
   await garantirStatusAgendaObrigatorios();
@@ -1825,6 +1862,70 @@ async function migrarTabelaSemAbreviacao(nomeTabela, chavePrimaria, declaracoesC
   await executar(
     `UPDATE ${nomeTabela} SET ordem = ${chavePrimaria} WHERE ordem IS NULL OR ordem <= 0`
   );
+}
+
+async function garantirPrazosPagamentoComDiasOpcionais() {
+  const colunas = await consultarTodos('PRAGMA table_info(prazoPagamento)');
+  const colunaPrazo1 = colunas.find((coluna) => coluna.name === 'prazo1');
+
+  if (!colunaPrazo1 || Number(colunaPrazo1.notnull) === 0) {
+    return;
+  }
+
+  await executar('PRAGMA foreign_keys = OFF');
+
+  try {
+    await executar('BEGIN TRANSACTION');
+    await executar(`
+      CREATE TABLE prazoPagamento_diasOpcionais (
+        idPrazoPagamento INTEGER PRIMARY KEY AUTOINCREMENT,
+        descricao VARCHAR(150),
+        idMetodoPagamento INTEGER NOT NULL,
+        prazo1 INTEGER,
+        prazo2 INTEGER,
+        prazo3 INTEGER,
+        prazo4 INTEGER,
+        prazo5 INTEGER,
+        prazo6 INTEGER,
+        status BOOLEAN NOT NULL DEFAULT 1,
+        FOREIGN KEY (idMetodoPagamento) REFERENCES metodoPagamento (idMetodoPagamento)
+      )
+    `);
+    await executar(`
+      INSERT INTO prazoPagamento_diasOpcionais (
+        idPrazoPagamento,
+        descricao,
+        idMetodoPagamento,
+        prazo1,
+        prazo2,
+        prazo3,
+        prazo4,
+        prazo5,
+        prazo6,
+        status
+      )
+      SELECT
+        idPrazoPagamento,
+        descricao,
+        idMetodoPagamento,
+        prazo1,
+        prazo2,
+        prazo3,
+        prazo4,
+        prazo5,
+        prazo6,
+        COALESCE(status, 1)
+      FROM prazoPagamento
+    `);
+    await executar('DROP TABLE prazoPagamento');
+    await executar('ALTER TABLE prazoPagamento_diasOpcionais RENAME TO prazoPagamento');
+    await executar('COMMIT');
+  } catch (erro) {
+    await executar('ROLLBACK');
+    throw erro;
+  } finally {
+    await executar('PRAGMA foreign_keys = ON');
+  }
 }
 
 async function removerColunaSiglaDosRecursos() {

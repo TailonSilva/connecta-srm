@@ -21,7 +21,9 @@ import { atualizarPedido, excluirPedido, incluirPedido, listarPedidos } from '..
 import { listarProdutos } from '../../servicos/produtos';
 import { listarUsuarios } from '../../servicos/usuarios';
 import { normalizarPreco } from '../../utilitarios/normalizarPreco';
+import { normalizarFiltrosPorPadrao, useFiltrosPersistidos } from '../../utilitarios/useFiltrosPersistidos';
 import { ModalPedido } from './modalPedido';
+import { ModalManualPedidos } from './modalManualPedidos';
 
 function criarFiltrosIniciaisPedidos() {
   return {
@@ -43,9 +45,18 @@ function normalizarEtapasPedido(etapasPedido) {
   }));
 }
 
+function normalizarFiltrosPedidos(filtros, filtrosPadrao) {
+  return normalizarFiltrosPorPadrao(filtros, filtrosPadrao);
+}
+
 export function PaginaPedidos({ usuarioLogado }) {
   const [pesquisa, definirPesquisa] = useState('');
-  const [filtros, definirFiltros] = useState(criarFiltrosIniciaisPedidos);
+  const [filtros, definirFiltros] = useFiltrosPersistidos({
+    chave: 'paginaPedidos',
+    usuario: usuarioLogado,
+    filtrosPadrao: criarFiltrosIniciaisPedidos(),
+    normalizarFiltros: normalizarFiltrosPedidos
+  });
   const [pedidos, definirPedidos] = useState([]);
   const [clientes, definirClientes] = useState([]);
   const [contatos, definirContatos] = useState([]);
@@ -62,13 +73,35 @@ export function PaginaPedidos({ usuarioLogado }) {
   const [pedidoSelecionado, definirPedidoSelecionado] = useState(null);
   const [modoModal, definirModoModal] = useState('consulta');
   const [modalAberto, definirModalAberto] = useState(false);
+  const [modalManualAberto, definirModalManualAberto] = useState(false);
   const [modalFiltrosAberto, definirModalFiltrosAberto] = useState(false);
   const [pedidoExclusaoPendente, definirPedidoExclusaoPendente] = useState(null);
+  const usuarioSomenteConsultaConfiguracao = usuarioLogado?.tipo === 'Usuario padrao';
   const permitirExcluir = usuarioLogado?.tipo !== 'Usuario padrao';
 
   useEffect(() => {
     carregarDados();
   }, []);
+
+  useEffect(() => {
+    function tratarAtalhosPedidos(evento) {
+      if (evento.key !== 'F1') {
+        return;
+      }
+
+      evento.preventDefault();
+
+      if (!modalAberto && !modalManualAberto && !modalFiltrosAberto && !pedidoExclusaoPendente) {
+        definirModalManualAberto(true);
+      }
+    }
+
+    window.addEventListener('keydown', tratarAtalhosPedidos);
+
+    return () => {
+      window.removeEventListener('keydown', tratarAtalhosPedidos);
+    };
+  }, [modalAberto, modalManualAberto, modalFiltrosAberto, pedidoExclusaoPendente]);
 
   async function carregarDados() {
     definirCarregando(true);
@@ -334,10 +367,21 @@ export function PaginaPedidos({ usuarioLogado }) {
         empresa={empresa}
         usuarioLogado={usuarioLogado}
         modo={modoModal}
+        somenteConsultaPrazos={usuarioSomenteConsultaConfiguracao}
         aoFechar={fecharModal}
         aoSalvar={salvarPedido}
         aoSalvarPrazoPagamento={salvarPrazoPagamento}
         aoInativarPrazoPagamento={inativarPrazoPagamento}
+      />
+
+      <ModalManualPedidos
+        aberto={modalManualAberto}
+        aoFechar={() => definirModalManualAberto(false)}
+        pedidos={pedidosFiltrados}
+        etapasPedido={etapasPedido}
+        prazosPagamento={prazosPagamento}
+        filtros={filtros}
+        usuarioLogado={usuarioLogado}
       />
 
       {pedidoExclusaoPendente ? (

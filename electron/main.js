@@ -5,12 +5,70 @@ const path = require('node:path');
 
 const isDev = !app.isPackaged;
 const urlFrontendDev = 'http://localhost:5174';
-const intervaloVerificacaoAtualizacaoMs = 60 * 60 * 1000;
 const nomeDiretorioPersistencia = 'Connecta CRM';
 let apiServer;
 let mainWindow;
 let autoUpdater;
 let atualizadorConfigurado = false;
+
+async function aguardarRecursosDocumento(webContents) {
+  await webContents.executeJavaScript(`
+    Promise.all(
+      Array.from(document.images)
+        .filter((imagem) => !imagem.complete)
+        .map((imagem) => new Promise((resolve) => {
+          imagem.addEventListener('load', () => resolve(), { once: true });
+          imagem.addEventListener('error', () => resolve(), { once: true });
+        }))
+    ).then(() => {
+      if (document.fonts && document.fonts.ready) {
+        return document.fonts.ready;
+      }
+
+      return Promise.resolve();
+    });
+  `, true);
+}
+
+async function gerarPdfHtml(html) {
+  const janelaPdf = new BrowserWindow({
+    show: false,
+    width: 1240,
+    height: 1754,
+    backgroundColor: '#ffffff',
+    webPreferences: {
+      sandbox: true,
+      contextIsolation: true,
+      nodeIntegration: false
+    }
+  });
+
+  try {
+    await janelaPdf.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
+    await aguardarRecursosDocumento(janelaPdf.webContents);
+
+    return await janelaPdf.webContents.printToPDF({
+      pageSize: 'A4',
+      printBackground: true,
+      preferCSSPageSize: true,
+      margins: {
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0
+      }
+    });
+  } finally {
+    if (!janelaPdf.isDestroyed()) {
+      janelaPdf.close();
+    }
+  }
+}
+
+function montarNomeArquivoPdf(nomeArquivo = 'documento.pdf') {
+  const nomeNormalizado = String(nomeArquivo || 'documento.pdf').trim();
+  return nomeNormalizado.toLowerCase().endsWith('.pdf') ? nomeNormalizado : `${nomeNormalizado}.pdf`;
+}
 
 function notificarStatusAtualizacao(payload) {
   if (!mainWindow || mainWindow.isDestroyed()) {
@@ -39,17 +97,38 @@ function obterDiretorioDadosPersistente() {
   return path.join(app.getPath('appData'), nomeDiretorioPersistencia, 'data');
 }
 
+function obterDiretorioBackupsPersistente() {
+  return path.join(app.getPath('appData'), nomeDiretorioPersistencia, 'backups');
+}
+
+function normalizarListaDiretorios(caminhos) {
+  return Array.from(new Set(
+    caminhos
+      .filter(Boolean)
+      .map((caminho) => path.resolve(caminho))
+  ));
+}
+
 function obterDiretoriosDadosLegados() {
   const base = app.getPath('appData');
+  const pastaExecutavel = path.dirname(process.execPath);
+  const pastaResources = process.resourcesPath || path.join(pastaExecutavel, 'resources');
+  const pastaBaseApp = path.resolve(__dirname, '..', '..');
 
-  return [
+  return normalizarListaDiretorios([
+    path.join(app.getPath('userData'), 'data'),
     path.join(base, app.getName(), 'data'),
     path.join(base, 'connecta-crm', 'data'),
     path.join(base, 'Connecta CRM', 'data'),
     path.join(base, 'CRM Desktop', 'data'),
     path.join(base, 'crm-desktop', 'data'),
-    path.join(base, 'crm', 'data')
-  ];
+    path.join(base, 'crm', 'data'),
+    path.join(pastaExecutavel, 'data'),
+    path.join(pastaExecutavel, 'resources', 'data'),
+    path.join(pastaResources, 'data'),
+    path.join(pastaBaseApp, 'data'),
+    path.join(process.cwd(), 'data')
+  ]);
 }
 
 function migrarBancoSeNecessario(diretorioDestino) {
@@ -81,6 +160,69 @@ function migrarBancoSeNecessario(diretorioDestino) {
     console.log(`Banco migrado automaticamente de ${caminhoLegadoNormalizado} para ${caminhoDestinoNormalizado}.`);
     return;
   }
+}
+
+function criarBackupDadosAntesAtualizacao() {
+  const diretorioOrigem = obterDiretorioDadosPersistente();
+  const caminhoBancoOrigem = path.join(diretorioOrigem, 'crm.sqlite');
+
+  if (!fs.existsSync(caminhoBancoOrigem)) {
+    return null;
+  }
+
+  const timestamp = new Date().toISOString().replace(/[.:]/g, '-');
+  const diretorioBackups = obterDiretorioBackupsPersistente();
+  const diretorioDestino = path.join(diretorioBackups, `pre-update-${timestamp}`);
+
+  fs.mkdirSync(diretorioBackups, { recursive: true });
+  fs.cpSync(diretorioOrigem, diretorioDestino, {
+    recursive: true,
+    force: false
+  });
+
+  console.log(`Backup de seguranca criado antes da atualizacao em ${diretorioDestino}.`);
+  return diretorioDestino;
+}
+
+function montarNomeArquivoBackupBanco() {
+  const timestamp = new Date().toISOString().replace(/[.:]/g, '-');
+  return `Connecta-CRM-backup-${timestamp}.sqlite`;
+}
+
+async function salvarBackupBancoManual() {
+  const diretorioOrigem = obterDiretorioDadosPersistente();
+  const caminhoBancoOrigem = path.join(diretorioOrigem, 'crm.sqlite');
+
+  if (!fs.existsSync(caminhoBancoOrigem)) {
+    throw new Error('Nenhum banco de dados foi encontrado para gerar o backup.');
+  }
+
+  const janelaBase = mainWindow && !mainWindow.isDestroyed() ? mainWindow : undefined;
+  const respostaSalvar = await dialog.showSaveDialog(janelaBase, {
+    title: 'Salvar backup do banco de dados',
+    defaultPath: path.join(app.getPath('documents'), montarNomeArquivoBackupBanco()),
+    filters: [
+      { name: 'Banco SQLite', extensions: ['sqlite'] }
+    ],
+    properties: ['createDirectory', 'showOverwriteConfirmation']
+  });
+
+  if (respostaSalvar.canceled || !respostaSalvar.filePath) {
+    return {
+      sucesso: false,
+      cancelado: true,
+      mensagem: 'Backup cancelado pelo usuario.'
+    };
+  }
+
+  await fs.promises.copyFile(caminhoBancoOrigem, respostaSalvar.filePath);
+
+  return {
+    sucesso: true,
+    cancelado: false,
+    caminhoArquivo: respostaSalvar.filePath,
+    mensagem: 'Backup do banco salvo com sucesso.'
+  };
 }
 
 function startBundledBackend() {
@@ -189,7 +331,7 @@ function configurarAtualizacaoAutomatica() {
 
   atualizadorConfigurado = true;
   autoUpdater.autoDownload = true;
-  autoUpdater.autoInstallOnAppQuit = true;
+  autoUpdater.autoInstallOnAppQuit = false;
 
   autoUpdater.on('error', (erro) => {
     console.error('Falha ao verificar atualizacoes:', erro);
@@ -234,6 +376,12 @@ function configurarAtualizacaoAutomatica() {
     });
 
     if (!mainWindow || mainWindow.isDestroyed()) {
+      try {
+        criarBackupDadosAntesAtualizacao();
+      } catch (erro) {
+        console.error('Falha ao criar backup antes de instalar a atualizacao:', erro);
+      }
+
       autoUpdater.quitAndInstall();
       return;
     }
@@ -249,18 +397,16 @@ function configurarAtualizacaoAutomatica() {
     });
 
     if (resposta.response === 0) {
+      try {
+        criarBackupDadosAntesAtualizacao();
+      } catch (erro) {
+        console.error('Falha ao criar backup antes de instalar a atualizacao:', erro);
+      }
+
       autoUpdater.quitAndInstall();
     }
   });
 
-  const verificarAtualizacoes = () => {
-    iniciarVerificacaoAtualizacoes().catch((erro) => {
-      console.error('Falha ao iniciar a verificacao de atualizacoes:', erro);
-    });
-  };
-
-  setTimeout(verificarAtualizacoes, 15000);
-  setInterval(verificarAtualizacoes, intervaloVerificacaoAtualizacaoMs);
 }
 
 async function iniciarVerificacaoAtualizacoes() {
@@ -308,12 +454,72 @@ function registrarEventosDesktop() {
       };
     }
   });
+
+  ipcMain.handle('desktop:salvar-backup-banco', async () => {
+    try {
+      return await salvarBackupBancoManual();
+    } catch (erro) {
+      return {
+        sucesso: false,
+        cancelado: false,
+        mensagem: erro.message || 'Nao foi possivel gerar o backup do banco de dados.'
+      };
+    }
+  });
+
+  ipcMain.handle('desktop:exportar-pdf', async (_evento, payload = {}) => {
+    try {
+      const html = String(payload.html || '').trim();
+
+      if (!html) {
+        return {
+          sucesso: false,
+          cancelado: false,
+          mensagem: 'Nao foi possivel gerar o documento em PDF sem conteudo.'
+        };
+      }
+
+      const janelaBase = mainWindow && !mainWindow.isDestroyed() ? mainWindow : undefined;
+      const nomeArquivo = montarNomeArquivoPdf(payload.nomeArquivo);
+      const respostaSalvar = await dialog.showSaveDialog(janelaBase, {
+        title: 'Salvar PDF do orcamento',
+        defaultPath: path.join(app.getPath('documents'), nomeArquivo),
+        filters: [
+          { name: 'Arquivo PDF', extensions: ['pdf'] }
+        ],
+        properties: ['createDirectory', 'showOverwriteConfirmation']
+      });
+
+      if (respostaSalvar.canceled || !respostaSalvar.filePath) {
+        return {
+          sucesso: false,
+          cancelado: true,
+          mensagem: 'Exportacao de PDF cancelada pelo usuario.'
+        };
+      }
+
+      const pdf = await gerarPdfHtml(html);
+      await fs.promises.writeFile(respostaSalvar.filePath, pdf);
+
+      return {
+        sucesso: true,
+        cancelado: false,
+        caminhoArquivo: respostaSalvar.filePath,
+        mensagem: 'PDF exportado com sucesso.'
+      };
+    } catch (erro) {
+      return {
+        sucesso: false,
+        cancelado: false,
+        mensagem: erro.message || 'Nao foi possivel exportar o PDF do orcamento.'
+      };
+    }
+  });
 }
 
 app.whenReady().then(() => {
   createWindow();
   registrarEventosDesktop();
-  configurarAtualizacaoAutomatica();
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {

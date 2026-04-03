@@ -42,8 +42,10 @@ import {
 import { incluirPedido } from '../../servicos/pedidos';
 import { listarProdutos } from '../../servicos/produtos';
 import { listarUsuarios } from '../../servicos/usuarios';
+import { normalizarFiltrosPorPadrao, useFiltrosPersistidos } from '../../utilitarios/useFiltrosPersistidos';
 import { ModalPedido } from '../pedidos/modalPedido';
 import { ModalAtendimento } from './modalAtendimento';
+import { ModalManualAtendimento } from './modalManualAtendimento';
 
 function criarFiltrosIniciaisAtendimentos(usuarioLogado) {
   return {
@@ -71,7 +73,6 @@ const ID_ETAPA_ORCAMENTO_PEDIDO_EXCLUIDO = 3;
 
 export function PaginaAtendimentos({ usuarioLogado }) {
   const [pesquisa, definirPesquisa] = useState('');
-  const [filtros, definirFiltros] = useState(() => criarFiltrosIniciaisAtendimentos(usuarioLogado));
   const [atendimentos, definirAtendimentos] = useState([]);
   const [clientes, definirClientes] = useState([]);
   const [contatos, definirContatos] = useState([]);
@@ -93,6 +94,7 @@ export function PaginaAtendimentos({ usuarioLogado }) {
   const [carregando, definirCarregando] = useState(true);
   const [mensagemErro, definirMensagemErro] = useState('');
   const [modalAberto, definirModalAberto] = useState(false);
+  const [modalManualAberto, definirModalManualAberto] = useState(false);
   const [modalFiltrosAberto, definirModalFiltrosAberto] = useState(false);
   const [modalPedidoAberto, definirModalPedidoAberto] = useState(false);
   const [atendimentoSelecionado, definirAtendimentoSelecionado] = useState(null);
@@ -101,14 +103,39 @@ export function PaginaAtendimentos({ usuarioLogado }) {
   const [etapaOrcamentoAtualizadaExternamente, definirEtapaOrcamentoAtualizadaExternamente] = useState(null);
   const [modoModal, definirModoModal] = useState('novo');
   const usuarioSomenteVendedor = usuarioLogado?.tipo === 'Usuario padrao' && usuarioLogado?.idVendedor;
-
-  useEffect(() => {
-    definirFiltros(criarFiltrosIniciaisAtendimentos(usuarioLogado));
-  }, [usuarioLogado?.idUsuario]);
+  const usuarioSomenteConsultaConfiguracao = usuarioLogado?.tipo === 'Usuario padrao';
+  const filtrosIniciais = useMemo(
+    () => criarFiltrosIniciaisAtendimentos(usuarioLogado),
+    [usuarioLogado?.idUsuario]
+  );
+  const [filtros, definirFiltros] = useFiltrosPersistidos({
+    chave: 'paginaAtendimentos',
+    usuario: usuarioLogado,
+    filtrosPadrao: filtrosIniciais,
+    normalizarFiltros: normalizarFiltrosAtendimentos
+  });
 
   useEffect(() => {
     carregarDados();
   }, [usuarioSomenteVendedor, usuarioLogado?.idVendedor]);
+
+  useEffect(() => {
+    function tratarAtalhosAtendimentos(evento) {
+      if (evento.key === 'F1') {
+        evento.preventDefault();
+
+        if (!modalAberto && !modalManualAberto && !modalFiltrosAberto && !modalPedidoAberto) {
+          definirModalManualAberto(true);
+        }
+      }
+    }
+
+    window.addEventListener('keydown', tratarAtalhosAtendimentos);
+
+    return () => {
+      window.removeEventListener('keydown', tratarAtalhosAtendimentos);
+    };
+  }, [modalAberto, modalManualAberto, modalFiltrosAberto, modalPedidoAberto]);
 
   async function carregarDados() {
     definirCarregando(true);
@@ -217,15 +244,17 @@ export function PaginaAtendimentos({ usuarioLogado }) {
   }
 
   async function salvarAtendimento(dadosAtendimento) {
+    const estaEditando = modoModal === 'edicao' && Boolean(atendimentoSelecionado?.idAtendimento);
+
     const payload = normalizarPayloadAtendimento({
       ...dadosAtendimento,
-      horaFim: atendimentoSelecionado?.idAtendimento
+      horaFim: estaEditando
         ? dadosAtendimento.horaFim
         : obterHoraAtualFormatoInput(),
-      idUsuario: atendimentoSelecionado?.idUsuario || usuarioLogado.idUsuario
+      idUsuario: estaEditando ? atendimentoSelecionado.idUsuario : usuarioLogado.idUsuario
     });
 
-    if (atendimentoSelecionado?.idAtendimento) {
+    if (estaEditando) {
       await atualizarAtendimento(atendimentoSelecionado.idAtendimento, payload);
     } else {
       await incluirAtendimento(payload);
@@ -402,10 +431,6 @@ export function PaginaAtendimentos({ usuarioLogado }) {
     () => filtrarAtendimentos(atendimentos, pesquisa, filtros),
     [atendimentos, pesquisa, filtros]
   );
-  const filtrosIniciais = useMemo(
-    () => criarFiltrosIniciaisAtendimentos(usuarioLogado),
-    [usuarioLogado?.idUsuario]
-  );
   const filtrosAtivos = JSON.stringify(filtros) !== JSON.stringify(filtrosIniciais);
 
   return (
@@ -518,6 +543,17 @@ export function PaginaAtendimentos({ usuarioLogado }) {
         aoLimpar={() => definirFiltros(criarFiltrosLimposAtendimentos())}
       />
 
+      <ModalManualAtendimento
+        aberto={modalManualAberto}
+        aoFechar={() => definirModalManualAberto(false)}
+        atendimentos={atendimentosFiltrados}
+        canaisAtendimento={canaisAtendimento}
+        origensAtendimento={origensAtendimento}
+        orcamentos={orcamentos}
+        filtros={filtros}
+        usuarioLogado={usuarioLogado}
+      />
+
       <ModalAtendimento
         aberto={modalAberto}
         atendimento={atendimentoSelecionado}
@@ -549,6 +585,7 @@ export function PaginaAtendimentos({ usuarioLogado }) {
         camposPedido={camposPedido}
         etapasPedido={etapasPedido}
         empresa={empresa}
+        somenteConsultaPrazos={usuarioSomenteConsultaConfiguracao}
         etapaOrcamentoAtualizadaExternamente={etapaOrcamentoAtualizadaExternamente}
         aoAtualizarStatusOrcamento={atualizarStatusOrcamentoPeloAtendimento}
         aoAbrirPedido={abrirPedidoPeloAtendimento}
@@ -575,6 +612,7 @@ export function PaginaAtendimentos({ usuarioLogado }) {
         empresa={empresa}
         usuarioLogado={usuarioLogado}
         modo="novo"
+        somenteConsultaPrazos={usuarioSomenteConsultaConfiguracao}
         aoFechar={fecharModalPedido}
         aoSalvar={salvarPedidoPeloAtendimento}
         aoSalvarPrazoPagamento={salvarPrazoPagamentoPeloAtendimento}
@@ -635,6 +673,10 @@ function LinhaAtendimento({ atendimento, permitirExcluir, aoConsultar, aoEditar,
       </td>
     </tr>
   );
+}
+
+function normalizarFiltrosAtendimentos(filtros, filtrosPadrao) {
+  return normalizarFiltrosPorPadrao(filtros, filtrosPadrao);
 }
 
 function filtrarAtendimentos(atendimentos, pesquisa, filtros) {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { CabecalhoClientes } from './cabecalhoClientes';
 import { CorpoClientes } from './corpoClientes';
 import {
@@ -16,8 +16,10 @@ import {
 import { filtrarClientes } from '../../utilitarios/filtrarClientes';
 import { normalizarTelefone } from '../../utilitarios/normalizarTelefone';
 import { obterPrimeiroCodigoDisponivel } from '../../utilitarios/obterPrimeiroCodigoDisponivel';
+import { normalizarFiltrosPorPadrao, useFiltrosPersistidos } from '../../utilitarios/useFiltrosPersistidos';
 import { ModalFiltros } from '../../componentes/comuns/modalFiltros';
 import { ModalCliente } from './modalCliente';
+import { ModalManualClientes } from './modalManualClientes';
 
 const filtrosIniciaisClientes = {
   estado: '',
@@ -30,7 +32,6 @@ const filtrosIniciaisClientes = {
 
 export function PaginaClientes({ usuarioLogado }) {
   const [pesquisa, definirPesquisa] = useState('');
-  const [filtros, definirFiltros] = useState(filtrosIniciaisClientes);
   const [clientes, definirClientes] = useState([]);
   const [contatos, definirContatos] = useState([]);
   const [vendedores, definirVendedores] = useState([]);
@@ -38,26 +39,46 @@ export function PaginaClientes({ usuarioLogado }) {
   const [carregando, definirCarregando] = useState(true);
   const [mensagemErro, definirMensagemErro] = useState('');
   const [modalAberto, definirModalAberto] = useState(false);
+  const [modalManualAberto, definirModalManualAberto] = useState(false);
   const [modalFiltrosAberto, definirModalFiltrosAberto] = useState(false);
   const [clienteEmEdicao, definirClienteEmEdicao] = useState(null);
   const [modoModalCliente, definirModoModalCliente] = useState('novo');
   const usuarioSomenteVendedor = usuarioLogado?.tipo === 'Usuario padrao' && usuarioLogado?.idVendedor;
   const usuarioSomenteConsultaConfiguracao = usuarioLogado?.tipo === 'Usuario padrao';
-
-  useEffect(() => {
-    if (!usuarioSomenteVendedor) {
-      return;
-    }
-
-    definirFiltros((estadoAtual) => ({
-      ...estadoAtual,
-      idVendedor: String(usuarioLogado.idVendedor)
-    }));
-  }, [usuarioSomenteVendedor, usuarioLogado?.idVendedor]);
+  const filtrosIniciais = useMemo(() => ({
+    ...filtrosIniciaisClientes,
+    idVendedor: usuarioSomenteVendedor ? String(usuarioLogado.idVendedor) : ''
+  }), [usuarioSomenteVendedor, usuarioLogado?.idVendedor]);
+  const [filtros, definirFiltros] = useFiltrosPersistidos({
+    chave: 'paginaClientes',
+    usuario: usuarioLogado,
+    filtrosPadrao: filtrosIniciais,
+    normalizarFiltros: normalizarFiltrosClientes
+  });
 
   useEffect(() => {
     carregarDados();
   }, [usuarioSomenteVendedor, usuarioLogado?.idVendedor]);
+
+  useEffect(() => {
+    function tratarAtalhosClientes(evento) {
+      if (evento.key !== 'F1') {
+        return;
+      }
+
+      evento.preventDefault();
+
+      if (!modalAberto && !modalManualAberto && !modalFiltrosAberto) {
+        definirModalManualAberto(true);
+      }
+    }
+
+    window.addEventListener('keydown', tratarAtalhosClientes);
+
+    return () => {
+      window.removeEventListener('keydown', tratarAtalhosClientes);
+    };
+  }, [modalAberto, modalManualAberto, modalFiltrosAberto]);
 
   async function carregarDados() {
     definirCarregando(true);
@@ -241,22 +262,15 @@ export function PaginaClientes({ usuarioLogado }) {
         ]}
         aoFechar={() => definirModalFiltrosAberto(false)}
         aoAplicar={(proximosFiltros) => {
-          definirFiltros({
-            ...proximosFiltros,
-            idVendedor: usuarioSomenteVendedor
-              ? String(usuarioLogado.idVendedor)
-              : proximosFiltros.idVendedor
-          });
+          definirFiltros(proximosFiltros);
           definirModalFiltrosAberto(false);
         }}
-        aoLimpar={() => definirFiltros({
-          ...filtrosIniciaisClientes,
-          idVendedor: usuarioSomenteVendedor ? String(usuarioLogado.idVendedor) : ''
-        })}
+        aoLimpar={() => definirFiltros(filtrosIniciais)}
       />
       <ModalCliente
         aberto={modalAberto}
         cliente={clienteEmEdicao}
+        usuarioLogado={usuarioLogado}
         codigoSugerido={proximoCodigoCliente}
         contatos={obterContatosDoCliente(contatos, clienteEmEdicao?.idCliente)}
         vendedores={vendedoresDisponiveis}
@@ -269,8 +283,27 @@ export function PaginaClientes({ usuarioLogado }) {
         aoInativarRamoAtividade={inativarRamoAtividadeCliente}
         aoSalvar={salvarCliente}
       />
+      <ModalManualClientes
+        aberto={modalManualAberto}
+        aoFechar={() => definirModalManualAberto(false)}
+        clientes={clientesFiltrados}
+        contatos={contatos}
+        vendedores={vendedoresDisponiveis}
+        ramosAtividade={ramosAtividade}
+        filtros={filtros}
+        usuarioLogado={usuarioLogado}
+      />
     </>
   );
+}
+
+function normalizarFiltrosClientes(filtros, filtrosPadrao) {
+  const filtrosNormalizados = normalizarFiltrosPorPadrao(filtros, filtrosPadrao);
+
+  return {
+    ...filtrosNormalizados,
+    idVendedor: filtrosPadrao.idVendedor || filtrosNormalizados.idVendedor
+  };
 }
 
 function obterOpcoesTexto(registros, campo) {

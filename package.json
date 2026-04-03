@@ -1,6 +1,6 @@
 {
   "name": "connecta-crm",
-  "version": "1.2.0",
+  "version": "1.3.2",
   "private": true,
   "description": "Connecta CRM com Electron, React, Express e SQLite.",
   "main": "electron/main.js",
@@ -15,8 +15,8 @@
     "start:electron": "npm run build:web && node scripts/abrirElectron.js .",
     "build": "npm run build:web",
     "build:web": "vite build",
-    "build:electron": "npm run build:web && electron-builder",
-    "release": "npm run build:web && electron-builder --publish always",
+    "build:electron": "npm run build:web && node scripts/executarElectronBuilder.js",
+    "release": "npm run build:web && node scripts/executarElectronBuilder.js --publish always",
     "popular:banco": "node server/scripts/popularBanco.js"
   },
   "dependencies": {

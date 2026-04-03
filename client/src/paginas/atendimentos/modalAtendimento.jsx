@@ -54,7 +54,9 @@ export function ModalAtendimento({
   orcamentos = [],
   produtos = [],
   camposOrcamento = [],
+  camposPedido = [],
   empresa,
+  somenteConsultaPrazos = false,
   etapaOrcamentoAtualizadaExternamente = null,
   aoSalvarPrazoPagamento,
   aoInativarPrazoPagamento,
@@ -75,7 +77,8 @@ export function ModalAtendimento({
   const [orcamentoSelecionado, definirOrcamentoSelecionado] = useState(null);
   const [confirmandoPedidoOrcamento, definirConfirmandoPedidoOrcamento] = useState(null);
   const somenteLeitura = modo === 'consulta';
-  const modoInclusao = !atendimento;
+  const modoInclusao = modo === 'novo';
+  const modoEdicao = modo === 'edicao';
   const clientesAtivos = clientes.filter((cliente) => cliente.status !== 0);
   const contatosAtivos = contatos.filter((contato) => contato.status !== 0);
   const canaisAtivos = canaisAtendimento.filter((canal) => canal.status !== 0);
@@ -174,7 +177,6 @@ export function ModalAtendimento({
     return null;
   }
 
-  const modoEdicao = Boolean(atendimento?.idAtendimento);
   const contatosDoCliente = contatosAtivos.filter(
     (contato) => String(contato.idCliente) === String(formulario.idCliente)
   );
@@ -275,7 +277,7 @@ export function ModalAtendimento({
       return;
     }
 
-    if (modoEdicao && formulario.horaFim && formulario.horaFim <= formulario.horaInicio) {
+    if (formulario.horaFim && formulario.horaFim <= formulario.horaInicio) {
       definirMensagemErro('O horario de fim deve ser maior que o horario de inicio.');
       return;
     }
@@ -660,7 +662,7 @@ export function ModalAtendimento({
       >
         <div className="cabecalhoModalContato">
           <h3 id="tituloModalAtendimento">
-            {somenteLeitura ? 'Consultar atendimento' : atendimento ? 'Editar atendimento' : 'Incluir atendimento'}
+            {somenteLeitura ? 'Consultar atendimento' : modoEdicao ? 'Editar atendimento' : 'Incluir atendimento'}
           </h3>
 
           <div className="acoesFormularioContatoModal">
@@ -1039,9 +1041,11 @@ export function ModalAtendimento({
       motivosPerda={motivosPerda}
       produtos={produtos}
       camposOrcamento={camposOrcamento}
+      camposPedido={camposPedido}
       empresa={empresa}
       usuarioLogado={usuarioLogado}
       modo={modoModalOrcamento}
+      somenteConsultaPrazos={somenteConsultaPrazos}
       aoFechar={fecharModalNovoOrcamento}
       aoSalvar={salvarNovoOrcamento}
       aoSalvarPrazoPagamento={aoSalvarPrazoPagamento}

@@ -73,6 +73,8 @@ import { ModalAtualizacaoSistema } from './modalAtualizacaoSistema';
 import { ModalCadastroConfiguracao } from './modalCadastroConfiguracao';
 import { ModalEmpresa } from './modalEmpresa';
 import { ModalGruposProduto } from './modalGruposProduto';
+import { ModalLayoutOrcamento } from './modalLayoutOrcamento';
+import { ModalManualConfiguracoes } from './modalManualConfiguracoes';
 import { ModalMarcas } from './modalMarcas';
 import { ModalPrazosPagamento } from './modalPrazosPagamento';
 import { ModalRamosAtividade } from './modalRamosAtividade';
@@ -169,6 +171,11 @@ const atalhosConfiguracao = [
     id: 'pedidos',
     titulo: 'Campos do pedido',
     icone: 'pedido'
+  },
+  {
+    id: 'layoutOrcamento',
+    titulo: 'Layout Orcamento',
+    icone: 'orcamento'
   },
   {
     id: 'etapasPedido',
@@ -291,7 +298,9 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
   const [camposPedido, definirCamposPedido] = useState([]);
   const [tamanhos, definirTamanhos] = useState([]);
   const [configuracaoAtualizacaoSistema, definirConfiguracaoAtualizacaoSistema] = useState(null);
+  const [modalManualAberto, definirModalManualAberto] = useState(false);
   const [modalEmpresaAberto, definirModalEmpresaAberto] = useState(false);
+  const [modalLayoutOrcamentoAberto, definirModalLayoutOrcamentoAberto] = useState(false);
   const [modalUsuariosAberto, definirModalUsuariosAberto] = useState(false);
   const [modalAtualizacaoSistemaAberto, definirModalAtualizacaoSistemaAberto] = useState(false);
   const [cadastroConfiguracaoAberto, definirCadastroConfiguracaoAberto] = useState(null);
@@ -308,6 +317,40 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
   useEffect(() => {
     carregarUsuarios();
   }, [vendedores]);
+
+  useEffect(() => {
+    function tratarAtalhosConfiguracoes(evento) {
+      if (evento.key !== 'F1') {
+        return;
+      }
+
+      evento.preventDefault();
+
+      if (
+        !modalManualAberto
+        && !modalEmpresaAberto
+        && !modalLayoutOrcamentoAberto
+        && !modalUsuariosAberto
+        && !modalAtualizacaoSistemaAberto
+        && !cadastroConfiguracaoAberto
+      ) {
+        definirModalManualAberto(true);
+      }
+    }
+
+    window.addEventListener('keydown', tratarAtalhosConfiguracoes);
+
+    return () => {
+      window.removeEventListener('keydown', tratarAtalhosConfiguracoes);
+    };
+  }, [
+    cadastroConfiguracaoAberto,
+    modalAtualizacaoSistemaAberto,
+    modalEmpresaAberto,
+    modalLayoutOrcamentoAberto,
+    modalManualAberto,
+    modalUsuariosAberto
+  ]);
 
   async function carregarEmpresa() {
     const empresas = await listarEmpresas({ incluirInativos: true });
@@ -327,6 +370,22 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
     window.dispatchEvent(new CustomEvent('empresa-atualizada'));
     definirModalEmpresaAberto(false);
     definirModoModalEmpresa('edicao');
+  }
+
+  async function salvarLayoutOrcamento(dadosLayout) {
+    if (!empresa?.idEmpresa) {
+      throw new Error('Cadastre a empresa antes de configurar o layout do orcamento.');
+    }
+
+    const payload = normalizarPayloadEmpresa({
+      ...empresa,
+      ...dadosLayout
+    });
+
+    await atualizarEmpresa(empresa.idEmpresa, payload);
+    await carregarEmpresa();
+    window.dispatchEvent(new CustomEvent('empresa-atualizada'));
+    definirModalLayoutOrcamentoAberto(false);
   }
 
   async function carregarUsuarios() {
@@ -847,13 +906,22 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
   }
 
   function abrirConfiguracao(atalho) {
-    if (usuarioSomenteConsulta && ['empresa', 'usuarios'].includes(atalho.id)) {
+    if (usuarioSomenteConsulta && ['empresa', 'usuarios', 'layoutOrcamento'].includes(atalho.id)) {
       return;
     }
 
     if (atalho.id === 'empresa') {
       definirModoModalEmpresa(usuarioSomenteConsulta ? 'consulta' : 'edicao');
       definirModalEmpresaAberto(true);
+      return;
+    }
+
+    if (atalho.id === 'layoutOrcamento') {
+      if (!empresa?.idEmpresa) {
+        return;
+      }
+
+      definirModalLayoutOrcamentoAberto(true);
       return;
     }
 
@@ -906,6 +974,10 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
     definirModalUsuariosAberto(false);
   }
 
+  function fecharModalLayoutOrcamento() {
+    definirModalLayoutOrcamentoAberto(false);
+  }
+
   function fecharModalAtualizacaoSistema() {
     definirModalAtualizacaoSistemaAberto(false);
   }
@@ -949,7 +1021,10 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
                         type="button"
                         className="cartaoConfiguracao"
                         title={atalho.titulo}
-                        disabled={usuarioSomenteConsulta && ['empresa', 'usuarios'].includes(atalho.id)}
+                        disabled={
+                          (usuarioSomenteConsulta && ['empresa', 'usuarios', 'layoutOrcamento'].includes(atalho.id))
+                          || (atalho.id === 'layoutOrcamento' && !empresa?.idEmpresa)
+                        }
                         onClick={() => abrirConfiguracao(atalho)}
                       >
                         <span className="iconeCartaoConfiguracao" aria-hidden="true">
@@ -983,6 +1058,13 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
         aoFechar={fecharModalEmpresa}
         aoSalvar={salvarEmpresa}
       />
+      <ModalLayoutOrcamento
+        aberto={modalLayoutOrcamentoAberto}
+        empresa={empresa}
+        somenteConsulta={usuarioSomenteConsulta}
+        aoFechar={fecharModalLayoutOrcamento}
+        aoSalvar={salvarLayoutOrcamento}
+      />
       <ModalUsuarios
         aberto={modalUsuariosAberto}
         usuarios={usuarios}
@@ -997,6 +1079,15 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
         configuracao={configuracaoAtualizacaoSistema}
         aoFechar={fecharModalAtualizacaoSistema}
         aoSalvar={salvarAtualizacaoSistema}
+      />
+      <ModalManualConfiguracoes
+        aberto={modalManualAberto}
+        aoFechar={() => definirModalManualAberto(false)}
+        totalAtalhos={atalhosConfiguracao.length}
+        secoes={secoesConfiguracao}
+        usuarios={usuarios}
+        vendedores={vendedores}
+        usuarioLogado={usuarioLogado}
       />
         <ModalGruposProduto
           aberto={cadastroConfiguracaoAberto === 'gruposProduto'}
@@ -1406,6 +1497,12 @@ function normalizarPayloadEmpresa(dadosEmpresa) {
         ? dadosEmpresa.etapasFiltroPadraoOrcamento.map(String)
         : []
     ),
+    corPrimariaOrcamento: limparTextoOpcional(dadosEmpresa.corPrimariaOrcamento) || '#111827',
+    corSecundariaOrcamento: limparTextoOpcional(dadosEmpresa.corSecundariaOrcamento) || '#ef4444',
+    corDestaqueOrcamento: limparTextoOpcional(dadosEmpresa.corDestaqueOrcamento) || '#f59e0b',
+    destaqueItemOrcamentoPdf: String(dadosEmpresa.destaqueItemOrcamentoPdf || '').trim() === 'referencia'
+      ? 'referencia'
+      : 'descricao',
     logradouro: limparTextoOpcional(dadosEmpresa.logradouro),
     numero: limparTextoOpcional(dadosEmpresa.numero),
     complemento: limparTextoOpcional(dadosEmpresa.complemento),

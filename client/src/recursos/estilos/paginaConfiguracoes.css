@@ -603,6 +603,8 @@
 .acoesAtualizacaoSistema {
   display: flex;
   justify-content: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .tabelaGruposProdutoConfiguracao th:nth-child(1),

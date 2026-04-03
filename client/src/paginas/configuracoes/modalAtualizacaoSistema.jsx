@@ -14,6 +14,8 @@ export function ModalAtualizacaoSistema({
   const [formulario, definirFormulario] = useState(formularioInicial);
   const [salvando, definirSalvando] = useState(false);
   const [verificando, definirVerificando] = useState(false);
+  const [gerandoBackup, definirGerandoBackup] = useState(false);
+  const [backupConcluido, definirBackupConcluido] = useState(false);
   const [mensagemErro, definirMensagemErro] = useState('');
   const [mensagemSucesso, definirMensagemSucesso] = useState('');
   const [versaoAtual, definirVersaoAtual] = useState('');
@@ -28,6 +30,8 @@ export function ModalAtualizacaoSistema({
     });
     definirSalvando(false);
     definirVerificando(false);
+    definirGerandoBackup(false);
+    definirBackupConcluido(false);
     definirMensagemErro('');
     definirMensagemSucesso('');
 
@@ -77,7 +81,7 @@ export function ModalAtualizacaoSistema({
     }
 
     function tratarTecla(evento) {
-      if (evento.key === 'Escape' && !salvando && !verificando) {
+      if (evento.key === 'Escape' && !salvando && !verificando && !gerandoBackup) {
         aoFechar();
       }
     }
@@ -87,7 +91,7 @@ export function ModalAtualizacaoSistema({
     return () => {
       window.removeEventListener('keydown', tratarTecla);
     };
-  }, [aberto, aoFechar, salvando, verificando]);
+  }, [aberto, aoFechar, salvando, verificando, gerandoBackup]);
 
   if (!aberto) {
     return null;
@@ -130,6 +134,12 @@ export function ModalAtualizacaoSistema({
       return;
     }
 
+    if (!backupConcluido) {
+      definirMensagemErro('Gere e salve um backup do banco antes de iniciar a atualizacao manual.');
+      definirMensagemSucesso('');
+      return;
+    }
+
     definirVerificando(true);
     definirMensagemErro('');
     definirMensagemSucesso('');
@@ -147,8 +157,44 @@ export function ModalAtualizacaoSistema({
     }
   }
 
+  async function gerarBackupBanco() {
+    if (!window.desktop?.salvarBackupBanco) {
+      definirMensagemErro('A geracao de backup so funciona no aplicativo desktop.');
+      definirMensagemSucesso('');
+      return;
+    }
+
+    definirGerandoBackup(true);
+    definirMensagemErro('');
+    definirMensagemSucesso('');
+
+    try {
+      const resultado = await window.desktop.salvarBackupBanco();
+
+      if (resultado?.cancelado) {
+        definirMensagemErro('');
+        definirMensagemSucesso('Backup cancelado pelo usuario.');
+        definirBackupConcluido(false);
+        return;
+      }
+
+      if (!resultado?.sucesso) {
+        throw new Error(resultado?.mensagem || 'Nao foi possivel gerar o backup do banco de dados.');
+      }
+
+      definirBackupConcluido(true);
+      definirMensagemSucesso(resultado.mensagem || 'Backup do banco salvo com sucesso.');
+    } catch (erro) {
+      definirMensagemErro(erro.message || 'Nao foi possivel gerar o backup do banco de dados.');
+      definirMensagemSucesso('');
+      definirBackupConcluido(false);
+    } finally {
+      definirGerandoBackup(false);
+    }
+  }
+
   function fecharAoClicarNoFundo(evento) {
-    if (evento.target === evento.currentTarget && !salvando && !verificando) {
+    if (evento.target === evento.currentTarget && !salvando && !verificando && !gerandoBackup) {
       aoFechar();
     }
   }
@@ -167,15 +213,15 @@ export function ModalAtualizacaoSistema({
           <div>
             <h2 id="tituloModalAtualizacaoSistema">Atualizacao do sistema</h2>
             <p className="textoAuxiliarAtualizacaoSistema">
-              Informe o link do repositorio ou da pagina de releases no GitHub.
+              Informe o link do repositorio ou da pagina de releases no GitHub. A atualizacao agora acontece somente por acao manual do cliente.
             </p>
           </div>
 
           <div className="acoesCabecalhoModalCliente">
-            <Botao variante="secundario" type="button" onClick={aoFechar} disabled={salvando || verificando}>
+            <Botao variante="secundario" type="button" onClick={aoFechar} disabled={salvando || verificando || gerandoBackup}>
               Fechar
             </Botao>
-            <Botao variante="primario" type="submit" disabled={salvando || verificando}>
+            <Botao variante="primario" type="submit" disabled={salvando || verificando || gerandoBackup}>
               {salvando ? 'Salvando...' : 'Salvar'}
             </Botao>
           </div>
@@ -204,19 +250,31 @@ export function ModalAtualizacaoSistema({
                 <strong>{versaoAtual || 'Nao disponivel'}</strong>
               </div>
               <div className="cartaoResumoAtualizacaoSistema">
-                <span className="rotuloResumoAtualizacaoSistema">Leitura automatica</span>
+                <span className="rotuloResumoAtualizacaoSistema">Repositorio configurado</span>
                 <strong>{configuracao?.urlRepositorio || 'Nao configurado'}</strong>
+              </div>
+              <div className="cartaoResumoAtualizacaoSistema">
+                <span className="rotuloResumoAtualizacaoSistema">Backup antes da atualizacao</span>
+                <strong>{backupConcluido ? 'Gerado nesta sessao' : 'Pendente'}</strong>
               </div>
             </div>
 
             <div className="acoesAtualizacaoSistema">
               <Botao
+                variante="secundario"
+                type="button"
+                onClick={gerarBackupBanco}
+                disabled={salvando || verificando || gerandoBackup}
+              >
+                {gerandoBackup ? 'Gerando backup...' : 'Gerar backup do banco'}
+              </Botao>
+              <Botao
                 variante="complementar"
                 type="button"
                 onClick={verificarAtualizacoes}
-                disabled={salvando || verificando}
+                disabled={salvando || verificando || gerandoBackup}
               >
-                {verificando ? 'Verificando...' : 'Verificar atualizacao agora'}
+                {verificando ? 'Verificando...' : 'Buscar atualizacao agora'}
               </Botao>
             </div>
           </div>

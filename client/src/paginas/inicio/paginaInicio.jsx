@@ -10,8 +10,14 @@ import { listarOrcamentos } from '../../servicos/orcamentos';
 import { listarPedidos } from '../../servicos/pedidos';
 import { listarGruposProduto, listarMarcas, listarProdutos } from '../../servicos/produtos';
 import { normalizarPreco } from '../../utilitarios/normalizarPreco';
+import {
+  normalizarFiltrosPorPadrao,
+  normalizarListaFiltroPersistido,
+  useFiltrosPersistidos
+} from '../../utilitarios/useFiltrosPersistidos';
 import { CabecalhoInicio } from './componentes/cabecalhoInicio';
 import { IndicadorResumoInicio } from './componentes/indicadorResumoInicio';
+import { ModalManualInicio } from './modalManualInicio';
 import { filtrarOrcamentosPaginaInicio } from './utilitarios/filtrarOrcamentosPaginaInicio';
 import { filtrarPedidosPaginaInicio } from './utilitarios/filtrarPedidosPaginaInicio';
 import { criarResumoFunilVendas } from './utilitarios/criarResumoFunilVendas';
@@ -27,10 +33,10 @@ export function PaginaInicio({ usuarioLogado }) {
   const [marcas, definirMarcas] = useState([]);
   const [vendedores, definirVendedores] = useState([]);
   const [etapasOrcamento, definirEtapasOrcamento] = useState([]);
-  const [filtros, definirFiltros] = useState(criarFiltrosIniciaisPaginaInicio);
   const [carregando, definirCarregando] = useState(true);
   const [mensagemErro, definirMensagemErro] = useState('');
   const [mensagemErroFunil, definirMensagemErroFunil] = useState('');
+  const [modalManualAberto, definirModalManualAberto] = useState(false);
   const [modalFiltrosAberto, definirModalFiltrosAberto] = useState(false);
   const usuarioSomenteVendedor = usuarioLogado?.tipo === 'Usuario padrao' && usuarioLogado?.idVendedor;
 
@@ -38,6 +44,14 @@ export function PaginaInicio({ usuarioLogado }) {
     () => criarFiltrosIniciaisPaginaInicio(usuarioLogado),
     [usuarioLogado?.idVendedor, usuarioLogado?.tipo]
   );
+  const [filtros, definirFiltros] = useFiltrosPersistidos({
+    chave: 'paginaInicio',
+    usuario: usuarioLogado,
+    filtrosPadrao: filtrosIniciais,
+    normalizarFiltros: (proximosFiltros, filtrosPadrao) => (
+      normalizarFiltrosPaginaInicio(proximosFiltros, filtrosPadrao, usuarioLogado)
+    )
+  });
   const filtrosAtivos = JSON.stringify(filtros) !== JSON.stringify(filtrosIniciais);
   const orcamentosFiltrados = useMemo(
     () => filtrarOrcamentosPaginaInicio(orcamentos, filtros, produtos),
@@ -59,10 +73,6 @@ export function PaginaInicio({ usuarioLogado }) {
     () => pedidosFiltrados.reduce((total, pedido) => total + obterQuantidadeTotalPedido(pedido), 0),
     [pedidosFiltrados]
   );
-
-  useEffect(() => {
-    definirFiltros(criarFiltrosIniciaisPaginaInicio(usuarioLogado));
-  }, [usuarioLogado?.idVendedor, usuarioLogado?.tipo]);
 
   useEffect(() => {
     let cancelado = false;
@@ -124,6 +134,26 @@ export function PaginaInicio({ usuarioLogado }) {
       window.removeEventListener('empresa-atualizada', tratarEmpresaAtualizada);
     };
   }, []);
+
+  useEffect(() => {
+    function tratarAtalhosInicio(evento) {
+      if (evento.key !== 'F1') {
+        return;
+      }
+
+      evento.preventDefault();
+
+      if (!modalManualAberto && !modalFiltrosAberto) {
+        definirModalManualAberto(true);
+      }
+    }
+
+    window.addEventListener('keydown', tratarAtalhosInicio);
+
+    return () => {
+      window.removeEventListener('keydown', tratarAtalhosInicio);
+    };
+  }, [modalManualAberto, modalFiltrosAberto]);
 
   return (
     <>
@@ -255,6 +285,21 @@ export function PaginaInicio({ usuarioLogado }) {
           }}
           aoLimpar={() => definirFiltros(filtrosIniciais)}
         />
+
+        <ModalManualInicio
+          aberto={modalManualAberto}
+          aoFechar={() => definirModalManualAberto(false)}
+          totalClientes={totalClientes}
+          totalProdutos={totalProdutos}
+          totalVendasValor={totalVendasValor}
+          totalVendasQuantidade={totalVendasQuantidade}
+          filtros={filtros}
+          orcamentos={orcamentosFiltrados}
+          pedidos={pedidosFiltrados}
+          etapasFunil={etapasFunil}
+          empresa={empresa}
+          usuarioLogado={usuarioLogado}
+        />
       </CorpoPagina>
     </>
   );
@@ -294,14 +339,15 @@ function obterUltimoDiaMesAtual() {
 }
 
 function normalizarFiltrosPaginaInicio(filtros, filtrosPadrao, usuarioLogado) {
-  const dataInicio = filtros?.dataInicio || filtrosPadrao.dataInicio;
-  const dataFim = filtros?.dataFim || filtrosPadrao.dataFim;
+  const filtrosNormalizados = normalizarFiltrosPorPadrao(filtros, filtrosPadrao);
+  const dataInicio = filtrosNormalizados.dataInicio || filtrosPadrao.dataInicio;
+  const dataFim = filtrosNormalizados.dataFim || filtrosPadrao.dataFim;
   const idVendedor = usuarioLogado?.tipo === 'Usuario padrao' && usuarioLogado?.idVendedor
     ? [String(usuarioLogado.idVendedor)]
-    : normalizarValoresFiltroMultiplo(filtros?.idVendedor);
-  const idProduto = normalizarValoresFiltroMultiplo(filtros?.idProduto);
-  const idGrupo = normalizarValoresFiltroMultiplo(filtros?.idGrupo);
-  const idMarca = normalizarValoresFiltroMultiplo(filtros?.idMarca);
+    : normalizarListaFiltroPersistido(filtrosNormalizados.idVendedor);
+  const idProduto = normalizarListaFiltroPersistido(filtrosNormalizados.idProduto);
+  const idGrupo = normalizarListaFiltroPersistido(filtrosNormalizados.idGrupo);
+  const idMarca = normalizarListaFiltroPersistido(filtrosNormalizados.idMarca);
 
   if (dataInicio <= dataFim) {
     return {
@@ -322,16 +368,6 @@ function normalizarFiltrosPaginaInicio(filtros, filtrosPadrao, usuarioLogado) {
     idGrupo,
     idMarca
   };
-}
-
-function normalizarValoresFiltroMultiplo(valores) {
-  if (!Array.isArray(valores)) {
-    return [];
-  }
-
-  return valores
-    .map((valor) => String(valor || '').trim())
-    .filter(Boolean);
 }
 
 function obterValorTotalPedido(pedido) {

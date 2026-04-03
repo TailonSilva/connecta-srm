@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Botao } from '../../componentes/comuns/botao';
 import { CampoSelecaoMultiplaModal } from '../../componentes/comuns/campoSelecaoMultiplaModal';
 import { CampoImagemPadrao } from '../../componentes/comuns/campoImagemPadrao';
@@ -33,6 +33,10 @@ const estadoInicialFormulario = {
   diasValidadeOrcamento: '7',
   diasEntregaPedido: '7',
   etapasFiltroPadraoOrcamento: [],
+  corPrimariaOrcamento: '#111827',
+  corSecundariaOrcamento: '#ef4444',
+  corDestaqueOrcamento: '#f59e0b',
+  destaqueItemOrcamentoPdf: 'descricao',
   logradouro: '',
   numero: '',
   complemento: '',
@@ -59,6 +63,21 @@ export function ModalEmpresa({
   const somenteLeitura = modo === 'consulta';
   const tipoPessoaFisica = formulario.tipo === 'Pessoa fisica';
   const rotuloDocumento = tipoPessoaFisica ? 'CPF' : 'CNPJ';
+  const etapasOrcamentoAtivasOrdenadas = useMemo(
+    () => [...etapasOrcamento]
+      .filter((etapa) => etapa.status !== 0)
+      .sort((etapaA, etapaB) => {
+        const ordemA = Number(etapaA?.ordem || etapaA?.idEtapaOrcamento || 0);
+        const ordemB = Number(etapaB?.ordem || etapaB?.idEtapaOrcamento || 0);
+
+        if (ordemA !== ordemB) {
+          return ordemA - ordemB;
+        }
+
+        return Number(etapaA?.idEtapaOrcamento || 0) - Number(etapaB?.idEtapaOrcamento || 0);
+      }),
+    [etapasOrcamento]
+  );
 
   useEffect(() => {
     if (!aberto) {
@@ -365,7 +384,7 @@ export function ModalEmpresa({
                 className="campoFormularioIntegral"
                 label="Filtro padrao de status do orcamento"
                 titulo="Status padrao do orcamento"
-                itens={etapasOrcamento.map((etapa) => ({
+                itens={etapasOrcamentoAtivasOrdenadas.map((etapa) => ({
                   valor: String(etapa.idEtapaOrcamento),
                   label: etapa.descricao
                 }))}
@@ -472,6 +491,10 @@ function criarFormularioEmpresa(empresa) {
     diasValidadeOrcamento: String(empresa.diasValidadeOrcamento ?? 7),
     diasEntregaPedido: String(empresa.diasEntregaPedido ?? 7),
     etapasFiltroPadraoOrcamento: normalizarListaEmpresa(empresa.etapasFiltroPadraoOrcamento),
+    corPrimariaOrcamento: empresa.corPrimariaOrcamento || '#111827',
+    corSecundariaOrcamento: empresa.corSecundariaOrcamento || '#ef4444',
+    corDestaqueOrcamento: empresa.corDestaqueOrcamento || '#f59e0b',
+    destaqueItemOrcamentoPdf: normalizarDestaqueItemOrcamentoPdf(empresa.destaqueItemOrcamentoPdf),
     logradouro: empresa.logradouro || '',
     numero: empresa.numero || '',
     complemento: empresa.complemento || '',
@@ -481,6 +504,10 @@ function criarFormularioEmpresa(empresa) {
     cep: empresa.cep || '',
     imagem: empresa.imagem || ''
   };
+}
+
+function normalizarDestaqueItemOrcamentoPdf(valor) {
+  return String(valor || '').trim() === 'referencia' ? 'referencia' : 'descricao';
 }
 
 function normalizarListaEmpresa(valor) {

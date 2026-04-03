@@ -150,11 +150,6 @@ export function ModalPrazosPagamento({
 
     const prazosNumericos = obterPrazosNumericos(formulario);
 
-    if (prazosNumericos.length === 0) {
-      definirMensagemErro('Informe ao menos o primeiro prazo.');
-      return;
-    }
-
     if (prazosNumericos.some((prazo) => prazo <= 0)) {
       definirMensagemErro('Os prazos devem ser numeros inteiros positivos.');
       return;
@@ -504,7 +499,7 @@ function montarResumoPrazos(prazo) {
 
 function obterDescricaoAutomatica(formulario) {
   const prazos = obterPrazosNumericos(formulario);
-  return prazos.length > 0 ? `${prazos.join('/') } dias` : '';
+  return prazos.length > 0 ? `${prazos.join('/')} dias` : '';
 }
 
 function montarDescricaoPrazo(formulario, metodosPagamento) {

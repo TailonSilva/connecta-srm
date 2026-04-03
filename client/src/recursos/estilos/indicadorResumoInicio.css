@@ -11,34 +11,29 @@
 }
 
 .inicioIndicadorResumoCabecalho {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
+  display: block;
 }
 
 .inicioIndicadorResumoConteudo {
   display: grid;
   gap: 8px;
   min-width: 0;
+  padding-right: 44px;
 }
 
 .inicioIndicadorResumoIcone {
-  display: grid;
-  place-items: center;
-  width: 88px;
-  height: 88px;
-  flex: 0 0 auto;
-  margin-top: -4px;
-  margin-right: -28px;
-  border-radius: 28px;
-  background: linear-gradient(180deg, rgba(23, 145, 226, 0.18) 0%, rgba(91, 189, 245, 0.24) 100%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 26px;
+  right: 24px;
   color: var(--corPrimariaForte);
 }
 
 .inicioIndicadorResumoIcone .iconeBase {
-  width: 34px;
-  height: 34px;
+  width: 24px;
+  height: 24px;
 }
 
 .inicioIndicadorResumoRotulo {
@@ -53,4 +48,9 @@
   color: var(--corPrimariaForte);
   font-size: clamp(2rem, 4vw, 2.8rem);
   line-height: 1;
+}
+
+.inicioIndicadorResumoValorCompacto {
+  font-size: clamp(1.75rem, 3.3vw, 2.35rem);
+  letter-spacing: -0.03em;
 }

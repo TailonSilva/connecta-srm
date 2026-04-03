@@ -20,8 +20,10 @@ import {
 import { filtrarProdutos } from '../../utilitarios/filtrarProdutos';
 import { converterPrecoParaNumero } from '../../utilitarios/normalizarPreco';
 import { obterPrimeiroCodigoDisponivel } from '../../utilitarios/obterPrimeiroCodigoDisponivel';
+import { normalizarFiltrosPorPadrao, useFiltrosPersistidos } from '../../utilitarios/useFiltrosPersistidos';
 import { ModalFiltros } from '../../componentes/comuns/modalFiltros';
 import { ModalProduto } from './modalProduto';
+import { ModalManualProdutos } from './modalManualProdutos';
 
 const filtrosIniciaisProdutos = {
   idGrupo: '',
@@ -32,7 +34,12 @@ const filtrosIniciaisProdutos = {
 
 export function PaginaProdutos({ usuarioLogado }) {
   const [pesquisa, definirPesquisa] = useState('');
-  const [filtros, definirFiltros] = useState(filtrosIniciaisProdutos);
+  const [filtros, definirFiltros] = useFiltrosPersistidos({
+    chave: 'paginaProdutos',
+    usuario: usuarioLogado,
+    filtrosPadrao: filtrosIniciaisProdutos,
+    normalizarFiltros: normalizarFiltrosProdutos
+  });
   const [produtos, definirProdutos] = useState([]);
   const [gruposProduto, definirGruposProduto] = useState([]);
   const [marcas, definirMarcas] = useState([]);
@@ -40,6 +47,7 @@ export function PaginaProdutos({ usuarioLogado }) {
   const [carregando, definirCarregando] = useState(true);
   const [mensagemErro, definirMensagemErro] = useState('');
   const [modalAberto, definirModalAberto] = useState(false);
+  const [modalManualAberto, definirModalManualAberto] = useState(false);
   const [modalFiltrosAberto, definirModalFiltrosAberto] = useState(false);
   const [produtoSelecionado, definirProdutoSelecionado] = useState(null);
   const [modoModalProduto, definirModoModalProduto] = useState('novo');
@@ -48,6 +56,26 @@ export function PaginaProdutos({ usuarioLogado }) {
   useEffect(() => {
     carregarDados();
   }, []);
+
+  useEffect(() => {
+    function tratarAtalhosProdutos(evento) {
+      if (evento.key !== 'F1') {
+        return;
+      }
+
+      evento.preventDefault();
+
+      if (!modalAberto && !modalManualAberto && !modalFiltrosAberto) {
+        definirModalManualAberto(true);
+      }
+    }
+
+    window.addEventListener('keydown', tratarAtalhosProdutos);
+
+    return () => {
+      window.removeEventListener('keydown', tratarAtalhosProdutos);
+    };
+  }, [modalAberto, modalManualAberto, modalFiltrosAberto]);
 
   async function carregarDados() {
     definirCarregando(true);
@@ -302,8 +330,22 @@ export function PaginaProdutos({ usuarioLogado }) {
         aoFechar={fecharModalProduto}
         aoSalvar={salvarProduto}
       />
+      <ModalManualProdutos
+        aberto={modalManualAberto}
+        aoFechar={() => definirModalManualAberto(false)}
+        produtos={produtosFiltrados}
+        gruposProduto={gruposProduto}
+        marcas={marcas}
+        unidadesMedida={unidadesMedida}
+        filtros={filtros}
+        usuarioLogado={usuarioLogado}
+      />
     </>
   );
+}
+
+function normalizarFiltrosProdutos(filtros, filtrosPadrao) {
+  return normalizarFiltrosPorPadrao(filtros, filtrosPadrao);
 }
 
 function enriquecerProdutos(produtos, grupos, marcas, unidades) {

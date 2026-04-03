@@ -44,9 +44,11 @@ import {
   listarTiposAgenda,
   listarTiposRecurso
 } from '../../servicos/agenda';
+import { normalizarFiltrosPorPadrao, useFiltrosPersistidos } from '../../utilitarios/useFiltrosPersistidos';
 import { ModalAtendimento } from '../atendimentos/modalAtendimento';
 import { ModalPedido } from '../pedidos/modalPedido';
 import { ModalAgendamento } from './modalAgendamento';
+import { ModalManualAgenda } from './modalManualAgenda';
 
 const minutosInicioPadrao = 8 * 60;
 const minutosFimPadrao = 18 * 60;
@@ -97,6 +99,7 @@ export function PaginaAgenda({ usuarioLogado }) {
   const [camposPedido, definirCamposPedido] = useState([]);
   const [empresa, definirEmpresa] = useState(null);
   const [modalAberto, definirModalAberto] = useState(false);
+  const [modalManualAberto, definirModalManualAberto] = useState(false);
   const [modalFiltrosAberto, definirModalFiltrosAberto] = useState(false);
   const [modalAtendimentoAberto, definirModalAtendimentoAberto] = useState(false);
   const [modalPedidoAberto, definirModalPedidoAberto] = useState(false);
@@ -112,8 +115,18 @@ export function PaginaAgenda({ usuarioLogado }) {
   const [agendamentoCopiado, definirAgendamentoCopiado] = useState(null);
   const [faixaSelecionada, definirFaixaSelecionada] = useState(null);
   const [arrastandoFaixa, definirArrastandoFaixa] = useState(null);
-  const [filtros, definirFiltros] = useState(() => criarFiltrosIniciaisAgenda(usuarioLogado));
   const temporizadorCliqueAgenda = useRef(null);
+  const usuarioSomenteConsultaConfiguracao = usuarioLogado?.tipo === 'Usuario padrao';
+  const filtrosIniciais = useMemo(
+    () => criarFiltrosIniciaisAgenda(usuarioLogado),
+    [usuarioLogado?.idUsuario]
+  );
+  const [filtros, definirFiltros] = useFiltrosPersistidos({
+    chave: 'paginaAgenda',
+    usuario: usuarioLogado,
+    filtrosPadrao: filtrosIniciais,
+    normalizarFiltros: normalizarFiltrosAgenda
+  });
 
   const agendamentosFiltrados = useMemo(
     () => filtrarAgendamentos(agendamentos, filtros),
@@ -145,19 +158,6 @@ export function PaginaAgenda({ usuarioLogado }) {
   useEffect(() => {
     carregarDados();
   }, []);
-
-  useEffect(() => {
-    definirFiltros((estadoAtual) => {
-      if (estadoAtual.idUsuario.length > 0 || !usuarioLogado?.idUsuario) {
-        return estadoAtual;
-      }
-
-      return {
-        ...estadoAtual,
-        idUsuario: [String(usuarioLogado.idUsuario)]
-      };
-    });
-  }, [usuarioLogado]);
 
   useEffect(() => {
     if (!arrastandoFaixa) {
@@ -209,7 +209,17 @@ export function PaginaAgenda({ usuarioLogado }) {
 
   useEffect(() => {
     function tratarAtalhosAgenda(evento) {
-      if (modalAberto || modalFiltrosAberto || modalAtendimentoAberto || confirmacaoAtendimentoAberta || evento.defaultPrevented) {
+      if (evento.key === 'F1') {
+        evento.preventDefault();
+
+        if (!modalAberto && !modalManualAberto && !modalFiltrosAberto && !modalAtendimentoAberto && !modalPedidoAberto && !confirmacaoAtendimentoAberta) {
+          definirModalManualAberto(true);
+        }
+
+        return;
+      }
+
+      if (modalAberto || modalManualAberto || modalFiltrosAberto || modalAtendimentoAberto || modalPedidoAberto || confirmacaoAtendimentoAberta || evento.defaultPrevented) {
         return;
       }
 
@@ -255,8 +265,10 @@ export function PaginaAgenda({ usuarioLogado }) {
     faixaSelecionada,
     idAgendamentoSelecionado,
     modalAberto,
+    modalManualAberto,
     modalAtendimentoAberto,
     modalFiltrosAberto,
+    modalPedidoAberto,
     confirmacaoAtendimentoAberta
   ]);
 
@@ -955,6 +967,18 @@ export function PaginaAgenda({ usuarioLogado }) {
         aoExcluir={excluirRegistroAgendamento}
       />
 
+      <ModalManualAgenda
+        aberto={modalManualAberto}
+        aoFechar={() => definirModalManualAberto(false)}
+        empresa={empresa}
+        tiposAgenda={tiposAgenda}
+        statusVisita={statusVisita}
+        locais={locais}
+        recursos={recursos}
+        filtros={filtros}
+        usuarioLogado={usuarioLogado}
+      />
+
       <ModalAtendimento
         aberto={modalAtendimentoAberto}
         atendimento={dadosIniciaisAtendimento}
@@ -985,6 +1009,7 @@ export function PaginaAgenda({ usuarioLogado }) {
         camposPedido={camposPedido}
         etapasPedido={etapasPedido}
         empresa={empresa}
+        somenteConsultaPrazos={usuarioSomenteConsultaConfiguracao}
         etapaOrcamentoAtualizadaExternamente={etapaOrcamentoAtualizadaExternamente}
         aoAtualizarStatusOrcamento={atualizarStatusOrcamentoPelaAgenda}
         aoAbrirPedido={abrirPedidoPelaAgenda}
@@ -1011,6 +1036,7 @@ export function PaginaAgenda({ usuarioLogado }) {
         empresa={empresa}
         usuarioLogado={usuarioLogado}
         modo="novo"
+        somenteConsultaPrazos={usuarioSomenteConsultaConfiguracao}
         aoFechar={fecharModalPedidoAgenda}
         aoSalvar={salvarPedidoPelaAgenda}
         aoSalvarPrazoPagamento={salvarPrazoPagamentoPelaAgenda}
@@ -1157,6 +1183,10 @@ export function PaginaAgenda({ usuarioLogado }) {
       />
     </>
   );
+}
+
+function normalizarFiltrosAgenda(filtros, filtrosPadrao) {
+  return normalizarFiltrosPorPadrao(filtros, filtrosPadrao);
 }
 
 function criarFiltrosIniciaisAgenda(usuarioLogado) {

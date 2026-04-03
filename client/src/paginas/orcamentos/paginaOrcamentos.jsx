@@ -30,7 +30,9 @@ import { listarEmpresas } from '../../servicos/empresa';
 import { listarProdutos } from '../../servicos/produtos';
 import { listarUsuarios } from '../../servicos/usuarios';
 import { normalizarPreco } from '../../utilitarios/normalizarPreco';
+import { normalizarFiltrosPorPadrao, useFiltrosPersistidos } from '../../utilitarios/useFiltrosPersistidos';
 import { ModalOrcamento } from './modalOrcamento';
+import { ModalManualOrcamentos } from './modalManualOrcamentos';
 import { ModalPedido } from '../pedidos/modalPedido';
 
 function criarFiltrosIniciaisOrcamentos(usuarioLogado, empresa = null) {
@@ -58,7 +60,6 @@ function criarFiltrosLimposOrcamentos(usuarioLogado, empresa = null) {
 
 export function PaginaOrcamentos({ usuarioLogado }) {
   const [pesquisa, definirPesquisa] = useState('');
-  const [filtros, definirFiltros] = useState(() => criarFiltrosIniciaisOrcamentos(usuarioLogado, null));
   const [orcamentos, definirOrcamentos] = useState([]);
   const [clientes, definirClientes] = useState([]);
   const [contatos, definirContatos] = useState([]);
@@ -76,6 +77,7 @@ export function PaginaOrcamentos({ usuarioLogado }) {
   const [carregando, definirCarregando] = useState(true);
   const [mensagemErro, definirMensagemErro] = useState('');
   const [modalAberto, definirModalAberto] = useState(false);
+  const [modalManualAberto, definirModalManualAberto] = useState(false);
   const [modalFiltrosAberto, definirModalFiltrosAberto] = useState(false);
   const [orcamentoSelecionado, definirOrcamentoSelecionado] = useState(null);
   const [orcamentoExclusaoPendente, definirOrcamentoExclusaoPendente] = useState(null);
@@ -87,15 +89,60 @@ export function PaginaOrcamentos({ usuarioLogado }) {
   const [modalPedidoAberto, definirModalPedidoAberto] = useState(false);
   const [modoModal, definirModoModal] = useState('novo');
   const usuarioSomenteVendedor = usuarioLogado?.tipo === 'Usuario padrao' && usuarioLogado?.idVendedor;
+  const usuarioSomenteConsultaConfiguracao = usuarioLogado?.tipo === 'Usuario padrao';
   const permitirExcluir = usuarioLogado?.tipo !== 'Usuario padrao';
-
-  useEffect(() => {
-    definirFiltros(criarFiltrosIniciaisOrcamentos(usuarioLogado, empresa));
-  }, [usuarioLogado?.idUsuario, usuarioLogado?.idVendedor, empresa?.etapasFiltroPadraoOrcamento]);
+  const filtrosIniciais = useMemo(
+    () => criarFiltrosIniciaisOrcamentos(usuarioLogado, empresa),
+    [usuarioLogado?.idUsuario, usuarioLogado?.idVendedor, empresa?.etapasFiltroPadraoOrcamento]
+  );
+  const [filtros, definirFiltros] = useFiltrosPersistidos({
+    chave: 'paginaOrcamentos',
+    usuario: usuarioLogado,
+    filtrosPadrao: filtrosIniciais,
+    normalizarFiltros: normalizarFiltrosOrcamentos
+  });
 
   useEffect(() => {
     carregarDados();
   }, [usuarioSomenteVendedor, usuarioLogado?.idVendedor]);
+
+  useEffect(() => {
+    function tratarAtalhosOrcamentos(evento) {
+      if (evento.key !== 'F1') {
+        return;
+      }
+
+      evento.preventDefault();
+
+      if (
+        !modalAberto
+        && !modalManualAberto
+        && !modalFiltrosAberto
+        && !modalPedidoAberto
+        && !orcamentoExclusaoPendente
+        && !alteracaoEtapaPendente
+        && !orcamentoPedidoPendente
+        && !orcamentoPedidoEmCriacao
+      ) {
+        definirModalManualAberto(true);
+      }
+    }
+
+    window.addEventListener('keydown', tratarAtalhosOrcamentos);
+
+    return () => {
+      window.removeEventListener('keydown', tratarAtalhosOrcamentos);
+    };
+  }, [
+    alteracaoEtapaPendente,
+    modalAberto,
+    modalManualAberto,
+    modalFiltrosAberto,
+    modalPedidoAberto,
+    orcamentoExclusaoPendente,
+    orcamentoPedidoEmCriacao,
+    orcamentoPedidoPendente
+  ]);
 
   async function carregarDados() {
     definirCarregando(true);
@@ -493,10 +540,6 @@ export function PaginaOrcamentos({ usuarioLogado }) {
     () => filtrarOrcamentos(orcamentos, pesquisa, filtros),
     [orcamentos, pesquisa, filtros]
   );
-  const filtrosIniciais = useMemo(
-    () => criarFiltrosIniciaisOrcamentos(usuarioLogado, empresa),
-    [usuarioLogado?.idUsuario, usuarioLogado?.idVendedor, empresa?.etapasFiltroPadraoOrcamento]
-  );
   const filtrosAtivos = JSON.stringify(filtros) !== JSON.stringify(filtrosIniciais);
 
   return (
@@ -626,9 +669,11 @@ export function PaginaOrcamentos({ usuarioLogado }) {
         motivosPerda={motivosPerda}
         produtos={produtos}
         camposOrcamento={camposOrcamento}
+        camposPedido={camposPedido}
         empresa={empresa}
         usuarioLogado={usuarioLogado}
         modo={modoModal}
+        somenteConsultaPrazos={usuarioSomenteConsultaConfiguracao}
         aoFechar={fecharModal}
         aoSalvar={salvarOrcamento}
         aoSalvarPrazoPagamento={salvarPrazoPagamento}
@@ -651,10 +696,23 @@ export function PaginaOrcamentos({ usuarioLogado }) {
         empresa={empresa}
         usuarioLogado={usuarioLogado}
         modo="novo"
+        somenteConsultaPrazos={usuarioSomenteConsultaConfiguracao}
         aoFechar={fecharModalPedido}
         aoSalvar={salvarPedido}
         aoSalvarPrazoPagamento={salvarPrazoPagamento}
         aoInativarPrazoPagamento={inativarPrazoPagamento}
+      />
+
+      <ModalManualOrcamentos
+        aberto={modalManualAberto}
+        aoFechar={() => definirModalManualAberto(false)}
+        orcamentos={orcamentosFiltrados}
+        etapasOrcamento={etapasOrcamento}
+        motivosPerda={motivosPerda}
+        prazosPagamento={prazosPagamento}
+        filtros={filtros}
+        empresa={empresa}
+        usuarioLogado={usuarioLogado}
       />
 
       {orcamentoExclusaoPendente ? (
@@ -891,6 +949,10 @@ function LinhaOrcamento({
       </td>
     </tr>
   );
+}
+
+function normalizarFiltrosOrcamentos(filtros, filtrosPadrao) {
+  return normalizarFiltrosPorPadrao(filtros, filtrosPadrao);
 }
 
 function filtrarOrcamentos(orcamentos, pesquisa, filtros) {
