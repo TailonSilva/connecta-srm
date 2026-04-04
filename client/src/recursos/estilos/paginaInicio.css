@@ -6,6 +6,16 @@
   overflow: visible;
 }
 
+.paginaInicioPainelHeroiCarteira .paginaInicioHeroiMetricas,
+.paginaInicioPainelHeroiCarteira .paginaInicioHeroiFaixas {
+  grid-template-columns: 1fr;
+}
+
+.paginaInicioPainelHeroiCarteira {
+  width: auto;
+  justify-self: stretch;
+}
+
 
 .paginaInicioGradeIndicadores {
   display: grid;
@@ -249,6 +259,64 @@
   grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
+.paginaInicioGraficoFunilEtapas {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.paginaInicioGraficoFunilItem {
+  position: relative;
+  display: grid;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid rgba(23, 145, 226, 0.1);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.88);
+  z-index: 1;
+}
+
+.paginaInicioGraficoFunilCabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.paginaInicioGraficoFunilLinha {
+  display: grid;
+  gap: 6px;
+}
+
+.paginaInicioGraficoFunilLegenda {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.paginaInicioGraficoFunilLegenda span {
+  color: var(--corTextoSuave);
+  font-size: 0.81rem;
+}
+
+.paginaInicioGraficoFunilLegenda strong {
+  color: var(--corTextoTitulo);
+  font-size: 0.88rem;
+}
+
+.paginaInicioGraficoFunilCabecalho .paginaInicioFluxoConversaoRotulo {
+  font-size: 0.9rem;
+}
+
+.paginaInicioGraficoFunilCabecalho strong {
+  font-size: 0.84rem;
+}
+
+.paginaInicioFluxoConversaoBarraValor {
+  height: 12px;
+}
+
 .paginaInicioConversaoValorLista {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
@@ -439,7 +507,9 @@
 .paginaInicioAgendaItem:hover .paginaInicioTooltipExplicacao,
 .paginaInicioAgendaItem:focus-visible .paginaInicioTooltipExplicacao,
 .paginaInicioRankingItem:hover .paginaInicioTooltipExplicacao,
-.paginaInicioRankingItem:focus-visible .paginaInicioTooltipExplicacao {
+.paginaInicioRankingItem:focus-visible .paginaInicioTooltipExplicacao,
+.paginaInicioGraficoFunilItem:hover .paginaInicioTooltipExplicacao,
+.paginaInicioGraficoFunilItem:focus-visible .paginaInicioTooltipExplicacao {
   opacity: 1;
   transform: translateY(0);
 }
@@ -456,6 +526,8 @@
 .paginaInicioAgendaItem:focus-visible,
 .paginaInicioRankingItem:hover,
 .paginaInicioRankingItem:focus-visible,
+.paginaInicioGraficoFunilItem:hover,
+.paginaInicioGraficoFunilItem:focus-visible,
 .paginaInicioFluxoConversaoItem:hover,
 .paginaInicioFluxoConversaoItem:focus-visible,
 .paginaInicioConversaoValorItem:hover,
@@ -490,6 +562,10 @@
   .paginaInicioFluxoConversao,
   .paginaInicioConversaoValorLista {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .paginaInicioGraficoFunilEtapas {
+    grid-template-columns: 1fr;
   }
 }
 

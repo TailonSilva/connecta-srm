@@ -21,15 +21,20 @@ export function criarResumoFunilVendas(etapasOrcamento, orcamentos) {
 
       const acumulado = orcamentosPorEtapa.get(idEtapa) || {
         quantidadeOrcamentos: 0,
+        quantidadeItens: 0,
         valorTotal: 0
       };
 
+      const quantidadeItensOrcamento = Array.isArray(orcamento?.itens)
+        ? orcamento.itens.reduce((total, item) => total + normalizarNumeroDecimal(item?.quantidade), 0)
+        : 0;
       const valorTotalOrcamento = Array.isArray(orcamento?.itens)
-        ? orcamento.itens.reduce((total, item) => total + (Number(item?.valorTotal) || 0), 0)
+        ? orcamento.itens.reduce((total, item) => total + normalizarNumeroDecimal(item?.valorTotal), 0)
         : 0;
 
       orcamentosPorEtapa.set(idEtapa, {
         quantidadeOrcamentos: acumulado.quantidadeOrcamentos + 1,
+        quantidadeItens: acumulado.quantidadeItens + quantidadeItensOrcamento,
         valorTotal: acumulado.valorTotal + valorTotalOrcamento
       });
     });
@@ -38,6 +43,7 @@ export function criarResumoFunilVendas(etapasOrcamento, orcamentos) {
   return etapasAtivasFunil.map((etapa) => {
     const acumulado = orcamentosPorEtapa.get(Number(etapa.idEtapaOrcamento)) || {
       quantidadeOrcamentos: 0,
+      quantidadeItens: 0,
       valorTotal: 0
     };
 
@@ -46,7 +52,25 @@ export function criarResumoFunilVendas(etapasOrcamento, orcamentos) {
       descricao: etapa.descricao,
       cor: etapa.cor,
       quantidadeOrcamentos: acumulado.quantidadeOrcamentos,
+      quantidadeItens: acumulado.quantidadeItens,
       valorTotal: acumulado.valorTotal
     };
   });
+}
+
+function normalizarNumeroDecimal(valor) {
+  const textoOriginal = String(valor ?? '').trim();
+
+  if (!textoOriginal) {
+    return 0;
+  }
+
+  const textoLimpo = textoOriginal
+    .replace(/[^\d,.-]/g, '')
+    .replace(/\.(?=\d{3}(?:\D|$))/g, '');
+  const texto = textoLimpo.includes(',')
+    ? textoLimpo.replace(',', '.')
+    : textoLimpo;
+  const numero = Number(texto);
+  return Number.isNaN(numero) ? 0 : numero;
 }
