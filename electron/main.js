@@ -1,4 +1,5 @@
 const { app, BrowserWindow, Menu, dialog, ipcMain } = require('electron');
+const { execFile } = require('node:child_process');
 const fs = require('node:fs');
 const http = require('node:http');
 const path = require('node:path');
@@ -162,7 +163,7 @@ function migrarBancoSeNecessario(diretorioDestino) {
   }
 }
 
-function criarBackupDadosAntesAtualizacao() {
+async function criarBackupDadosAntesAtualizacao() {
   const diretorioOrigem = obterDiretorioDadosPersistente();
   const caminhoBancoOrigem = path.join(diretorioOrigem, 'crm.sqlite');
 
@@ -175,10 +176,7 @@ function criarBackupDadosAntesAtualizacao() {
   const diretorioDestino = path.join(diretorioBackups, `pre-update-${timestamp}`);
 
   fs.mkdirSync(diretorioBackups, { recursive: true });
-  fs.cpSync(diretorioOrigem, diretorioDestino, {
-    recursive: true,
-    force: false
-  });
+  await prepararConteudoBackup(diretorioOrigem, diretorioDestino);
 
   console.log(`Backup de seguranca criado antes da atualizacao em ${diretorioDestino}.`);
   return diretorioDestino;
@@ -189,20 +187,105 @@ function montarNomeArquivoBackupBanco() {
   return `Connecta-CRM-backup-${timestamp}.sqlite`;
 }
 
+function montarNomeArquivoBackupZip() {
+  const agora = new Date();
+  const data = [
+    agora.getFullYear(),
+    String(agora.getMonth() + 1).padStart(2, '0'),
+    String(agora.getDate()).padStart(2, '0')
+  ].join('-');
+  const hora = [
+    String(agora.getHours()).padStart(2, '0'),
+    String(agora.getMinutes()).padStart(2, '0'),
+    String(agora.getSeconds()).padStart(2, '0')
+  ].join('-');
+
+  return `backup_${data}_${hora}.zip`;
+}
+
+function criarZipDiretorioWindows(diretorioOrigem, caminhoArquivoZip) {
+  return new Promise((resolve, reject) => {
+    const script = [
+      '$ErrorActionPreference = "Stop"',
+      'Add-Type -AssemblyName System.IO.Compression.FileSystem',
+      `$diretorioOrigem = [System.IO.Path]::GetFullPath('${diretorioOrigem.replace(/'/g, "''")}')`,
+      `$caminhoArquivoZip = [System.IO.Path]::GetFullPath('${caminhoArquivoZip.replace(/'/g, "''")}')`,
+      '[System.IO.Directory]::CreateDirectory([System.IO.Path]::GetDirectoryName($caminhoArquivoZip)) | Out-Null',
+      'if ([System.IO.File]::Exists($caminhoArquivoZip)) { [System.IO.File]::Delete($caminhoArquivoZip) }',
+      '[System.IO.Compression.ZipFile]::CreateFromDirectory($diretorioOrigem, $caminhoArquivoZip, [System.IO.Compression.CompressionLevel]::Optimal, $false)'
+    ].join('; ');
+
+    execFile('powershell.exe', ['-NoProfile', '-NonInteractive', '-Command', script], (erro) => {
+      if (erro) {
+        reject(erro);
+        return;
+      }
+
+      resolve();
+    });
+  });
+}
+
+function escaparLiteralSqlite(valor) {
+  return String(valor).replace(/'/g, "''");
+}
+
+function copiarDiretorioSemBanco(diretorioOrigem, diretorioDestino) {
+  fs.cpSync(diretorioOrigem, diretorioDestino, {
+    recursive: true,
+    force: true,
+    filter: (origem) => path.basename(origem) !== 'crm.sqlite'
+  });
+}
+
+function gerarCopiaConsistenteBanco(caminhoDestinoBanco) {
+  return new Promise((resolve, reject) => {
+    try {
+      const { banco } = require(path.join(__dirname, '..', 'server', 'configuracoes', 'banco.js'));
+      const caminhoDestinoNormalizado = path.resolve(caminhoDestinoBanco);
+      const sql = `VACUUM INTO '${escaparLiteralSqlite(caminhoDestinoNormalizado)}'`;
+
+      if (fs.existsSync(caminhoDestinoNormalizado)) {
+        fs.rmSync(caminhoDestinoNormalizado, { force: true });
+      }
+
+      banco.run(sql, (erro) => {
+        if (erro) {
+          reject(erro);
+          return;
+        }
+
+        resolve();
+      });
+    } catch (erro) {
+      reject(erro);
+    }
+  });
+}
+
+async function prepararConteudoBackup(diretorioOrigem, diretorioDestino) {
+  const caminhoBancoOrigem = path.join(diretorioOrigem, 'crm.sqlite');
+  const caminhoBancoDestino = path.join(diretorioDestino, 'crm.sqlite');
+
+  fs.rmSync(diretorioDestino, { recursive: true, force: true });
+  fs.mkdirSync(diretorioDestino, { recursive: true });
+  copiarDiretorioSemBanco(diretorioOrigem, diretorioDestino);
+
+  if (fs.existsSync(caminhoBancoOrigem)) {
+    await gerarCopiaConsistenteBanco(caminhoBancoDestino);
+  }
+}
+
 async function salvarBackupBancoManual() {
   const diretorioOrigem = obterDiretorioDadosPersistente();
   if (!fs.existsSync(diretorioOrigem)) {
     throw new Error('Nenhuma pasta de dados foi encontrada para gerar o backup.');
   }
 
-  const pathZip = require('node:path');
-  const { createWriteStream } = require('node:fs');
-  const archiver = require('archiver');
-
   const janelaBase = mainWindow && !mainWindow.isDestroyed() ? mainWindow : undefined;
   const respostaSalvar = await dialog.showSaveDialog(janelaBase, {
     title: 'Salvar backup completo dos dados',
-    defaultPath: path.join(app.getPath('documents'), `Connecta-CRM-backup-${new Date().toISOString().replace(/[.:]/g, '-')}.zip`),
+    defaultPath: path.join(app.getPath('documents'), montarNomeArquivoBackupZip()),
     filters: [
       { name: 'Backup ZIP', extensions: ['zip'] }
     ],
@@ -217,16 +300,20 @@ async function salvarBackupBancoManual() {
     };
   }
 
-  // Cria o arquivo zip com toda a pasta de dados
-  await new Promise((resolve, reject) => {
-    const saida = createWriteStream(respostaSalvar.filePath);
-    const zip = archiver('zip', { zlib: { level: 9 } });
-    saida.on('close', resolve);
-    zip.on('error', reject);
-    zip.pipe(saida);
-    zip.directory(diretorioOrigem, false);
-    zip.finalize();
-  });
+  const diretorioTemporario = path.join(
+    app.getPath('temp'),
+    `connecta-crm-backup-${Date.now()}`
+  );
+
+  try {
+    await prepararConteudoBackup(diretorioOrigem, diretorioTemporario);
+    await criarZipDiretorioWindows(diretorioTemporario, respostaSalvar.filePath);
+  } catch (erro) {
+    fs.rmSync(respostaSalvar.filePath, { force: true });
+    throw erro;
+  } finally {
+    fs.rmSync(diretorioTemporario, { recursive: true, force: true });
+  }
 
   return {
     sucesso: true,
@@ -388,7 +475,7 @@ function configurarAtualizacaoAutomatica() {
 
     if (!mainWindow || mainWindow.isDestroyed()) {
       try {
-        criarBackupDadosAntesAtualizacao();
+        await criarBackupDadosAntesAtualizacao();
       } catch (erro) {
         console.error('Falha ao criar backup antes de instalar a atualizacao:', erro);
       }
@@ -409,7 +496,7 @@ function configurarAtualizacaoAutomatica() {
 
     if (resposta.response === 0) {
       try {
-        criarBackupDadosAntesAtualizacao();
+        await criarBackupDadosAntesAtualizacao();
       } catch (erro) {
         console.error('Falha ao criar backup antes de instalar a atualizacao:', erro);
       }
