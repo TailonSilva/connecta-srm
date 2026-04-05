@@ -1,10 +1,99 @@
 const express = require('express');
 const { consultarTodos, consultarUm, executar } = require('../configuracoes/banco');
+const {
+  normalizarListaQuery,
+  adicionarFiltroIgual,
+  adicionarFiltroLista,
+  adicionarFiltroPeriodo,
+  montarWhere
+} = require('../utilitarios/filtrosSql');
 
 const rotaAgendamentos = express.Router();
 
-rotaAgendamentos.get('/', async (_requisicao, resposta) => {
+rotaAgendamentos.get('/', async (requisicao, resposta) => {
   try {
+    const clausulas = [];
+    const parametros = [];
+    const { query } = requisicao;
+
+    adicionarFiltroPeriodo(clausulas, parametros, 'agendamento.data', query.dataInicio, query.dataFim);
+    adicionarFiltroIgual(clausulas, parametros, 'agendamento.idCliente', query.idCliente, Number);
+    adicionarFiltroLista(clausulas, parametros, 'agendamento.idLocal', query.idLocal, Number);
+    adicionarFiltroLista(clausulas, parametros, 'cliente.idVendedor', query.idVendedor, Number);
+
+    const idsUsuarios = normalizarListaQuery(query.idUsuario)
+      .map(Number)
+      .filter((valor) => !Number.isNaN(valor));
+    idsUsuarios.forEach((idUsuario) => {
+      clausulas.push(`
+        EXISTS (
+          SELECT 1
+          FROM agendamentoUsuario
+          WHERE agendamentoUsuario.idAgendamento = agendamento.idAgendamento
+            AND agendamentoUsuario.idUsuario = ?
+        )
+      `);
+      parametros.push(idUsuario);
+    });
+
+    const idsRecursos = normalizarListaQuery(query.idRecurso)
+      .map(Number)
+      .filter((valor) => !Number.isNaN(valor));
+    idsRecursos.forEach((idRecurso) => {
+      clausulas.push(`
+        EXISTS (
+          SELECT 1
+          FROM agendamentoRecurso
+          WHERE agendamentoRecurso.idAgendamento = agendamento.idAgendamento
+            AND agendamentoRecurso.idRecurso = ?
+        )
+      `);
+      parametros.push(idRecurso);
+    });
+
+    const idsStatusVisita = normalizarListaQuery(query.idStatusVisita)
+      .map(Number)
+      .filter((valor) => !Number.isNaN(valor));
+    const escopoIdUsuario = Number(query.escopoIdUsuario);
+
+    if (idsStatusVisita.length > 0) {
+      const placeholders = idsStatusVisita.map(() => '?').join(', ');
+
+      if (!Number.isNaN(escopoIdUsuario) && escopoIdUsuario > 0) {
+        clausulas.push(`
+          COALESCE(
+            (
+              SELECT agendamentoStatusUsuario.idStatusVisita
+              FROM agendamentoStatusUsuario
+              WHERE agendamentoStatusUsuario.idAgendamento = agendamento.idAgendamento
+                AND agendamentoStatusUsuario.idUsuario = ?
+              LIMIT 1
+            ),
+            agendamento.idStatusVisita
+          ) IN (${placeholders})
+        `);
+        parametros.push(escopoIdUsuario, ...idsStatusVisita);
+      } else {
+        clausulas.push(`agendamento.idStatusVisita IN (${placeholders})`);
+        parametros.push(...idsStatusVisita);
+      }
+    }
+
+    if (!Number.isNaN(Number(query.escopoIdVendedor)) && !Number.isNaN(escopoIdUsuario) && Number(query.escopoIdVendedor) > 0 && escopoIdUsuario > 0) {
+      clausulas.push(`
+        (
+          cliente.idVendedor = ?
+          OR EXISTS (
+            SELECT 1
+            FROM agendamentoUsuario
+            WHERE agendamentoUsuario.idAgendamento = agendamento.idAgendamento
+              AND agendamentoUsuario.idUsuario = ?
+          )
+        )
+      `);
+      parametros.push(Number(query.escopoIdVendedor), escopoIdUsuario);
+    }
+
     const registros = await consultarTodos(`
       SELECT
         agendamento.*,
@@ -24,8 +113,10 @@ rotaAgendamentos.get('/', async (_requisicao, resposta) => {
           WHERE agendamentoStatusUsuario.idAgendamento = agendamento.idAgendamento
         ) AS statusUsuarios
       FROM agendamento
+      LEFT JOIN cliente ON cliente.idCliente = agendamento.idCliente
+      ${montarWhere(clausulas)}
       ORDER BY agendamento.idAgendamento DESC
-    `);
+    `, parametros);
 
     resposta.json(registros.map(normalizarAgendamentoRetornado));
   } catch (_erro) {
@@ -581,10 +672,23 @@ function normalizarAgendamentoRetornado(registro) {
 
   return {
     ...registro,
+    data: normalizarDataAgendamento(registro.data),
+    horaInicio: normalizarHorarioAgendamento(registro.horaInicio),
+    horaFim: normalizarHorarioAgendamento(registro.horaFim),
     idsRecursos,
     idsUsuarios,
     statusUsuarios: normalizarStatusUsuarios(registro.statusUsuarios)
   };
+}
+
+function normalizarDataAgendamento(valor) {
+  const texto = String(valor || '').trim();
+  return texto ? texto.slice(0, 10) : '';
+}
+
+function normalizarHorarioAgendamento(valor) {
+  const texto = String(valor || '').trim();
+  return texto ? texto.slice(0, 5) : '';
 }
 
 function normalizarStatusUsuarios(statusUsuarios) {

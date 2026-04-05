@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import '../../recursos/estilos/paginaInicio.css';
 import { CorpoPagina } from '../../componentes/layout/corpoPagina';
 import { listarAgendamentos } from '../../servicos/agenda';
-import { listarAtendimentos } from '../../servicos/atendimentos';
+import { listarAtendimentosGrid } from '../../servicos/atendimentos';
 import { listarClientes, listarVendedores } from '../../servicos/clientes';
 import {
   listarEtapasOrcamentoConfiguracao,
@@ -38,27 +38,54 @@ export function PaginaInicio({ usuarioLogado }) {
     definirMensagemErro('');
 
     try {
-      const [
-        clientes,
-        vendedores,
-        atendimentos,
-        agendamentos,
-        orcamentos,
-        pedidos,
-        etapasOrcamento,
-        etapasPedido,
-        empresas
-      ] = await Promise.all([
+      const recorteUsuarioPadrao = usuarioLogado?.tipo === 'Usuario padrao' && usuarioLogado?.idVendedor
+        ? {
+          escopoIdVendedor: usuarioLogado.idVendedor,
+          escopoIdUsuario: usuarioLogado.idUsuario
+        }
+        : {};
+      const hoje = new Date();
+      const dataInicioAgenda = dataInput(hoje);
+      const dataFimAgenda = dataInput(new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() + 7));
+      const resultados = await Promise.allSettled([
         listarClientes(),
         listarVendedores(),
-        listarAtendimentos(),
-        listarAgendamentos(),
-        listarOrcamentos(),
-        listarPedidos(),
+        listarAtendimentosGrid({
+          filtros: recorteUsuarioPadrao
+        }),
+        listarAgendamentos({
+          dataInicio: dataInicioAgenda,
+          dataFim: dataFimAgenda,
+          ...recorteUsuarioPadrao
+        }),
+        listarOrcamentos(recorteUsuarioPadrao),
+        listarPedidos(recorteUsuarioPadrao),
         listarEtapasOrcamentoConfiguracao(),
         listarEtapasPedidoConfiguracao(),
         listarEmpresas()
       ]);
+
+      const [
+        clientesResultado,
+        vendedoresResultado,
+        atendimentosResultado,
+        agendamentosResultado,
+        orcamentosResultado,
+        pedidosResultado,
+        etapasOrcamentoResultado,
+        etapasPedidoResultado,
+        empresasResultado
+      ] = resultados;
+
+      const clientes = clientesResultado.status === 'fulfilled' ? clientesResultado.value : [];
+      const vendedores = vendedoresResultado.status === 'fulfilled' ? vendedoresResultado.value : [];
+      const atendimentos = atendimentosResultado.status === 'fulfilled' ? atendimentosResultado.value : [];
+      const agendamentos = agendamentosResultado.status === 'fulfilled' ? agendamentosResultado.value : [];
+      const orcamentos = orcamentosResultado.status === 'fulfilled' ? orcamentosResultado.value : [];
+      const pedidos = pedidosResultado.status === 'fulfilled' ? pedidosResultado.value : [];
+      const etapasOrcamento = etapasOrcamentoResultado.status === 'fulfilled' ? etapasOrcamentoResultado.value : [];
+      const etapasPedido = etapasPedidoResultado.status === 'fulfilled' ? etapasPedidoResultado.value : [];
+      const empresas = empresasResultado.status === 'fulfilled' ? empresasResultado.value : [];
 
       definirPainelBruto({
         clientes,

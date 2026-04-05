@@ -1,8 +1,9 @@
 import { requisitarApi } from './api';
 import { requisitarListaApi } from './listas';
+import { montarParametrosConsulta } from '../utilitarios/montarParametrosConsulta';
 
-export function listarAgendamentos() {
-  return requisitarApi('/agendamentos');
+export function listarAgendamentos(parametros) {
+  return requisitarApi(`/agendamentos${montarParametrosConsulta(parametros)}`);
 }
 
 export function incluirAgendamento(payload) {

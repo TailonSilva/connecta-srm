@@ -6,7 +6,7 @@ import { ModalFiltros } from '../../componentes/comuns/modalFiltros';
 import { CorpoPagina } from '../../componentes/layout/corpoPagina';
 import {
   incluirAtendimento,
-  listarAtendimentos,
+  listarAtendimentosGrid,
   listarCanaisAtendimento,
   listarOrigensAtendimento
 } from '../../servicos/atendimentos';
@@ -50,7 +50,6 @@ import {
   normalizarListaFiltroPersistido,
   useFiltrosPersistidos
 } from '../../utilitarios/useFiltrosPersistidos';
-import { listaIncluiValorFiltro, normalizarValorComparacaoFiltro } from '../../utilitarios/compararValoresFiltro';
 import { registroEstaAtivo } from '../../utilitarios/statusRegistro';
 import { ModalAtendimento } from '../atendimentos/modalAtendimento';
 import { ModalPedido } from '../pedidos/modalPedido';
@@ -105,6 +104,7 @@ export function PaginaAgenda({ usuarioLogado }) {
   const [camposOrcamento, definirCamposOrcamento] = useState([]);
   const [camposPedido, definirCamposPedido] = useState([]);
   const [empresa, definirEmpresa] = useState(null);
+  const [contextoCarregado, definirContextoCarregado] = useState(false);
   const [modalAberto, definirModalAberto] = useState(false);
   const [modalManualAberto, definirModalManualAberto] = useState(false);
   const [modalFiltrosAberto, definirModalFiltrosAberto] = useState(false);
@@ -137,18 +137,14 @@ export function PaginaAgenda({ usuarioLogado }) {
     normalizarFiltros: normalizarFiltrosAgenda
   });
 
-  const agendamentosFiltrados = useMemo(
-    () => filtrarAgendamentos(agendamentos, filtros),
-    [agendamentos, filtros]
-  );
   const inicioSemana = useMemo(() => obterInicioSemana(dataBase), [dataBase]);
   const diasSemana = useMemo(
-    () => criarDiasSemana(inicioSemana, empresa, agendamentosFiltrados),
-    [inicioSemana, empresa, agendamentosFiltrados]
+    () => criarDiasSemana(inicioSemana, empresa, agendamentos),
+    [inicioSemana, empresa, agendamentos]
   );
   const faixaHorariosSemana = useMemo(
-    () => calcularFaixaHorariosSemana(agendamentosFiltrados, diasSemana, empresa),
-    [agendamentosFiltrados, diasSemana, empresa]
+    () => calcularFaixaHorariosSemana(agendamentos, diasSemana, empresa),
+    [agendamentos, diasSemana, empresa]
   );
   const horarios = useMemo(
     () => criarHorarios(faixaHorariosSemana.minutosInicio, faixaHorariosSemana.minutosFim),
@@ -167,6 +163,14 @@ export function PaginaAgenda({ usuarioLogado }) {
   useEffect(() => {
     carregarDados();
   }, []);
+
+  useEffect(() => {
+    if (!contextoCarregado) {
+      return;
+    }
+
+    carregarGradeAgenda();
+  }, [contextoCarregado, dataBase, usuarioLogado?.idUsuario, usuarioLogado?.idVendedor, JSON.stringify(filtros)]);
 
   useEffect(() => {
     if (!arrastandoFaixa) {
@@ -282,39 +286,21 @@ export function PaginaAgenda({ usuarioLogado }) {
   ]);
 
   async function carregarDados() {
-    const [
-      agendamentosCarregados,
-      locaisCarregados,
-      recursosCarregados,
-      tiposRecursoCarregados,
-      tiposAgendaCarregados,
-      statusVisitaCarregados,
-      atendimentosCarregados,
-      canaisAtendimentoCarregados,
-      origensAtendimentoCarregadas,
-      orcamentosCarregados,
-      metodosCarregados,
-      prazosCarregados,
-      etapasOrcamentoCarregadas,
-      etapasPedidoCarregadas,
-      motivosPerdaCarregados,
-      produtosCarregados,
-      camposOrcamentoCarregados,
-      camposPedidoCarregados,
-      clientesCarregados,
-      contatosCarregados,
-      vendedoresCarregados,
-      ramosCarregados,
-      usuariosCarregados,
-      empresasCarregadas
-    ] = await Promise.all([
-      listarAgendamentos(),
+    try {
+      const contexto = await carregarContexto();
+      await carregarGradeAgenda(contexto);
+    } catch (_erro) {
+      definirAgendamentos([]);
+    }
+  }
+
+  async function carregarContexto() {
+    const resultados = await Promise.allSettled([
       listarLocaisAgenda(),
       listarRecursosAgenda(),
       listarTiposRecurso(),
       listarTiposAgenda(),
       listarStatusVisita(),
-      listarAtendimentos(),
       listarCanaisAtendimento(),
       listarOrigensAtendimento(),
       listarOrcamentos(),
@@ -334,58 +320,179 @@ export function PaginaAgenda({ usuarioLogado }) {
       listarEmpresas()
     ]);
 
-    definirEmpresa(empresasCarregadas[0] || null);
+    const [
+      locaisResultado,
+      recursosResultado,
+      tiposRecursoResultado,
+      tiposAgendaResultado,
+      statusVisitaResultado,
+      canaisResultado,
+      origensResultado,
+      orcamentosResultado,
+      metodosResultado,
+      prazosResultado,
+      etapasOrcamentoResultado,
+      etapasPedidoResultado,
+      motivosPerdaResultado,
+      produtosResultado,
+      camposOrcamentoResultado,
+      camposPedidoResultado,
+      clientesResultado,
+      contatosResultado,
+      vendedoresResultado,
+      ramosResultado,
+      usuariosResultado,
+      empresasResultado
+    ] = resultados;
+
+    const locaisCarregados = locaisResultado.status === 'fulfilled' ? locaisResultado.value : [];
+    const recursosCarregados = recursosResultado.status === 'fulfilled' ? recursosResultado.value : [];
+    const tiposRecursoCarregados = tiposRecursoResultado.status === 'fulfilled' ? tiposRecursoResultado.value : [];
+    const tiposAgendaCarregados = tiposAgendaResultado.status === 'fulfilled' ? tiposAgendaResultado.value : [];
+    const statusVisitaCarregados = statusVisitaResultado.status === 'fulfilled' ? statusVisitaResultado.value : [];
+    const canaisAtendimentoCarregados = canaisResultado.status === 'fulfilled' ? canaisResultado.value : [];
+    const origensAtendimentoCarregadas = origensResultado.status === 'fulfilled' ? origensResultado.value : [];
+    const orcamentosCarregados = orcamentosResultado.status === 'fulfilled' ? orcamentosResultado.value : [];
+    const metodosCarregados = metodosResultado.status === 'fulfilled' ? metodosResultado.value : [];
+    const prazosCarregados = prazosResultado.status === 'fulfilled' ? prazosResultado.value : [];
+    const etapasOrcamentoCarregadas = etapasOrcamentoResultado.status === 'fulfilled' ? etapasOrcamentoResultado.value : [];
+    const etapasPedidoCarregadas = etapasPedidoResultado.status === 'fulfilled' ? etapasPedidoResultado.value : [];
+    const motivosPerdaCarregados = motivosPerdaResultado.status === 'fulfilled' ? motivosPerdaResultado.value : [];
+    const produtosCarregados = produtosResultado.status === 'fulfilled' ? produtosResultado.value : [];
+    const camposOrcamentoCarregados = camposOrcamentoResultado.status === 'fulfilled' ? camposOrcamentoResultado.value : [];
+    const camposPedidoCarregados = camposPedidoResultado.status === 'fulfilled' ? camposPedidoResultado.value : [];
+    const clientesCarregados = clientesResultado.status === 'fulfilled' ? clientesResultado.value : [];
+    const contatosCarregados = contatosResultado.status === 'fulfilled' ? contatosResultado.value : [];
+    const vendedoresCarregados = vendedoresResultado.status === 'fulfilled' ? vendedoresResultado.value : [];
+    const ramosCarregados = ramosResultado.status === 'fulfilled' ? ramosResultado.value : [];
+    const usuariosCarregados = usuariosResultado.status === 'fulfilled' ? usuariosResultado.value : [];
+    const empresasCarregadas = empresasResultado.status === 'fulfilled' ? empresasResultado.value : [];
+
+    const empresaCarregada = empresasCarregadas[0] || null;
+    const tiposAgendaAtivos = ordenarRegistrosPorOrdem(
+      tiposAgendaCarregados.filter((tipoAgenda) => registroEstaAtivo(tipoAgenda.status)),
+      'idTipoAgenda'
+    );
+    const statusVisitaAtivos = ordenarRegistrosPorOrdem(
+      statusVisitaCarregados.filter((status) => registroEstaAtivo(status.status)),
+      'idStatusVisita'
+    );
+    const clientesAtivos = clientesCarregados.filter((cliente) => registroEstaAtivo(cliente.status));
+    const contatosAtivos = contatosCarregados.filter((contato) => registroEstaAtivo(contato.status));
+    const vendedoresAtivos = vendedoresCarregados.filter((vendedor) => registroEstaAtivo(vendedor.status));
+    const usuariosAtivos = usuariosCarregados.filter((usuario) => registroEstaAtivo(usuario.ativo));
+    const canaisAtivos = canaisAtendimentoCarregados.filter((canal) => registroEstaAtivo(canal.status));
+    const origensAtivas = origensAtendimentoCarregadas.filter((origem) => registroEstaAtivo(origem.status));
+    const produtosAtivos = produtosCarregados.filter((produto) => registroEstaAtivo(produto.status));
+    const recursosEnriquecidos = enriquecerRecursos(recursosCarregados, tiposRecursoCarregados);
+    const prazosEnriquecidos = enriquecerPrazosPagamento(prazosCarregados, metodosCarregados);
+    const orcamentosAbertos = enriquecerOrcamentosAtendimento(
+      orcamentosCarregados,
+      clientesCarregados,
+      contatosCarregados,
+      usuariosCarregados,
+      vendedoresCarregados,
+      prazosCarregados.map((prazo) => ({
+        ...prazo,
+        descricaoFormatada: prazo.descricao || [prazo.prazo1, prazo.prazo2, prazo.prazo3, prazo.prazo4, prazo.prazo5, prazo.prazo6]
+          .filter((valor) => valor !== null && valor !== undefined && valor !== '')
+          .join(' / ')
+      })),
+      etapasOrcamentoCarregadas,
+      produtosCarregados
+    ).filter((orcamento) => orcamentoEstaAberto(orcamento));
+
+    definirEmpresa(empresaCarregada);
     definirLocais(locaisCarregados);
-    definirTiposAgenda(ordenarRegistrosPorOrdem(tiposAgendaCarregados.filter((tipoAgenda) => registroEstaAtivo(tipoAgenda.status)), 'idTipoAgenda'));
-    definirStatusVisita(ordenarRegistrosPorOrdem(statusVisitaCarregados.filter((status) => registroEstaAtivo(status.status)), 'idStatusVisita'));
-    definirClientes(clientesCarregados.filter((cliente) => registroEstaAtivo(cliente.status)));
-    definirContatos(contatosCarregados.filter((contato) => registroEstaAtivo(contato.status)));
-    definirVendedores(vendedoresCarregados.filter((vendedor) => registroEstaAtivo(vendedor.status)));
+    definirTiposAgenda(tiposAgendaAtivos);
+    definirStatusVisita(statusVisitaAtivos);
+    definirClientes(clientesAtivos);
+    definirContatos(contatosAtivos);
+    definirVendedores(vendedoresAtivos);
     definirRamosAtividade(ramosCarregados);
-    definirCanaisAtendimento(canaisAtendimentoCarregados.filter((canal) => registroEstaAtivo(canal.status)));
-    definirOrigensAtendimento(origensAtendimentoCarregadas.filter((origem) => registroEstaAtivo(origem.status)));
-    definirUsuarios(usuariosCarregados.filter((usuario) => registroEstaAtivo(usuario.ativo)));
+    definirCanaisAtendimento(canaisAtivos);
+    definirOrigensAtendimento(origensAtivas);
+    definirUsuarios(usuariosAtivos);
     definirMetodosPagamento(metodosCarregados);
-    definirPrazosPagamento(enriquecerPrazosPagamento(prazosCarregados, metodosCarregados));
+    definirPrazosPagamento(prazosEnriquecidos);
     definirEtapasOrcamento(etapasOrcamentoCarregadas);
     definirEtapasPedido(etapasPedidoCarregadas.map((etapa) => ({
       ...etapa,
       idEtapaPedido: etapa.idEtapaPedido ?? etapa.idEtapa
     })));
     definirMotivosPerda(motivosPerdaCarregados);
-    definirProdutos(produtosCarregados.filter((produto) => registroEstaAtivo(produto.status)));
+    definirProdutos(produtosAtivos);
     definirCamposOrcamento(camposOrcamentoCarregados);
     definirCamposPedido(camposPedidoCarregados);
-    definirOrcamentos(
-      enriquecerOrcamentosAtendimento(
-        orcamentosCarregados,
-        clientesCarregados,
-        contatosCarregados,
-        usuariosCarregados,
-        vendedoresCarregados,
-        prazosCarregados.map((prazo) => ({
-          ...prazo,
-          descricaoFormatada: prazo.descricao || [prazo.prazo1, prazo.prazo2, prazo.prazo3, prazo.prazo4, prazo.prazo5, prazo.prazo6]
-            .filter((valor) => valor !== null && valor !== undefined && valor !== '')
-            .join(' / ')
-        })),
-        etapasOrcamentoCarregadas,
-        produtosCarregados
-      ).filter((orcamento) => orcamentoEstaAberto(orcamento))
-    );
-    definirRecursos(enriquecerRecursos(recursosCarregados, tiposRecursoCarregados));
+    definirOrcamentos(orcamentosAbertos);
+    definirRecursos(recursosEnriquecidos);
+    definirContextoCarregado(true);
+
+    return {
+      locais: locaisCarregados,
+      recursos: recursosEnriquecidos,
+      tiposAgenda: tiposAgendaAtivos,
+      statusVisita: statusVisitaAtivos,
+      clientes: clientesAtivos,
+      contatos: contatosAtivos,
+      vendedores: vendedoresAtivos,
+      usuarios: usuariosAtivos
+    };
+  }
+
+  async function carregarGradeAgenda(contextoAtual = null) {
+    const dataInicioSemana = formatarDataIso(inicioSemana);
+    const dataFimSemana = formatarDataIso(adicionarDias(inicioSemana, 6));
+    const contexto = contextoAtual || {
+      locais,
+      recursos,
+      tiposAgenda,
+      statusVisita,
+      clientes,
+      contatos,
+      vendedores,
+      usuarios
+    };
+    const filtrosGrade = {
+      dataInicio: dataInicioSemana,
+      dataFim: dataFimSemana,
+      ...filtros,
+      ...(usuarioLogado?.tipo === 'Usuario padrao' && usuarioLogado?.idVendedor
+        ? {
+          escopoIdVendedor: usuarioLogado.idVendedor,
+          escopoIdUsuario: usuarioLogado.idUsuario
+        }
+        : {})
+    };
+
+    const [agendamentosCarregados, atendimentosCarregados] = await Promise.all([
+      listarAgendamentos(filtrosGrade),
+      listarAtendimentosGrid({
+        filtros: {
+          dataInicio: dataInicioSemana,
+          dataFim: dataFimSemana,
+          ...(usuarioLogado?.tipo === 'Usuario padrao' && usuarioLogado?.idVendedor
+            ? {
+              escopoIdVendedor: usuarioLogado.idVendedor,
+              escopoIdUsuario: usuarioLogado.idUsuario
+            }
+            : {})
+        }
+      })
+    ]);
+
     definirAgendamentos(distribuirAgendamentosPorConflito(enriquecerAgendamentos(
       agendamentosCarregados,
-      locaisCarregados,
-      recursosCarregados,
-      tiposRecursoCarregados,
-      tiposAgendaCarregados,
-      statusVisitaCarregados,
+      contexto.locais,
+      contexto.recursos,
+      [],
+      contexto.tiposAgenda,
+      contexto.statusVisita,
       atendimentosCarregados,
-      clientesCarregados,
-      contatosCarregados,
-      vendedoresCarregados,
-      usuariosCarregados,
+      contexto.clientes,
+      contexto.contatos,
+      contexto.vendedores,
+      contexto.usuarios,
       usuarioLogado
     )));
     definirIdAgendamentoSelecionado((estadoAtual) => {
@@ -910,7 +1017,7 @@ export function PaginaAgenda({ usuarioLogado }) {
                       <div className="linhaAgendaConteudo" style={estiloGradeAgenda}>
                     <div className="colunaHorarioAgenda etiquetaHorarioAgenda">{horario}</div>
                     {diasSemana.map((dia, indiceDia) => {
-                      const agendamentosCelula = agendamentosFiltrados.filter(
+                      const agendamentosCelula = agendamentos.filter(
                         (agendamento) => (
                           agendamento.data === dia.valor &&
                           obterHorarioLinhaAgendamento(agendamento.horaInicio) === horario
@@ -1515,7 +1622,7 @@ function enriquecerAgendamentos(
   const recursosPorId = new Map(
     recursos.map((recurso) => [
       recurso.idRecurso,
-      `${recurso.descricao} (${tiposPorId.get(recurso.idTipoRecurso) || 'Nao informado'})`
+      `${recurso.descricao} (${tiposPorId.get(recurso.idTipoRecurso) || recurso.nomeTipoRecurso || 'Nao informado'})`
     ])
   );
   const clientesPorId = new Map(
@@ -1936,52 +2043,6 @@ function celulaEstaNaFaixaSelecionada(faixaSelecionada, data, horario) {
   const minutosFim = converterHorarioParaMinutos(faixaSelecionada.horaFim);
 
   return minutosHorario >= minutosInicio && minutosHorario < minutosFim;
-}
-
-function filtrarAgendamentos(agendamentos, filtros) {
-  return agendamentos.filter((agendamento) => {
-    const idsUsuariosFiltro = Array.isArray(filtros.idUsuario) ? filtros.idUsuario.map(String) : [];
-    const idsUsuariosAgendamento = Array.isArray(agendamento.idsUsuarios)
-      ? agendamento.idsUsuarios.map(String)
-      : (agendamento.idUsuario ? [String(agendamento.idUsuario)] : []);
-
-    if (
-      idsUsuariosFiltro.length > 0 &&
-      !idsUsuariosFiltro.every((idUsuario) => idsUsuariosAgendamento.includes(idUsuario))
-    ) {
-      return false;
-    }
-
-    if (filtros.idCliente && normalizarValorComparacaoFiltro(agendamento.idCliente) !== normalizarValorComparacaoFiltro(filtros.idCliente)) {
-      return false;
-    }
-
-    if (!listaIncluiValorFiltro(filtros.idVendedor, agendamento.idVendedor)) {
-      return false;
-    }
-
-    if (!listaIncluiValorFiltro(filtros.idLocal, agendamento.idLocal)) {
-      return false;
-    }
-
-    const idsRecursosFiltro = Array.isArray(filtros.idRecurso) ? filtros.idRecurso.map(String) : [];
-    const idsRecursosAgendamento = Array.isArray(agendamento.idsRecursos)
-      ? agendamento.idsRecursos.map(String)
-      : (agendamento.idRecurso ? [String(agendamento.idRecurso)] : []);
-
-    if (
-      idsRecursosFiltro.length > 0 &&
-      !idsRecursosFiltro.every((idRecurso) => idsRecursosAgendamento.includes(idRecurso))
-    ) {
-      return false;
-    }
-
-    if (!listaIncluiValorFiltro(filtros.idStatusVisita, agendamento.idStatusVisita)) {
-      return false;
-    }
-
-    return true;
-  });
 }
 
 function deveOferecerGeracaoAtendimento(agendamento, usuarioLogado) {

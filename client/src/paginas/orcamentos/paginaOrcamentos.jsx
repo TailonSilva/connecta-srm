@@ -202,21 +202,7 @@ export function PaginaOrcamentos({ usuarioLogado }) {
     definirMensagemErro('');
 
     try {
-      const [
-        clientesCarregados,
-        contatosCarregados,
-        usuariosCarregados,
-        vendedoresCarregados,
-        metodosCarregados,
-        prazosCarregados,
-        etapasCarregadas,
-        motivosPerdaCarregados,
-        produtosCarregados,
-        camposCarregados,
-        camposPedidoCarregados,
-        etapasPedidoCarregadas,
-        empresasCarregadas
-      ] = await Promise.all([
+      const resultados = await Promise.allSettled([
         listarClientes(),
         listarContatos(),
         listarUsuarios(),
@@ -231,6 +217,36 @@ export function PaginaOrcamentos({ usuarioLogado }) {
         listarEtapasPedidoConfiguracao(),
         listarEmpresas()
       ]);
+
+      const [
+        clientesResultado,
+        contatosResultado,
+        usuariosResultado,
+        vendedoresResultado,
+        metodosResultado,
+        prazosResultado,
+        etapasResultado,
+        motivosPerdaResultado,
+        produtosResultado,
+        camposResultado,
+        camposPedidoResultado,
+        etapasPedidoResultado,
+        empresasResultado
+      ] = resultados;
+
+      const clientesCarregados = clientesResultado.status === 'fulfilled' ? clientesResultado.value : [];
+      const contatosCarregados = contatosResultado.status === 'fulfilled' ? contatosResultado.value : [];
+      const usuariosCarregados = usuariosResultado.status === 'fulfilled' ? usuariosResultado.value : [];
+      const vendedoresCarregados = vendedoresResultado.status === 'fulfilled' ? vendedoresResultado.value : [];
+      const metodosCarregados = metodosResultado.status === 'fulfilled' ? metodosResultado.value : [];
+      const prazosCarregados = prazosResultado.status === 'fulfilled' ? prazosResultado.value : [];
+      const etapasCarregadas = etapasResultado.status === 'fulfilled' ? etapasResultado.value : [];
+      const motivosPerdaCarregados = motivosPerdaResultado.status === 'fulfilled' ? motivosPerdaResultado.value : [];
+      const produtosCarregados = produtosResultado.status === 'fulfilled' ? produtosResultado.value : [];
+      const camposCarregados = camposResultado.status === 'fulfilled' ? camposResultado.value : [];
+      const camposPedidoCarregados = camposPedidoResultado.status === 'fulfilled' ? camposPedidoResultado.value : [];
+      const etapasPedidoCarregadas = etapasPedidoResultado.status === 'fulfilled' ? etapasPedidoResultado.value : [];
+      const empresasCarregadas = empresasResultado.status === 'fulfilled' ? empresasResultado.value : [];
 
       const clientesCarteira = usuarioSomenteVendedor
         ? clientesCarregados.filter((cliente) => cliente.idVendedor === usuarioLogado.idVendedor)
@@ -1461,32 +1477,34 @@ function enriquecerOrcamentos(
   motivosPerda = []
 ) {
   const clientesPorId = new Map(
-    clientes.map((cliente) => [cliente.idCliente, cliente])
+    clientes.map((cliente) => [String(cliente.idCliente), cliente])
   );
   const contatosPorId = new Map(
-    contatos.map((contato) => [contato.idContato, contato.nome])
+    contatos.map((contato) => [String(contato.idContato), contato.nome])
   );
   const usuariosPorId = new Map(
-    usuarios.map((usuario) => [usuario.idUsuario, usuario.nome])
+    usuarios.map((usuario) => [String(usuario.idUsuario), usuario.nome])
   );
   const vendedoresPorId = new Map(
-    vendedores.map((vendedor) => [vendedor.idVendedor, vendedor.nome])
+    vendedores.map((vendedor) => [String(vendedor.idVendedor), vendedor.nome])
   );
   const prazosPorId = new Map(
-    prazosPagamento.map((prazo) => [prazo.idPrazoPagamento, prazo])
+    prazosPagamento.map((prazo) => [String(prazo.idPrazoPagamento), prazo])
   );
   const etapasPorId = new Map(
-    etapasOrcamento.map((etapa) => [etapa.idEtapaOrcamento, etapa])
+    etapasOrcamento.map((etapa) => [String(etapa.idEtapaOrcamento), etapa])
   );
   const produtosPorId = new Map(
-    produtos.map((produto) => [produto.idProduto, produto])
+    produtos.map((produto) => [String(produto.idProduto), produto])
   );
   const motivosPorId = new Map(
-    motivosPerda.map((motivo) => [motivo.idMotivo, motivo.descricao])
+    motivosPerda.map((motivo) => [String(motivo.idMotivo), motivo.descricao])
   );
 
   return orcamentos.map((orcamento) => {
-    const cliente = clientesPorId.get(orcamento.idCliente);
+    const cliente = clientesPorId.get(String(orcamento.idCliente));
+    const prazo = prazosPorId.get(String(orcamento.idPrazoPagamento));
+    const etapa = etapasPorId.get(String(orcamento.idEtapaOrcamento));
     const totalOrcamento = Array.isArray(orcamento.itens)
       ? orcamento.itens.reduce((total, item) => total + (Number(item.valorTotal) || 0), 0)
       : 0;
@@ -1495,21 +1513,45 @@ function enriquecerOrcamentos(
       ...orcamento,
       itens: Array.isArray(orcamento.itens) ? orcamento.itens.map((item) => ({
         ...item,
-        nomeProduto: obterValorGrid(produtosPorId.get(item.idProduto)?.descricao)
+        nomeProduto: obterValorGrid(
+          item.nomeProduto || produtosPorId.get(String(item.idProduto))?.descricao
+        )
       })) : [],
-      nomeCliente: obterValorGrid(cliente?.nomeFantasia || cliente?.razaoSocial),
-      nomeContato: obterValorGrid(contatosPorId.get(orcamento.idContato)),
+      nomeCliente: obterValorGrid(
+        orcamento.nomeCliente || cliente?.nomeFantasia || cliente?.razaoSocial
+      ),
+      nomeContato: obterValorGrid(
+        orcamento.nomeContato || contatosPorId.get(String(orcamento.idContato))
+      ),
       idVendedorCliente: cliente?.idVendedor || null,
-      nomeVendedorCliente: obterValorGrid(vendedoresPorId.get(cliente?.idVendedor)),
-      nomeUsuario: obterValorGrid(usuariosPorId.get(orcamento.idUsuario)),
-      nomeVendedor: obterValorGrid(vendedoresPorId.get(orcamento.idVendedor)),
-      nomeMetodoPagamento: obterValorGrid(prazosPorId.get(orcamento.idPrazoPagamento)?.nomeMetodoPagamento),
-      nomePrazoPagamento: obterValorGrid(prazosPorId.get(orcamento.idPrazoPagamento)?.descricaoFormatada),
-      nomePrazoPagamentoDias: obterValorGrid(prazosPorId.get(orcamento.idPrazoPagamento)?.descricaoDias),
-      nomeEtapaOrcamento: obterValorGrid(etapasPorId.get(orcamento.idEtapaOrcamento)?.descricao),
-      nomeMotivoPerda: obterValorGrid(motivosPorId.get(orcamento.idMotivoPerda)),
-      corEtapaOrcamento: etapasPorId.get(orcamento.idEtapaOrcamento)?.cor || '',
-      obrigarMotivoPerdaEtapa: Boolean(etapasPorId.get(orcamento.idEtapaOrcamento)?.obrigarMotivoPerda),
+      nomeVendedorCliente: obterValorGrid(
+        orcamento.nomeVendedorCliente || vendedoresPorId.get(String(cliente?.idVendedor))
+      ),
+      nomeUsuario: obterValorGrid(
+        orcamento.nomeUsuario || usuariosPorId.get(String(orcamento.idUsuario))
+      ),
+      nomeVendedor: obterValorGrid(
+        orcamento.nomeVendedor || vendedoresPorId.get(String(orcamento.idVendedor))
+      ),
+      nomeMetodoPagamento: obterValorGrid(
+        orcamento.nomeMetodoPagamento || prazo?.nomeMetodoPagamento
+      ),
+      nomePrazoPagamento: obterValorGrid(
+        orcamento.nomePrazoPagamento || prazo?.descricaoFormatada
+      ),
+      nomePrazoPagamentoDias: obterValorGrid(
+        orcamento.nomePrazoPagamentoDias || prazo?.descricaoDias
+      ),
+      nomeEtapaOrcamento: obterValorGrid(
+        orcamento.nomeEtapaOrcamento || etapa?.descricao
+      ),
+      nomeMotivoPerda: obterValorGrid(
+        orcamento.nomeMotivoPerda || motivosPorId.get(String(orcamento.idMotivoPerda))
+      ),
+      corEtapaOrcamento: orcamento.corEtapaOrcamento || etapa?.cor || '',
+      obrigarMotivoPerdaEtapa: Boolean(
+        orcamento.obrigarMotivoPerdaEtapa ?? etapa?.obrigarMotivoPerda
+      ),
       totalOrcamento
     };
   });

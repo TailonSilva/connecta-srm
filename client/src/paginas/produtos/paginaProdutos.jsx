@@ -111,18 +111,28 @@ export function PaginaProdutos({ usuarioLogado }) {
     definirMensagemErro('');
 
     try {
-      const [empresasCarregadas, gruposCarregados, marcasCarregadas, unidadesCarregadas] = await Promise.all([
+      const resultados = await Promise.allSettled([
         listarEmpresas(),
-        listarGruposProduto(),
-        listarMarcas(),
-        listarUnidadesMedida()
+        listarGruposProduto({ incluirInativos: true }),
+        listarMarcas({ incluirInativos: true }),
+        listarUnidadesMedida({ incluirInativos: true })
       ]);
-      definirEmpresa(empresasCarregadas[0] || null);
-      definirGruposProduto(gruposCarregados);
-      definirMarcas(marcasCarregadas);
-      definirUnidadesMedida(unidadesCarregadas);
-    } catch (erro) {
-      definirMensagemErro('Nao foi possivel carregar os produtos.');
+
+      const [
+        empresasResultado,
+        gruposResultado,
+        marcasResultado,
+        unidadesResultado
+      ] = resultados;
+
+      definirEmpresa(
+        empresasResultado.status === 'fulfilled'
+          ? (empresasResultado.value[0] || null)
+          : null
+      );
+      definirGruposProduto(gruposResultado.status === 'fulfilled' ? gruposResultado.value : []);
+      definirMarcas(marcasResultado.status === 'fulfilled' ? marcasResultado.value : []);
+      definirUnidadesMedida(unidadesResultado.status === 'fulfilled' ? unidadesResultado.value : []);
     } finally {
       definirCarregandoContexto(false);
     }

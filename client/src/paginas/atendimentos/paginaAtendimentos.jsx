@@ -181,25 +181,7 @@ export function PaginaAtendimentos({ usuarioLogado }) {
     definirMensagemErro('');
 
     try {
-      const [
-        clientesCarregados,
-        contatosCarregados,
-        usuariosCarregados,
-        vendedoresCarregados,
-        orcamentosCarregados,
-        ramosCarregados,
-        canaisCarregados,
-        origensCarregadas,
-        metodosCarregados,
-        prazosCarregados,
-        etapasOrcamentoCarregadas,
-        etapasPedidoCarregadas,
-        motivosPerdaCarregados,
-        produtosCarregados,
-        camposOrcamentoCarregados,
-        camposPedidoCarregados,
-        empresasCarregadas
-      ] = await Promise.all([
+      const resultados = await Promise.allSettled([
         listarClientes(),
         listarContatos(),
         listarUsuarios(),
@@ -218,6 +200,44 @@ export function PaginaAtendimentos({ usuarioLogado }) {
         listarCamposPedidoConfiguracao(),
         listarEmpresas()
       ]);
+
+      const [
+        clientesResultado,
+        contatosResultado,
+        usuariosResultado,
+        vendedoresResultado,
+        orcamentosResultado,
+        ramosResultado,
+        canaisResultado,
+        origensResultado,
+        metodosResultado,
+        prazosResultado,
+        etapasOrcamentoResultado,
+        etapasPedidoResultado,
+        motivosPerdaResultado,
+        produtosResultado,
+        camposOrcamentoResultado,
+        camposPedidoResultado,
+        empresasResultado
+      ] = resultados;
+
+      const clientesCarregados = clientesResultado.status === 'fulfilled' ? clientesResultado.value : [];
+      const contatosCarregados = contatosResultado.status === 'fulfilled' ? contatosResultado.value : [];
+      const usuariosCarregados = usuariosResultado.status === 'fulfilled' ? usuariosResultado.value : [];
+      const vendedoresCarregados = vendedoresResultado.status === 'fulfilled' ? vendedoresResultado.value : [];
+      const orcamentosCarregados = orcamentosResultado.status === 'fulfilled' ? orcamentosResultado.value : [];
+      const ramosCarregados = ramosResultado.status === 'fulfilled' ? ramosResultado.value : [];
+      const canaisCarregados = canaisResultado.status === 'fulfilled' ? canaisResultado.value : [];
+      const origensCarregadas = origensResultado.status === 'fulfilled' ? origensResultado.value : [];
+      const metodosCarregados = metodosResultado.status === 'fulfilled' ? metodosResultado.value : [];
+      const prazosCarregados = prazosResultado.status === 'fulfilled' ? prazosResultado.value : [];
+      const etapasOrcamentoCarregadas = etapasOrcamentoResultado.status === 'fulfilled' ? etapasOrcamentoResultado.value : [];
+      const etapasPedidoCarregadas = etapasPedidoResultado.status === 'fulfilled' ? etapasPedidoResultado.value : [];
+      const motivosPerdaCarregados = motivosPerdaResultado.status === 'fulfilled' ? motivosPerdaResultado.value : [];
+      const produtosCarregados = produtosResultado.status === 'fulfilled' ? produtosResultado.value : [];
+      const camposOrcamentoCarregados = camposOrcamentoResultado.status === 'fulfilled' ? camposOrcamentoResultado.value : [];
+      const camposPedidoCarregados = camposPedidoResultado.status === 'fulfilled' ? camposPedidoResultado.value : [];
+      const empresasCarregadas = empresasResultado.status === 'fulfilled' ? empresasResultado.value : [];
 
       const clientesCarteira = usuarioSomenteVendedor
         ? clientesCarregados.filter((cliente) => cliente.idVendedor === usuarioLogado.idVendedor)

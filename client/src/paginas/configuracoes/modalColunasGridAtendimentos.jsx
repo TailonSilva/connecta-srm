@@ -65,6 +65,7 @@ export function ModalColunasGridAtendimentos({
   const totalColunasUtilizadas = colunasOrdenadas
     .filter((coluna) => coluna.visivel)
     .reduce((total, coluna) => total + Number(coluna.span || 0), 0);
+  const colunaEditadaAtual = colunasOrdenadas.find((coluna) => coluna.id === colunaEmEdicao) || null;
 
   if (!aberto) {
     return null;
@@ -95,7 +96,7 @@ export function ModalColunasGridAtendimentos({
     definirColunaEmEdicao(coluna.id);
     definirFormularioEdicao({
       ordem: coluna.ordem || obterMaiorOrdem(colunasOrdenadas) + 1,
-      span: coluna.span || 1
+      span: coluna.spanFixo || coluna.span || 1
     });
   }
 
@@ -124,7 +125,7 @@ export function ModalColunasGridAtendimentos({
 
         return {
           ...coluna,
-          span: normalizarSpan(formularioEdicao.span, coluna.spanPadrao || 1),
+          span: normalizarSpan(formularioEdicao.span, coluna.spanFixo || coluna.spanPadrao || 1),
           ordem: coluna.visivel || coluna.obrigatoria
             ? normalizarNumeroInteiro(formularioEdicao.ordem, coluna.ordem || 1)
             : null
@@ -175,7 +176,7 @@ export function ModalColunasGridAtendimentos({
           id: coluna.id,
           visivel: coluna.obrigatoria ? true : Boolean(coluna.visivel),
           ordem: coluna.visivel || coluna.obrigatoria ? coluna.ordem : null,
-          span: normalizarSpan(coluna.span, coluna.spanPadrao || 1)
+          span: normalizarSpan(coluna.span, coluna.spanFixo || coluna.spanPadrao || 1)
         }))
       });
     } catch (erro) {
@@ -327,6 +328,7 @@ export function ModalColunasGridAtendimentos({
                     min="1"
                     max={String(TOTAL_COLUNAS_GRID_ATENDIMENTOS)}
                     value={formularioEdicao.span}
+                    disabled={Boolean(colunaEditadaAtual?.spanFixo)}
                     onChange={(evento) => definirFormularioEdicao((estadoAtual) => ({
                       ...estadoAtual,
                       span: evento.target.value

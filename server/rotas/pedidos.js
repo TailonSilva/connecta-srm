@@ -48,9 +48,15 @@ rotaPedidos.get('/', async (requisicao, resposta) => {
     adicionarFiltroPeriodo(clausulas, parametros, 'pedido.dataInclusao', query.dataInclusaoInicio, query.dataInclusaoFim);
     adicionarFiltroPeriodo(clausulas, parametros, 'pedido.dataEntrega', query.dataEntregaInicio, query.dataEntregaFim);
 
+    if (query.escopoIdVendedor && query.escopoIdUsuario) {
+      clausulas.push('(cliente.idVendedor = ? OR pedido.idUsuario = ?)');
+      parametros.push(Number(query.escopoIdVendedor), Number(query.escopoIdUsuario));
+    }
+
     const registros = await consultarTodos(`
       SELECT pedido.idPedido
       FROM pedido
+      LEFT JOIN cliente ON cliente.idCliente = pedido.idCliente
       ${montarWhere(clausulas)}
       ORDER BY pedido.idPedido DESC
     `, parametros);

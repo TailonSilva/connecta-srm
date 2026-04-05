@@ -86,8 +86,8 @@ export function ModalHistoricoVendasCadastro({
                 {exibirClienteNosItens ? <th className="colunaHistoricoCliente">Cliente</th> : null}
                 {exibirProdutoNosItens ? <th className="colunaHistoricoReferencia">Referencia</th> : null}
                 {exibirProdutoNosItens ? <th className="colunaHistoricoDescricao">Descricao</th> : null}
-                <th className="colunaHistoricoValor">Valor</th>
-                <th className="colunaHistoricoQuantidade">Quantidade</th>
+                <th className="colunaHistoricoValor">VALOR UN</th>
+                <th className="colunaHistoricoQuantidade">QTD</th>
                 <th className="colunaHistoricoValorTotal">Valor total</th>
                 {exibirAcaoItens ? <th className="cabecalhoAcoesContato">Acoes</th> : null}
               </tr>

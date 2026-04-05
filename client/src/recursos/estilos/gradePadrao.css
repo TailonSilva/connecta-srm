@@ -124,6 +124,7 @@
 .tabelaGradePadrao .colunaGradeStatus {
   width: 1%;
   white-space: nowrap;
+  text-align: center;
 }
 
 .tabelaGradePadrao .colunaGradeAcoes {

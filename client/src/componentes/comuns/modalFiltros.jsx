@@ -178,6 +178,25 @@ export function ModalFiltros({
                   disabled={campo.disabled}
                   aoAlterar={(valores) => alternarCampoMultiploSubstituir(campo.name, valores)}
                 />
+              ) : campo.type === 'busca-modal' ? (
+                <div key={campo.name} className="campoFormulario">
+                  <label htmlFor={campo.name}>{campo.label}</label>
+                  <div className={`campoSelectComAcao ${campo.acaoExtra ? 'temAcao' : ''}`.trim()}>
+                    <Botao
+                      id={campo.name}
+                      variante="secundario"
+                      type="button"
+                      className="botaoFiltroPeriodo"
+                      disabled={campo.disabled}
+                      onClick={campo.onClick}
+                    >
+                      {typeof campo.obterResumo === 'function'
+                        ? campo.obterResumo(formulario)
+                        : (formulario[campo.name] || campo.placeholder || 'Selecionar')}
+                    </Botao>
+                    {campo.acaoExtra ? <div className="acoesCampoSelect">{campo.acaoExtra}</div> : null}
+                  </div>
+                </div>
               ) : campo.type === 'date-filters-modal' || campo.type === 'date-range-modal' ? (
                 <div key={campo.name} className="campoFormulario campoFormularioIntegral">
                   <label htmlFor={campo.name}>{campo.label}</label>

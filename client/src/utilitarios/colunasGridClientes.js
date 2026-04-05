@@ -16,7 +16,8 @@ export const colunasGridClientes = [
     classe: 'colunaGradeCodigo',
     obrigatoria: false,
     ordemPadrao: 2,
-    spanPadrao: 2,
+    spanPadrao: 1,
+    spanFixo: 1,
     visivelPadrao: true
   },
   {
@@ -25,7 +26,8 @@ export const colunasGridClientes = [
     classe: 'colunaGradeCodigo',
     obrigatoria: false,
     ordemPadrao: 3,
-    spanPadrao: 2,
+    spanPadrao: 1,
+    spanFixo: 1,
     visivelPadrao: false
   },
   {
@@ -34,7 +36,8 @@ export const colunasGridClientes = [
     classe: 'colunaGradeCodigo',
     obrigatoria: false,
     ordemPadrao: 4,
-    spanPadrao: 2,
+    spanPadrao: 1,
+    spanFixo: 1,
     visivelPadrao: false
   },
   {
@@ -260,6 +263,7 @@ export const colunasGridClientes = [
     obrigatoria: false,
     ordemPadrao: 29,
     spanPadrao: 1,
+    spanFixo: 1,
     visivelPadrao: true
   },
   {
@@ -268,7 +272,8 @@ export const colunasGridClientes = [
     classe: 'colunaGradeAcoes',
     obrigatoria: true,
     ordemPadrao: 30,
-    spanPadrao: 1,
+    spanPadrao: 2,
+    spanFixo: 2,
     visivelPadrao: true
   }
 ];
@@ -296,7 +301,7 @@ export function normalizarConfiguracoesColunasGridClientes(valor) {
     const colunaBase = mapaColunasGridClientes.get(id);
     const visivel = item.visivel === undefined ? true : Boolean(item.visivel);
     const ordem = normalizarNumeroInteiro(item.ordem, indice + 1);
-    const span = normalizarSpanColuna(item.span, colunaBase?.spanPadrao || 1);
+    const span = normalizarSpanColuna(item.span, colunaBase?.spanPadrao || 1, colunaBase?.spanFixo);
     const configuracaoExistente = configuracoesPorId.get(id);
 
     configuracoesPorId.set(id, {
@@ -316,7 +321,7 @@ export function normalizarConfiguracoesColunasGridClientes(valor) {
       ordem: coluna.obrigatoria || (configuracao?.visivel ?? coluna.visivelPadrao)
         ? normalizarNumeroInteiro(configuracao?.ordem, coluna.ordemPadrao || (indice + 1))
         : null,
-      span: normalizarSpanColuna(configuracao?.span, coluna.spanPadrao || 1)
+      span: normalizarSpanColuna(configuracao?.span, coluna.spanPadrao || 1, coluna.spanFixo)
     };
   });
 
@@ -463,7 +468,11 @@ function normalizarNumeroInteiro(valor, valorPadrao = 1) {
   return Number.isFinite(numero) && numero > 0 ? numero : valorPadrao;
 }
 
-function normalizarSpanColuna(valor, valorPadrao = 1) {
+function normalizarSpanColuna(valor, valorPadrao = 1, valorFixo = null) {
+  if (Number.isFinite(Number(valorFixo)) && Number(valorFixo) > 0) {
+    return Number(valorFixo);
+  }
+
   const numero = normalizarNumeroInteiro(valor, valorPadrao);
   return Math.min(TOTAL_COLUNAS_GRID_CLIENTES, Math.max(1, numero));
 }

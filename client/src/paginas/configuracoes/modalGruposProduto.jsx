@@ -100,13 +100,17 @@ export function ModalGruposProduto({
     definirCarregandoAuxiliares(true);
 
     try {
-      const [tamanhosCarregados, relacoesCarregadas] = await Promise.all([
+      const [tamanhosResultado, relacoesResultado] = await Promise.allSettled([
         listarTamanhosConfiguracao({ incluirInativos: true }),
         listarGruposProdutoTamanhosConfiguracao({ incluirInativos: true })
       ]);
 
-      definirTamanhos(tamanhosCarregados);
-      definirRelacoesGrupoTamanho(relacoesCarregadas);
+      definirTamanhos(tamanhosResultado.status === 'fulfilled' ? tamanhosResultado.value : []);
+      definirRelacoesGrupoTamanho(relacoesResultado.status === 'fulfilled' ? relacoesResultado.value : []);
+
+      if (tamanhosResultado.status !== 'fulfilled' && relacoesResultado.status !== 'fulfilled') {
+        throw new Error('Nao foi possivel carregar os tamanhos do grupo.');
+      }
     } catch (erro) {
       definirMensagemErro(erro.message || 'Nao foi possivel carregar os tamanhos do grupo.');
     } finally {

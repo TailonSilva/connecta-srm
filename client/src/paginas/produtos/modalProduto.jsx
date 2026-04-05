@@ -119,16 +119,7 @@ export function ModalProduto({
       definirMensagemErroPedidos('');
 
       try {
-        const [
-          pedidosCarregados,
-          clientesCarregados,
-          contatosCarregados,
-          usuariosCarregados,
-          vendedoresCarregados,
-          prazosCarregados,
-          etapasCarregadas,
-          empresasCarregadas
-        ] = await Promise.all([
+        const resultados = await Promise.allSettled([
           listarPedidos(),
           listarClientes(),
           listarContatos(),
@@ -142,6 +133,26 @@ export function ModalProduto({
         if (cancelado) {
           return;
         }
+
+        const [
+          pedidosResultado,
+          clientesResultado,
+          contatosResultado,
+          usuariosResultado,
+          vendedoresResultado,
+          prazosResultado,
+          etapasResultado,
+          empresasResultado
+        ] = resultados;
+
+        const pedidosCarregados = pedidosResultado.status === 'fulfilled' ? pedidosResultado.value : [];
+        const clientesCarregados = clientesResultado.status === 'fulfilled' ? clientesResultado.value : [];
+        const contatosCarregados = contatosResultado.status === 'fulfilled' ? contatosResultado.value : [];
+        const usuariosCarregados = usuariosResultado.status === 'fulfilled' ? usuariosResultado.value : [];
+        const vendedoresCarregados = vendedoresResultado.status === 'fulfilled' ? vendedoresResultado.value : [];
+        const prazosCarregados = prazosResultado.status === 'fulfilled' ? prazosResultado.value : [];
+        const etapasCarregadas = etapasResultado.status === 'fulfilled' ? etapasResultado.value : [];
+        const empresasCarregadas = empresasResultado.status === 'fulfilled' ? empresasResultado.value : [];
 
         definirClientesPedidos(clientesCarregados);
         definirContatosPedidos(contatosCarregados);

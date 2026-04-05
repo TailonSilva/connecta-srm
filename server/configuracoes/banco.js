@@ -1652,122 +1652,6 @@ banco.serialize(() => {
   `);
 
   banco.get(
-    'SELECT COUNT(*) AS total FROM etapaOrcamento',
-    (_erroConsulta, resultado) => {
-      if ((resultado?.total || 0) > 0) {
-        return;
-      }
-
-      const etapasPadrao = [
-        { descricao: 'Lead recebido', cor: '#D9EAF7', ordem: 1 },
-        { descricao: 'Contato inicial', cor: '#CFE5FF', ordem: 2 },
-        { descricao: 'Qualificacao', cor: '#BFE3D0', ordem: 3 },
-        { descricao: 'Apresentacao da proposta', cor: '#FFE2A8', ordem: 4 },
-        { descricao: 'Negociacao', cor: '#FFC98F', ordem: 5 },
-        { descricao: 'Fechado', cor: '#A7E1B8', ordem: 6 }
-      ];
-
-      etapasPadrao.forEach((etapa) => {
-        banco.run(
-          `
-            INSERT INTO etapaOrcamento (
-              descricao,
-              cor,
-              ordem,
-              status
-            ) VALUES (?, ?, ?, ?)
-          `,
-          [etapa.descricao, etapa.cor, etapa.ordem, 1]
-        );
-      });
-    }
-  );
-
-  banco.get(
-    "SELECT COUNT(*) AS total FROM etapaOrcamento WHERE LOWER(TRIM(descricao)) = 'recusado'",
-    (_erroConsulta, resultado) => {
-      if ((resultado?.total || 0) > 0) {
-        return;
-      }
-
-      banco.run(
-        `INSERT INTO etapaOrcamento (
-          descricao,
-          cor,
-          obrigarMotivoPerda,
-          ordem,
-          status
-        ) VALUES (?, ?, ?, ?, ?)`,
-        ['Recusado', '#E5E7EB', 1, 7, 1]
-      );
-    }
-  );
-
-  banco.get(
-    'SELECT COUNT(*) AS total FROM localAgenda',
-    (_erroConsulta, resultado) => {
-      if ((resultado?.total || 0) > 0) {
-        return;
-      }
-
-      ['Escritorio', 'Cliente', 'Online'].forEach((descricao) => {
-        banco.run(
-          'INSERT INTO localAgenda (descricao, status) VALUES (?, ?)',
-          [descricao, 1]
-        );
-      });
-    }
-  );
-
-  banco.get(
-    'SELECT COUNT(*) AS total FROM tipoRecurso',
-    (_erroConsulta, resultado) => {
-      if ((resultado?.total || 0) > 0) {
-        return;
-      }
-
-      ['Sala', 'Veiculo', 'Equipamento'].forEach((descricao) => {
-        banco.run(
-          'INSERT INTO tipoRecurso (descricao, status) VALUES (?, ?)',
-          [descricao, 1]
-        );
-      });
-    }
-  );
-
-  banco.get(
-    'SELECT COUNT(*) AS total FROM recurso',
-    (_erroConsulta, resultado) => {
-      if ((resultado?.total || 0) > 0) {
-        return;
-      }
-
-      const recursosPadrao = [
-        { descricao: 'Sala de reuniao 1', idTipoRecurso: 1 },
-        { descricao: 'Carro da empresa', idTipoRecurso: 2 },
-        { descricao: 'Notebook comercial', idTipoRecurso: 3 }
-      ];
-
-      recursosPadrao.forEach((recursoPadrao) => {
-        banco.run(
-          `
-            INSERT INTO recurso (
-              descricao,
-              idTipoRecurso,
-              status
-            ) VALUES (?, ?, ?)
-          `,
-          [
-            recursoPadrao.descricao,
-            recursoPadrao.idTipoRecurso,
-            1
-          ]
-        );
-      });
-    }
-  );
-
-  banco.get(
     'SELECT COUNT(*) AS total FROM statusVisita',
     (_erroConsulta, resultado) => {
       if ((resultado?.total || 0) > 0) {
@@ -1786,38 +1670,6 @@ banco.serialize(() => {
         banco.run(
           'INSERT INTO statusVisita (idStatusVisita, descricao, icone, ordem, status) VALUES (?, ?, ?, ?, ?)',
           [status.idStatusVisita, status.descricao, status.icone, status.ordem, 1]
-        );
-      });
-    }
-  );
-
-  banco.get(
-    'SELECT COUNT(*) AS total FROM canalAtendimento',
-    (_erroConsulta, resultado) => {
-      if ((resultado?.total || 0) > 0) {
-        return;
-      }
-
-      ['Telefone', 'WhatsApp', 'E-mail', 'Presencial'].forEach((descricao) => {
-        banco.run(
-          'INSERT INTO canalAtendimento (descricao, status) VALUES (?, ?)',
-          [descricao, 1]
-        );
-      });
-    }
-  );
-
-  banco.get(
-    'SELECT COUNT(*) AS total FROM origemAtendimento',
-    (_erroConsulta, resultado) => {
-      if ((resultado?.total || 0) > 0) {
-        return;
-      }
-
-      ['Cliente', 'Empresa'].forEach((descricao) => {
-        banco.run(
-          'INSERT INTO origemAtendimento (descricao, status) VALUES (?, ?)',
-          [descricao, 1]
         );
       });
     }
@@ -1860,15 +1712,7 @@ async function garantirRegistrosObrigatorios() {
   await garantirEtapasPedidoObrigatorias();
   await garantirEtapasOrcamentoObrigatorias();
   await garantirStatusAgendaObrigatorios();
-  await garantirLocaisAgendaObrigatorios();
-  await garantirTiposRecursoObrigatorios();
-  await garantirRecursosObrigatorios();
   await garantirTiposAgendaObrigatorios();
-  await garantirCanaisAtendimentoObrigatorios();
-  await garantirOrigensAtendimentoObrigatorias();
-  await garantirMetodosPagamentoObrigatorios();
-  await garantirPrazosPagamentoObrigatorios();
-  await garantirCamposPedidoObrigatorios();
 }
 
 async function garantirConfiguracaoAtualizacaoSistemaPadrao() {

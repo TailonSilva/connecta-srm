@@ -104,15 +104,7 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
       definirMensagemErroPedidos('');
 
       try {
-        const [
-          pedidosCarregados,
-          clientesCarregados,
-          vendedoresCarregados,
-          etapasCarregadas,
-          gruposEmpresaCarregados,
-          gruposProdutoCarregados,
-          produtosCarregados
-        ] = await Promise.all([
+        const resultados = await Promise.allSettled([
           listarPedidos(),
           listarClientes(),
           listarVendedores(),
@@ -122,9 +114,27 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
           listarProdutos()
         ]);
 
+        const [
+          pedidosResultado,
+          clientesResultado,
+          vendedoresResultado,
+          etapasResultado,
+          gruposEmpresaResultado,
+          gruposProdutoResultado,
+          produtosResultado
+        ] = resultados;
+
         if (cancelado) {
           return;
         }
+
+        const pedidosCarregados = pedidosResultado.status === 'fulfilled' ? pedidosResultado.value : [];
+        const clientesCarregados = clientesResultado.status === 'fulfilled' ? clientesResultado.value : [];
+        const vendedoresCarregados = vendedoresResultado.status === 'fulfilled' ? vendedoresResultado.value : [];
+        const etapasCarregadas = etapasResultado.status === 'fulfilled' ? etapasResultado.value : [];
+        const gruposEmpresaCarregados = gruposEmpresaResultado.status === 'fulfilled' ? gruposEmpresaResultado.value : [];
+        const gruposProdutoCarregados = gruposProdutoResultado.status === 'fulfilled' ? gruposProdutoResultado.value : [];
+        const produtosCarregados = produtosResultado.status === 'fulfilled' ? produtosResultado.value : [];
 
         const clientesAtivos = filtrarRegistrosAtivosLocais(clientesCarregados);
         const gruposEmpresaAtivos = filtrarRegistrosAtivosLocais(gruposEmpresaCarregados, 'status');
@@ -188,17 +198,7 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
       definirMensagemErroConversao('');
 
       try {
-        const [
-          orcamentosCarregados,
-          clientesCarregados,
-          contatosCarregados,
-          usuariosCarregados,
-          vendedoresCarregados,
-          etapasCarregadas,
-          gruposEmpresaCarregados,
-          gruposProdutoCarregados,
-          produtosCarregados
-        ] = await Promise.all([
+        const resultados = await Promise.allSettled([
           listarOrcamentos(),
           listarClientes(),
           listarContatos(),
@@ -213,6 +213,28 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
         if (cancelado) {
           return;
         }
+
+        const [
+          orcamentosResultado,
+          clientesResultado,
+          contatosResultado,
+          usuariosResultado,
+          vendedoresResultado,
+          etapasResultado,
+          gruposEmpresaResultado,
+          gruposProdutoResultado,
+          produtosResultado
+        ] = resultados;
+
+        const orcamentosCarregados = orcamentosResultado.status === 'fulfilled' ? orcamentosResultado.value : [];
+        const clientesCarregados = clientesResultado.status === 'fulfilled' ? clientesResultado.value : [];
+        const contatosCarregados = contatosResultado.status === 'fulfilled' ? contatosResultado.value : [];
+        const usuariosCarregados = usuariosResultado.status === 'fulfilled' ? usuariosResultado.value : [];
+        const vendedoresCarregados = vendedoresResultado.status === 'fulfilled' ? vendedoresResultado.value : [];
+        const etapasCarregadas = etapasResultado.status === 'fulfilled' ? etapasResultado.value : [];
+        const gruposEmpresaCarregados = gruposEmpresaResultado.status === 'fulfilled' ? gruposEmpresaResultado.value : [];
+        const gruposProdutoCarregados = gruposProdutoResultado.status === 'fulfilled' ? gruposProdutoResultado.value : [];
+        const produtosCarregados = produtosResultado.status === 'fulfilled' ? produtosResultado.value : [];
 
         const clientesAtivos = filtrarRegistrosAtivosLocais(clientesCarregados);
         const contatosAtivos = filtrarRegistrosAtivosLocais(contatosCarregados);
@@ -284,15 +306,7 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
       definirMensagemErroAtendimentosRelatorio('');
 
       try {
-        const [
-          atendimentosCarregados,
-          clientesCarregados,
-          contatosCarregados,
-          usuariosCarregados,
-          canaisCarregados,
-          origensCarregadas,
-          gruposEmpresaCarregados
-        ] = await Promise.all([
+        const resultados = await Promise.allSettled([
           listarAtendimentos(),
           listarClientes(),
           listarContatos(),
@@ -305,6 +319,24 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
         if (cancelado) {
           return;
         }
+
+        const [
+          atendimentosResultado,
+          clientesResultado,
+          contatosResultado,
+          usuariosResultado,
+          canaisResultado,
+          origensResultado,
+          gruposEmpresaResultado
+        ] = resultados;
+
+        const atendimentosCarregados = atendimentosResultado.status === 'fulfilled' ? atendimentosResultado.value : [];
+        const clientesCarregados = clientesResultado.status === 'fulfilled' ? clientesResultado.value : [];
+        const contatosCarregados = contatosResultado.status === 'fulfilled' ? contatosResultado.value : [];
+        const usuariosCarregados = usuariosResultado.status === 'fulfilled' ? usuariosResultado.value : [];
+        const canaisCarregados = canaisResultado.status === 'fulfilled' ? canaisResultado.value : [];
+        const origensCarregadas = origensResultado.status === 'fulfilled' ? origensResultado.value : [];
+        const gruposEmpresaCarregados = gruposEmpresaResultado.status === 'fulfilled' ? gruposEmpresaResultado.value : [];
 
         const clientesAtivos = filtrarRegistrosAtivosLocais(clientesCarregados);
         const contatosAtivos = filtrarRegistrosAtivosLocais(contatosCarregados);

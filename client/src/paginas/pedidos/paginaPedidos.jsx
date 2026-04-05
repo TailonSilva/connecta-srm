@@ -180,18 +180,7 @@ export function PaginaPedidos({ usuarioLogado }) {
     definirMensagemErro('');
 
     try {
-      const [
-        etapasCarregadas,
-        clientesCarregados,
-        contatosCarregados,
-        usuariosCarregados,
-        vendedoresCarregados,
-        metodosCarregados,
-        prazosCarregados,
-        produtosCarregados,
-        camposCarregados,
-        empresasCarregadas
-      ] = await Promise.all([
+      const resultados = await Promise.allSettled([
         listarEtapasPedidoConfiguracao(),
         listarClientes(),
         listarContatos(),
@@ -203,6 +192,30 @@ export function PaginaPedidos({ usuarioLogado }) {
         listarCamposPedidoConfiguracao(),
         listarEmpresas()
       ]);
+
+      const [
+        etapasResultado,
+        clientesResultado,
+        contatosResultado,
+        usuariosResultado,
+        vendedoresResultado,
+        metodosResultado,
+        prazosResultado,
+        produtosResultado,
+        camposResultado,
+        empresasResultado
+      ] = resultados;
+
+      const etapasCarregadas = etapasResultado.status === 'fulfilled' ? etapasResultado.value : [];
+      const clientesCarregados = clientesResultado.status === 'fulfilled' ? clientesResultado.value : [];
+      const contatosCarregados = contatosResultado.status === 'fulfilled' ? contatosResultado.value : [];
+      const usuariosCarregados = usuariosResultado.status === 'fulfilled' ? usuariosResultado.value : [];
+      const vendedoresCarregados = vendedoresResultado.status === 'fulfilled' ? vendedoresResultado.value : [];
+      const metodosCarregados = metodosResultado.status === 'fulfilled' ? metodosResultado.value : [];
+      const prazosCarregados = prazosResultado.status === 'fulfilled' ? prazosResultado.value : [];
+      const produtosCarregados = produtosResultado.status === 'fulfilled' ? produtosResultado.value : [];
+      const camposCarregados = camposResultado.status === 'fulfilled' ? camposResultado.value : [];
+      const empresasCarregadas = empresasResultado.status === 'fulfilled' ? empresasResultado.value : [];
 
       const etapasNormalizadas = normalizarEtapasPedido(etapasCarregadas);
 
