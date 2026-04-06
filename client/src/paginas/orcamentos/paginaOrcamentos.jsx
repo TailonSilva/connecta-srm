@@ -130,8 +130,12 @@ export function PaginaOrcamentos({ usuarioLogado }) {
   }, [usuarioSomenteVendedor, usuarioLogado?.idVendedor]);
 
   useEffect(() => {
+    if (carregandoContexto) {
+      return;
+    }
+
     carregarGradeOrcamentos();
-  }, [usuarioSomenteVendedor, usuarioLogado?.idVendedor, usuarioLogado?.idUsuario, pesquisa, JSON.stringify(filtros)]);
+  }, [carregandoContexto, usuarioSomenteVendedor, usuarioLogado?.idVendedor, usuarioLogado?.idUsuario, pesquisa, JSON.stringify(filtros)]);
 
   useEffect(() => {
     function tratarGrupoEmpresaAtualizado() {
@@ -268,14 +272,31 @@ export function PaginaOrcamentos({ usuarioLogado }) {
       definirCamposPedido(camposPedidoCarregados);
       definirEtapasPedido(etapasPedidoCarregadas);
       definirEmpresa(empresasCarregadas[0] || null);
+
+      return {
+        clientes: clientesDisponiveis,
+        contatos: contatosCarregados.filter((contato) => idsClientesDisponiveis.has(contato.idCliente)),
+        usuarios: usuariosCarregados,
+        vendedores: vendedoresCarregados,
+        metodosPagamento: metodosCarregados,
+        prazosPagamento: enriquecerPrazosPagamento(prazosCarregados, metodosCarregados),
+        etapasOrcamento: etapasCarregadasOrdenadas,
+        motivosPerda: motivosPerdaCarregados,
+        produtos: produtosCarregados.filter((produto) => produto.status !== 0),
+        camposOrcamento: camposCarregados,
+        camposPedido: camposPedidoCarregados,
+        etapasPedido: etapasPedidoCarregadas,
+        empresa: empresasCarregadas[0] || null
+      };
     } catch (_erro) {
       definirMensagemErro('Nao foi possivel carregar os orcamentos.');
+      return null;
     } finally {
       definirCarregandoContexto(false);
     }
   }
 
-  async function carregarGradeOrcamentos() {
+  async function carregarGradeOrcamentos(contextoAtual = null) {
     definirCarregandoGrade(true);
     definirMensagemErro('');
 
@@ -291,17 +312,28 @@ export function PaginaOrcamentos({ usuarioLogado }) {
           : {})
       });
 
+      const contexto = contextoAtual || {
+        clientes,
+        contatos,
+        usuarios,
+        vendedores,
+        prazosPagamento,
+        etapasOrcamento,
+        produtos,
+        motivosPerda
+      };
+
       definirOrcamentos(
         enriquecerOrcamentos(
           orcamentosCarregados,
-          clientes,
-          contatos,
-          usuarios,
-          vendedores,
-          prazosPagamento,
-          etapasOrcamento,
-          produtos,
-          motivosPerda
+          contexto.clientes,
+          contexto.contatos,
+          contexto.usuarios,
+          contexto.vendedores,
+          contexto.prazosPagamento,
+          contexto.etapasOrcamento,
+          contexto.produtos,
+          contexto.motivosPerda
         )
       );
     } catch (_erro) {
@@ -312,7 +344,11 @@ export function PaginaOrcamentos({ usuarioLogado }) {
   }
 
   async function recarregarPagina() {
-    await Promise.all([carregarContexto(), carregarGradeOrcamentos()]);
+    const contextoAtual = await carregarContexto();
+
+    if (contextoAtual) {
+      await carregarGradeOrcamentos(contextoAtual);
+    }
   }
 
   async function salvarOrcamento(dadosOrcamento) {

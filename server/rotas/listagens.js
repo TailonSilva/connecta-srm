@@ -1,5 +1,7 @@
 const express = require('express');
 const { consultarTodos } = require('../configuracoes/banco');
+const { ehCaminhoImagemLocal } = require('../utilitarios/imagens');
+const { montarUrlArquivo } = require('../utilitarios/urlApi');
 const {
   adicionarFiltroBusca,
   adicionarFiltroIgual,
@@ -57,7 +59,7 @@ rotaListagens.get('/clientes', async (requisicao, resposta) => {
       ORDER BY cliente.idCliente DESC
     `, parametros);
 
-    resposta.json(registros);
+    resposta.json(registros.map(normalizarRegistroImagemListagem));
   } catch (_erro) {
     resposta.status(500).json({ mensagem: 'Ocorreu um erro ao processar a requisicao.' });
   }
@@ -97,7 +99,7 @@ rotaListagens.get('/produtos', async (requisicao, resposta) => {
       ORDER BY produto.idProduto DESC
     `, parametros);
 
-    resposta.json(registros);
+    resposta.json(registros.map(normalizarRegistroImagemListagem));
   } catch (_erro) {
     resposta.status(500).json({ mensagem: 'Ocorreu um erro ao processar a requisicao.' });
   }
@@ -163,3 +165,22 @@ rotaListagens.get('/atendimentos', async (requisicao, resposta) => {
 module.exports = {
   rotaListagens
 };
+
+function normalizarRegistroImagemListagem(registro) {
+  if (!registro) {
+    return null;
+  }
+
+  return {
+    ...registro,
+    imagem: normalizarCaminhoImagemListagem(registro.imagem)
+  };
+}
+
+function normalizarCaminhoImagemListagem(valorImagem) {
+  if (!ehCaminhoImagemLocal(valorImagem)) {
+    return valorImagem || '';
+  }
+
+  return montarUrlArquivo(valorImagem);
+}

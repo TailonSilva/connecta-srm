@@ -1,0 +1,13 @@
+{
+  "watch": [
+    "server",
+    "scripts"
+  ],
+  "ext": "js,json",
+  "ignore": [
+    "data/**",
+    "dist/**",
+    "client/**",
+    "build/**"
+  ]
+}
