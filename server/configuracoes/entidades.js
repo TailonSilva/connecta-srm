@@ -165,6 +165,13 @@ const entidades = [
     camposPermitidos: ['descricao', 'status']
   },
   {
+    nome: 'tipoPedido',
+    rota: '/api/tiposPedido',
+    chavePrimaria: 'idTipoPedido',
+    camposObrigatorios: ['descricao'],
+    camposPermitidos: ['descricao', 'status']
+  },
+  {
     nome: 'prazoPagamento',
     rota: '/api/prazosPagamento',
     chavePrimaria: 'idPrazoPagamento',

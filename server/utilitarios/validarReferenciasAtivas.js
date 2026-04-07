@@ -251,6 +251,13 @@ const validacoesPorEntidade = {
       mensagem: 'Selecione um prazo de pagamento ativo.'
     },
     {
+      campo: 'idTipoPedido',
+      tabela: 'tipoPedido',
+      chavePrimaria: 'idTipoPedido',
+      colunaAtiva: 'status',
+      mensagem: 'Selecione um tipo de pedido ativo.'
+    },
+    {
       campo: 'idEtapaPedido',
       tabela: 'etapaPedido',
       chavePrimaria: 'idEtapa',

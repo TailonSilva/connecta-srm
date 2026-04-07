@@ -9,7 +9,7 @@ import { TabelaHistoricoAtendimentos } from '../../componentes/comuns/tabelaHist
 import { TabelaHistoricoOrcamentos } from '../../componentes/comuns/tabelaHistoricoOrcamentos';
 import { TabelaHistoricoPedidos } from '../../componentes/comuns/tabelaHistoricoPedidos';
 import { listarClientes, listarContatos, listarGruposEmpresa, listarVendedores } from '../../servicos/clientes';
-import { listarEtapasOrcamentoConfiguracao, listarEtapasPedidoConfiguracao } from '../../servicos/configuracoes';
+import { listarEtapasOrcamentoConfiguracao, listarEtapasPedidoConfiguracao, listarTiposPedidoConfiguracao } from '../../servicos/configuracoes';
 import { desktopTemExportacaoPdf } from '../../servicos/desktop';
 import { listarOrcamentos } from '../../servicos/orcamentos';
 import { listarPedidos } from '../../servicos/pedidos';
@@ -59,6 +59,7 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
   const [gruposProdutoRelatorio, definirGruposProdutoRelatorio] = useState([]);
   const [marcasRelatorio, definirMarcasRelatorio] = useState([]);
   const [etapasPedido, definirEtapasPedido] = useState([]);
+  const [tiposPedidoRelatorio, definirTiposPedidoRelatorio] = useState([]);
   const [avisosPopup, definirAvisosPopup] = useState([]);
   const [gerandoPdf, definirGerandoPdf] = useState(false);
   const [filtrosPedidosFechados, definirFiltrosPedidosFechados] = useState(() => obterFiltrosPadraoPedidosFechados());
@@ -111,6 +112,7 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
           listarClientes(),
           listarVendedores(),
           listarEtapasPedidoConfiguracao(),
+          listarTiposPedidoConfiguracao(),
           listarGruposEmpresa(),
           listarGruposProduto(),
           listarMarcas(),
@@ -122,6 +124,7 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
           clientesResultado,
           vendedoresResultado,
           etapasResultado,
+          tiposPedidoResultado,
           gruposEmpresaResultado,
           gruposProdutoResultado,
           marcasResultado,
@@ -136,6 +139,7 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
         const clientesCarregados = clientesResultado.status === 'fulfilled' ? clientesResultado.value : [];
         const vendedoresCarregados = vendedoresResultado.status === 'fulfilled' ? vendedoresResultado.value : [];
         const etapasCarregadas = etapasResultado.status === 'fulfilled' ? etapasResultado.value : [];
+        const tiposPedidoCarregados = tiposPedidoResultado.status === 'fulfilled' ? tiposPedidoResultado.value : [];
         const gruposEmpresaCarregados = gruposEmpresaResultado.status === 'fulfilled' ? gruposEmpresaResultado.value : [];
         const gruposProdutoCarregados = gruposProdutoResultado.status === 'fulfilled' ? gruposProdutoResultado.value : [];
         const marcasCarregadas = marcasResultado.status === 'fulfilled' ? marcasResultado.value : [];
@@ -160,6 +164,7 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
         definirGruposProdutoRelatorio(gruposProdutoAtivos);
         definirMarcasRelatorio(marcasAtivas);
         definirEtapasPedido(normalizarEtapasPedido(filtrarRegistrosAtivosLocais(etapasCarregadas, 'status')));
+        definirTiposPedidoRelatorio(filtrarRegistrosAtivosLocais(tiposPedidoCarregados, 'status'));
       } catch (_erro) {
         if (!cancelado) {
           definirMensagemErroPedidos('Nao foi possivel carregar os pedidos do relatorio.');
@@ -170,6 +175,7 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
           definirGruposProdutoRelatorio([]);
           definirMarcasRelatorio([]);
           definirEtapasPedido([]);
+          definirTiposPedidoRelatorio([]);
         }
       } finally {
         if (!cancelado) {
@@ -473,15 +479,16 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
   );
 
   const chipsPedidosFechados = useMemo(
-    () => montarChipsFiltrosPedidosFechados(filtrosPedidosFechados, {
-      clientes,
-      vendedores,
-      etapasPedido,
-      gruposEmpresa: gruposEmpresaRelatorio,
-      gruposProduto: gruposProdutoRelatorio,
-      marcas: marcasRelatorio
-    }),
-    [clientes, etapasPedido, filtrosPedidosFechados, gruposEmpresaRelatorio, gruposProdutoRelatorio, marcasRelatorio, vendedores]
+      () => montarChipsFiltrosPedidosFechados(filtrosPedidosFechados, {
+        clientes,
+        vendedores,
+        etapasPedido,
+        gruposEmpresa: gruposEmpresaRelatorio,
+        gruposProduto: gruposProdutoRelatorio,
+        marcas: marcasRelatorio,
+        tiposPedido: tiposPedidoRelatorio
+      }),
+    [clientes, etapasPedido, filtrosPedidosFechados, gruposEmpresaRelatorio, gruposProdutoRelatorio, marcasRelatorio, tiposPedidoRelatorio, vendedores]
   );
 
   const quantidadeTotalPedidosFechados = useMemo(
@@ -716,6 +723,7 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
               mensagemSemContexto="O relatorio ficara disponivel apos carregar os pedidos."
               mensagemVazia="Nenhum pedido encontrado para o periodo informado."
               exibirCliente
+              exibirTipoPedido
               exibirAcoes={false}
             />
           </section>
@@ -793,19 +801,30 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
                 label: marca.descricao || `Marca #${marca.idMarca}`
               }))
             },
-            {
-              name: 'idsEtapasPedido',
-              label: 'Etapa',
-              multiple: true,
-              tituloSelecao: 'Selecionar etapas do pedido',
-              placeholder: 'Todas as etapas',
-              options: etapasPedido.map((etapa) => ({
-                valor: String(etapa.idEtapaPedido),
-                label: etapa.descricao || `Etapa #${etapa.idEtapaPedido}`
-              }))
-            },
-            {
-              name: 'periodoInclusaoPedidosFechados',
+              {
+                name: 'idsEtapasPedido',
+                label: 'Etapa',
+                multiple: true,
+                tituloSelecao: 'Selecionar etapas do pedido',
+                placeholder: 'Todas as etapas',
+                options: etapasPedido.map((etapa) => ({
+                  valor: String(etapa.idEtapaPedido),
+                  label: etapa.descricao || `Etapa #${etapa.idEtapaPedido}`
+                }))
+              },
+              {
+                name: 'idsTiposPedido',
+                label: 'Tipo de venda',
+                multiple: true,
+                tituloSelecao: 'Selecionar tipos de venda',
+                placeholder: 'Todos os tipos',
+                options: tiposPedidoRelatorio.map((tipoPedido) => ({
+                  valor: String(tipoPedido.idTipoPedido),
+                  label: tipoPedido.descricao || `Tipo #${tipoPedido.idTipoPedido}`
+                }))
+              },
+              {
+                name: 'periodoInclusaoPedidosFechados',
               label: 'Datas',
               type: 'date-filters-modal',
               tituloSelecao: 'Filtro por datas de vendas',
@@ -1382,6 +1401,14 @@ function filtrarPedidosFechados(pedidos, filtros) {
       return false;
     }
 
+    if (
+      Array.isArray(filtros.idsTiposPedido)
+      && filtros.idsTiposPedido.length > 0
+      && !filtros.idsTiposPedido.map(String).includes(String(pedido.idTipoPedido || ''))
+    ) {
+      return false;
+    }
+
     return true;
   });
 }
@@ -1448,6 +1475,7 @@ function normalizarFiltrosPedidosFechados(filtros = {}) {
   const idsGruposProduto = normalizarListaIdentificadoresFiltro(filtros.idsGruposProduto);
   const idsMarcas = normalizarListaIdentificadoresFiltro(filtros.idsMarcas);
   const idsEtapasPedido = normalizarListaIdentificadoresFiltro(filtros.idsEtapasPedido);
+  const idsTiposPedido = normalizarListaIdentificadoresFiltro(filtros.idsTiposPedido);
   const dataInclusaoInicio = normalizarDataFiltro(filtros.dataInclusaoInicio);
   const dataInclusaoFim = normalizarDataFiltro(filtros.dataInclusaoFim);
   const dataEntregaInicio = normalizarDataFiltro(filtros.dataEntregaInicio);
@@ -1462,6 +1490,7 @@ function normalizarFiltrosPedidosFechados(filtros = {}) {
     idsGruposProduto,
     idsMarcas,
     idsEtapasPedido,
+    idsTiposPedido,
     dataInclusaoInicio: periodoInclusao.dataInicio,
     dataInclusaoFim: periodoInclusao.dataFim,
     dataEntregaInicio: periodoEntrega.dataInicio,
@@ -1489,6 +1518,7 @@ function possuiFiltrosAtivos(filtros = {}) {
     || (Array.isArray(filtros.idsGruposProduto) && filtros.idsGruposProduto.length > 0)
     || (Array.isArray(filtros.idsMarcas) && filtros.idsMarcas.length > 0)
     || (Array.isArray(filtros.idsEtapasPedido) && filtros.idsEtapasPedido.length > 0)
+    || (Array.isArray(filtros.idsTiposPedido) && filtros.idsTiposPedido.length > 0)
     || filtros.dataInclusaoInicio
     || filtros.dataInclusaoFim
     || filtros.dataEntregaInicio
@@ -1502,7 +1532,8 @@ function montarChipsFiltrosPedidosFechados(filtros, {
   etapasPedido,
   gruposEmpresa,
   gruposProduto,
-  marcas
+  marcas,
+  tiposPedido
 }) {
   const chips = [];
 
@@ -1595,6 +1626,7 @@ function obterFiltrosPadraoPedidosFechados() {
     idsGruposProduto: [],
     idsMarcas: [],
     idsEtapasPedido: [],
+    idsTiposPedido: [],
     dataInclusaoInicio: formatarDataInput(inicioMes),
     dataInclusaoFim: formatarDataInput(fimMes),
     dataEntregaInicio: '',

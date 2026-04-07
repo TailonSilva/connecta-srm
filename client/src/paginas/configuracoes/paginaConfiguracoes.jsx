@@ -17,6 +17,7 @@ import {
   atualizarMotivoPerda,
   atualizarOrigemAtendimento,
   atualizarPrazoPagamento,
+  atualizarTipoPedido,
   atualizarRecurso,
   atualizarRamoAtividade,
   atualizarStatusVisita,
@@ -38,6 +39,7 @@ import {
   incluirMotivoPerda,
   incluirOrigemAtendimento,
   incluirPrazoPagamento,
+  incluirTipoPedido,
   incluirRecurso,
   incluirRamoAtividade,
   incluirStatusVisita,
@@ -60,6 +62,7 @@ import {
   obterConfiguracaoAtualizacaoSistema,
   listarOrigensAtendimentoConfiguracao,
   listarPrazosPagamentoConfiguracao,
+  listarTiposPedidoConfiguracao,
   listarRecursosConfiguracao,
   listarRamosAtividadeConfiguracao,
   listarStatusVisitaConfiguracao,
@@ -145,6 +148,11 @@ const atalhosConfiguracao = [
     id: 'prazosPagamento',
     titulo: 'Prazos de pagamento',
     icone: 'pagamento'
+  },
+  {
+    id: 'tiposPedido',
+    titulo: 'Tipos de pedido',
+    icone: 'pedido'
   },
   {
     id: 'locaisAgenda',
@@ -277,6 +285,7 @@ const secoesConfiguracao = [
       'gruposEmpresa',
       'gruposProduto',
       'marcas',
+      'tiposPedido',
       'unidadesMedida',
       'tamanhos'
     ]
@@ -319,6 +328,7 @@ const secoesConfiguracao = [
 const IDS_STATUS_VISITA_CRITICOS = new Set([1, 2, 3, 4, 5]);
 const IDS_ETAPAS_PEDIDO_OBRIGATORIAS = new Set([5]);
 const IDS_ETAPAS_ORCAMENTO_OBRIGATORIAS = new Set([1, 2, 3, 4]);
+const IDS_TIPOS_PEDIDO_OBRIGATORIOS = new Set([1, 2]);
 
 function statusVisitaEhCritico(registro) {
   const idStatusVisita = Number(registro?.idStatusVisita);
@@ -335,6 +345,11 @@ function etapaPedidoEhObrigatoria(registro) {
   return Number.isFinite(idEtapaPedido) && IDS_ETAPAS_PEDIDO_OBRIGATORIAS.has(idEtapaPedido);
 }
 
+function tipoPedidoEhObrigatorio(registro) {
+  const idTipoPedido = Number(registro?.idTipoPedido);
+  return Number.isFinite(idTipoPedido) && IDS_TIPOS_PEDIDO_OBRIGATORIOS.has(idTipoPedido);
+}
+
 export function PaginaConfiguracoes({ usuarioLogado }) {
   const [empresa, definirEmpresa] = useState(null);
   const [usuarios, definirUsuarios] = useState([]);
@@ -347,6 +362,7 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
   const [unidadesMedida, definirUnidadesMedida] = useState([]);
   const [metodosPagamento, definirMetodosPagamento] = useState([]);
   const [prazosPagamento, definirPrazosPagamento] = useState([]);
+  const [tiposPedido, definirTiposPedido] = useState([]);
   const [locaisAgenda, definirLocaisAgenda] = useState([]);
   const [tiposRecurso, definirTiposRecurso] = useState([]);
   const [recursos, definirRecursos] = useState([]);
@@ -585,6 +601,7 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
       listarUnidadesMedidaConfiguracao({ incluirInativos: true }),
       listarMetodosPagamentoConfiguracao({ incluirInativos: true }),
       listarPrazosPagamentoConfiguracao({ incluirInativos: true }),
+      listarTiposPedidoConfiguracao({ incluirInativos: true }),
       listarLocaisAgendaConfiguracao({ incluirInativos: true }),
       listarTiposRecursoConfiguracao({ incluirInativos: true }),
       listarRecursosConfiguracao({ incluirInativos: true }),
@@ -609,19 +626,20 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
     definirUnidadesMedida(obterResultadoLista(resultados[6]));
     definirMetodosPagamento(obterResultadoLista(resultados[7]));
     definirPrazosPagamento(obterResultadoLista(resultados[8]));
-    definirLocaisAgenda(obterResultadoLista(resultados[9]));
-    definirTiposRecurso(obterResultadoLista(resultados[10]));
-    definirRecursos(obterResultadoLista(resultados[11]));
-    definirTiposAgenda(ordenarRegistrosPorOrdem(obterResultadoLista(resultados[12]), 'idTipoAgenda'));
-    definirCanaisAtendimento(obterResultadoLista(resultados[13]));
-    definirOrigensAtendimento(obterResultadoLista(resultados[14]));
-    definirStatusVisita(ordenarRegistrosPorOrdem(obterResultadoLista(resultados[15]), 'idStatusVisita'));
-    definirMotivosPerda(obterResultadoLista(resultados[16]));
-    definirEtapasPedido(ordenarRegistrosPorOrdem(obterResultadoLista(resultados[17]), 'idEtapa'));
-    definirEtapasOrcamento(ordenarRegistrosPorOrdem(obterResultadoLista(resultados[18]), 'idEtapaOrcamento'));
-    definirCamposOrcamento(obterResultadoLista(resultados[19]));
-    definirCamposPedido(obterResultadoLista(resultados[20]));
-    definirTamanhos(obterResultadoLista(resultados[21]));
+    definirTiposPedido(obterResultadoLista(resultados[9]));
+    definirLocaisAgenda(obterResultadoLista(resultados[10]));
+    definirTiposRecurso(obterResultadoLista(resultados[11]));
+    definirRecursos(obterResultadoLista(resultados[12]));
+    definirTiposAgenda(ordenarRegistrosPorOrdem(obterResultadoLista(resultados[13]), 'idTipoAgenda'));
+    definirCanaisAtendimento(obterResultadoLista(resultados[14]));
+    definirOrigensAtendimento(obterResultadoLista(resultados[15]));
+    definirStatusVisita(ordenarRegistrosPorOrdem(obterResultadoLista(resultados[16]), 'idStatusVisita'));
+    definirMotivosPerda(obterResultadoLista(resultados[17]));
+    definirEtapasPedido(ordenarRegistrosPorOrdem(obterResultadoLista(resultados[18]), 'idEtapa'));
+    definirEtapasOrcamento(ordenarRegistrosPorOrdem(obterResultadoLista(resultados[19]), 'idEtapaOrcamento'));
+    definirCamposOrcamento(obterResultadoLista(resultados[20]));
+    definirCamposPedido(obterResultadoLista(resultados[21]));
+    definirTamanhos(obterResultadoLista(resultados[22]));
   }
 
   async function salvarUsuario(dadosUsuario) {
@@ -814,6 +832,21 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
       await atualizarPrazoPagamento(dadosPrazo.idPrazoPagamento, payload);
     } else {
       await incluirPrazoPagamento(payload);
+    }
+
+    await carregarCadastrosConfiguracao();
+  }
+
+  async function salvarTipoPedido(dadosTipoPedido) {
+    const payload = {
+      descricao: dadosTipoPedido.descricao.trim(),
+      status: dadosTipoPedido.status ? 1 : 0
+    };
+
+    if (dadosTipoPedido.idTipoPedido) {
+      await atualizarTipoPedido(dadosTipoPedido.idTipoPedido, payload);
+    } else {
+      await incluirTipoPedido(payload);
     }
 
     await carregarCadastrosConfiguracao();
@@ -1068,6 +1101,11 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
     await carregarCadastrosConfiguracao();
   }
 
+  async function inativarTipoPedido(registro) {
+    await atualizarTipoPedido(registro.idTipoPedido, { status: 0 });
+    await carregarCadastrosConfiguracao();
+  }
+
   async function inativarMotivoPerda(registro) {
     await atualizarMotivoPerda(registro.idMotivo, { status: 0 });
     await carregarCadastrosConfiguracao();
@@ -1199,6 +1237,7 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
       'orcamentos',
       'pedidos',
       'prazosPagamento',
+      'tiposPedido',
       'recursos',
       'ramosAtividade',
       'canaisAtendimento',
@@ -1559,6 +1598,31 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
         aoFechar={fecharCadastroConfiguracao}
         aoSalvar={salvarPrazoPagamento}
         aoInativar={inativarPrazoPagamento}
+      />
+      <ModalCadastroConfiguracao
+        aberto={cadastroConfiguracaoAberto === 'tiposPedido'}
+        titulo="Tipos de pedido"
+        rotuloIncluir="Incluir tipo"
+        registros={tiposPedido}
+        chavePrimaria="idTipoPedido"
+        somenteConsulta={usuarioSomenteConsulta}
+        colunas={[
+          { key: 'descricao', label: 'Descricao' }
+        ]}
+        camposFormulario={[
+          { name: 'descricao', label: 'Descricao', required: true },
+          {
+            name: 'status',
+            label: 'Registro ativo',
+            type: 'checkbox',
+            defaultValue: true,
+            disabled: ({ registroSelecionado }) => tipoPedidoEhObrigatorio(registroSelecionado)
+          }
+        ]}
+        aoFechar={fecharCadastroConfiguracao}
+        aoSalvar={salvarTipoPedido}
+        aoInativar={inativarTipoPedido}
+        podeInativarRegistro={(registro) => !tipoPedidoEhObrigatorio(registro)}
       />
       <ModalCadastroConfiguracao
         aberto={cadastroConfiguracaoAberto === 'locaisAgenda'}

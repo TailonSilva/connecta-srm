@@ -1,5 +1,9 @@
 const express = require('express');
-const { ID_ETAPA_PEDIDO_ENTREGUE } = require('../configuracoes/banco');
+const {
+  ID_ETAPA_PEDIDO_ENTREGUE,
+  ID_TIPO_PEDIDO_VENDA,
+  ID_TIPO_PEDIDO_DEVOLUCAO
+} = require('../configuracoes/banco');
 const {
   listarRegistros,
   consultarRegistroPorId,
@@ -27,7 +31,8 @@ function validarCamposObrigatorios(entidade, corpo) {
 const etapasCriticasProtegidas = {
   etapaPedido: new Set([ID_ETAPA_PEDIDO_ENTREGUE]),
   etapaOrcamento: new Set([1, 2, 3, 4]),
-  statusVisita: new Set([1, 2, 3, 4, 5])
+  statusVisita: new Set([1, 2, 3, 4, 5]),
+  tipoPedido: new Set([ID_TIPO_PEDIDO_VENDA, ID_TIPO_PEDIDO_DEVOLUCAO])
 };
 
 function registroEhRegraCritica(entidade, registro) {
@@ -66,6 +71,8 @@ function criarMensagemRegraCritica(entidade) {
       ? 'As etapas obrigatorias de orcamento nao podem ser inativadas ou excluidas.'
       : entidade.nome === 'statusVisita'
         ? 'Os status criticos da agenda nao podem ser inativados ou excluidos.'
+        : entidade.nome === 'tipoPedido'
+          ? 'Os tipos de pedido obrigatorios do sistema nao podem ser inativados ou excluidos.'
         : 'Este registro critico nao pode ser inativado ou excluido.';
 }
 

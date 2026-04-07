@@ -11,6 +11,7 @@ export function TabelaHistoricoPedidos({
   mensagemSemContexto = 'Nenhum contexto disponivel.',
   mensagemVazia = 'Nenhum pedido encontrado.',
   exibirCliente = false,
+  exibirTipoPedido = false,
   exibirAcoes = true,
   onConsultarPedido
 }) {
@@ -26,6 +27,7 @@ export function TabelaHistoricoPedidos({
           <th className="colunaHistoricoPedido">Pedido</th>
           {exibirCliente ? <th className="colunaHistoricoCliente">Cliente</th> : null}
           <th className="colunaHistoricoEtapa">Etapa</th>
+          {exibirTipoPedido ? <th className="colunaHistoricoEtapa">Tipo</th> : null}
           <th className="colunaHistoricoVendedor">Vendedor</th>
           <th className="colunaHistoricoPrazoPagamento">Prazo de pagamento</th>
           <th className="colunaHistoricoValorTotal">Total</th>
@@ -47,6 +49,7 @@ export function TabelaHistoricoPedidos({
           </td>
           {exibirCliente ? <td className="colunaHistoricoCliente">{pedido.nomeClienteSnapshot || 'Cliente nao informado'}</td> : null}
           <td className="colunaHistoricoEtapa">{pedido.nomeEtapaPedidoSnapshot || 'Sem etapa'}</td>
+          {exibirTipoPedido ? <td className="colunaHistoricoEtapa">{pedido.nomeTipoPedidoSnapshot || 'Nao informado'}</td> : null}
           <td className="colunaHistoricoVendedor">{pedido.nomeVendedorSnapshot || 'Nao informado'}</td>
           <td className="colunaHistoricoPrazoPagamento">{pedido.nomePrazoPagamentoSnapshot || 'Nao informado'}</td>
           <td className="colunaHistoricoValorTotal">{normalizarPreco(pedido.totalPedido)}</td>

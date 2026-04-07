@@ -20,10 +20,12 @@ export function normalizarPreco(valor) {
 }
 
 export function normalizarPrecoDigitado(valor) {
-  const texto = String(valor ?? '').replace(/[^\d,]/g, '');
+  const textoOriginal = String(valor ?? '').trim();
+  const negativo = textoOriginal.includes('-');
+  const texto = textoOriginal.replace(/[^\d,]/g, '');
 
   if (!texto) {
-    return '';
+    return negativo ? '-' : '';
   }
 
   const partes = texto.split(',');
@@ -32,10 +34,10 @@ export function normalizarPrecoDigitado(valor) {
   const terminaComVirgula = texto.endsWith(',');
 
   if (terminaComVirgula) {
-    return `${parteInteira},`;
+    return `${negativo ? '-' : ''}${parteInteira},`;
   }
 
-  return parteDecimal ? `${parteInteira},${parteDecimal}` : parteInteira;
+  return `${negativo ? '-' : ''}${parteDecimal ? `${parteInteira},${parteDecimal}` : parteInteira}`;
 }
 
 export function desformatarPreco(valor) {
@@ -59,6 +61,7 @@ export function converterPrecoParaNumero(valor) {
   }
 
   const textoSemMoeda = texto.replace(/[^\d,.-]/g, '');
+  const negativo = textoSemMoeda.startsWith('-');
   const ultimaVirgula = textoSemMoeda.lastIndexOf(',');
   const ultimoPonto = textoSemMoeda.lastIndexOf('.');
   const separadorDecimal = Math.max(ultimaVirgula, ultimoPonto);
@@ -73,9 +76,10 @@ export function converterPrecoParaNumero(valor) {
 
   const inteiroNormalizado = parteInteira.replace(/\D/g, '') || '0';
   const decimalNormalizado = parteDecimal.replace(/\D/g, '').slice(0, 2);
-  const numeroTexto = decimalNormalizado
+  const numeroBase = decimalNormalizado
     ? `${inteiroNormalizado}.${decimalNormalizado}`
     : inteiroNormalizado;
+  const numeroTexto = negativo ? `-${numeroBase}` : numeroBase;
 
   const numero = Number(numeroTexto);
 

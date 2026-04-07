@@ -7,6 +7,8 @@ const ID_ETAPA_ORCAMENTO_FECHADO_SEM_PEDIDO = 2;
 const ID_ETAPA_ORCAMENTO_PEDIDO_EXCLUIDO = 3;
 const ID_ETAPA_ORCAMENTO_RECUSADO = 4;
 const ID_ETAPA_PEDIDO_ENTREGUE = 5;
+const ID_TIPO_PEDIDO_VENDA = 1;
+const ID_TIPO_PEDIDO_DEVOLUCAO = 2;
 const ID_STATUS_VISITA_AGENDADO = 1;
 const ID_STATUS_VISITA_CONFIRMADO = 2;
 const ID_STATUS_VISITA_REALIZADO = 3;
@@ -487,6 +489,14 @@ banco.serialize(() => {
     CREATE TABLE IF NOT EXISTS metodoPagamento (
       idMetodoPagamento INTEGER PRIMARY KEY AUTOINCREMENT,
       descricao VARCHAR(100) NOT NULL,
+      status BOOLEAN NOT NULL DEFAULT 1
+    )
+  `);
+
+  banco.run(`
+    CREATE TABLE IF NOT EXISTS tipoPedido (
+      idTipoPedido INTEGER PRIMARY KEY AUTOINCREMENT,
+      descricao VARCHAR(150) NOT NULL,
       status BOOLEAN NOT NULL DEFAULT 1
     )
   `);
@@ -1313,6 +1323,7 @@ banco.serialize(() => {
       idVendedor INTEGER NOT NULL,
       comissao DECIMAL(7, 2) NOT NULL DEFAULT 0,
       idPrazoPagamento INTEGER,
+      idTipoPedido INTEGER,
       idEtapaPedido INTEGER,
       dataInclusao DATE,
       dataEntrega DATE,
@@ -1325,6 +1336,7 @@ banco.serialize(() => {
       nomeVendedorSnapshot VARCHAR(150),
       nomeMetodoPagamentoSnapshot VARCHAR(150),
       nomePrazoPagamentoSnapshot VARCHAR(255),
+      nomeTipoPedidoSnapshot VARCHAR(150),
       nomeEtapaPedidoSnapshot VARCHAR(150),
       dataCriacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (idOrcamento) REFERENCES orcamento (idOrcamento),
@@ -1333,6 +1345,7 @@ banco.serialize(() => {
       FOREIGN KEY (idUsuario) REFERENCES usuario (idUsuario),
       FOREIGN KEY (idVendedor) REFERENCES vendedor (idVendedor),
       FOREIGN KEY (idPrazoPagamento) REFERENCES prazoPagamento (idPrazoPagamento),
+      FOREIGN KEY (idTipoPedido) REFERENCES tipoPedido (idTipoPedido),
       FOREIGN KEY (idEtapaPedido) REFERENCES etapaPedido (idEtapaPedido)
     )
   `);
@@ -1454,6 +1467,22 @@ banco.serialize(() => {
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
       console.error('Nao foi possivel garantir a coluna nomePrazoPagamentoSnapshot do pedido.', erro);
+    }
+  });
+
+  banco.run(`
+    ALTER TABLE pedido ADD COLUMN idTipoPedido INTEGER
+  `, (erro) => {
+    if (erro && !String(erro.message || '').includes('duplicate column name')) {
+      console.error('Nao foi possivel garantir a coluna idTipoPedido do pedido.', erro);
+    }
+  });
+
+  banco.run(`
+    ALTER TABLE pedido ADD COLUMN nomeTipoPedidoSnapshot VARCHAR(150)
+  `, (erro) => {
+    if (erro && !String(erro.message || '').includes('duplicate column name')) {
+      console.error('Nao foi possivel garantir a coluna nomeTipoPedidoSnapshot do pedido.', erro);
     }
   });
 
@@ -1710,6 +1739,7 @@ async function garantirRegistrosObrigatorios() {
   await removerColunaSiglaDosRecursos();
   await garantirPrazosPagamentoComDiasOpcionais();
   await garantirUsuarioAdministradorPadrao();
+  await garantirTiposPedidoObrigatorios();
   await garantirEtapasPedidoObrigatorias();
   await garantirEtapasOrcamentoObrigatorias();
   await garantirStatusAgendaObrigatorios();
@@ -1910,6 +1940,33 @@ async function garantirEtapasPedidoObrigatorias() {
     'UPDATE etapaPedido SET status = 1, cor = COALESCE(cor, ?), ordem = CASE WHEN ordem IS NULL OR ordem <= 0 THEN ? ELSE ordem END WHERE idEtapa = ?',
     [etapaObrigatoria.cor, etapaObrigatoria.ordem, etapaObrigatoria.idEtapa]
   );
+}
+
+async function garantirTiposPedidoObrigatorios() {
+  const tiposObrigatorios = [
+    { idTipoPedido: ID_TIPO_PEDIDO_VENDA, descricao: 'Venda', status: 1 },
+    { idTipoPedido: ID_TIPO_PEDIDO_DEVOLUCAO, descricao: 'Devolucao', status: 1 }
+  ];
+
+  for (const tipoPedido of tiposObrigatorios) {
+    const existente = await consultarUm(
+      'SELECT idTipoPedido FROM tipoPedido WHERE idTipoPedido = ?',
+      [tipoPedido.idTipoPedido]
+    );
+
+    if (!existente) {
+      await executar(
+        'INSERT INTO tipoPedido (idTipoPedido, descricao, status) VALUES (?, ?, ?)',
+        [tipoPedido.idTipoPedido, tipoPedido.descricao, tipoPedido.status]
+      );
+      continue;
+    }
+
+    await executar(
+      'UPDATE tipoPedido SET descricao = ?, status = ? WHERE idTipoPedido = ?',
+      [tipoPedido.descricao, tipoPedido.status, tipoPedido.idTipoPedido]
+    );
+  }
 }
 
 async function removerColunaAbreviacaoDasEtapas() {
@@ -2427,6 +2484,8 @@ module.exports = {
   ID_ETAPA_ORCAMENTO_PEDIDO_EXCLUIDO,
   ID_ETAPA_ORCAMENTO_RECUSADO,
   ID_ETAPA_PEDIDO_ENTREGUE,
+  ID_TIPO_PEDIDO_VENDA,
+  ID_TIPO_PEDIDO_DEVOLUCAO,
   consultarUm,
   consultarTodos,
   executar

@@ -364,6 +364,10 @@ Filtros da agenda:
 - Integracao com pedido originado de orcamento
 - No modal de inclusao do pedido, os campos `Cliente` e `Contato` tambem possuem atalho de pesquisa para abrir os grids reutilizaveis sem sair do formulario
 - A busca de contato dentro do pedido tambem permite incluir um novo contato do cliente atual e assumir esse contato automaticamente no formulario
+- O modal do pedido agora possui o campo `Tipo de pedido`, alimentado por uma tabela auxiliar propria em `Configuracoes`
+- A tabela `Tipos de pedido` nasce com `Venda` e `Devolucao` como registros obrigatorios do sistema, protegidos contra inativacao e exclusao
+- Quando o `Tipo de pedido` for `Devolucao`, o sistema ajusta automaticamente o valor unitario dos itens para negativo e recalcula o total do pedido com valor negativo
+- Em pedidos do tipo `Devolucao`, a quantidade dos itens tambem fica negativa e a etapa do pedido passa a ser travada automaticamente em `Entregue`
 - O modal de filtros da pagina de pedidos permite selecionar multiplas etapas ao mesmo tempo e salva esse recorte por usuario
 - A etapa do pedido pode ser alterada direto no grid, no mesmo padrao visual adotado em Orcamentos
 - O filtro da pagina de pedidos tem um botao unico de `Datas` que abre um modal com os intervalos de `Data de inclusao` e `Data de entrega`
@@ -393,6 +397,7 @@ A tela de configuracoes usa cards grandes e modais padrao. Hoje ela cobre:
 - `Tamanhos`
 - `Unidades`
 - `Metodos de pagamento`
+- `Tipos de pedido`
 - `Prazos de pagamento`
 - `Motivo da perda`
 - `Etapas do pedido`
