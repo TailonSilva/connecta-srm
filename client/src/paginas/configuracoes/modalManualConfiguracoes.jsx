@@ -96,6 +96,7 @@ export function ModalManualConfiguracoes({
           itens: [
             'Locais, recursos, tipos e status alimentam a Agenda.',
             'Canais, origens e motivos de perda entram no fluxo comercial.',
+            'Tipos de pedido abastecem o novo campo de classificacao do modal de Pedidos e deixam o fluxo preparado para personalizacoes futuras; Venda e Devolucao ja nascem como registros obrigatorios protegidos.',
             'Grupos de empresa e seus contatos abastecem o cadastro de clientes com heranca de contatos.',
             'A empresa define se o CRM usa o codigo padrao do cliente ou o Codigo alternativo como identificador principal nos grids que exibem codigo.',
             'A empresa tambem pode escolher quais colunas do cadastro de Atendimentos aparecem no grid principal, incluindo codigo, agendamento, horarios e relacionamentos exibidos com nomes legiveis.',

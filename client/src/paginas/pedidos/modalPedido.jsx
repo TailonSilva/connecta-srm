@@ -23,6 +23,7 @@ const abasModalPedido = [
 ];
 
 const ID_ETAPA_PEDIDO_ENTREGUE = 5;
+const ID_TIPO_PEDIDO_DEVOLUCAO = 2;
 
 const estadoInicialFormulario = {
   idOrcamento: '',
@@ -31,6 +32,7 @@ const estadoInicialFormulario = {
   idUsuario: '',
   idVendedor: '',
   idPrazoPagamento: '',
+  idTipoPedido: '',
   dataInclusao: '',
   dataEntrega: '',
   nomeClienteSnapshot: '',
@@ -39,6 +41,7 @@ const estadoInicialFormulario = {
   nomeVendedorSnapshot: '',
   nomeMetodoPagamentoSnapshot: '',
   nomePrazoPagamentoSnapshot: '',
+  nomeTipoPedidoSnapshot: '',
   idEtapaPedido: '',
   nomeEtapaPedidoSnapshot: '',
   comissao: '0,00',
@@ -107,6 +110,7 @@ export function ModalPedido({
   vendedores,
   metodosPagamento = [],
   prazosPagamento,
+  tiposPedido = [],
   etapasPedido,
   produtos,
   camposPedido,
@@ -138,6 +142,7 @@ export function ModalPedido({
   const usuariosAtivos = usuarios.filter((usuario) => usuario.ativo !== 0);
   const vendedoresAtivos = vendedores.filter((vendedor) => vendedor.status !== 0);
   const prazosAtivos = prazosPagamento.filter((prazo) => prazo.status !== 0);
+  const tiposPedidoAtivos = tiposPedido.filter((tipoPedido) => tipoPedido.status !== 0);
   const produtosAtivos = produtos.filter((produto) => produto.status !== 0);
   const etapasPedidoNormalizadas = useMemo(
     () => normalizarEtapasPedido(etapasPedido).filter((etapa) => etapa.status !== 0),
@@ -180,11 +185,13 @@ export function ModalPedido({
         : atualizarItens
     })),
     formatarPrecoInput,
-    calcularTotalItem,
+    calcularTotalItem: (quantidade, valorUnitario) => calcularTotalItemPorTipo(quantidade, valorUnitario, formulario.idTipoPedido),
     normalizarPrecoDigitado,
     converterPrecoParaNumero,
     normalizarPreco,
-    normalizarQuantidade: (valor) => Number(String(valor ?? '').replace(',', '.'))
+    normalizarQuantidade: (valor) => Number(String(valor ?? '').replace(',', '.')),
+    normalizarValorUnitario: (valor) => aplicarSinalTipoPedidoNoPreco(valor, formulario.idTipoPedido),
+    normalizarItemAoSalvar: (item) => normalizarItemPedidoPorTipo(item, formulario.idTipoPedido)
   });
 
   useEffect(() => {
@@ -306,6 +313,16 @@ export function ModalPedido({
         proximoEstado.nomeMetodoPagamentoSnapshot = prazo?.nomeMetodoPagamento || '';
       }
 
+      if (name === 'idTipoPedido') {
+        const tipoPedido = tiposPedidoAtivos.find((item) => String(item.idTipoPedido) === String(value));
+        proximoEstado.nomeTipoPedidoSnapshot = tipoPedido?.descricao || '';
+        proximoEstado.itens = estadoAtual.itens.map((item) => normalizarItemPedidoPorTipo(item, value));
+        if (tipoPedidoEhDevolucao(value)) {
+          proximoEstado.idEtapaPedido = String(ID_ETAPA_PEDIDO_ENTREGUE);
+          proximoEstado.nomeEtapaPedidoSnapshot = etapasPedidoNormalizadas.find((etapa) => Number(etapa.idEtapaPedido) === ID_ETAPA_PEDIDO_ENTREGUE)?.descricao || '';
+        }
+      }
+
       if (name === 'dataInclusao') {
         proximoEstado.dataEntrega = somarDiasNaData(
           value,
@@ -315,6 +332,18 @@ export function ModalPedido({
 
       return proximoEstado;
     });
+
+    if (name === 'idTipoPedido') {
+      definirItemFormulario((estadoAtual) => {
+        const valorUnitario = aplicarSinalTipoPedidoNoPreco(estadoAtual.valorUnitario, value);
+
+        return {
+          ...estadoAtual,
+          valorUnitario,
+          valorTotal: calcularTotalItemPorTipo(estadoAtual.quantidade, valorUnitario, value)
+        };
+      });
+    }
   }
 
   function alterarCampoExtra(indice, valor) {
@@ -618,7 +647,7 @@ export function ModalPedido({
                 )}
               </div>
 
-              <div className="linhaOrcamentoComercial">
+              <div className="linhaOrcamentoComercial linhaPedidoComercialEstendida">
                 {modoInclusao ? (
                   <>
                     <CampoSelect
@@ -655,11 +684,23 @@ export function ModalPedido({
                         />
                       ) : null}
                     />
+                    <CampoSelect
+                      label="Tipo de pedido"
+                      name="idTipoPedido"
+                      value={formulario.idTipoPedido}
+                      onChange={alterarCampo}
+                      options={tiposPedidoAtivos.map((tipoPedido) => ({
+                        valor: String(tipoPedido.idTipoPedido),
+                        label: tipoPedido.descricao
+                      }))}
+                      disabled={somenteLeitura}
+                    />
                   </>
                 ) : (
                   <>
                     <CampoFormulario label="Vendedor" name="nomeVendedorSnapshot" value={formulario.nomeVendedorSnapshot} disabled />
                     <CampoFormulario label="Prazo de pagamento" name="nomePrazoPagamentoSnapshot" value={formulario.nomePrazoPagamentoSnapshot} disabled />
+                    <CampoFormulario label="Tipo de pedido" name="nomeTipoPedidoSnapshot" value={formulario.nomeTipoPedidoSnapshot} disabled />
                   </>
                 )}
                 <CampoFormulario label="Comissao (%)" name="comissao" value={formulario.comissao} onChange={alterarCampo} disabled={somenteLeitura} />
@@ -683,7 +724,7 @@ export function ModalPedido({
                     valor: String(etapa.idEtapaPedido),
                     label: etapa.descricao
                   }))}
-                  disabled={somenteLeitura}
+                  disabled={somenteLeitura || tipoPedidoEhDevolucao(formulario.idTipoPedido)}
                 />
                 <CampoFormulario label="Total" name="totalPedido" value={normalizarPreco(totalPedido)} disabled />
               </div>
@@ -920,6 +961,7 @@ function criarFormularioInicialPedido(pedido, usuarioLogado, camposPedido, empre
       idUsuario: String(pedido?.idUsuario || usuarioLogado?.idUsuario || ''),
       idVendedor: pedido?.idVendedor ? String(pedido.idVendedor) : '',
       idPrazoPagamento: pedido?.idPrazoPagamento ? String(pedido.idPrazoPagamento) : '',
+      idTipoPedido: pedido?.idTipoPedido ? String(pedido.idTipoPedido) : '',
       dataInclusao: pedido?.dataInclusao || obterDataAtualFormatoInput(),
       dataEntrega: pedido?.dataEntrega || somarDiasNaData(
         pedido?.dataInclusao || obterDataAtualFormatoInput(),
@@ -931,6 +973,7 @@ function criarFormularioInicialPedido(pedido, usuarioLogado, camposPedido, empre
       nomeVendedorSnapshot: pedido?.nomeVendedorSnapshot || '',
       nomeMetodoPagamentoSnapshot: pedido?.nomeMetodoPagamentoSnapshot || '',
       nomePrazoPagamentoSnapshot: pedido?.nomePrazoPagamentoSnapshot || '',
+      nomeTipoPedidoSnapshot: pedido?.nomeTipoPedidoSnapshot || '',
       idEtapaPedido: pedido?.idEtapaPedido ? String(pedido.idEtapaPedido) : '',
       nomeEtapaPedidoSnapshot: pedido?.nomeEtapaPedidoSnapshot || '',
       comissao: formatarPercentualInput(pedido?.comissao),
@@ -974,6 +1017,7 @@ function criarFormularioInicialPedido(pedido, usuarioLogado, camposPedido, empre
     idUsuario: pedido.idUsuario ? String(pedido.idUsuario) : '',
     idVendedor: pedido.idVendedor ? String(pedido.idVendedor) : '',
     idPrazoPagamento: pedido.idPrazoPagamento ? String(pedido.idPrazoPagamento) : '',
+    idTipoPedido: pedido.idTipoPedido ? String(pedido.idTipoPedido) : '',
     dataInclusao: pedido.dataInclusao || '',
     dataEntrega: pedido.dataEntrega || pedido.dataValidade || '',
     nomeClienteSnapshot: pedido.nomeClienteSnapshot || '',
@@ -982,6 +1026,7 @@ function criarFormularioInicialPedido(pedido, usuarioLogado, camposPedido, empre
     nomeVendedorSnapshot: pedido.nomeVendedorSnapshot || '',
     nomeMetodoPagamentoSnapshot: pedido.nomeMetodoPagamentoSnapshot || '',
     nomePrazoPagamentoSnapshot: pedido.nomePrazoPagamentoSnapshot || '',
+    nomeTipoPedidoSnapshot: pedido.nomeTipoPedidoSnapshot || '',
     idEtapaPedido: pedido.idEtapaPedido ? String(pedido.idEtapaPedido) : '',
     nomeEtapaPedidoSnapshot: pedido.nomeEtapaPedidoSnapshot || '',
     comissao: formatarPercentualInput(pedido.comissao),
@@ -1068,6 +1113,64 @@ function calcularTotalItem(quantidade, valorUnitario) {
 function formatarPrecoInput(valor) {
   const numero = converterPrecoParaNumero(valor);
   return numero === null ? '' : desformatarPreco(numero);
+}
+
+function tipoPedidoEhDevolucao(idTipoPedido) {
+  return Number(idTipoPedido) === ID_TIPO_PEDIDO_DEVOLUCAO;
+}
+
+function aplicarSinalTipoPedidoNaQuantidade(valor, idTipoPedido) {
+  const numero = Number(String(valor ?? '').replace(',', '.'));
+
+  if (!Number.isFinite(numero) || numero === 0) {
+    return String(valor ?? '').trim();
+  }
+
+  const numeroNormalizado = tipoPedidoEhDevolucao(idTipoPedido)
+    ? -Math.abs(numero)
+    : Math.abs(numero);
+
+  return String(numeroNormalizado);
+}
+
+function aplicarSinalTipoPedidoNoPreco(valor, idTipoPedido) {
+  const numero = converterPrecoParaNumero(valor);
+
+  if (numero === null) {
+    return String(valor ?? '').trim();
+  }
+
+  const numeroNormalizado = tipoPedidoEhDevolucao(idTipoPedido)
+    ? -Math.abs(numero)
+    : Math.abs(numero);
+
+  return desformatarPreco(numeroNormalizado);
+}
+
+function normalizarItemPedidoPorTipo(item, idTipoPedido) {
+  const valorUnitario = aplicarSinalTipoPedidoNoPreco(item?.valorUnitario, idTipoPedido);
+  const quantidade = aplicarSinalTipoPedidoNaQuantidade(item?.quantidade, idTipoPedido);
+
+  return {
+    ...item,
+    quantidade,
+    valorUnitario,
+    valorTotal: calcularTotalItemPorTipo(quantidade, valorUnitario, idTipoPedido)
+  };
+}
+
+function calcularTotalItemPorTipo(quantidade, valorUnitario, idTipoPedido) {
+  const numeroQuantidade = Number(String(quantidade ?? '').replace(',', '.'));
+  const numeroValorUnitario = converterPrecoParaNumero(valorUnitario);
+
+  if (!numeroQuantidade || numeroValorUnitario === null) {
+    return '';
+  }
+
+  const valorBase = Math.abs(numeroQuantidade) * Math.abs(numeroValorUnitario);
+  const total = tipoPedidoEhDevolucao(idTipoPedido) ? -valorBase : valorBase;
+
+  return desformatarPreco(total);
 }
 
 function obterIniciaisItemPedido(item) {

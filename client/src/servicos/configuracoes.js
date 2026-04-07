@@ -279,6 +279,10 @@ export function listarMetodosPagamentoConfiguracao(opcoes) {
   return listarCadastroConfiguracao('/metodosPagamento', opcoes);
 }
 
+export function listarTiposPedidoConfiguracao(opcoes) {
+  return listarCadastroConfiguracao('/tiposPedido', opcoes);
+}
+
 export function incluirMetodoPagamento(payload) {
   return requisitarApi('/metodosPagamento', {
     method: 'POST',
@@ -291,6 +295,26 @@ export function incluirMetodoPagamento(payload) {
 
 export function atualizarMetodoPagamento(idMetodoPagamento, payload) {
   return requisitarApi(`/metodosPagamento/${idMetodoPagamento}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+}
+
+export function incluirTipoPedido(payload) {
+  return requisitarApi('/tiposPedido', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+}
+
+export function atualizarTipoPedido(idTipoPedido, payload) {
+  return requisitarApi(`/tiposPedido/${idTipoPedido}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json'

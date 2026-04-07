@@ -12,6 +12,8 @@ export function useFormularioItemProduto({
   converterPrecoParaNumero,
   normalizarPreco,
   normalizarQuantidade,
+  normalizarValorUnitario = (valor) => valor,
+  normalizarItemAoSalvar = (item) => item,
   exigirProduto = true
 }) {
   const [modalItemAberto, definirModalItemAberto] = useState(false);
@@ -79,7 +81,7 @@ export function useFormularioItemProduto({
       if (name === 'idProduto') {
         const produto = produtos.find((item) => String(item.idProduto) === String(value));
         if (produto) {
-          const precoPadrao = formatarPrecoInput(produto.preco);
+          const precoPadrao = normalizarValorUnitario(formatarPrecoInput(produto.preco));
           proximoEstado.descricaoProdutoSnapshot = produto.descricao || '';
           proximoEstado.referenciaProdutoSnapshot = produto.referencia || '';
           proximoEstado.unidadeProdutoSnapshot = produto.nomeUnidadeMedida || produto.siglaUnidadeMedida || '';
@@ -128,16 +130,16 @@ export function useFormularioItemProduto({
     }
 
     const quantidade = normalizarQuantidade(itemFormulario.quantidade);
-    const valorUnitario = converterPrecoParaNumero(itemFormulario.valorUnitario);
+    const valorUnitario = converterPrecoParaNumero(normalizarValorUnitario(itemFormulario.valorUnitario));
 
-    if (!quantidade || !valorUnitario) {
+    if (!quantidade || valorUnitario === null) {
       definirMensagemErroItem('Informe quantidade e valor unitario validos.');
       return;
     }
 
     const itensAtuais = obterItens();
     const produto = produtos.find((item) => String(item.idProduto) === String(itemFormulario.idProduto));
-    const itemAtualizado = {
+    const itemAtualizadoBase = {
       ...itensAtuais[indiceItemEdicao],
       idProduto: itemFormulario.idProduto ? Number(itemFormulario.idProduto) : null,
       quantidade: String(quantidade),
@@ -149,6 +151,7 @@ export function useFormularioItemProduto({
       referenciaProdutoSnapshot: itemFormulario.referenciaProdutoSnapshot || produto?.referencia || itensAtuais[indiceItemEdicao]?.referenciaProdutoSnapshot || '',
       unidadeProdutoSnapshot: itemFormulario.unidadeProdutoSnapshot || produto?.nomeUnidadeMedida || produto?.siglaUnidadeMedida || itensAtuais[indiceItemEdicao]?.unidadeProdutoSnapshot || ''
     };
+    const itemAtualizado = normalizarItemAoSalvar(itemAtualizadoBase);
 
     definirItens((estadoAtual) => (
       indiceItemEdicao === null

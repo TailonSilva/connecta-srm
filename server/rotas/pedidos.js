@@ -2,6 +2,7 @@ const express = require('express');
 const {
   ID_ETAPA_ORCAMENTO_PEDIDO_EXCLUIDO,
   ID_ETAPA_PEDIDO_ENTREGUE,
+  ID_TIPO_PEDIDO_DEVOLUCAO,
   consultarTodos,
   consultarUm,
   executar
@@ -38,6 +39,7 @@ rotaPedidos.get('/', async (requisicao, resposta) => {
       'pedido.nomeUsuarioSnapshot',
       'pedido.nomeVendedorSnapshot',
       'pedido.nomePrazoPagamentoSnapshot',
+      'pedido.nomeTipoPedidoSnapshot',
       'pedido.nomeEtapaPedidoSnapshot',
       'pedido.observacao'
     ]);
@@ -109,6 +111,7 @@ rotaPedidos.post('/', async (requisicao, resposta) => {
         idVendedor,
         comissao,
         idPrazoPagamento,
+        idTipoPedido,
         idEtapaPedido,
         dataInclusao,
         dataEntrega,
@@ -121,8 +124,9 @@ rotaPedidos.post('/', async (requisicao, resposta) => {
         nomeVendedorSnapshot,
         nomeMetodoPagamentoSnapshot,
         nomePrazoPagamentoSnapshot,
+        nomeTipoPedidoSnapshot,
         nomeEtapaPedidoSnapshot
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         payload.idOrcamento,
         payload.idCliente,
@@ -131,6 +135,7 @@ rotaPedidos.post('/', async (requisicao, resposta) => {
         payload.idVendedor,
         payload.comissao,
         payload.idPrazoPagamento,
+        payload.idTipoPedido,
         payload.idEtapaPedido,
         payload.dataInclusao,
         payload.dataEntrega,
@@ -143,6 +148,7 @@ rotaPedidos.post('/', async (requisicao, resposta) => {
         snapshots.nomeVendedorSnapshot,
         snapshots.nomeMetodoPagamentoSnapshot,
         snapshots.nomePrazoPagamentoSnapshot,
+        snapshots.nomeTipoPedidoSnapshot,
         snapshots.nomeEtapaPedidoSnapshot
       ]
     );
@@ -201,6 +207,7 @@ rotaPedidos.put('/:id', async (requisicao, resposta) => {
         idVendedor = ?,
         comissao = ?,
         idPrazoPagamento = ?,
+        idTipoPedido = ?,
         idEtapaPedido = ?,
         dataInclusao = ?,
         dataEntrega = ?,
@@ -213,6 +220,7 @@ rotaPedidos.put('/:id', async (requisicao, resposta) => {
         nomeVendedorSnapshot = ?,
         nomeMetodoPagamentoSnapshot = ?,
         nomePrazoPagamentoSnapshot = ?,
+        nomeTipoPedidoSnapshot = ?,
         nomeEtapaPedidoSnapshot = ?
       WHERE idPedido = ?`,
       [
@@ -223,6 +231,7 @@ rotaPedidos.put('/:id', async (requisicao, resposta) => {
         payload.idVendedor,
         payload.comissao,
         payload.idPrazoPagamento,
+        payload.idTipoPedido,
         payload.idEtapaPedido,
         payload.dataInclusao,
         payload.dataEntrega,
@@ -235,6 +244,7 @@ rotaPedidos.put('/:id', async (requisicao, resposta) => {
         snapshots.nomeVendedorSnapshot,
         snapshots.nomeMetodoPagamentoSnapshot,
         snapshots.nomePrazoPagamentoSnapshot,
+        snapshots.nomeTipoPedidoSnapshot,
         snapshots.nomeEtapaPedidoSnapshot,
         idPedido
       ]
@@ -335,6 +345,7 @@ function normalizarPayloadPedido(payload = {}) {
       ? 0
       : Number(payload.comissao),
     idPrazoPagamento: payload.idPrazoPagamento ? Number(payload.idPrazoPagamento) : null,
+    idTipoPedido: payload.idTipoPedido ? Number(payload.idTipoPedido) : null,
     idEtapaPedido: payload.idEtapaPedido ? Number(payload.idEtapaPedido) : null,
     dataInclusao: limparTexto(payload.dataInclusao),
     dataEntrega: limparTexto(payload.dataEntrega || payload.dataValidade),
@@ -347,6 +358,7 @@ function normalizarPayloadPedido(payload = {}) {
     nomeVendedorSnapshot: limparTexto(payload.nomeVendedorSnapshot),
     nomeMetodoPagamentoSnapshot: limparTexto(payload.nomeMetodoPagamentoSnapshot),
     nomePrazoPagamentoSnapshot: limparTexto(payload.nomePrazoPagamentoSnapshot),
+    nomeTipoPedidoSnapshot: limparTexto(payload.nomeTipoPedidoSnapshot),
     nomeEtapaPedidoSnapshot: limparTexto(payload.nomeEtapaPedidoSnapshot),
     itens: normalizarItensPedido(payload.itens),
     camposExtras: normalizarCamposPedido(payload.camposExtras)
@@ -357,8 +369,13 @@ function aplicarAutomacoesPedido(payload, pedidoAtual = null) {
   const proximoPayload = {
     ...payload
   };
+  const pedidoEhDevolucao = Number(proximoPayload.idTipoPedido) === ID_TIPO_PEDIDO_DEVOLUCAO;
   const entrouNaEtapaEntregue = !etapaPedidoEhEntregue(pedidoAtual?.idEtapaPedido)
     && etapaPedidoEhEntregue(proximoPayload.idEtapaPedido);
+
+  if (pedidoEhDevolucao) {
+    proximoPayload.idEtapaPedido = ID_ETAPA_PEDIDO_ENTREGUE;
+  }
 
   if (entrouNaEtapaEntregue && (!proximoPayload.dataEntrega || proximoPayload.dataEntrega === limparTexto(pedidoAtual?.dataEntrega))) {
     proximoPayload.dataEntrega = obterDataAtualFormatoInput();
@@ -367,6 +384,8 @@ function aplicarAutomacoesPedido(payload, pedidoAtual = null) {
   if (etapaPedidoEhEntregue(proximoPayload.idEtapaPedido) && !proximoPayload.dataEntrega) {
     proximoPayload.dataEntrega = obterDataAtualFormatoInput();
   }
+
+  proximoPayload.itens = normalizarSinalItensPedido(proximoPayload.itens, proximoPayload.idTipoPedido);
 
   return proximoPayload;
 }
@@ -389,6 +408,38 @@ function normalizarItensPedido(itens) {
       unidadeProdutoSnapshot: limparTexto(item.unidadeProdutoSnapshot)
     }))
     .filter((item) => item.quantidade && item.valorUnitario !== null);
+}
+
+function normalizarSinalItensPedido(itens, idTipoPedido) {
+  if (!Array.isArray(itens)) {
+    return [];
+  }
+
+  const ehDevolucao = Number(idTipoPedido) === ID_TIPO_PEDIDO_DEVOLUCAO;
+  const multiplicador = ehDevolucao ? -1 : 1;
+
+  return itens.map((item) => {
+    const quantidadeBase = Math.abs(Number(item?.quantidade || 0));
+    const valorUnitarioBase = item?.valorUnitario === null || item?.valorUnitario === undefined
+      ? null
+      : Math.abs(Number(item.valorUnitario));
+
+    if (!quantidadeBase || valorUnitarioBase === null || Number.isNaN(valorUnitarioBase)) {
+      return item;
+    }
+
+    const quantidade = Number((quantidadeBase * multiplicador).toFixed(3));
+    const valorUnitario = Number((valorUnitarioBase * multiplicador).toFixed(2));
+    const valorTotalBase = quantidadeBase * valorUnitarioBase;
+    const valorTotal = Number(((ehDevolucao ? -1 : 1) * valorTotalBase).toFixed(2));
+
+    return {
+      ...item,
+      quantidade,
+      valorUnitario,
+      valorTotal
+    };
+  });
 }
 
 function normalizarCamposPedido(camposExtras) {
@@ -433,6 +484,7 @@ async function montarSnapshotsPedido(payload) {
     usuario,
     vendedor,
     prazo,
+    tipoPedido,
     etapaPedido,
     orcamento
   ] = await Promise.all([
@@ -441,6 +493,7 @@ async function montarSnapshotsPedido(payload) {
     obterUsuario(payload.idUsuario),
     obterVendedor(payload.idVendedor),
     obterPrazoPagamento(payload.idPrazoPagamento),
+    obterTipoPedido(payload.idTipoPedido),
     obterEtapaPedido(payload.idEtapaPedido),
     obterOrcamento(payload.idOrcamento)
   ]);
@@ -453,6 +506,7 @@ async function montarSnapshotsPedido(payload) {
     nomeVendedorSnapshot: payload.nomeVendedorSnapshot || vendedor?.nome || null,
     nomeMetodoPagamentoSnapshot: payload.nomeMetodoPagamentoSnapshot || prazo?.nomeMetodoPagamento || null,
     nomePrazoPagamentoSnapshot: payload.nomePrazoPagamentoSnapshot || prazo?.descricaoFormatada || null,
+    nomeTipoPedidoSnapshot: payload.nomeTipoPedidoSnapshot || tipoPedido?.descricao || null,
     nomeEtapaPedidoSnapshot: payload.nomeEtapaPedidoSnapshot || etapaPedido?.descricao || null
   };
 }
@@ -627,6 +681,21 @@ async function obterEtapaPedido(idEtapaPedido) {
     FROM etapaPedido
     WHERE idEtapa = ?`,
     [idEtapaPedido]
+  );
+}
+
+async function obterTipoPedido(idTipoPedido) {
+  if (!idTipoPedido) {
+    return null;
+  }
+
+  return consultarUm(
+    `SELECT
+      idTipoPedido,
+      descricao
+    FROM tipoPedido
+    WHERE idTipoPedido = ?`,
+    [idTipoPedido]
   );
 }
 

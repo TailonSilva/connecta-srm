@@ -15,7 +15,8 @@ import {
   listarCamposPedidoConfiguracao,
   listarEtapasPedidoConfiguracao,
   listarMetodosPagamentoConfiguracao,
-  listarPrazosPagamentoConfiguracao
+  listarPrazosPagamentoConfiguracao,
+  listarTiposPedidoConfiguracao
 } from '../../servicos/configuracoes';
 import { listarEmpresas } from '../../servicos/empresa';
 import { atualizarPedido, excluirPedido, incluirPedido, listarPedidos } from '../../servicos/pedidos';
@@ -105,6 +106,7 @@ export function PaginaPedidos({ usuarioLogado }) {
   const [vendedores, definirVendedores] = useState([]);
   const [metodosPagamento, definirMetodosPagamento] = useState([]);
   const [prazosPagamento, definirPrazosPagamento] = useState([]);
+  const [tiposPedido, definirTiposPedido] = useState([]);
   const [produtos, definirProdutos] = useState([]);
   const [camposPedido, definirCamposPedido] = useState([]);
   const [etapasPedido, definirEtapasPedido] = useState([]);
@@ -192,6 +194,7 @@ export function PaginaPedidos({ usuarioLogado }) {
         listarVendedores(),
         listarMetodosPagamentoConfiguracao(),
         listarPrazosPagamentoConfiguracao(),
+        listarTiposPedidoConfiguracao(),
         listarProdutos(),
         listarCamposPedidoConfiguracao(),
         listarEmpresas()
@@ -205,6 +208,7 @@ export function PaginaPedidos({ usuarioLogado }) {
         vendedoresResultado,
         metodosResultado,
         prazosResultado,
+        tiposPedidoResultado,
         produtosResultado,
         camposResultado,
         empresasResultado
@@ -217,6 +221,7 @@ export function PaginaPedidos({ usuarioLogado }) {
       const vendedoresCarregados = vendedoresResultado.status === 'fulfilled' ? vendedoresResultado.value : [];
       const metodosCarregados = metodosResultado.status === 'fulfilled' ? metodosResultado.value : [];
       const prazosCarregados = prazosResultado.status === 'fulfilled' ? prazosResultado.value : [];
+      const tiposPedidoCarregados = tiposPedidoResultado.status === 'fulfilled' ? tiposPedidoResultado.value : [];
       const produtosCarregados = produtosResultado.status === 'fulfilled' ? produtosResultado.value : [];
       const camposCarregados = camposResultado.status === 'fulfilled' ? camposResultado.value : [];
       const empresasCarregadas = empresasResultado.status === 'fulfilled' ? empresasResultado.value : [];
@@ -230,6 +235,7 @@ export function PaginaPedidos({ usuarioLogado }) {
       definirVendedores(vendedoresCarregados);
       definirMetodosPagamento(metodosCarregados);
       definirPrazosPagamento(enriquecerPrazosPagamento(prazosCarregados, metodosCarregados));
+      definirTiposPedido(tiposPedidoCarregados);
       definirProdutos(produtosCarregados);
       definirCamposPedido(camposCarregados);
       definirEmpresa(empresasCarregadas[0] || null);
@@ -242,6 +248,7 @@ export function PaginaPedidos({ usuarioLogado }) {
         vendedores: vendedoresCarregados,
         metodosPagamento: metodosCarregados,
         prazosPagamento: prazosCarregados,
+        tiposPedido: tiposPedidoCarregados,
         produtos: produtosCarregados,
         camposPedido: camposCarregados,
         empresa: empresasCarregadas[0] || null
@@ -552,6 +559,7 @@ export function PaginaPedidos({ usuarioLogado }) {
         vendedores={vendedores}
         metodosPagamento={metodosPagamento}
         prazosPagamento={prazosPagamento}
+        tiposPedido={tiposPedido}
         etapasPedido={etapasPedido}
         produtos={produtos}
         camposPedido={camposPedido}
@@ -908,9 +916,10 @@ function normalizarPayloadPedido(dadosPedido) {
     idCliente: dadosPedido.idCliente ? Number(dadosPedido.idCliente) : null,
     idContato: dadosPedido.idContato ? Number(dadosPedido.idContato) : null,
     idUsuario: dadosPedido.idUsuario ? Number(dadosPedido.idUsuario) : null,
-    idVendedor: dadosPedido.idVendedor ? Number(dadosPedido.idVendedor) : null,
-    idPrazoPagamento: dadosPedido.idPrazoPagamento ? Number(dadosPedido.idPrazoPagamento) : null,
-    idEtapaPedido: dadosPedido.idEtapaPedido ? Number(dadosPedido.idEtapaPedido) : null,
+      idVendedor: dadosPedido.idVendedor ? Number(dadosPedido.idVendedor) : null,
+      idPrazoPagamento: dadosPedido.idPrazoPagamento ? Number(dadosPedido.idPrazoPagamento) : null,
+      idTipoPedido: dadosPedido.idTipoPedido ? Number(dadosPedido.idTipoPedido) : null,
+      idEtapaPedido: dadosPedido.idEtapaPedido ? Number(dadosPedido.idEtapaPedido) : null,
     comissao: normalizarNumeroDecimal(dadosPedido.comissao),
     dataInclusao: limparTextoOpcional(dadosPedido.dataInclusao),
     dataEntrega: limparTextoOpcional(dadosPedido.dataEntrega),
@@ -920,10 +929,11 @@ function normalizarPayloadPedido(dadosPedido) {
     nomeClienteSnapshot: limparTextoOpcional(dadosPedido.nomeClienteSnapshot),
     nomeContatoSnapshot: limparTextoOpcional(dadosPedido.nomeContatoSnapshot),
     nomeUsuarioSnapshot: limparTextoOpcional(dadosPedido.nomeUsuarioSnapshot),
-    nomeVendedorSnapshot: limparTextoOpcional(dadosPedido.nomeVendedorSnapshot),
-    nomeMetodoPagamentoSnapshot: limparTextoOpcional(dadosPedido.nomeMetodoPagamentoSnapshot),
-    nomePrazoPagamentoSnapshot: limparTextoOpcional(dadosPedido.nomePrazoPagamentoSnapshot),
-    nomeEtapaPedidoSnapshot: limparTextoOpcional(dadosPedido.nomeEtapaPedidoSnapshot),
+      nomeVendedorSnapshot: limparTextoOpcional(dadosPedido.nomeVendedorSnapshot),
+      nomeMetodoPagamentoSnapshot: limparTextoOpcional(dadosPedido.nomeMetodoPagamentoSnapshot),
+      nomePrazoPagamentoSnapshot: limparTextoOpcional(dadosPedido.nomePrazoPagamentoSnapshot),
+      nomeTipoPedidoSnapshot: limparTextoOpcional(dadosPedido.nomeTipoPedidoSnapshot),
+      nomeEtapaPedidoSnapshot: limparTextoOpcional(dadosPedido.nomeEtapaPedidoSnapshot),
     itens: Array.isArray(dadosPedido.itens) ? dadosPedido.itens.map((item) => ({
       idProduto: item.idProduto ? Number(item.idProduto) : null,
       quantidade: normalizarNumeroDecimal(item.quantidade),
