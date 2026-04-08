@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Botao } from '../../componentes/comuns/botao';
+import { MensagemErroPopup } from '../../componentes/comuns/mensagemErroPopup';
 import { BotaoAcaoGrade } from '../../componentes/comuns/botaoAcaoGrade';
 import { CodigoRegistro } from '../../componentes/comuns/codigoRegistro';
 import { GradePadrao } from '../../componentes/comuns/gradePadrao';
@@ -461,7 +462,7 @@ export function ModalCadastroConfiguracao({
                   : null}
               </div>
 
-              {mensagemErro ? <p className="mensagemErroFormulario">{mensagemErro}</p> : null}
+              <MensagemErroPopup mensagem={mensagemErro} titulo="Nao foi possivel salvar a configuracao." />
             </form>
           </div>
         ) : null}

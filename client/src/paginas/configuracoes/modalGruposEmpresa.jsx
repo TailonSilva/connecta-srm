@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Botao } from '../../componentes/comuns/botao';
+import { MensagemErroPopup } from '../../componentes/comuns/mensagemErroPopup';
 import { BotaoAcaoGrade } from '../../componentes/comuns/botaoAcaoGrade';
 import { GradePadrao } from '../../componentes/comuns/gradePadrao';
 import { normalizarTelefone } from '../../utilitarios/normalizarTelefone';
@@ -318,7 +319,7 @@ export function ModalGruposEmpresa({
               </GradePadrao>
             </section>
 
-            {mensagemErroContato ? <p className="mensagemErroFormulario">{mensagemErroContato}</p> : null}
+            <MensagemErroPopup mensagem={mensagemErroContato} titulo="Nao foi possivel salvar o contato do grupo." />
           </>
         )}
       />

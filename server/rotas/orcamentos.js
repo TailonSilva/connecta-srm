@@ -181,6 +181,16 @@ rotaOrcamentos.put('/:id', async (requisicao, resposta) => {
       return;
     }
 
+    if (orcamentoBloqueadoPorPedidoVinculado(existente)) {
+      resposta.status(400).json({ mensagem: 'Nao e possivel editar um orcamento com pedido vinculado.' });
+      return;
+    }
+
+    if (orcamentoEhRecusado(existente)) {
+      resposta.status(400).json({ mensagem: 'Nao e possivel editar um orcamento recusado.' });
+      return;
+    }
+
     if (
       existente.idPedidoVinculado &&
       String(existente.idEtapaOrcamento || '') !== String(payload.idEtapaOrcamento || '')
@@ -269,7 +279,7 @@ rotaOrcamentos.delete('/:id', async (requisicao, resposta) => {
     await executar('COMMIT');
 
     itensAtuais.forEach((item) => {
-      if (ehCaminhoImagemLocal(item.imagem)) {
+      if (ehImagemItemOrcamentoLocal(item.imagem)) {
         removerArquivoImagem(item.imagem);
       }
     });
@@ -542,15 +552,19 @@ function desnormalizarCaminhoImagem(valorImagem) {
 function removerImagensItensNaoUtilizadas(imagensAtuais, imagensNovas) {
   const imagensMantidas = new Set(
     imagensNovas
-      .filter((imagem) => ehCaminhoImagemLocal(desnormalizarCaminhoImagem(imagem)))
+      .filter((imagem) => ehImagemItemOrcamentoLocal(desnormalizarCaminhoImagem(imagem)))
       .map((imagem) => desnormalizarCaminhoImagem(imagem))
   );
 
   imagensAtuais.forEach((imagem) => {
-    if (ehCaminhoImagemLocal(imagem) && !imagensMantidas.has(imagem)) {
+    if (ehImagemItemOrcamentoLocal(imagem) && !imagensMantidas.has(imagem)) {
       removerArquivoImagem(imagem);
     }
   });
+}
+
+function ehImagemItemOrcamentoLocal(valorImagem) {
+  return ehCaminhoImagemLocal(valorImagem) && String(valorImagem).startsWith('imagens/orcamentos/');
 }
 
 function limparTexto(valor) {
@@ -560,6 +574,14 @@ function limparTexto(valor) {
 
 function etapaOrcamentoEhFechada(idEtapaOrcamento) {
   return IDS_ETAPAS_ORCAMENTO_FECHADAS.has(Number(idEtapaOrcamento));
+}
+
+function orcamentoEhRecusado(orcamento) {
+  return Number(orcamento?.idEtapaOrcamento) === 4;
+}
+
+function orcamentoBloqueadoPorPedidoVinculado(orcamento) {
+  return Number(orcamento?.idPedidoVinculado) > 0;
 }
 
 function obterDataAtualFormatoInput() {

@@ -4,6 +4,7 @@ import { CodigoRegistro } from '../../componentes/comuns/codigoRegistro';
 import { GradePadrao } from '../../componentes/comuns/gradePadrao';
 import { ModalBuscaClientes } from '../../componentes/comuns/modalBuscaClientes';
 import { ModalBuscaContatos } from '../../componentes/comuns/modalBuscaContatos';
+import { MensagemErroPopup } from '../../componentes/comuns/mensagemErroPopup';
 import { ModalItemProduto } from '../../componentes/comuns/modalItemProduto';
 import { ModalCadastroConfiguracao } from '../configuracoes/modalCadastroConfiguracao';
 import { ModalPrazosPagamento } from '../configuracoes/modalPrazosPagamento';
@@ -954,7 +955,7 @@ export function ModalPedido({
           ) : null}
         </div>
 
-        {mensagemErro ? <p className="mensagemErroFormulario">{mensagemErro}</p> : null}
+        <MensagemErroPopup mensagem={mensagemErro} titulo="Nao foi possivel salvar o pedido." />
 
         {confirmandoSaida ? (
           <div className="camadaConfirmacaoModal" role="presentation" onMouseDown={() => definirConfirmandoSaida(false)}>

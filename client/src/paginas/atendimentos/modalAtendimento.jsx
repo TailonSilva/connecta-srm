@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Botao } from '../../componentes/comuns/botao';
+import { MensagemErroPopup } from '../../componentes/comuns/mensagemErroPopup';
 import { ModalBuscaClientes } from '../../componentes/comuns/modalBuscaClientes';
 import { ModalBuscaContatos } from '../../componentes/comuns/modalBuscaContatos';
 import { ModalCliente } from '../clientes/modalCliente';
@@ -910,7 +911,7 @@ export function ModalAtendimento({
           </div>
         </div>
 
-        {mensagemErro ? <p className="mensagemErroFormulario">{mensagemErro}</p> : null}
+        <MensagemErroPopup mensagem={mensagemErro} titulo="Nao foi possivel salvar o atendimento." />
 
         {confirmandoPedidoOrcamento ? (
           <div className="camadaConfirmacaoModal" role="presentation" onMouseDown={recusarGeracaoPedido}>

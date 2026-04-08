@@ -1,3 +1,5 @@
+import { MensagemErroPopup } from './mensagemErroPopup';
+
 export function GradePadrao({
   className = '',
   classNameCorpo = '',
@@ -27,71 +29,77 @@ export function GradePadrao({
 
   if (modo === 'layout') {
     return (
-      <section className={classeGrade}>
-        <div className={classeCorpo}>
-          <div className={['layoutGradePadrao', classNameTabela].filter(Boolean).join(' ')} style={estiloLayout}>
-            {cabecalho ? (
-              <div className={['cabecaLayoutGradePadrao', classNameCabecalho].filter(Boolean).join(' ')}>
-                {cabecalho}
+      <>
+        <MensagemErroPopup mensagem={!carregando ? mensagemErro : ''} />
+        <section className={classeGrade}>
+          <div className={classeCorpo}>
+            <div className={['layoutGradePadrao', classNameTabela].filter(Boolean).join(' ')} style={estiloLayout}>
+              {cabecalho ? (
+                <div className={['cabecaLayoutGradePadrao', classNameCabecalho].filter(Boolean).join(' ')}>
+                  {cabecalho}
+                </div>
+              ) : null}
+
+              <div className="corpoLayoutGradePadrao">
+                {carregando ? (
+                  <p className={classeMensagem}>{mensagemCarregando}</p>
+                ) : null}
+
+                {!carregando && mensagemErro ? (
+                  <p className={classeMensagemErro}>{mensagemErro}</p>
+                ) : null}
+
+                {!carregando && !mensagemErro && !temItens ? (
+                  <p className={classeMensagem}>{mensagemVazia}</p>
+                ) : null}
+
+                {!carregando && !mensagemErro && temItens ? children : null}
               </div>
-            ) : null}
-
-            <div className="corpoLayoutGradePadrao">
-              {carregando ? (
-                <p className={classeMensagem}>{mensagemCarregando}</p>
-              ) : null}
-
-              {!carregando && mensagemErro ? (
-                <p className={classeMensagemErro}>{mensagemErro}</p>
-              ) : null}
-
-              {!carregando && !mensagemErro && !temItens ? (
-                <p className={classeMensagem}>{mensagemVazia}</p>
-              ) : null}
-
-              {!carregando && !mensagemErro && temItens ? children : null}
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </>
     );
   }
 
   return (
-    <section className={classeGrade}>
-      <div className={classeCorpo}>
-        <table className={classeTabela}>
-          {colGroup}
+    <>
+      <MensagemErroPopup mensagem={!carregando ? mensagemErro : ''} />
+      <section className={classeGrade}>
+        <div className={classeCorpo}>
+          <table className={classeTabela}>
+            {colGroup}
 
-          <thead className={classeCabecalho}>
-            {cabecalho}
-          </thead>
+            <thead className={classeCabecalho}>
+              {cabecalho}
+            </thead>
 
-          <tbody className="corpoTabelaGradePadrao">
-            {carregando ? (
-              <tr>
-                <td className={classeMensagem} colSpan={99}>{mensagemCarregando}</td>
-              </tr>
-            ) : null}
+            <tbody className="corpoTabelaGradePadrao">
+              {carregando ? (
+                <tr>
+                  <td className={classeMensagem} colSpan={99}>{mensagemCarregando}</td>
+                </tr>
+              ) : null}
 
-            {!carregando && mensagemErro ? (
-              <tr>
-                <td className={classeMensagemErro} colSpan={99}>
-                  {mensagemErro}
-                </td>
-              </tr>
-            ) : null}
+              {!carregando && mensagemErro ? (
+                <tr>
+                  <td className={classeMensagemErro} colSpan={99}>
+                    {mensagemErro}
+                  </td>
+                </tr>
+              ) : null}
 
-            {!carregando && !mensagemErro && !temItens ? (
-              <tr>
-                <td className={classeMensagem} colSpan={99}>{mensagemVazia}</td>
-              </tr>
-            ) : null}
+              {!carregando && !mensagemErro && !temItens ? (
+                <tr>
+                  <td className={classeMensagem} colSpan={99}>{mensagemVazia}</td>
+                </tr>
+              ) : null}
 
-            {!carregando && !mensagemErro && temItens ? children : null}
-          </tbody>
-        </table>
-      </div>
-    </section>
+              {!carregando && !mensagemErro && temItens ? children : null}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </>
   );
 }

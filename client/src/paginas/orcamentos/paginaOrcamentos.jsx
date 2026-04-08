@@ -38,6 +38,7 @@ import {
   TOTAL_COLUNAS_GRID_ORCAMENTOS
 } from '../../utilitarios/colunasGridOrcamentos';
 import { normalizarPreco } from '../../utilitarios/normalizarPreco';
+import { formatarCodigoCliente } from '../../utilitarios/codigoCliente';
 import { obterEtapasOrcamentoParaInputManual } from '../../utilitarios/etapasOrcamento';
 import { obterValorGrid } from '../../utilitarios/valorPadraoGrid';
 import {
@@ -568,7 +569,7 @@ export function PaginaOrcamentos({ usuarioLogado }) {
   }
 
   function abrirEdicaoOrcamento(orcamento) {
-    if (orcamentoBloqueadoParaUsuarioPadrao(orcamento, usuarioLogado)) {
+    if (orcamentoBloqueadoParaEdicao(orcamento, usuarioLogado)) {
       abrirConsultaOrcamento(orcamento);
       return;
     }
@@ -786,9 +787,12 @@ export function PaginaOrcamentos({ usuarioLogado }) {
               colunas={colunasVisiveisOrcamentos}
               etapasOrcamento={etapasOrcamento}
               permitirExcluir={permitirExcluir}
-              permitirEdicao={!orcamentoBloqueadoParaUsuarioPadrao(orcamento, usuarioLogado)}
+              usuarioLogado={usuarioLogado}
+              empresa={empresa}
+              clientes={clientes}
+              permitirEdicao={!orcamentoBloqueadoParaEdicao(orcamento, usuarioLogado)}
               permitirAlteracaoEtapa={
-                !orcamentoBloqueadoParaUsuarioPadrao(orcamento, usuarioLogado)
+                !orcamentoBloqueadoParaEdicao(orcamento, usuarioLogado)
                 && !orcamento.idPedidoVinculado
               }
               aoAlterarEtapa={(idEtapaOrcamento) => selecionarEtapaNoGrid(orcamento, idEtapaOrcamento)}
@@ -1162,6 +1166,9 @@ function LinhaOrcamento({
   colunas,
   etapasOrcamento,
   permitirExcluir,
+  usuarioLogado,
+  empresa,
+  clientes,
   permitirEdicao,
   permitirAlteracaoEtapa,
   aoAlterarEtapa,
@@ -1176,6 +1183,9 @@ function LinhaOrcamento({
         orcamento,
         etapasOrcamento,
         permitirExcluir,
+        usuarioLogado,
+        empresa,
+        clientes,
         permitirEdicao,
         permitirAlteracaoEtapa,
         aoAlterarEtapa,
@@ -1192,6 +1202,9 @@ function renderizarCelulaOrcamento({
   orcamento,
   etapasOrcamento,
   permitirExcluir,
+  usuarioLogado,
+  empresa,
+  clientes,
   permitirEdicao,
   permitirAlteracaoEtapa,
   aoAlterarEtapa,
@@ -1200,14 +1213,13 @@ function renderizarCelulaOrcamento({
   aoExcluir
 }) {
   const propriedadesCelula = {
-    key: coluna.id,
     className: `celulaLayoutGradePadrao ${coluna.classe}`.trim(),
     style: obterEstiloColunaLayout(coluna)
   };
 
   if (coluna.id === 'codigo') {
     return (
-      <CelulaLayoutOrcamento coluna={coluna} {...propriedadesCelula}>
+      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
         <CodigoRegistro valor={orcamento.idOrcamento} />
       </CelulaLayoutOrcamento>
     );
@@ -1215,7 +1227,7 @@ function renderizarCelulaOrcamento({
 
   if (coluna.id === 'idOrcamento') {
     return (
-      <CelulaLayoutOrcamento coluna={coluna} {...propriedadesCelula}>
+      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
         <CodigoRegistro valor={orcamento.idOrcamento} />
       </CelulaLayoutOrcamento>
     );
@@ -1223,23 +1235,29 @@ function renderizarCelulaOrcamento({
 
   if (coluna.id === 'cliente') {
     return (
-      <CelulaLayoutOrcamento coluna={coluna} {...propriedadesCelula}>
+      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
         <TextoGradeClamp>{obterValorGrid(orcamento.nomeCliente)}</TextoGradeClamp>
       </CelulaLayoutOrcamento>
     );
   }
 
   if (coluna.id === 'idCliente') {
+    const cliente = (Array.isArray(clientes) ? clientes : []).find(
+      (item) => String(item.idCliente) === String(orcamento.idCliente)
+    );
+
     return (
-      <CelulaLayoutOrcamento coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(orcamento.nomeCliente)}</TextoGradeClamp>
+      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
+        {orcamento.idCliente
+          ? <CodigoRegistro valor={formatarCodigoCliente(cliente || { idCliente: orcamento.idCliente }, empresa).replace('#', '')} />
+          : '-'}
       </CelulaLayoutOrcamento>
     );
   }
 
   if (coluna.id === 'contato') {
     return (
-      <CelulaLayoutOrcamento coluna={coluna} {...propriedadesCelula}>
+      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
         <TextoGradeClamp>{obterValorGrid(orcamento.nomeContato)}</TextoGradeClamp>
       </CelulaLayoutOrcamento>
     );
@@ -1247,23 +1265,31 @@ function renderizarCelulaOrcamento({
 
   if (coluna.id === 'idContato') {
     return (
-      <CelulaLayoutOrcamento coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(orcamento.nomeContato)}</TextoGradeClamp>
+      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
+        {orcamento.idContato ? <CodigoRegistro valor={orcamento.idContato} /> : '-'}
       </CelulaLayoutOrcamento>
     );
   }
 
-  if (coluna.id === 'usuario' || coluna.id === 'idUsuario') {
+  if (coluna.id === 'usuario') {
     return (
-      <CelulaLayoutOrcamento coluna={coluna} {...propriedadesCelula}>
+      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
         <TextoGradeClamp>{obterValorGrid(orcamento.nomeUsuario)}</TextoGradeClamp>
+      </CelulaLayoutOrcamento>
+    );
+  }
+
+  if (coluna.id === 'idUsuario') {
+    return (
+      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
+        {orcamento.idUsuario ? <CodigoRegistro valor={orcamento.idUsuario} /> : '-'}
       </CelulaLayoutOrcamento>
     );
   }
 
   if (coluna.id === 'idPedidoVinculado') {
     return (
-      <CelulaLayoutOrcamento coluna={coluna} {...propriedadesCelula}>
+      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
         {orcamento.idPedidoVinculado ? (
           <CodigoRegistro valor={orcamento.idPedidoVinculado} />
         ) : (
@@ -1275,8 +1301,8 @@ function renderizarCelulaOrcamento({
 
   if (coluna.id === 'idVendedor') {
     return (
-      <CelulaLayoutOrcamento coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(orcamento.nomeVendedor)}</TextoGradeClamp>
+      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
+        {orcamento.idVendedor ? <CodigoRegistro valor={orcamento.idVendedor} /> : '-'}
       </CelulaLayoutOrcamento>
     );
   }
@@ -1288,7 +1314,7 @@ function renderizarCelulaOrcamento({
     );
 
     return (
-      <CelulaLayoutOrcamento coluna={coluna} {...propriedadesCelula}>
+      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
         <div className="campoEtapaGridOrcamento">
           <select
             className="selectEtapaGridOrcamento"
@@ -1312,15 +1338,15 @@ function renderizarCelulaOrcamento({
 
   if (coluna.id === 'idEtapaOrcamento') {
     return (
-      <CelulaLayoutOrcamento coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(orcamento.nomeEtapaOrcamento)}</TextoGradeClamp>
+      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
+        {orcamento.idEtapaOrcamento ? <CodigoRegistro valor={orcamento.idEtapaOrcamento} /> : '-'}
       </CelulaLayoutOrcamento>
     );
   }
 
   if (coluna.id === 'vendedor') {
     return (
-      <CelulaLayoutOrcamento coluna={coluna} {...propriedadesCelula}>
+      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
         <TextoGradeClamp>{obterValorGrid(orcamento.nomeVendedor)}</TextoGradeClamp>
       </CelulaLayoutOrcamento>
     );
@@ -1328,23 +1354,31 @@ function renderizarCelulaOrcamento({
 
   if (coluna.id === 'comissao') {
     return (
-      <CelulaLayoutOrcamento coluna={coluna} {...propriedadesCelula}>
+      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
         {normalizarPreco(orcamento.comissao || 0)}
       </CelulaLayoutOrcamento>
     );
   }
 
-  if (coluna.id === 'prazoPagamento' || coluna.id === 'idPrazoPagamento') {
+  if (coluna.id === 'prazoPagamento') {
     return (
-      <CelulaLayoutOrcamento coluna={coluna} {...propriedadesCelula}>
+      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
         <TextoGradeClamp>{obterValorGrid(orcamento.nomePrazoPagamento)}</TextoGradeClamp>
+      </CelulaLayoutOrcamento>
+    );
+  }
+
+  if (coluna.id === 'idPrazoPagamento') {
+    return (
+      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
+        {orcamento.idPrazoPagamento ? <CodigoRegistro valor={orcamento.idPrazoPagamento} /> : '-'}
       </CelulaLayoutOrcamento>
     );
   }
 
   if (coluna.id === 'metodoPagamento') {
     return (
-      <CelulaLayoutOrcamento coluna={coluna} {...propriedadesCelula}>
+      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
         <TextoGradeClamp>{obterValorGrid(orcamento.nomeMetodoPagamento)}</TextoGradeClamp>
       </CelulaLayoutOrcamento>
     );
@@ -1352,7 +1386,7 @@ function renderizarCelulaOrcamento({
 
   if (coluna.id === 'idMotivoPerda') {
     return (
-      <CelulaLayoutOrcamento coluna={coluna} {...propriedadesCelula}>
+      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
         <TextoGradeClamp>{obterValorGrid(orcamento.nomeMotivoPerda)}</TextoGradeClamp>
       </CelulaLayoutOrcamento>
     );
@@ -1360,7 +1394,7 @@ function renderizarCelulaOrcamento({
 
   if (coluna.id === 'dataInclusao') {
     return (
-      <CelulaLayoutOrcamento coluna={coluna} {...propriedadesCelula}>
+      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
         {formatarDataGridOrcamento(orcamento.dataInclusao)}
       </CelulaLayoutOrcamento>
     );
@@ -1368,7 +1402,7 @@ function renderizarCelulaOrcamento({
 
   if (coluna.id === 'dataValidade') {
     return (
-      <CelulaLayoutOrcamento coluna={coluna} {...propriedadesCelula}>
+      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
         {formatarDataGridOrcamento(orcamento.dataValidade)}
       </CelulaLayoutOrcamento>
     );
@@ -1376,7 +1410,7 @@ function renderizarCelulaOrcamento({
 
   if (coluna.id === 'dataFechamento') {
     return (
-      <CelulaLayoutOrcamento coluna={coluna} {...propriedadesCelula}>
+      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
         {formatarDataGridOrcamento(orcamento.dataFechamento)}
       </CelulaLayoutOrcamento>
     );
@@ -1384,7 +1418,7 @@ function renderizarCelulaOrcamento({
 
   if (coluna.id === 'observacao') {
     return (
-      <CelulaLayoutOrcamento coluna={coluna} {...propriedadesCelula}>
+      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
         <TextoGradeClamp>{obterValorGrid(orcamento.observacao)}</TextoGradeClamp>
       </CelulaLayoutOrcamento>
     );
@@ -1392,7 +1426,7 @@ function renderizarCelulaOrcamento({
 
   if (coluna.id === 'total') {
     return (
-      <CelulaLayoutOrcamento coluna={coluna} {...propriedadesCelula}>
+      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
         {normalizarPreco(orcamento.totalOrcamento)}
       </CelulaLayoutOrcamento>
     );
@@ -1400,10 +1434,10 @@ function renderizarCelulaOrcamento({
 
   if (coluna.id === 'acoes') {
     return (
-      <CelulaLayoutOrcamento coluna={coluna} {...propriedadesCelula}>
+      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
         <AcoesRegistro
           rotuloConsulta="Consultar orcamento"
-          rotuloEdicao={permitirEdicao ? 'Editar orcamento' : 'Orcamento fechado: usuario padrao consulta apenas.'}
+          rotuloEdicao={permitirEdicao ? 'Editar orcamento' : obterRotuloBloqueioEdicaoOrcamento(orcamento, usuarioLogado)}
           rotuloInativacao="Excluir orcamento"
           iconeInativacao="limpar"
           exibirInativacao={permitirExcluir && !orcamento.idPedidoVinculado}
@@ -1834,6 +1868,34 @@ function entrouEmEtapaFechada(idEtapaAnterior, idEtapaAtual) {
 
 function orcamentoBloqueadoParaUsuarioPadrao(orcamento, usuarioLogado) {
   return usuarioLogado?.tipo === 'Usuario padrao' && etapaOrcamentoEhFechadoPorId(orcamento?.idEtapaOrcamento);
+}
+
+function orcamentoBloqueadoParaEdicao(orcamento, usuarioLogado) {
+  if (Number(orcamento?.idPedidoVinculado) > 0) {
+    return true;
+  }
+
+  if (Number(orcamento?.idEtapaOrcamento) === ID_ETAPA_ORCAMENTO_RECUSADO) {
+    return true;
+  }
+
+  return orcamentoBloqueadoParaUsuarioPadrao(orcamento, usuarioLogado);
+}
+
+function obterRotuloBloqueioEdicaoOrcamento(orcamento, usuarioLogado) {
+  if (Number(orcamento?.idPedidoVinculado) > 0) {
+    return 'Orcamento com pedido vinculado: consulta apenas.';
+  }
+
+  if (Number(orcamento?.idEtapaOrcamento) === ID_ETAPA_ORCAMENTO_RECUSADO) {
+    return 'Orcamento recusado: consulta apenas.';
+  }
+
+  if (orcamentoBloqueadoParaUsuarioPadrao(orcamento, usuarioLogado)) {
+    return 'Orcamento fechado: usuario padrao consulta apenas.';
+  }
+
+  return 'Editar orcamento';
 }
 
 function etapaOrcamentoEhFechamento(etapa) {

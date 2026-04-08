@@ -1,4 +1,5 @@
 import { Botao } from './botao';
+import { MensagemErroPopup } from './mensagemErroPopup';
 import { CampoImagemPadrao } from './campoImagemPadrao';
 import { ModalBuscaTabela } from './modalBuscaTabela';
 
@@ -115,7 +116,7 @@ export function ModalItemProduto({
               </div>
             </div>
           </div>
-          {mensagemErro ? <p className="mensagemErroFormulario">{mensagemErro}</p> : null}
+          <MensagemErroPopup mensagem={mensagemErro} titulo="Nao foi possivel salvar o item." />
         </div>
 
         <ModalBuscaTabela

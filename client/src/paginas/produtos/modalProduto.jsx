@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Botao } from '../../componentes/comuns/botao';
+import { MensagemErroPopup } from '../../componentes/comuns/mensagemErroPopup';
 import { CampoImagemPadrao } from '../../componentes/comuns/campoImagemPadrao';
 import { CodigoRegistro } from '../../componentes/comuns/codigoRegistro';
 import { ModalFiltros } from '../../componentes/comuns/modalFiltros';
@@ -584,7 +585,7 @@ export function ModalProduto({
             ) : null}
           </div>
 
-          {mensagemErro ? <p className="mensagemErroFormulario">{mensagemErro}</p> : null}
+          <MensagemErroPopup mensagem={mensagemErro} titulo="Nao foi possivel salvar o produto." />
 
           {confirmandoSaida ? (
             <div className="camadaConfirmacaoModal" role="presentation" onMouseDown={fecharConfirmacaoSaida}>

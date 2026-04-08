@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Botao } from '../../componentes/comuns/botao';
+import { MensagemErroPopup } from '../../componentes/comuns/mensagemErroPopup';
 import { CampoSelecaoMultiplaModal } from '../../componentes/comuns/campoSelecaoMultiplaModal';
 import { CampoImagemPadrao } from '../../componentes/comuns/campoImagemPadrao';
 import { buscarCep } from '../../servicos/empresa';
@@ -402,7 +403,7 @@ export function ModalEmpresa({
           ) : null}
         </div>
 
-        {mensagemErro ? <p className="mensagemErroFormulario">{mensagemErro}</p> : null}
+        <MensagemErroPopup mensagem={mensagemErro} titulo="Nao foi possivel salvar a empresa." />
       </form>
     </div>
   );

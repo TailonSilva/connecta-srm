@@ -149,10 +149,8 @@ export function ModalManualOrcamentos({
         },
         {
           titulo: 'Consulta em etapas finais',
-          descricao: usuarioLogado?.tipo === 'Usuario padrao'
-            ? 'Quando o orcamento entra em Fechado, Fechado sem pedido, Pedido Excluido ou Recusado, Usuario padrao passa a consultar sem editar.'
-            : 'As etapas finais do orcamento mantem o bloqueio de edicao apenas para Usuario padrao.',
-          detalhe: 'A validacao usa sempre os IDs fixos 1, 2, 3 e 4 das etapas obrigatorias do sistema.',
+          descricao: 'Orcamentos na etapa Recusado ou com pedido vinculado ficam somente para consulta por qualquer usuario.',
+          detalhe: 'A edicao volta a ser permitida apenas quando o pedido vinculado e excluido, levando o orcamento para a etapa tecnica Pedido Excluido.',
           icone: 'usuarios'
         }
       ]}

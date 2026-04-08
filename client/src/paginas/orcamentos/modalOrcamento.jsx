@@ -6,6 +6,7 @@ import { ModalBuscaClientes } from '../../componentes/comuns/modalBuscaClientes'
 import { ModalBuscaContatos } from '../../componentes/comuns/modalBuscaContatos';
 import { ModalItemProduto } from '../../componentes/comuns/modalItemProduto';
 import { PopupAvisos } from '../../componentes/comuns/popupAvisos';
+import { MensagemErroPopup } from '../../componentes/comuns/mensagemErroPopup';
 import { ModalPrazosPagamento } from '../configuracoes/modalPrazosPagamento';
 import { formatarNomeContato } from '../../utilitarios/formatarNomeContato';
 import { useFormularioItemProduto } from '../../utilitarios/useFormularioItemProduto';
@@ -942,7 +943,7 @@ export function ModalOrcamento({
           ) : null}
         </div>
 
-        {mensagemErro ? <p className="mensagemErroFormulario">{mensagemErro}</p> : null}
+        <MensagemErroPopup mensagem={mensagemErro} titulo="Nao foi possivel salvar o orcamento." />
 
         {confirmandoSaida ? (
           <div className="camadaConfirmacaoModal" role="presentation" onMouseDown={() => definirConfirmandoSaida(false)}>

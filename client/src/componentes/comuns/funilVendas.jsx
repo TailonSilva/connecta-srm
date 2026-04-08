@@ -3,6 +3,7 @@ import '../../recursos/estilos/funilVendas.css';
 import { FunilVendasCabecalho } from './funilVendasCabecalho';
 import { FunilVendasGrafico } from './funilVendasGrafico';
 import { FunilVendasCardDetalhe } from './funilVendasCardDetalhe';
+import { MensagemErroPopup } from './mensagemErroPopup';
 
 export function FunilVendas({ etapas = [], carregando = false, mensagemErro = '' }) {
   const totalOrcamentos = etapas.reduce((total, etapa) => total + (Number(etapa.quantidadeOrcamentos) || 0), 0);
@@ -85,15 +86,18 @@ export function FunilVendas({ etapas = [], carregando = false, mensagemErro = ''
 
   if (mensagemErro) {
     return (
-      <section className="funilVendasPainel" aria-label="Funil de vendas">
-        <header className="funilVendasCabecalho">
-          <div>
-            <span className="funilVendasCabecalhoRotulo">Funil de vendas</span>
-            <h2>Visao Por Etapa Do Orcamento</h2>
-          </div>
-        </header>
-        <p className="funilVendasMensagem">{mensagemErro}</p>
-      </section>
+      <>
+        <MensagemErroPopup mensagem={mensagemErro} />
+        <section className="funilVendasPainel" aria-label="Funil de vendas">
+          <header className="funilVendasCabecalho">
+            <div>
+              <span className="funilVendasCabecalhoRotulo">Funil de vendas</span>
+              <h2>Visao Por Etapa Do Orcamento</h2>
+            </div>
+          </header>
+          <p className="funilVendasMensagem">{mensagemErro}</p>
+        </section>
+      </>
     );
   }
 

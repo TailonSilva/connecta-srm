@@ -346,7 +346,9 @@ Filtros da agenda:
 - Quando a troca para uma etapa final acontece pelo grid, a `Data de fechamento` usa automaticamente a data atual
 - Dentro do modal do orcamento, a `Data de fechamento` pode ser ajustada manualmente antes de salvar
 - O filtro da pagina de orcamentos tem um botao unico de `Datas` que abre um modal com os intervalos de `Data de inclusao` e `Data de fechamento`
-- Quando o orcamento esta nas etapas `Fechado`, `Fechado sem pedido`, `Pedido Excluido` ou `Recusado`, o perfil `Usuario padrao` passa a consultar sem editar
+- Orcamentos na etapa `Recusado` ficam somente para consulta por qualquer usuario
+- Orcamentos com `pedido vinculado` tambem ficam somente para consulta por qualquer usuario
+- A edicao do orcamento volta a ser permitida apenas quando o pedido vinculado e excluido, levando o registro para a etapa tecnica `Pedido Excluido`
 - Modais de confirmacao do fluxo comercial abrem como sobreposicao fixa acima da pagina, inclusive no lancamento de pedido a partir do grid
 - Campos configuraveis extras para o orcamento
 - Os campos `Prazo de pagamento` nos modais de orcamento e pedido reutilizam o mesmo grid de `Prazos de pagamento` da area de Configuracoes, permitindo cadastrar, editar, inativar e selecionar o prazo sem sair do fluxo

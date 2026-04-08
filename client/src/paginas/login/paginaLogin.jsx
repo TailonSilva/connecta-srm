@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Botao } from '../../componentes/comuns/botao';
+import { MensagemErroPopup } from '../../componentes/comuns/mensagemErroPopup';
 import '../../recursos/estilos/paginaLogin.css';
 import { autenticarUsuario } from '../../servicos/autenticacao';
 import { listarEmpresas } from '../../servicos/empresa';
@@ -84,7 +85,7 @@ export function PaginaLogin({ aoEntrar }) {
             />
           </div>
 
-          {mensagemErro ? <p className="mensagemErroFormulario paginaLoginMensagemErro">{mensagemErro}</p> : null}
+          <MensagemErroPopup mensagem={mensagemErro} titulo="Nao foi possivel entrar." />
 
           <Botao variante="primario" type="submit" disabled={carregando}>
             {carregando ? 'Entrando...' : 'Entrar'}

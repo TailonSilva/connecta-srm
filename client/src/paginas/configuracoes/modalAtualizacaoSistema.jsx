@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Botao } from '../../componentes/comuns/botao';
+import { MensagemErroPopup } from '../../componentes/comuns/mensagemErroPopup';
 
 const formularioInicial = {
   urlRepositorio: ''
@@ -280,7 +281,7 @@ export function ModalAtualizacaoSistema({
           </div>
         </div>
 
-        {mensagemErro ? <p className="mensagemErroFormulario">{mensagemErro}</p> : null}
+        <MensagemErroPopup mensagem={mensagemErro} titulo="Nao foi possivel concluir a atualizacao." />
         {mensagemSucesso ? <p className="mensagemSucessoFormulario">{mensagemSucesso}</p> : null}
       </form>
     </div>

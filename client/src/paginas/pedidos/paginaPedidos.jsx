@@ -24,6 +24,7 @@ import { atualizarPedido, excluirPedido, incluirPedido, listarPedidos } from '..
 import { listarProdutos } from '../../servicos/produtos';
 import { listarUsuarios } from '../../servicos/usuarios';
 import { normalizarPreco } from '../../utilitarios/normalizarPreco';
+import { formatarCodigoCliente } from '../../utilitarios/codigoCliente';
 import { obterValorGrid } from '../../utilitarios/valorPadraoGrid';
 import {
   normalizarColunasGridPedidos,
@@ -523,6 +524,8 @@ export function PaginaPedidos({ usuarioLogado }) {
               pedido={pedido}
               colunas={colunasVisiveisPedidos}
               etapasPedido={etapasPedido}
+              empresa={empresa}
+              clientes={clientes}
               permitirExcluir={permitirExcluir}
               permitirEdicao={!pedidoBloqueadoParaUsuarioPadrao(pedido, usuarioLogado)}
               permitirAlteracaoEtapa={!pedidoBloqueadoParaUsuarioPadrao(pedido, usuarioLogado)}
@@ -769,6 +772,8 @@ function LinhaPedido({
   pedido,
   colunas,
   etapasPedido,
+  empresa,
+  clientes,
   permitirExcluir,
   permitirEdicao,
   permitirAlteracaoEtapa,
@@ -783,6 +788,8 @@ function LinhaPedido({
         coluna,
         pedido,
         etapasPedido,
+        empresa,
+        clientes,
         permitirExcluir,
         permitirEdicao,
         permitirAlteracaoEtapa,
@@ -799,6 +806,8 @@ function renderizarCelulaPedido({
   coluna,
   pedido,
   etapasPedido,
+  empresa,
+  clientes,
   permitirExcluir,
   permitirEdicao,
   permitirAlteracaoEtapa,
@@ -837,7 +846,7 @@ function renderizarCelulaPedido({
     );
   }
 
-  if (coluna.id === 'cliente' || coluna.id === 'idCliente') {
+  if (coluna.id === 'cliente') {
     return (
       <CelulaLayoutPedido coluna={coluna} {...propriedadesCelula}>
         <TextoGradeClamp>{obterValorGrid(pedido.nomeClienteSnapshot)}</TextoGradeClamp>
@@ -845,7 +854,21 @@ function renderizarCelulaPedido({
     );
   }
 
-  if (coluna.id === 'contato' || coluna.id === 'idContato') {
+  if (coluna.id === 'idCliente') {
+    const cliente = (Array.isArray(clientes) ? clientes : []).find(
+      (item) => String(item.idCliente) === String(pedido.idCliente)
+    );
+
+    return (
+      <CelulaLayoutPedido coluna={coluna} {...propriedadesCelula}>
+        {pedido.idCliente
+          ? <CodigoRegistro valor={formatarCodigoCliente(cliente || { idCliente: pedido.idCliente }, empresa).replace('#', '')} />
+          : '-'}
+      </CelulaLayoutPedido>
+    );
+  }
+
+  if (coluna.id === 'contato') {
     return (
       <CelulaLayoutPedido coluna={coluna} {...propriedadesCelula}>
         <TextoGradeClamp>{obterValorGrid(pedido.nomeContatoSnapshot)}</TextoGradeClamp>
@@ -853,7 +876,15 @@ function renderizarCelulaPedido({
     );
   }
 
-  if (coluna.id === 'usuario' || coluna.id === 'idUsuario') {
+  if (coluna.id === 'idContato') {
+    return (
+      <CelulaLayoutPedido coluna={coluna} {...propriedadesCelula}>
+        {pedido.idContato ? <CodigoRegistro valor={pedido.idContato} /> : '-'}
+      </CelulaLayoutPedido>
+    );
+  }
+
+  if (coluna.id === 'usuario') {
     return (
       <CelulaLayoutPedido coluna={coluna} {...propriedadesCelula}>
         <TextoGradeClamp>{obterValorGrid(pedido.nomeUsuarioSnapshot)}</TextoGradeClamp>
@@ -861,10 +892,26 @@ function renderizarCelulaPedido({
     );
   }
 
-  if (coluna.id === 'vendedor' || coluna.id === 'idVendedor') {
+  if (coluna.id === 'idUsuario') {
+    return (
+      <CelulaLayoutPedido coluna={coluna} {...propriedadesCelula}>
+        {pedido.idUsuario ? <CodigoRegistro valor={pedido.idUsuario} /> : '-'}
+      </CelulaLayoutPedido>
+    );
+  }
+
+  if (coluna.id === 'vendedor') {
     return (
       <CelulaLayoutPedido coluna={coluna} {...propriedadesCelula}>
         <TextoGradeClamp>{obterValorGrid(pedido.nomeVendedorSnapshot)}</TextoGradeClamp>
+      </CelulaLayoutPedido>
+    );
+  }
+
+  if (coluna.id === 'idVendedor') {
+    return (
+      <CelulaLayoutPedido coluna={coluna} {...propriedadesCelula}>
+        {pedido.idVendedor ? <CodigoRegistro valor={pedido.idVendedor} /> : '-'}
       </CelulaLayoutPedido>
     );
   }
@@ -897,7 +944,7 @@ function renderizarCelulaPedido({
   if (coluna.id === 'idEtapaPedido') {
     return (
       <CelulaLayoutPedido coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(pedido.nomeEtapaPedidoSnapshot)}</TextoGradeClamp>
+        {pedido.idEtapaPedido ? <CodigoRegistro valor={pedido.idEtapaPedido} /> : '-'}
       </CelulaLayoutPedido>
     );
   }
@@ -910,10 +957,18 @@ function renderizarCelulaPedido({
     );
   }
 
-  if (coluna.id === 'prazoPagamento' || coluna.id === 'idPrazoPagamento') {
+  if (coluna.id === 'prazoPagamento') {
     return (
       <CelulaLayoutPedido coluna={coluna} {...propriedadesCelula}>
         <TextoGradeClamp>{obterValorGrid(pedido.nomePrazoPagamentoSnapshot)}</TextoGradeClamp>
+      </CelulaLayoutPedido>
+    );
+  }
+
+  if (coluna.id === 'idPrazoPagamento') {
+    return (
+      <CelulaLayoutPedido coluna={coluna} {...propriedadesCelula}>
+        {pedido.idPrazoPagamento ? <CodigoRegistro valor={pedido.idPrazoPagamento} /> : '-'}
       </CelulaLayoutPedido>
     );
   }

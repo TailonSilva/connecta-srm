@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Botao } from '../../componentes/comuns/botao';
+import { MensagemErroPopup } from '../../componentes/comuns/mensagemErroPopup';
 import { BotaoAcaoGrade } from '../../componentes/comuns/botaoAcaoGrade';
 import {
   normalizarConfiguracoesColunasGridOrcamentos,
@@ -247,7 +248,7 @@ export function ModalColunasGridOrcamentos({
           </section>
         </div>
 
-        {mensagemErro ? <p className="mensagemErroFormulario">{mensagemErro}</p> : null}
+        <MensagemErroPopup mensagem={mensagemErro} titulo="Nao foi possivel salvar as colunas do grid." />
       </form>
 
       {colunaEmEdicao ? (
@@ -314,28 +315,31 @@ function obterRotuloConfiguracaoColuna(coluna) {
     return 'Cliente do Orcamento';
   }
   if (coluna.id === 'idCliente') {
-    return 'Cliente Vinculado ao Orcamento';
+    return 'Codigo do Cliente';
   }
   if (coluna.id === 'contato') {
     return 'Contato do Cliente';
   }
   if (coluna.id === 'idContato') {
-    return 'Contato Vinculado ao Orcamento';
+    return 'Codigo do Contato';
   }
-  if (coluna.id === 'usuario' || coluna.id === 'idUsuario') {
+  if (coluna.id === 'usuario') {
     return 'Usuario do Registro';
   }
+  if (coluna.id === 'idUsuario') {
+    return 'Codigo do Usuario';
+  }
   if (coluna.id === 'idPedidoVinculado') {
-    return 'Numero do Pedido Vinculado';
+    return 'Codigo do Pedido Vinculado';
   }
   if (coluna.id === 'idVendedor') {
-    return 'Vendedor Vinculado ao Orcamento';
+    return 'Codigo do Vendedor';
   }
   if (coluna.id === 'etapa') {
     return 'Etapa do Orcamento';
   }
   if (coluna.id === 'idEtapaOrcamento') {
-    return 'Etapa Vinculada ao Orcamento';
+    return 'Codigo da Etapa';
   }
   if (coluna.id === 'vendedor') {
     return 'Vendedor do Orcamento';
@@ -343,8 +347,11 @@ function obterRotuloConfiguracaoColuna(coluna) {
   if (coluna.id === 'comissao') {
     return 'Comissao do Orcamento';
   }
-  if (coluna.id === 'prazoPagamento' || coluna.id === 'idPrazoPagamento') {
+  if (coluna.id === 'prazoPagamento') {
     return 'Prazo de Pagamento';
+  }
+  if (coluna.id === 'idPrazoPagamento') {
+    return 'Codigo do Prazo';
   }
   if (coluna.id === 'metodoPagamento') {
     return 'Metodo de Pagamento';

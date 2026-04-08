@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Botao } from '../../componentes/comuns/botao';
+import { MensagemErroPopup } from '../../componentes/comuns/mensagemErroPopup';
 import { BotaoAcaoGrade } from '../../componentes/comuns/botaoAcaoGrade';
 import {
   normalizarConfiguracoesColunasGridPedidos,
@@ -273,7 +274,7 @@ export function ModalColunasGridPedidos({
           </section>
         </div>
 
-        {mensagemErro ? <p className="mensagemErroFormulario">{mensagemErro}</p> : null}
+        <MensagemErroPopup mensagem={mensagemErro} titulo="Nao foi possivel salvar as colunas do grid." />
       </form>
 
       {colunaEmEdicao ? (
@@ -368,31 +369,49 @@ function obterRotuloConfiguracaoColuna(coluna) {
   }
 
   if (coluna.id === 'idOrcamento' || coluna.id === 'codigoOrcamentoOrigem') {
-    return 'Orcamento de Origem';
+    return 'Codigo do Orcamento de Origem';
   }
 
-  if (coluna.id === 'cliente' || coluna.id === 'idCliente') {
+  if (coluna.id === 'cliente') {
     return 'Cliente do Pedido';
   }
+  if (coluna.id === 'idCliente') {
+    return 'Codigo do Cliente';
+  }
 
-  if (coluna.id === 'contato' || coluna.id === 'idContato') {
+  if (coluna.id === 'contato') {
     return 'Contato do Cliente';
   }
+  if (coluna.id === 'idContato') {
+    return 'Codigo do Contato';
+  }
 
-  if (coluna.id === 'usuario' || coluna.id === 'idUsuario') {
+  if (coluna.id === 'usuario') {
     return 'Usuario do Registro';
   }
+  if (coluna.id === 'idUsuario') {
+    return 'Codigo do Usuario';
+  }
 
-  if (coluna.id === 'vendedor' || coluna.id === 'idVendedor') {
+  if (coluna.id === 'vendedor') {
     return 'Vendedor do Pedido';
   }
-
-  if (coluna.id === 'etapa' || coluna.id === 'idEtapaPedido') {
-    return 'Etapa do Pedido';
+  if (coluna.id === 'idVendedor') {
+    return 'Codigo do Vendedor';
   }
 
-  if (coluna.id === 'prazoPagamento' || coluna.id === 'idPrazoPagamento') {
+  if (coluna.id === 'etapa') {
+    return 'Etapa do Pedido';
+  }
+  if (coluna.id === 'idEtapaPedido') {
+    return 'Codigo da Etapa';
+  }
+
+  if (coluna.id === 'prazoPagamento') {
     return 'Prazo de Pagamento';
+  }
+  if (coluna.id === 'idPrazoPagamento') {
+    return 'Codigo do Prazo';
   }
 
   if (coluna.id === 'metodoPagamento') {

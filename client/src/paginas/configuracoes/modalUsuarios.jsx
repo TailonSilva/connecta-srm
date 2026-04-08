@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Botao } from '../../componentes/comuns/botao';
+import { MensagemErroPopup } from '../../componentes/comuns/mensagemErroPopup';
 import { BotaoAcaoGrade } from '../../componentes/comuns/botaoAcaoGrade';
 import { CampoImagemPadrao } from '../../componentes/comuns/campoImagemPadrao';
 import { CodigoRegistro } from '../../componentes/comuns/codigoRegistro';
@@ -403,7 +404,7 @@ export function ModalUsuarios({
                 </div>
               </div>
 
-              {mensagemErro ? <p className="mensagemErroFormulario">{mensagemErro}</p> : null}
+              <MensagemErroPopup mensagem={mensagemErro} titulo="Nao foi possivel salvar o usuario." />
             </form>
           </div>
         ) : null}

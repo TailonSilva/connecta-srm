@@ -466,7 +466,10 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
   }
 
   async function salvarEmpresa(dadosEmpresa) {
-    const payload = normalizarPayloadEmpresa(dadosEmpresa);
+    const payload = normalizarPayloadEmpresa({
+      ...(empresa || {}),
+      ...dadosEmpresa
+    });
 
     if (empresa?.idEmpresa) {
       await atualizarEmpresa(empresa.idEmpresa, payload);

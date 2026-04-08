@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Botao } from '../../componentes/comuns/botao';
+import { MensagemErroPopup } from '../../componentes/comuns/mensagemErroPopup';
 
 const formularioInicial = {
   corPrimariaOrcamento: '#111827',
@@ -149,7 +150,7 @@ export function ModalLayoutOrcamento({
           </section>
         </div>
 
-        {mensagemErro ? <p className="mensagemErroFormulario">{mensagemErro}</p> : null}
+        <MensagemErroPopup mensagem={mensagemErro} titulo="Nao foi possivel salvar o layout do orcamento." />
       </form>
     </div>
   );

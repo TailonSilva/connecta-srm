@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Botao } from '../../componentes/comuns/botao';
+import { MensagemErroPopup } from '../../componentes/comuns/mensagemErroPopup';
 import { CampoSelecaoMultiplaModal } from '../../componentes/comuns/campoSelecaoMultiplaModal';
 import { formatarNomeContato } from '../../utilitarios/formatarNomeContato';
 import { normalizarValorEntradaFormulario } from '../../utilitarios/normalizarTextoFormulario';
@@ -367,7 +368,7 @@ export function ModalAgendamento({
           </div>
         </div>
 
-        {mensagemErro ? <p className="mensagemErroFormulario">{mensagemErro}</p> : null}
+        <MensagemErroPopup mensagem={mensagemErro} titulo="Nao foi possivel salvar o agendamento." />
 
         {confirmandoExclusao ? (
           <div className="camadaConfirmacaoModal" role="presentation" onMouseDown={fecharConfirmacaoExclusao}>

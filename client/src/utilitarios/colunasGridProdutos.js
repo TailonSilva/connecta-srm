@@ -1,5 +1,6 @@
 export const TOTAL_COLUNAS_GRID_PRODUTOS = 100;
 const BASE_LEGADA_COLUNAS_GRID_PRODUTOS = 24;
+const MAX_SPAN_COLUNA_OCULTA = 19;
 
 export const colunasGridProdutos = [
   {
@@ -18,7 +19,6 @@ export const colunasGridProdutos = [
     obrigatoria: false,
     ordemPadrao: 2,
     spanPadrao: 1,
-    spanFixo: 1,
     visivelPadrao: true
   },
   {
@@ -28,7 +28,6 @@ export const colunasGridProdutos = [
     obrigatoria: false,
     ordemPadrao: 3,
     spanPadrao: 1,
-    spanFixo: 1,
     visivelPadrao: false
   },
   {
@@ -119,7 +118,6 @@ export const colunasGridProdutos = [
     obrigatoria: false,
     ordemPadrao: 13,
     spanPadrao: 1,
-    spanFixo: 1,
     visivelPadrao: true
   },
   {
@@ -129,7 +127,6 @@ export const colunasGridProdutos = [
     obrigatoria: true,
     ordemPadrao: 14,
     spanPadrao: 2,
-    spanFixo: 2,
     visivelPadrao: true
   }
 ];
@@ -194,7 +191,10 @@ export function normalizarConfiguracoesColunasGridProdutos(valor) {
         normalizarBaseConfiguracao(configuracao?.base, TOTAL_COLUNAS_GRID_PRODUTOS)
       )
     };
-  });
+  }).map((coluna) => ({
+    ...coluna,
+    span: ajustarSpanColunaOculta(coluna.span, coluna.visivel || coluna.obrigatoria, coluna.spanPadrao)
+  }));
 
   return reordenarConfiguracoesColunasGridProdutos(configuracoesNormalizadas);
 }
@@ -210,11 +210,16 @@ export function reordenarConfiguracoesColunasGridProdutos(configuracoes) {
   const visiveis = lista
     .filter((coluna) => coluna.visivel || coluna.obrigatoria)
     .sort(ordenarColunasGridProdutos)
-    .map((coluna, indice) => ({
+    .map((coluna) => ({
       ...coluna,
-      visivel: coluna.obrigatoria ? true : Boolean(coluna.visivel),
-      ordem: indice + 1
+      visivel: coluna.obrigatoria ? true : Boolean(coluna.visivel)
     }));
+  const colunasFixasNoFim = visiveis.filter((coluna) => coluna.id === 'acoes');
+  const colunasReordenaveis = visiveis.filter((coluna) => coluna.id !== 'acoes');
+  const visiveisReordenadas = [...colunasReordenaveis, ...colunasFixasNoFim].map((coluna, indice) => ({
+    ...coluna,
+    ordem: indice + 1
+  }));
   const invisiveis = lista
     .filter((coluna) => !coluna.visivel && !coluna.obrigatoria)
     .sort((colunaA, colunaB) => (colunaA.ordemPadrao || 0) - (colunaB.ordemPadrao || 0))
@@ -223,7 +228,7 @@ export function reordenarConfiguracoesColunasGridProdutos(configuracoes) {
       ordem: null
     }));
 
-  return [...visiveis, ...invisiveis];
+  return [...visiveisReordenadas, ...invisiveis];
 }
 
 export function reposicionarConfiguracaoColunaGridProdutos(configuracoes, idColuna, ordemDesejada) {
@@ -231,6 +236,8 @@ export function reposicionarConfiguracaoColunaGridProdutos(configuracoes, idColu
   const visiveisOrdenadas = lista
     .filter((coluna) => coluna.visivel || coluna.obrigatoria)
     .sort(ordenarColunasGridProdutos);
+  const colunasFixasNoFim = visiveisOrdenadas.filter((coluna) => coluna.id === 'acoes');
+  const colunasReordenaveis = visiveisOrdenadas.filter((coluna) => coluna.id !== 'acoes');
   const invisiveis = lista
     .filter((coluna) => !coluna.visivel && !coluna.obrigatoria)
     .sort((colunaA, colunaB) => (colunaA.ordemPadrao || 0) - (colunaB.ordemPadrao || 0))
@@ -238,19 +245,23 @@ export function reposicionarConfiguracaoColunaGridProdutos(configuracoes, idColu
       ...coluna,
       ordem: null
     }));
-  const indiceAtual = visiveisOrdenadas.findIndex((coluna) => coluna.id === idColuna);
+  if (idColuna === 'acoes') {
+    return reordenarConfiguracoesColunasGridProdutos(lista);
+  }
+
+  const indiceAtual = colunasReordenaveis.findIndex((coluna) => coluna.id === idColuna);
 
   if (indiceAtual === -1) {
     return reordenarConfiguracoesColunasGridProdutos(lista);
   }
 
-  const [colunaReposicionada] = visiveisOrdenadas.splice(indiceAtual, 1);
+  const [colunaReposicionada] = colunasReordenaveis.splice(indiceAtual, 1);
   const ordemNormalizada = normalizarNumeroInteiro(ordemDesejada, colunaReposicionada.ordem || 1);
-  const indiceDestino = Math.max(0, Math.min(visiveisOrdenadas.length, ordemNormalizada - 1));
+  const indiceDestino = Math.max(0, Math.min(colunasReordenaveis.length, ordemNormalizada - 1));
 
-  visiveisOrdenadas.splice(indiceDestino, 0, colunaReposicionada);
+  colunasReordenaveis.splice(indiceDestino, 0, colunaReposicionada);
 
-  const visiveisReordenadas = visiveisOrdenadas.map((coluna, indice) => ({
+  const visiveisReordenadas = [...colunasReordenaveis, ...colunasFixasNoFim].map((coluna, indice) => ({
     ...coluna,
     visivel: coluna.obrigatoria ? true : Boolean(coluna.visivel),
     ordem: indice + 1
@@ -304,6 +315,14 @@ function normalizarItensConfiguracao(lista) {
 }
 
 function ordenarColunasGridProdutos(colunaA, colunaB) {
+  if (colunaA.id === 'acoes' && colunaB.id !== 'acoes') {
+    return 1;
+  }
+
+  if (colunaB.id === 'acoes' && colunaA.id !== 'acoes') {
+    return -1;
+  }
+
   if (colunaA.ordem !== colunaB.ordem) {
     return colunaA.ordem - colunaB.ordem;
   }
@@ -354,4 +373,13 @@ function converterSpanParaBaseAtual(valor, baseOrigem = TOTAL_COLUNAS_GRID_PRODU
     TOTAL_COLUNAS_GRID_PRODUTOS,
     Math.max(1, Math.floor((numero * TOTAL_COLUNAS_GRID_PRODUTOS) / baseOrigem))
   );
+}
+
+function ajustarSpanColunaOculta(span, visivel, spanPadrao) {
+  if (visivel) {
+    return span;
+  }
+
+  const spanNormalizado = normalizarNumeroInteiro(span, spanPadrao || 1);
+  return Math.min(MAX_SPAN_COLUNA_OCULTA, Math.max(1, spanNormalizado));
 }

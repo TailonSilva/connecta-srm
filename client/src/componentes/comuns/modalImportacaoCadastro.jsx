@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Botao } from './botao';
+import { MensagemErroPopup } from './mensagemErroPopup';
 import { GradePadrao } from './gradePadrao';
 import { baixarModeloImportacao, lerArquivoImportacao, obterConfiguracaoImportacaoCadastro } from '../../utilitarios/importacaoCadastros';
 import { ModalGruposProduto } from '../../paginas/configuracoes/modalGruposProduto';
@@ -237,7 +238,7 @@ export function ModalImportacaoCadastro({
               <li>Quando uma chave de outra tabela nao for encontrada, voce pode escolher um registro existente no grid de pendencias e reprocessar apenas essas linhas.</li>
             </ul>
 
-            {mensagemErro ? <p className="mensagemErroFormulario">{mensagemErro}</p> : null}
+            <MensagemErroPopup mensagem={mensagemErro} titulo="Nao foi possivel concluir a importacao." />
           </section>
 
           {resultado ? (

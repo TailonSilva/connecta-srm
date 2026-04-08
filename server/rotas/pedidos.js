@@ -300,7 +300,7 @@ rotaPedidos.delete('/:id', async (requisicao, resposta) => {
     await executar('COMMIT');
 
     itensAtuais.forEach((item) => {
-      if (ehCaminhoImagemLocal(item.imagem)) {
+      if (ehImagemItemPedidoLocal(item.imagem)) {
         removerArquivoImagem(item.imagem);
       }
     });
@@ -828,15 +828,19 @@ function obterDataAtualFormatoInput() {
 function removerImagensItensNaoUtilizadas(imagensAtuais, imagensNovas) {
   const imagensMantidas = new Set(
     imagensNovas
-      .filter((imagem) => ehCaminhoImagemLocal(desnormalizarCaminhoImagem(imagem)))
+      .filter((imagem) => ehImagemItemPedidoLocal(desnormalizarCaminhoImagem(imagem)))
       .map((imagem) => desnormalizarCaminhoImagem(imagem))
   );
 
   imagensAtuais.forEach((imagem) => {
-    if (ehCaminhoImagemLocal(imagem) && !imagensMantidas.has(imagem)) {
+    if (ehImagemItemPedidoLocal(imagem) && !imagensMantidas.has(imagem)) {
       removerArquivoImagem(imagem);
     }
   });
+}
+
+function ehImagemItemPedidoLocal(valorImagem) {
+  return ehCaminhoImagemLocal(valorImagem) && String(valorImagem).startsWith('imagens/pedidos/');
 }
 
 function limparTexto(valor) {
