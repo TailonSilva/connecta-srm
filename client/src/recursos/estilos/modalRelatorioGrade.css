@@ -60,6 +60,10 @@
   overflow: auto;
 }
 
+.modalCliente.modalRelatorioGrade .modalRelatorioGradePainelTabela .corpoGradePadrao {
+  overflow-x: auto;
+}
+
 .modalCliente.modalRelatorioGrade .modalHistoricoVendasClienteGrade {
   border-radius: 22px;
 }
@@ -215,11 +219,84 @@
   .modalRelatorioGradeCards {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+
+  .modalCliente.modalRelatorioGrade .tabelaContatosModal {
+    min-width: 1280px;
+  }
+
+  .modalCliente.modalRelatorioGrade .tabelaHistoricoOrcamentos {
+    min-width: 1320px;
+  }
+
+  .modalCliente.modalRelatorioGrade .colunaHistoricoCliente,
+  .modalCliente.modalRelatorioGrade .colunaHistoricoAtendimentoCliente,
+  .modalCliente.modalRelatorioGrade .colunaHistoricoAtendimentoAssunto,
+  .modalCliente.modalRelatorioGrade .colunaHistoricoAtendimentoContato,
+  .modalCliente.modalRelatorioGrade .colunaHistoricoOrcamentoCliente,
+  .modalCliente.modalRelatorioGrade .colunaHistoricoOrcamentoContato {
+    width: 220px;
+  }
+
+  .modalCliente.modalRelatorioGrade .colunaHistoricoEtapa,
+  .modalCliente.modalRelatorioGrade .colunaHistoricoVendedor,
+  .modalCliente.modalRelatorioGrade .colunaHistoricoPrazoPagamento,
+  .modalCliente.modalRelatorioGrade .colunaHistoricoAtendimentoCanal,
+  .modalCliente.modalRelatorioGrade .colunaHistoricoAtendimentoUsuario,
+  .modalCliente.modalRelatorioGrade .colunaHistoricoOrcamentoEtapa,
+  .modalCliente.modalRelatorioGrade .colunaHistoricoOrcamentoVendedor {
+    width: 170px;
+  }
 }
 
 @media (max-width: 1080px) {
   .modalRelatorioGradeCards {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .modalCliente.modalRelatorioGrade .tabelaContatosModal {
+    min-width: 1040px;
+  }
+
+  .modalCliente.modalRelatorioGrade .tabelaHistoricoOrcamentos {
+    min-width: 1100px;
+  }
+
+  .modalCliente.modalRelatorioGrade .tabelaContatosModal th,
+  .modalCliente.modalRelatorioGrade .tabelaContatosModal td {
+    padding: 12px 12px;
+  }
+
+  .modalCliente.modalRelatorioGrade .colunaHistoricoData,
+  .modalCliente.modalRelatorioGrade .colunaHistoricoAtendimentoData,
+  .modalCliente.modalRelatorioGrade .colunaHistoricoOrcamentoData {
+    width: 102px;
+  }
+
+  .modalCliente.modalRelatorioGrade .colunaHistoricoPedido,
+  .modalCliente.modalRelatorioGrade .colunaHistoricoOrcamentoCodigo,
+  .modalCliente.modalRelatorioGrade .colunaHistoricoAtendimentoHora,
+  .modalCliente.modalRelatorioGrade .colunaHistoricoValorTotal,
+  .modalCliente.modalRelatorioGrade .colunaHistoricoOrcamentoTotal {
+    width: 120px;
+  }
+
+  .modalCliente.modalRelatorioGrade .colunaHistoricoCliente,
+  .modalCliente.modalRelatorioGrade .colunaHistoricoAtendimentoCliente,
+  .modalCliente.modalRelatorioGrade .colunaHistoricoAtendimentoAssunto,
+  .modalCliente.modalRelatorioGrade .colunaHistoricoAtendimentoContato,
+  .modalCliente.modalRelatorioGrade .colunaHistoricoOrcamentoCliente,
+  .modalCliente.modalRelatorioGrade .colunaHistoricoOrcamentoContato {
+    width: 190px;
+  }
+
+  .modalCliente.modalRelatorioGrade .colunaHistoricoEtapa,
+  .modalCliente.modalRelatorioGrade .colunaHistoricoVendedor,
+  .modalCliente.modalRelatorioGrade .colunaHistoricoPrazoPagamento,
+  .modalCliente.modalRelatorioGrade .colunaHistoricoAtendimentoCanal,
+  .modalCliente.modalRelatorioGrade .colunaHistoricoAtendimentoUsuario,
+  .modalCliente.modalRelatorioGrade .colunaHistoricoOrcamentoEtapa,
+  .modalCliente.modalRelatorioGrade .colunaHistoricoOrcamentoVendedor {
+    width: 150px;
   }
 }
 
@@ -233,6 +310,32 @@
   }
 
   .modalCliente.modalRelatorioGrade .tabelaContatosModal {
-    min-width: 1180px;
+    min-width: 760px;
+  }
+
+  .modalCliente.modalRelatorioGrade .tabelaHistoricoOrcamentos {
+    min-width: 800px;
+  }
+
+  .modalCliente.modalRelatorioGrade .tabelaContatosModal th,
+  .modalCliente.modalRelatorioGrade .tabelaContatosModal td {
+    padding: 10px 10px;
+    font-size: 0.92rem;
+  }
+
+  .modalCliente.modalRelatorioGrade .colunaHistoricoCliente,
+  .modalCliente.modalRelatorioGrade .colunaHistoricoAtendimentoCliente,
+  .modalCliente.modalRelatorioGrade .colunaHistoricoAtendimentoAssunto,
+  .modalCliente.modalRelatorioGrade .colunaHistoricoAtendimentoContato,
+  .modalCliente.modalRelatorioGrade .colunaHistoricoOrcamentoCliente,
+  .modalCliente.modalRelatorioGrade .colunaHistoricoOrcamentoContato,
+  .modalCliente.modalRelatorioGrade .colunaHistoricoEtapa,
+  .modalCliente.modalRelatorioGrade .colunaHistoricoVendedor,
+  .modalCliente.modalRelatorioGrade .colunaHistoricoPrazoPagamento,
+  .modalCliente.modalRelatorioGrade .colunaHistoricoAtendimentoCanal,
+  .modalCliente.modalRelatorioGrade .colunaHistoricoAtendimentoUsuario,
+  .modalCliente.modalRelatorioGrade .colunaHistoricoOrcamentoEtapa,
+  .modalCliente.modalRelatorioGrade .colunaHistoricoOrcamentoVendedor {
+    width: auto;
   }
 }

@@ -376,6 +376,9 @@ Filtros da agenda:
 - A mesma exigencia do `Motivo da devolucao` tambem vale para a troca rapida de etapa direto no grid de pedidos
 - O modal de `Pedidos` agora possui a aba `Outros`, que concentra `Orcamento vinculado` e o campo visual do motivo, trazendo o valor preenchido quando existir ou vazio quando ainda nao houver motivo
 - A pagina inicial agora exibe a secao `Devolucoes do mes`, agrupando pedidos do tipo `Devolucao` por `Motivo da devolucao`, com quantidade por motivo e valor total convertido para positivo apenas para leitura do grafico
+- A pagina inicial agora exibe tambem `Vendas do mes por grupo de produtos`, com quantidade total dos itens vendidos, quantidade de pedidos e valor total por grupo nos pedidos com entrega no mes atual
+- A pagina inicial agora exibe tambem `Vendas do mes por marca`, com quantidade total dos itens vendidos, quantidade de pedidos e valor total por marca nos pedidos com entrega no mes atual
+- O cabecalho da pagina inicial agora possui as abas `Orcamentos` e `Vendas`, separando os graficos comerciais por contexto sem misturar funil com analise de vendas
 - O modal de filtros da pagina de pedidos permite selecionar multiplas etapas ao mesmo tempo e salva esse recorte por usuario
 - A etapa do pedido pode ser alterada direto no grid, no mesmo padrao visual adotado em Orcamentos
 - O filtro da pagina de pedidos tem um botao unico de `Datas` que abre um modal com os intervalos de `Data de inclusao` e `Data de entrega`

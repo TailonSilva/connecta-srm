@@ -63,6 +63,13 @@ const caminhosIcones = {
       <path d="M12 9v4.5M12 16.5h.01" />
     </>
   ),
+  informacao: (
+    <>
+      <circle cx="12" cy="12" r="8" />
+      <path d="M12 10v5" />
+      <path d="M12 7.8h.01" />
+    </>
+  ),
   limpar: (
     <>
       <path d="M6 7.5h12" />

@@ -127,7 +127,7 @@ rotaPedidos.post('/', async (requisicao, resposta) => {
         nomePrazoPagamentoSnapshot,
         nomeTipoPedidoSnapshot,
         nomeEtapaPedidoSnapshot
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         payload.idOrcamento,
         payload.idCliente,
@@ -475,6 +475,14 @@ function validarPayloadPedido(payload) {
 
   if (!payload.idVendedor) {
     return 'Selecione o vendedor.';
+  }
+
+  if (!payload.idTipoPedido) {
+    return 'Selecione o tipo de pedido.';
+  }
+
+  if (!payload.idPrazoPagamento) {
+    return 'Selecione o prazo de pagamento.';
   }
 
   if (payload.itens.length === 0) {

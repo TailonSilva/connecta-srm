@@ -7,7 +7,10 @@ export function CabecalhoInicio({
   filtrosAtivos = false,
   resumo = '',
   descricao = '',
-  somenteTitulo = false
+  somenteTitulo = false,
+  abas = [],
+  abaAtiva = '',
+  aoSelecionarAba
 }) {
   return (
     <header className="cabecalhoPagina inicioCabecalho">
@@ -19,6 +22,23 @@ export function CabecalhoInicio({
 
       {aoAbrirFiltros && !somenteTitulo ? (
         <div className="acoesCabecalhoPagina">
+          {Array.isArray(abas) && abas.length > 0 ? (
+            <div className="inicioCabecalhoAbas" role="tablist" aria-label="Secoes da pagina inicial">
+              {abas.map((aba) => (
+                <button
+                  key={aba.id}
+                  type="button"
+                  role="tab"
+                  className={`inicioCabecalhoAba ${abaAtiva === aba.id ? 'ativa' : ''}`.trim()}
+                  aria-selected={abaAtiva === aba.id}
+                  onClick={() => aoSelecionarAba?.(aba.id)}
+                >
+                  {aba.rotulo}
+                </button>
+              ))}
+            </div>
+          ) : null}
+
           <Botao
             variante={filtrosAtivos ? 'primario' : 'secundario'}
             icone="filtro"
@@ -27,6 +47,23 @@ export function CabecalhoInicio({
             aria-label="Filtrar"
             onClick={aoAbrirFiltros}
           />
+        </div>
+      ) : !somenteTitulo && Array.isArray(abas) && abas.length > 0 ? (
+        <div className="acoesCabecalhoPagina">
+          <div className="inicioCabecalhoAbas" role="tablist" aria-label="Secoes da pagina inicial">
+            {abas.map((aba) => (
+              <button
+                key={aba.id}
+                type="button"
+                role="tab"
+                className={`inicioCabecalhoAba ${abaAtiva === aba.id ? 'ativa' : ''}`.trim()}
+                aria-selected={abaAtiva === aba.id}
+                onClick={() => aoSelecionarAba?.(aba.id)}
+              >
+                {aba.rotulo}
+              </button>
+            ))}
+          </div>
         </div>
       ) : null}
     </header>

@@ -31,6 +31,7 @@ const abasModalPedido = [
 ];
 
 const ID_ETAPA_PEDIDO_ENTREGUE = 5;
+const ID_TIPO_PEDIDO_VENDA = 1;
 const ID_TIPO_PEDIDO_DEVOLUCAO = 2;
 
 const estadoInicialFormulario = {
@@ -407,6 +408,16 @@ export function ModalPedido({
 
     if (!String(formularioParaSalvar.idVendedor || '').trim()) {
       definirMensagemErro('Selecione o vendedor.');
+      return;
+    }
+
+    if (!String(formularioParaSalvar.idTipoPedido || '').trim()) {
+      definirMensagemErro('Selecione o tipo de pedido.');
+      return;
+    }
+
+    if (!String(formularioParaSalvar.idPrazoPagamento || '').trim()) {
+      definirMensagemErro('Selecione o prazo de pagamento.');
       return;
     }
 
@@ -1149,6 +1160,14 @@ function CampoSelect({ label, name, options, acaoExtra = null, ...props }) {
 }
 
 function criarFormularioInicialPedido(pedido, usuarioLogado, camposPedido, empresa, { novo = !pedido } = {}) {
+  const pedidoOriginadoDeOrcamento = Boolean(pedido?.idOrcamento);
+  const idTipoPedidoInicial = pedido?.idTipoPedido
+    ? String(pedido.idTipoPedido)
+    : pedidoOriginadoDeOrcamento
+      ? String(ID_TIPO_PEDIDO_VENDA)
+      : '';
+  const nomeTipoPedidoInicial = pedido?.nomeTipoPedidoSnapshot || (pedidoOriginadoDeOrcamento ? 'Venda' : '');
+
   if (!pedido || novo) {
     return {
       ...estadoInicialFormulario,
@@ -1158,7 +1177,7 @@ function criarFormularioInicialPedido(pedido, usuarioLogado, camposPedido, empre
       idUsuario: String(pedido?.idUsuario || usuarioLogado?.idUsuario || ''),
       idVendedor: pedido?.idVendedor ? String(pedido.idVendedor) : '',
       idPrazoPagamento: pedido?.idPrazoPagamento ? String(pedido.idPrazoPagamento) : '',
-      idTipoPedido: pedido?.idTipoPedido ? String(pedido.idTipoPedido) : '',
+      idTipoPedido: idTipoPedidoInicial,
       idMotivoDevolucao: pedido?.idMotivoDevolucao ? String(pedido.idMotivoDevolucao) : '',
       dataInclusao: pedido?.dataInclusao || obterDataAtualFormatoInput(),
       dataEntrega: pedido?.dataEntrega || somarDiasNaData(
@@ -1171,7 +1190,7 @@ function criarFormularioInicialPedido(pedido, usuarioLogado, camposPedido, empre
       nomeVendedorSnapshot: pedido?.nomeVendedorSnapshot || '',
       nomeMetodoPagamentoSnapshot: pedido?.nomeMetodoPagamentoSnapshot || '',
       nomePrazoPagamentoSnapshot: pedido?.nomePrazoPagamentoSnapshot || '',
-      nomeTipoPedidoSnapshot: pedido?.nomeTipoPedidoSnapshot || '',
+      nomeTipoPedidoSnapshot: nomeTipoPedidoInicial,
       idEtapaPedido: pedido?.idEtapaPedido ? String(pedido.idEtapaPedido) : '',
       nomeEtapaPedidoSnapshot: pedido?.nomeEtapaPedidoSnapshot || '',
       comissao: formatarPercentualInput(pedido?.comissao),
@@ -1215,7 +1234,7 @@ function criarFormularioInicialPedido(pedido, usuarioLogado, camposPedido, empre
     idUsuario: pedido.idUsuario ? String(pedido.idUsuario) : '',
     idVendedor: pedido.idVendedor ? String(pedido.idVendedor) : '',
     idPrazoPagamento: pedido.idPrazoPagamento ? String(pedido.idPrazoPagamento) : '',
-    idTipoPedido: pedido.idTipoPedido ? String(pedido.idTipoPedido) : '',
+    idTipoPedido: idTipoPedidoInicial,
     idMotivoDevolucao: pedido.idMotivoDevolucao ? String(pedido.idMotivoDevolucao) : '',
     dataInclusao: pedido.dataInclusao || '',
     dataEntrega: pedido.dataEntrega || pedido.dataValidade || '',
@@ -1225,7 +1244,7 @@ function criarFormularioInicialPedido(pedido, usuarioLogado, camposPedido, empre
     nomeVendedorSnapshot: pedido.nomeVendedorSnapshot || '',
     nomeMetodoPagamentoSnapshot: pedido.nomeMetodoPagamentoSnapshot || '',
     nomePrazoPagamentoSnapshot: pedido.nomePrazoPagamentoSnapshot || '',
-    nomeTipoPedidoSnapshot: pedido.nomeTipoPedidoSnapshot || '',
+    nomeTipoPedidoSnapshot: nomeTipoPedidoInicial,
     idEtapaPedido: pedido.idEtapaPedido ? String(pedido.idEtapaPedido) : '',
     nomeEtapaPedidoSnapshot: pedido.nomeEtapaPedidoSnapshot || '',
     comissao: formatarPercentualInput(pedido.comissao),

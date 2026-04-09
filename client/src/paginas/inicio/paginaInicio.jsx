@@ -12,9 +12,18 @@ import {
 import { listarEmpresas } from '../../servicos/empresa';
 import { listarOrcamentos } from '../../servicos/orcamentos';
 import { listarPedidos } from '../../servicos/pedidos';
+import { listarGruposProduto, listarMarcas, listarProdutos } from '../../servicos/produtos';
 import { normalizarPreco } from '../../utilitarios/normalizarPreco';
+import { registroEstaAtivo } from '../../utilitarios/statusRegistro';
 import { CabecalhoInicio } from './componentes/cabecalhoInicio';
+import { IconeAjudaSessaoInicio } from './componentes/iconeAjudaSessaoInicio';
 import { IndicadorResumoInicio } from './componentes/indicadorResumoInicio';
+import { PainelHeroiInicio } from './componentes/painelHeroiInicio';
+import { SecaoDevolucoesInicio } from './componentes/secaoDevolucoesInicio';
+import { SecaoFunilOrcamentosInicio } from './componentes/secaoFunilOrcamentosInicio';
+import { SecaoRankingInicio } from './componentes/secaoRankingInicio';
+import { SecaoVendasGrupoProdutosInicio } from './componentes/secaoVendasGrupoProdutosInicio';
+import { SecaoVendasMarcaInicio } from './componentes/secaoVendasMarcaInicio';
 import { criarResumoFunilVendas } from './utilitarios/criarResumoFunilVendas';
 
 const IDS_ETAPAS_ORCAMENTO_FECHADAS = new Set([1, 2, 3, 4]);
@@ -25,6 +34,7 @@ export function PaginaInicio({ usuarioLogado }) {
   const [carregando, definirCarregando] = useState(true);
   const [mensagemErro, definirMensagemErro] = useState('');
   const [painelBruto, definirPainelBruto] = useState(null);
+  const [abaAtiva, definirAbaAtiva] = useState('orcamentos');
 
   useEffect(() => {
     carregarPainel();
@@ -62,6 +72,9 @@ export function PaginaInicio({ usuarioLogado }) {
         }),
         listarOrcamentos(recorteUsuarioPadrao),
         listarPedidos(recorteUsuarioPadrao),
+        listarProdutos(),
+        listarGruposProduto(),
+        listarMarcas(),
         listarEtapasOrcamentoConfiguracao(),
         listarEtapasPedidoConfiguracao(),
         listarMotivosDevolucaoConfiguracao(),
@@ -75,6 +88,9 @@ export function PaginaInicio({ usuarioLogado }) {
         agendamentosResultado,
         orcamentosResultado,
         pedidosResultado,
+        produtosResultado,
+        gruposProdutoResultado,
+        marcasResultado,
         etapasOrcamentoResultado,
         etapasPedidoResultado,
         motivosDevolucaoResultado,
@@ -87,6 +103,9 @@ export function PaginaInicio({ usuarioLogado }) {
       const agendamentos = agendamentosResultado.status === 'fulfilled' ? agendamentosResultado.value : [];
       const orcamentos = orcamentosResultado.status === 'fulfilled' ? orcamentosResultado.value : [];
       const pedidos = pedidosResultado.status === 'fulfilled' ? pedidosResultado.value : [];
+      const produtos = produtosResultado.status === 'fulfilled' ? produtosResultado.value : [];
+      const gruposProduto = gruposProdutoResultado.status === 'fulfilled' ? gruposProdutoResultado.value : [];
+      const marcas = marcasResultado.status === 'fulfilled' ? marcasResultado.value : [];
       const etapasOrcamento = etapasOrcamentoResultado.status === 'fulfilled' ? etapasOrcamentoResultado.value : [];
       const etapasPedido = etapasPedidoResultado.status === 'fulfilled' ? etapasPedidoResultado.value : [];
       const motivosDevolucao = motivosDevolucaoResultado.status === 'fulfilled' ? motivosDevolucaoResultado.value : [];
@@ -99,6 +118,9 @@ export function PaginaInicio({ usuarioLogado }) {
         agendamentos,
         orcamentos,
         pedidos,
+        produtos,
+        gruposProduto,
+        marcas,
         etapasOrcamento,
         etapasPedido,
         motivosDevolucao,
@@ -113,7 +135,16 @@ export function PaginaInicio({ usuarioLogado }) {
 
   return (
     <>
-      <CabecalhoInicio descricao={painel.descricao} resumo={painel.resumo} />
+      <CabecalhoInicio
+        descricao={painel.descricao}
+        resumo={painel.resumo}
+        abas={[
+          { id: 'orcamentos', rotulo: 'Orcamentos' },
+          { id: 'vendas', rotulo: 'Vendas' }
+        ]}
+        abaAtiva={abaAtiva}
+        aoSelecionarAba={definirAbaAtiva}
+      />
 
       <CorpoPagina>
         {mensagemErro ? (
@@ -138,229 +169,41 @@ export function PaginaInicio({ usuarioLogado }) {
               ))}
             </div>
 
-            {usuarioLogado?.tipo !== 'Usuario padrao' ? (
-              <section className="paginaInicioPainelHeroi">
-                <div className="paginaInicioPainelHeroiCabecalho">
-                  <div>
-                    <span className="paginaInicioPainelTag">{painel.tag}</span>
-                    <h2>{painel.titulo}</h2>
-                    <p>{painel.subtitulo}</p>
-                  </div>
-                </div>
-
-                <div className="paginaInicioHeroiMetricas">
-                  {painel.metricas.map((item) => (
-                    <article key={item.rotulo} tabIndex={0}>
-                      <span>{item.rotulo}</span>
-                      <strong>{carregando ? '...' : item.valor}</strong>
-                      <TooltipExplicacao titulo={item.rotulo} ajuda={item.ajuda} />
-                    </article>
-                  ))}
-                </div>
-
-                <div className="paginaInicioHeroiFaixas">
-                  {painel.faixas.map((item) => (
-                    <article key={item.rotulo} className="paginaInicioHeroiFaixa" tabIndex={0}>
-                      <span>{item.rotulo}</span>
-                      <strong>{carregando ? '...' : item.valor}</strong>
-                      <TooltipExplicacao titulo={item.rotulo} ajuda={item.ajuda} />
-                    </article>
-                  ))}
-                </div>
-              </section>
-            ) : null}
-
             <div className="paginaInicioSecoes">
               {usuarioLogado?.tipo === 'Usuario padrao' ? (
-                <section className="paginaInicioPainelHeroi paginaInicioPainelHeroiCarteira">
-                  <div className="paginaInicioPainelHeroiCabecalho">
-                    <div>
-                      <span className="paginaInicioPainelTag">{painel.tag}</span>
-                      <h2>{painel.titulo}</h2>
-                      <p>{painel.subtitulo}</p>
-                    </div>
-                  </div>
-
-                  <div className="paginaInicioHeroiMetricas">
-                    {painel.metricas.map((item) => (
-                      <article key={item.rotulo} tabIndex={0}>
-                        <span>{item.rotulo}</span>
-                        <strong>{carregando ? '...' : item.valor}</strong>
-                        <TooltipExplicacao titulo={item.rotulo} ajuda={item.ajuda} />
-                      </article>
-                    ))}
-                  </div>
-
-                  <div className="paginaInicioHeroiFaixas">
-                    {painel.faixas.map((item) => (
-                      <article key={item.rotulo} className="paginaInicioHeroiFaixa" tabIndex={0}>
-                        <span>{item.rotulo}</span>
-                        <strong>{carregando ? '...' : item.valor}</strong>
-                        <TooltipExplicacao titulo={item.rotulo} ajuda={item.ajuda} />
-                      </article>
-                    ))}
-                  </div>
-                </section>
+                <PainelHeroiInicio
+                  tag={painel.tag}
+                  titulo={painel.titulo}
+                  subtitulo={painel.subtitulo}
+                  metricas={painel.metricas}
+                  faixas={painel.faixas}
+                  carregando={carregando}
+                  className="paginaInicioPainelHeroiCarteira"
+                  ajuda={{
+                    conceito: painel.subtitulo,
+                    calculo: 'As metricas desta sessao consideram apenas clientes da carteira, registros proprios e pedidos ou orcamentos dentro do escopo do usuario.',
+                    observacao: 'Serve como painel de acompanhamento operacional da carteira.'
+                  }}
+                />
               ) : null}
 
-              <section className="paginaInicioPainel paginaInicioPainelAmplo">
-                <div className="paginaInicioPainelCabecalho">
-                  <div>
-                    <h3>Funil de orcamentos</h3>
-                    <p>Quantidade de produtos e valor total por etapa do funil, respeitando ordem e etapas consideradas.</p>
-                  </div>
-                </div>
+              {abaAtiva === 'orcamentos' ? (
+                <SecaoFunilOrcamentosInicio itens={painel.funil} />
+              ) : (
+                <>
+                  <SecaoDevolucoesInicio itens={painel.devolucoes} />
+                  <SecaoVendasGrupoProdutosInicio itens={painel.vendasPorGrupo} />
+                  <SecaoVendasMarcaInicio itens={painel.vendasPorMarca} />
+                </>
+              )}
 
-                <div className="paginaInicioGraficoFunilEtapas">
-                  {painel.funil.length > 0 ? painel.funil.map((etapa) => (
-                    <article key={etapa.idEtapaOrcamento} className="paginaInicioGraficoFunilItem" tabIndex={0}>
-                      <div className="paginaInicioGraficoFunilCabecalho">
-                        <span className="paginaInicioFluxoConversaoRotulo">{etapa.descricao}</span>
-                        <strong>{etapa.quantidadeOrcamentos}</strong>
-                      </div>
-                        <div className="paginaInicioGraficoFunilLinha">
-                          <div className="paginaInicioGraficoFunilLegenda">
-                            <span>Qtd. dos itens</span>
-                            <strong>{etapa.quantidadeItens}</strong>
-                          </div>
-                          <div className="paginaInicioFluxoConversaoBarra">
-                            <span style={{ width: `${etapa.percentualProdutos}%`, background: etapa.cor || undefined }} />
-                          </div>
-                        </div>
-                      <div className="paginaInicioGraficoFunilLinha">
-                        <div className="paginaInicioGraficoFunilLegenda">
-                          <span>Valor total</span>
-                          <strong>{etapa.valor}</strong>
-                        </div>
-                        <div className="paginaInicioFluxoConversaoBarra paginaInicioFluxoConversaoBarraValor">
-                          <span style={{ width: `${etapa.percentualValor}%`, background: etapa.cor || undefined }} />
-                        </div>
-                      </div>
-                      <TooltipExplicacao titulo={etapa.descricao} ajuda={etapa.ajuda} />
-                    </article>
-                  )) : (
-                    <p className="paginaInicioPainelMensagem">Nenhuma etapa marcada para considerar no funil ou nenhum orcamento em aberto nessas etapas.</p>
-                  )}
-                </div>
-              </section>
-
-              <section className="paginaInicioPainel paginaInicioPainelAmplo">
-                <div className="paginaInicioPainelCabecalho">
-                  <div>
-                    <h3>Devolucoes do mes</h3>
-                    <p>Quantidade de devolucoes e valor total por motivo no mes atual, com valores convertidos para leitura positiva.</p>
-                  </div>
-                </div>
-
-                <div className="paginaInicioGraficoFunilEtapas">
-                  {painel.devolucoes.length > 0 ? painel.devolucoes.map((motivo) => (
-                    <article key={motivo.idMotivoDevolucao} className="paginaInicioGraficoFunilItem" tabIndex={0}>
-                      <div className="paginaInicioGraficoFunilCabecalho">
-                        <span className="paginaInicioFluxoConversaoRotulo">{motivo.descricao}</span>
-                        <strong>{motivo.quantidadeDevolucoes}</strong>
-                      </div>
-                      <div className="paginaInicioGraficoFunilLinha">
-                        <div className="paginaInicioGraficoFunilLegenda">
-                          <span>Qtd. de devolucoes</span>
-                          <strong>{motivo.quantidade}</strong>
-                        </div>
-                        <div className="paginaInicioFluxoConversaoBarra">
-                          <span style={{ width: `${motivo.percentualQuantidade}%` }} />
-                        </div>
-                      </div>
-                      <div className="paginaInicioGraficoFunilLinha">
-                        <div className="paginaInicioGraficoFunilLegenda">
-                          <span>Valor total</span>
-                          <strong>{motivo.valor}</strong>
-                        </div>
-                        <div className="paginaInicioFluxoConversaoBarra paginaInicioFluxoConversaoBarraValor paginaInicioFluxoConversaoBarraDevolucao">
-                          <span style={{ width: `${motivo.percentualValor}%` }} />
-                        </div>
-                      </div>
-                      <TooltipExplicacao titulo={motivo.descricao} ajuda={motivo.ajuda} />
-                    </article>
-                  )) : (
-                    <p className="paginaInicioPainelMensagem">Nenhuma devolucao registrada no mes atual.</p>
-                  )}
-                </div>
-              </section>
-
-              <section className="paginaInicioPainel">
-                <div className="paginaInicioPainelCabecalho">
-                  <div>
-                    <h3>Acoes imediatas</h3>
-                    <p>Itens que pedem acompanhamento rapido.</p>
-                  </div>
-                </div>
-
-                <div className="paginaInicioSaudeLista">
-                  {painel.alertas.map((item) => (
-                    <article key={item.rotulo} className="paginaInicioSaudeItem" tabIndex={0}>
-                      <div className="paginaInicioSaudeTopo">
-                        <span>{item.rotulo}</span>
-                        <strong>{item.valor}</strong>
-                      </div>
-                      <div className="paginaInicioSaudeBarra">
-                        <span style={{ width: `${item.percentual}%` }} />
-                      </div>
-                      <small>{item.descricao}</small>
-                      <TooltipExplicacao titulo={item.rotulo} ajuda={item.ajuda} />
-                    </article>
-                  ))}
-                </div>
-              </section>
-
-              <section className="paginaInicioPainel">
-                <div className="paginaInicioPainelCabecalho">
-                  <div>
-                    <h3>{painel.tituloRanking}</h3>
-                    <p>{painel.descricaoRanking}</p>
-                  </div>
-                </div>
-
-                <div className="paginaInicioRankingLista">
-                  {painel.ranking.length > 0 ? painel.ranking.map((item, indice) => (
-                    <article key={`${item.rotulo}-${indice}`} className="paginaInicioRankingItem" tabIndex={0}>
-                      <div className="paginaInicioRankingRotulo">
-                        <span>{indice + 1}</span>
-                        <div>
-                          <strong>{item.rotulo}</strong>
-                          <small>{item.descricao}</small>
-                        </div>
-                      </div>
-                      <div className="paginaInicioRankingBarra">
-                        <span style={{ width: `${item.percentual}%` }} />
-                      </div>
-                      <strong className="paginaInicioRankingValor">{item.valor}</strong>
-                      <TooltipExplicacao titulo={item.rotulo} ajuda={item.ajuda} />
-                    </article>
-                  )) : (
-                    <p className="paginaInicioPainelMensagem">Sem movimentacao suficiente para ranking.</p>
-                  )}
-                </div>
-              </section>
-
-              <section className="paginaInicioPainel">
-                <div className="paginaInicioPainelCabecalho">
-                  <div>
-                    <h3>Agenda proxima</h3>
-                    <p>Compromissos dos proximos 7 dias.</p>
-                  </div>
-                </div>
-
-                <div className="paginaInicioAgendaLista">
-                  {painel.agenda.length > 0 ? painel.agenda.map((item) => (
-                    <article key={item.id} className="paginaInicioAgendaItem" tabIndex={0}>
-                      <strong>{item.assunto}</strong>
-                      <span>{item.dataHora}</span>
-                      <small>{item.detalhe}</small>
-                      <TooltipExplicacao titulo={item.assunto} ajuda={item.ajuda} />
-                    </article>
-                  )) : (
-                    <p className="paginaInicioPainelMensagem">Nenhum compromisso proximo no periodo.</p>
-                  )}
-                </div>
-              </section>
+              {abaAtiva === 'vendas' ? (
+                <SecaoRankingInicio
+                  titulo={painel.tituloRanking}
+                  descricao={painel.descricaoRanking}
+                  itens={painel.ranking}
+                />
+              ) : null}
 
             </div>
           </div>
@@ -384,6 +227,8 @@ function montarPainel(dados, usuarioLogado) {
     cliente.nomeFantasia || cliente.razaoSocial || '-'
   ]));
   const vendedoresPorId = new Map((dados.vendedores || []).map((vendedor) => [String(vendedor.idVendedor), vendedor.nome]));
+  const clientesAtivos = clientesVisiveis.filter((item) => registroEstaAtivo(item.status));
+  const produtosAtivos = (dados.produtos || []).filter((item) => registroEstaAtivo(item.status));
   const orcamentos = filtrarOrcamentosVisiveis(dados.orcamentos, idsClientes, usuarioLogado);
   const pedidos = filtrarPedidosVisiveis(dados.pedidos, idsClientes, usuarioLogado);
   const atendimentos = filtrarAtendimentosVisiveis(dados.atendimentos, idsClientes, usuarioLogado);
@@ -397,7 +242,7 @@ function montarPainel(dados, usuarioLogado) {
   const pedidosEntregaMes = pedidos.filter((item) => dataNoPeriodo(item.dataEntrega, inicioMes, fimMes));
   const devolucoesMes = pedidos.filter((item) => (
     Number(item.idTipoPedido) === ID_TIPO_PEDIDO_DEVOLUCAO
-    && dataNoPeriodo(item.dataEntrega, inicioMes, fimMes)
+    && dataNoPeriodo(item.dataInclusao, inicioMes, fimMes)
   ));
   const atendimentosMes = atendimentos.filter((item) => dataNoPeriodo(item.data, inicioMes, fimMes));
   const valorAberto = somarTotais(orcamentosAbertos);
@@ -427,6 +272,24 @@ function montarPainel(dados, usuarioLogado) {
     }));
   const funil = montarFunil(criarResumoFunilVendas(dados.etapasOrcamento, orcamentosAbertos));
   const devolucoes = montarResumoDevolucoes(devolucoesMes, dados.motivosDevolucao);
+  const vendasPorGrupo = montarResumoVendasPorRelacionamento(
+    pedidosMes,
+    dados.produtos,
+    dados.gruposProduto,
+    'idGrupo',
+    'idGrupo',
+    'descricao',
+    'Sem grupo'
+  );
+  const vendasPorMarca = montarResumoVendasPorRelacionamento(
+    pedidosMes,
+    dados.produtos,
+    dados.marcas,
+    'idMarca',
+    'idMarca',
+    'descricao',
+    'Sem marca'
+  );
 
   return {
     ...base,
@@ -460,26 +323,26 @@ function montarPainel(dados, usuarioLogado) {
       },
       {
         icone: 'atendimentos',
-        titulo: 'Atendimentos no mes',
-        valor: String(atendimentosMes.length),
-        descricao: 'Registros de atendimento do mes atual.',
-        destaque: `${agenda.length} compromissos proximos`,
+        titulo: 'Catalogo',
+        valor: String(produtosAtivos.length),
+        descricao: 'Produtos ativos para comercializacao.',
+        destaque: `${dados.gruposProduto?.length || 0} grupos cadastrados`,
         ajuda: {
-          conceito: 'Atendimentos registrados no mes atual.',
-          calculo: 'Conta atendimentos visiveis cuja data pertence ao mes atual.',
-          observacao: `O destaque mostra ${agenda.length} compromissos da agenda agendados para os proximos 7 dias.`
+          conceito: 'Quantidade de produtos ativos disponiveis no catalogo visivel.',
+          calculo: 'Conta os produtos visiveis com status ativo.',
+          observacao: `O destaque mostra ${dados.gruposProduto?.length || 0} grupos de produto cadastrados.`
         }
       },
       {
         icone: 'selo',
-        titulo: 'Conversao do mes',
-        valor: `${taxaConversaoMes.toFixed(1)}%`,
-        descricao: 'Orcamentos do mes que viraram pedido.',
-        destaque: `${convertidosMes} convertidos`,
+        titulo: 'Carteira',
+        valor: String(clientesAtivos.length),
+        descricao: 'Clientes ativos em acompanhamento.',
+        destaque: `${clientesVisiveis.length} visiveis`,
         ajuda: {
-          conceito: 'Percentual de orcamentos do mes que geraram pedido vinculado.',
-          calculo: `${convertidosMes} convertidos dividido por ${orcamentosMes.length || 0} orcamentos incluidos no mes atual.`,
-          observacao: 'Quanto maior, melhor o aproveitamento das negociacoes abertas no mes atual.'
+          conceito: 'Quantidade de clientes ativos dentro do escopo visivel da dashboard.',
+          calculo: 'Conta os clientes visiveis com status ativo.',
+          observacao: `O destaque mostra ${clientesVisiveis.length} clientes considerados no acompanhamento atual.`
         }
       }
     ],
@@ -555,11 +418,13 @@ function montarPainel(dados, usuarioLogado) {
     exibirFunil: dados.empresa?.exibirFunilPaginaInicial !== 0,
     funil,
     devolucoes,
+    vendasPorGrupo,
+    vendasPorMarca,
     alertas: montarAlertas(orcamentosVencidos, orcamentosVencendo, pedidosEntregaProxima, clientesSemAtendimento),
     tituloRanking: usuarioLogado?.tipo === 'Usuario padrao' ? 'Clientes em destaque' : 'Vendedores em destaque',
     descricaoRanking: usuarioLogado?.tipo === 'Usuario padrao'
-      ? 'Quem mais comprou no mes dentro da sua carteira.'
-      : 'Quem mais movimentou pedidos no mes atual.',
+      ? 'Quem mais comprou no mes pela data de entrada do pedido dentro da sua carteira.'
+      : 'Quem mais movimentou pedidos pela data de entrada no mes atual.',
     ranking: usuarioLogado?.tipo === 'Usuario padrao'
       ? montarRankingClientes(pedidosMes, clientesPorId)
       : montarRankingVendedores(pedidosMes, vendedoresPorId),
@@ -583,14 +448,16 @@ function criarPainelBase(usuarioLogado) {
     indicadores: [
       { icone: 'orcamento', titulo: 'Orcamentos em aberto', valor: '0', descricao: '', destaque: '' },
       { icone: 'pedido', titulo: 'Pedidos no mes', valor: '0', descricao: '', destaque: '' },
-      { icone: 'atendimentos', titulo: 'Atendimentos no mes', valor: '0', descricao: '', destaque: '' },
-      { icone: 'selo', titulo: 'Conversao do mes', valor: '0%', descricao: '', destaque: '' }
+      { icone: 'atendimentos', titulo: 'Catalogo', valor: '0', descricao: '', destaque: '' },
+      { icone: 'selo', titulo: 'Carteira', valor: '0', descricao: '', destaque: '' }
     ],
     metricas: [],
     faixas: [],
     exibirFunil: true,
     funil: [],
     devolucoes: [],
+    vendasPorGrupo: [],
+    vendasPorMarca: [],
     alertas: [],
     tituloRanking: 'Ranking',
     descricaoRanking: '',
@@ -659,8 +526,8 @@ function filtrarAgendamentosVisiveis(agendamentos, idsClientes, usuarioLogado) {
 }
 
 function montarFunil(funil) {
-  const maiorQuantidadeItens = Math.max(...(funil || []).map((item) => Number(item.quantidadeItens) || 0), 0);
-  const maiorValor = Math.max(...(funil || []).map((item) => Number(item.valorTotal) || 0), 0);
+  const totalQuantidadeItens = (funil || []).reduce((acumulado, item) => acumulado + (Number(item.quantidadeItens) || 0), 0);
+  const totalValor = (funil || []).reduce((acumulado, item) => acumulado + (Number(item.valorTotal) || 0), 0);
   return (funil || []).map((item) => ({
     idEtapaOrcamento: item.idEtapaOrcamento,
     descricao: item.descricao,
@@ -668,18 +535,25 @@ function montarFunil(funil) {
     quantidadeItens: Number(item.quantidadeItens || 0),
     valor: normalizarPreco(item.valorTotal),
     cor: item.cor,
-    percentualProdutos: maiorQuantidadeItens > 0
-      ? Math.max(8, Math.round((Number(item.quantidadeItens || 0) / maiorQuantidadeItens) * 100))
-      : 0,
-    percentualValor: maiorValor > 0
-      ? Math.max(8, Math.round((Number(item.valorTotal || 0) / maiorValor) * 100))
-      : 0,
+    percentualProdutos: calcularPercentualParteDoTotal(Number(item.quantidadeItens || 0), totalQuantidadeItens),
+    percentualValor: calcularPercentualParteDoTotal(Number(item.valorTotal || 0), totalValor),
     ajuda: {
       conceito: `Resumo da etapa ${item.descricao} dentro do funil do orçamento.`,
       calculo: `${item.quantidadeOrcamentos} orcamentos, soma de ${Number(item.quantidadeItens || 0)} nas quantidades dos itens e ${normalizarPreco(item.valorTotal)} em valor total nessa etapa.`,
-      observacao: 'As barras comparam a etapa com a maior soma de quantidades dos itens e com o maior valor total entre as etapas do funil.'
+      observacao: 'A barra representa a participacao dessa etapa no valor total somado do funil.'
     }
   }));
+}
+
+function calcularPercentualParteDoTotal(valor, total) {
+  const valorNumerico = Number(valor) || 0;
+  const totalNumerico = Number(total) || 0;
+
+  if (valorNumerico <= 0 || totalNumerico <= 0) {
+    return 0;
+  }
+
+  return Math.max(8, Math.round((valorNumerico / totalNumerico) * 100));
 }
 
 function montarAlertas(vencidos, vencendo, entrega, semAtendimento) {
@@ -757,19 +631,89 @@ function montarResumoDevolucoes(pedidos, motivosDevolucao) {
   });
 
   const lista = [...resumoPorMotivo.values()].sort((a, b) => b.valorTotal - a.valorTotal);
-  const maiorQuantidade = Math.max(...lista.map((item) => item.quantidade), 0);
-  const maiorValor = Math.max(...lista.map((item) => item.valorTotal), 0);
+  const totalQuantidade = lista.reduce((acumulado, item) => acumulado + item.quantidade, 0);
+  const totalValor = lista.reduce((acumulado, item) => acumulado + item.valorTotal, 0);
 
   return lista.map((item) => ({
     ...item,
     quantidadeDevolucoes: `${item.quantidade} dev.`,
     valor: normalizarPreco(item.valorTotal),
-    percentualQuantidade: maiorQuantidade > 0 ? Math.max(8, Math.round((item.quantidade / maiorQuantidade) * 100)) : 0,
-    percentualValor: maiorValor > 0 ? Math.max(8, Math.round((item.valorTotal / maiorValor) * 100)) : 0,
+    percentualQuantidade: totalQuantidade > 0 ? Math.round((item.quantidade / totalQuantidade) * 100) : 0,
+    percentualValor: totalValor > 0 ? Math.round((item.valorTotal / totalValor) * 100) : 0,
     ajuda: {
       conceito: `Resumo das devolucoes do mes atual para o motivo ${item.descricao}.`,
-      calculo: `${item.quantidade} pedido(s) de devolucao no mes atual, somando ${normalizarPreco(item.valorTotal)} em valor absoluto.`,
-      observacao: 'O grafico converte os valores negativos das devolucoes para positivo apenas para facilitar a leitura comparativa.'
+      calculo: `${item.quantidade} pedido(s) de devolucao com data de entrada no mes atual, somando ${normalizarPreco(item.valorTotal)} em valor absoluto.`,
+      observacao: 'A barra representa a participacao desse motivo no valor total de devolucoes do mes pela data de entrada. O grafico converte os valores negativos para positivo apenas para leitura.'
+    }
+  }));
+}
+
+function montarResumoVendasPorRelacionamento(
+  pedidos,
+  produtos,
+  relacionamentos,
+  chaveProduto,
+  chaveRelacionamento,
+  chaveDescricao,
+  descricaoFallback
+) {
+  const produtosPorId = new Map((produtos || []).map((produto) => [
+    String(produto.idProduto),
+    produto
+  ]));
+  const relacionamentosPorId = new Map((relacionamentos || []).map((registro) => [
+    String(registro[chaveRelacionamento]),
+    registro
+  ]));
+  const resumoPorRelacionamento = new Map();
+
+  (pedidos || []).forEach((pedido) => {
+    (pedido?.itens || []).forEach((item) => {
+      const produto = produtosPorId.get(String(item.idProduto || ''));
+      const idRelacionamento = String(produto?.[chaveProduto] || 'sem-relacionamento');
+      const relacionamento = relacionamentosPorId.get(idRelacionamento);
+      const atual = resumoPorRelacionamento.get(idRelacionamento) || {
+        id: idRelacionamento,
+        descricao: relacionamento?.[chaveDescricao] || descricaoFallback,
+        quantidadeItens: 0,
+        valorTotal: 0,
+        pedidos: new Set()
+      };
+
+      atual.quantidadeItens += Number(item.quantidade) || 0;
+      atual.valorTotal += Number(item.valorTotal) || 0;
+      atual.pedidos.add(String(pedido.idPedido));
+      resumoPorRelacionamento.set(idRelacionamento, atual);
+    });
+  });
+
+  const lista = [...resumoPorRelacionamento.values()]
+    .map((item) => ({
+      ...item,
+      quantidadePedidos: `${item.pedidos.size} ped.`,
+      pedidos: undefined
+    }))
+    .filter((item) => item.quantidadeItens !== 0 || item.valorTotal !== 0)
+    .sort((a, b) => b.valorTotal - a.valorTotal)
+    .slice(0, 8);
+  const totalQuantidade = lista.reduce(
+    (acumulado, item) => acumulado + Math.max(Number(item.quantidadeItens) || 0, 0),
+    0
+  );
+  const totalValor = lista.reduce(
+    (acumulado, item) => acumulado + Math.max(Number(item.valorTotal) || 0, 0),
+    0
+  );
+
+  return lista.map((item) => ({
+    ...item,
+    valor: normalizarPreco(item.valorTotal),
+    percentualQuantidade: calcularPercentualParteDoTotal(Number(item.quantidadeItens || 0), totalQuantidade),
+    percentualValor: calcularPercentualParteDoTotal(Number(item.valorTotal || 0), totalValor),
+    ajuda: {
+      conceito: `Resumo das vendas do mes atual para ${item.descricao}.`,
+      calculo: `${item.quantidadePedidos} somando ${item.quantidadeItens} nas quantidades dos itens e ${normalizarPreco(item.valorTotal)} em valor total liquido, ja debitando devolucoes com data de entrada no mes atual.`,
+      observacao: 'A barra representa a participacao desse item no saldo total da secao, considerando vendas e devolucoes cuja data de entrada pertence ao mes atual.'
     }
   }));
 }
@@ -806,13 +750,13 @@ function montarRanking(pedidos, obterChave, obterNome) {
 
   return lista.map((item) => ({
     rotulo: item.nome,
-    descricao: `${item.quantidade} pedidos no mes atual`,
+    descricao: `${item.quantidade} pedidos`,
     valor: normalizarPreco(item.total),
     percentual: maior > 0 ? Math.max(12, Math.round((item.total / maior) * 100)) : 0,
     ajuda: {
-      conceito: 'Posicao no ranking de vendas do mes atual.',
-      calculo: `${item.quantidade} pedidos do mes atual somando ${normalizarPreco(item.total)}.`,
-      observacao: 'A barra compara esse resultado com o maior volume do ranking no mes atual.'
+      conceito: 'Posicao no ranking de vendas do mes atual pela data de entrada do pedido.',
+      calculo: `${item.quantidade} pedidos com data de entrada no mes atual somando ${normalizarPreco(item.total)}.`,
+      observacao: 'A barra compara esse resultado com o maior volume liquido do ranking no mes atual.'
     }
   }));
 }
@@ -932,19 +876,4 @@ function dataInput(data) {
   const mes = String(data.getMonth() + 1).padStart(2, '0');
   const dia = String(data.getDate()).padStart(2, '0');
   return `${ano}-${mes}-${dia}`;
-}
-
-function TooltipExplicacao({ titulo, ajuda }) {
-  if (!ajuda) {
-    return null;
-  }
-
-  return (
-    <span className="paginaInicioTooltipExplicacao" role="tooltip">
-      <strong>{ajuda.titulo || titulo}</strong>
-      {ajuda.conceito ? <span>{`Conceito: ${ajuda.conceito}`}</span> : null}
-      {ajuda.calculo ? <span>{`Calculo: ${ajuda.calculo}`}</span> : null}
-      {ajuda.observacao ? <span>{`Leitura: ${ajuda.observacao}`}</span> : null}
-    </span>
-  );
 }

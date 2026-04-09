@@ -1,9 +1,15 @@
 import { registroEstaAtivo } from '../../../utilitarios/statusRegistro';
 
+const IDS_ETAPAS_ORCAMENTO_OBRIGATORIAS = new Set([1, 2, 3, 4]);
+
 export function criarResumoFunilVendas(etapasOrcamento, orcamentos) {
   const etapasAtivasFunil = Array.isArray(etapasOrcamento)
     ? [...etapasOrcamento]
-      .filter((etapa) => registroEstaAtivo(etapa?.status) && registroEstaAtivo(etapa?.consideraFunilVendas))
+      .filter((etapa) => (
+        registroEstaAtivo(etapa?.status)
+        && registroEstaAtivo(etapa?.consideraFunilVendas)
+        && !IDS_ETAPAS_ORCAMENTO_OBRIGATORIAS.has(Number(etapa?.idEtapaOrcamento))
+      ))
       .sort((primeira, segunda) => {
         const ordemPrimeira = Number(primeira?.ordem || 0);
         const ordemSegunda = Number(segunda?.ordem || 0);

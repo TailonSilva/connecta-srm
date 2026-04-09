@@ -28,6 +28,7 @@ const estadoInicialFormulario = {
 
 const ID_ETAPA_ORCAMENTO_FECHAMENTO = 1;
 const ID_ETAPA_ORCAMENTO_FECHADO_SEM_PEDIDO = 2;
+const ID_TIPO_PEDIDO_VENDA = 1;
 
 export function ModalAtendimento({
   aberto,
@@ -1304,6 +1305,7 @@ function montarDadosIniciaisPedidoAPartirDoOrcamento(orcamento) {
     idUsuario: orcamento.idUsuario,
     idVendedor: orcamento.idVendedor,
     idPrazoPagamento: orcamento.idPrazoPagamento,
+    idTipoPedido: ID_TIPO_PEDIDO_VENDA,
     comissao: orcamento.comissao,
     dataInclusao: obterDataAtualFormatoInput(),
     nomeClienteSnapshot: orcamento.nomeCliente || '',
@@ -1312,6 +1314,7 @@ function montarDadosIniciaisPedidoAPartirDoOrcamento(orcamento) {
     nomeVendedorSnapshot: orcamento.nomeVendedor || '',
     nomeMetodoPagamentoSnapshot: orcamento.nomeMetodoPagamento || '',
     nomePrazoPagamentoSnapshot: orcamento.nomePrazoPagamento || '',
+    nomeTipoPedidoSnapshot: 'Venda',
     observacao: orcamento.observacao || '',
     itens: Array.isArray(orcamento.itens) ? orcamento.itens.map((item) => ({
       idProduto: item.idProduto,
