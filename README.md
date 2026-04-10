@@ -143,9 +143,24 @@ Utilitarios importantes:
 
 ### Pagina inicial
 
-- A pagina inicial foi reduzida ao minimo e agora exibe apenas o titulo `Painel inicial`
-- Todos os cards, graficos, rankings, funil, filtros visuais e conteudos complementares da home foram removidos nesta etapa
-- O restante da infraestrutura do sistema permanece no projeto; apenas a composicao visual da pagina inicial foi zerada
+- A pagina inicial usa abas `Orcamentos` e `Vendas` para separar funil e analise comercial
+- A configuracao da empresa agora possui a aba `Pagina inicial`, com botoes `Graficos Orcamentos` e `Graficos Vendas`
+- A mesma aba agora tambem possui o bloco `Cards resumo`, usado para configurar os cards que aparecem no topo das duas abas da home
+- Cada aba da home pode ser configurada por lista, com `visivel`, `ordem`, `colunas` e `rotulo`, usando malha de `10 colunas`
+- Os `Cards resumo` usam `visivel`, `ordem`, `colunas` e `rotulo`, e a composicao precisa caber em no maximo duas linhas de `10 colunas` cada
+- A ordem das sessoes da home segue leitura visual: de cima para baixo e da esquerda para a direita
+- Sempre que uma nova sessao for criada para a pagina inicial, ela tambem deve ser cadastrada na configuracao da empresa, dentro da aba `Pagina inicial`, para que o usuario possa controlar exibicao, ordem e largura
+- Os cards iniciais atuais mostram `Orcamentos em aberto`, `Pedidos no mes`, `Catalogo` e `Carteira`
+- Os graficos compactos da home seguem o padrao `maximo de 5 itens + modal com lista completa`
+- O modal com a lista completa deve ser reutilizavel para qualquer sessao da home que precise resumir muitos itens
+- Os icones de `Informacao` mostram tooltip com conceito, calculo e leitura de cada sessao
+- O icone lateral ao lado do `Informacao` abre o modal com a lista completa quando houver mais de 5 resultados
+- As secoes graficas compactas da home ocupam `2 colunas` no grid principal, salvo quando uma sessao explicitar outro span
+- A aba `Orcamentos` concentra `Funil de orcamentos`, `Orcamentos em aberto por grupo de produtos`, `Orcamentos em aberto por marca` e `Motivos de perda do mes`
+- A aba `Vendas` concentra `Devolucoes do mes`, `Vendas do mes por grupo de produtos`, `Vendas do mes por marca`, `Vendas do mes por produto` e `Vendedores/Clientes em destaque`
+- `Devolucoes do mes` usa valores convertidos para positivo apenas para leitura do grafico
+- Os calculos das sessoes devem sempre explicitar o periodo e a regra usada no tooltip da propria sessao
+- A pagina inicial segue em evolucao e a composicao atual da home deve ser lida pelos blocos documentados acima
 - As barras exibem novamente a descricao da etapa diretamente sobre a propria barra, junto do valor
 - A descricao dentro da barra usa a paleta do projeto com variacao baseada na cor da etapa, e o valor aparece em negrito
 - As barras usam uma largura mais contida e com maior espacamento entre linhas para aliviar a leitura visual

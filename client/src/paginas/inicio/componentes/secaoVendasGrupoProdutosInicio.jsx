@@ -1,26 +1,16 @@
-import { SecaoGraficosDuplosInicio } from './secaoGraficosDuplosInicio';
+import { SecaoResumoRelacionamentoComModalInicio } from './secaoResumoRelacionamentoComModalInicio';
 
-export function SecaoVendasGrupoProdutosInicio({ itens }) {
+export function SecaoVendasGrupoProdutosInicio({ itens, titulo = 'Vendas do mes por grupo de produtos' }) {
   return (
-    <SecaoGraficosDuplosInicio
-      titulo="Vendas do mes por grupo de produtos"
-      subtitulo=""
-      colunasPainel={1}
-      modoExibicao="lista"
-      ajudaSecao={{
-        conceito: 'Quantidade de itens vendidos e valor total por grupo de produto nos pedidos com data de entrada no mes atual.'
-      }}
+    <SecaoResumoRelacionamentoComModalInicio
+      titulo={titulo}
       itens={itens}
+      colunasPainel={2}
+      conceito="Quantidade de itens vendidos e valor total por grupo de produto nos pedidos com data de entrada no mes atual."
       mensagemVazia="Nenhuma venda registrada no mes atual para grupos de produtos."
-      tituloValor="Valor"
-      tituloQuantidade="Quantidade"
-      obterChave={(item) => item.id}
-      obterRotulo={(item) => item.descricao}
-      obterValorTexto={(item) => item.valor}
-      obterValorPercentual={(item) => item.percentualValor}
-      obterQuantidadeTexto={(item) => `${item.quantidadeItens} itens`}
-      obterQuantidadePercentual={(item) => item.percentualQuantidade}
-      obterAjuda={(item) => item.ajuda}
+      modalTitulo={titulo}
+      modalSubtitulo="Lista completa por grupo de produto no mes corrente."
+      ariaAcao="Abrir lista completa das vendas por grupo de produtos no mes"
     />
   );
 }

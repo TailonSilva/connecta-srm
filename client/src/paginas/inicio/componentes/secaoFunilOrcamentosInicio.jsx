@@ -1,28 +1,21 @@
-import { SecaoGraficosDuplosInicio } from './secaoGraficosDuplosInicio';
+import { SecaoResumoRelacionamentoComModalInicio } from './secaoResumoRelacionamentoComModalInicio';
 
-export function SecaoFunilOrcamentosInicio({ itens }) {
+export function SecaoFunilOrcamentosInicio({ itens, titulo = 'Funil de orcamentos' }) {
   return (
-    <SecaoGraficosDuplosInicio
-      titulo="Funil de orcamentos"
-      subtitulo=""
+    <SecaoResumoRelacionamentoComModalInicio
+      titulo={titulo}
       colunasPainel={2}
-      modoExibicao="lista"
-      ajudaSecao={{
-        conceito: 'Quantidade de produtos e valor total por etapa do funil, respeitando ordem e etapas consideradas.'
-      }}
+      conceito="Quantidade de produtos e valor total por etapa do funil, respeitando ordem e etapas consideradas."
       itens={itens}
       mensagemVazia="Nenhuma etapa marcada para considerar no funil ou nenhum orcamento em aberto nessas etapas."
-      tituloValor="Valor total"
-      tituloQuantidade="Quantidade"
+      modalTitulo={titulo}
+      modalSubtitulo="Lista completa das etapas consideradas no funil de orcamentos."
+      ariaAcao="Abrir lista completa do funil de orcamentos"
       obterChave={(item) => item.idEtapaOrcamento}
-      obterRotulo={(item) => item.descricao}
-      obterValorTexto={(item) => item.valor}
-      obterValorPercentual={(item) => item.percentualValor}
       obterQuantidadeTexto={(item) => `${item.quantidadeItens} itens`}
       obterQuantidadePercentual={(item) => item.percentualProdutos}
       obterCorValor={(item) => item.cor || ''}
       obterCorQuantidade={(item) => item.cor || ''}
-      obterAjuda={(item) => item.ajuda}
     />
   );
 }

@@ -1,3 +1,4 @@
+import '../../../recursos/estilos/secaoGraficosDuplosInicio.css';
 import { IconeAjudaSessaoInicio } from './iconeAjudaSessaoInicio';
 import { TooltipExplicacaoInicio } from './tooltipExplicacaoInicio';
 
@@ -19,6 +20,7 @@ export function SecaoGraficosDuplosInicio({
   obterAjuda,
   varianteValor = '',
   ajudaSecao = null,
+  acoesCabecalho = null,
   colunasPainel = 4,
   modoExibicao = 'duplo'
 }) {
@@ -29,10 +31,13 @@ export function SecaoGraficosDuplosInicio({
           <h3>{titulo}</h3>
           {subtitulo ? <p>{subtitulo}</p> : null}
         </div>
-        <IconeAjudaSessaoInicio
-          titulo={titulo}
-          ajuda={ajudaSecao || { conceito: subtitulo }}
-        />
+        <div className="paginaInicioPainelCabecalhoAcoes">
+          {acoesCabecalho}
+          <IconeAjudaSessaoInicio
+            titulo={titulo}
+            ajuda={ajudaSecao || { conceito: subtitulo }}
+          />
+        </div>
       </div>
 
       {Array.isArray(itens) && itens.length > 0 ? (

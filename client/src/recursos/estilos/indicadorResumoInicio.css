@@ -63,17 +63,6 @@
   line-height: 1.5;
 }
 
-.inicioIndicadorResumoDestaque {
-  justify-self: start;
-  margin-top: 14px;
-  padding: 6px 10px;
-  border-radius: 999px;
-  background: rgba(23, 145, 226, 0.1);
-  color: var(--corPrimariaForte);
-  font-size: 0.74rem;
-  font-weight: 700;
-}
-
 .inicioIndicadorResumoTooltip {
   position: absolute;
   left: 18px;

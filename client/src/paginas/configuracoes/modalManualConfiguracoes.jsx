@@ -104,7 +104,7 @@ export function ModalManualConfiguracoes({
             'As etapas obrigatorias Fechado sem pedido e Pedido Excluido continuam cadastradas em Configuracoes, mas sao de uso automatico e nao aparecem nos selects manuais do fluxo comercial.',
             'As grades de configuracao, historico e relatorio priorizam leitura sem rolagem horizontal, com colunas curtas mais contidas e colunas textuais mais flexiveis.',
             'Metodos, prazos, etapas e campos personalizados abastecem Orcamentos e Pedidos.',
-            'Parametros da empresa influenciam layout de PDF, expediente, pagina inicial simplificada e regras operacionais do cadastro.'
+            'Parametros da empresa influenciam layout de PDF, expediente, regras operacionais do cadastro e agora tambem a composicao da pagina inicial nas abas Orcamentos e Vendas.'
           ]
         }
       ]}
@@ -120,6 +120,12 @@ export function ModalManualConfiguracoes({
           descricao: 'Ao salvar configuracoes da empresa, o sistema dispara eventos para recarregar telas dependentes, como a pagina inicial e regras de exibicao ligadas ao cadastro de clientes.',
           detalhe: 'Isso reduz inconsistencias entre tela e parametro salvo.',
           icone: 'empresa'
+        },
+        {
+          titulo: 'Home configuravel',
+          descricao: 'A aba Pagina inicial dentro da Empresa agora permite definir quais sessoes aparecem em Orcamentos e Vendas, a ordem de leitura, quantas colunas cada bloco ocupa e qual titulo sera exibido em cada sessao, alem dos cards resumo do topo.',
+          detalhe: 'A malha dos graficos usa base de 10 colunas, e os cards resumo tambem respeitam essa base, com validacao para caber em no maximo duas linhas.',
+          icone: 'inicio'
         },
         {
           titulo: 'Relatorios padronizados',

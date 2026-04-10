@@ -33,6 +33,14 @@ const caminhosIcones = {
       <circle cx="11" cy="16.5" r="1.75" />
     </>
   ),
+  lista: (
+    <>
+      <path d="M8 7h11M8 12h11M8 17h11" />
+      <circle cx="5" cy="7" r="1" />
+      <circle cx="5" cy="12" r="1" />
+      <circle cx="5" cy="17" r="1" />
+    </>
+  ),
   adicionar: (
     <path d="M12 5v14M5 12h14" />
   ),

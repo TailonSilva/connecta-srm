@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Botao } from '../../componentes/comuns/botao';
+import { Icone } from '../../componentes/comuns/icone';
 import { MensagemErroPopup } from '../../componentes/comuns/mensagemErroPopup';
 import { CampoSelecaoMultiplaModal } from '../../componentes/comuns/campoSelecaoMultiplaModal';
 import { CampoImagemPadrao } from '../../componentes/comuns/campoImagemPadrao';
@@ -54,7 +55,11 @@ export function ModalEmpresa({
   aberto,
   empresa,
   etapasOrcamento = [],
+  podeConfigurarPaginaInicial = false,
   modo = 'edicao',
+  aoAbrirCardsPaginaInicial,
+  aoAbrirGraficosPaginaInicialOrcamentos,
+  aoAbrirGraficosPaginaInicialVendas,
   aoFechar,
   aoSalvar
 }) {
@@ -92,7 +97,7 @@ export function ModalEmpresa({
     definirSalvando(false);
     definirMensagemErro('');
     definirBuscandoCep(false);
-  }, [aberto, empresa]);
+  }, [aberto]);
 
   useEffect(() => {
     if (!aberto) {
@@ -328,8 +333,63 @@ export function ModalEmpresa({
             <section className="gradeCamposModalCliente">
               <div className="campoFormularioIntegral painelOpcaoEmpresaPaginaInicial">
                 <p className="descricaoOpcaoEmpresaPaginaInicial">
-                  A pagina inicial foi simplificada nesta etapa e nao possui configuracoes disponiveis dentro do cadastro da empresa.
+                  Configure quais sessoes aparecem em cada aba da pagina inicial, a ordem de leitura e quantas colunas cada uma vai ocupar na malha de 10 colunas.
                 </p>
+                <div className="painelEmpresaPaginaInicialAcoes">
+                  <button
+                    type="button"
+                    className="cartaoConfiguracao cartaoEmpresaPaginaInicial"
+                    disabled={somenteLeitura || !podeConfigurarPaginaInicial}
+                    onClick={aoAbrirCardsPaginaInicial}
+                  >
+                    <span className="iconeCartaoConfiguracao" aria-hidden="true">
+                      <span className="circuloIconeConfiguracao">
+                        <Icone nome="inicio" />
+                      </span>
+                    </span>
+                    <span className="conteudoCartaoConfiguracao">
+                      <strong>Cards resumo</strong>
+                      <small>Escolha quais cards aparecem nas duas abas, a largura de cada um e o titulo exibido.</small>
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    className="cartaoConfiguracao cartaoEmpresaPaginaInicial"
+                    disabled={somenteLeitura || !podeConfigurarPaginaInicial}
+                    onClick={aoAbrirGraficosPaginaInicialOrcamentos}
+                  >
+                    <span className="iconeCartaoConfiguracao" aria-hidden="true">
+                      <span className="circuloIconeConfiguracao">
+                        <Icone nome="orcamento" />
+                      </span>
+                    </span>
+                    <span className="conteudoCartaoConfiguracao">
+                      <strong>Graficos Orcamentos</strong>
+                      <small>Escolha as sessoes da aba Orcamentos, a ordem e quantas colunas cada uma ocupa.</small>
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    className="cartaoConfiguracao cartaoEmpresaPaginaInicial"
+                    disabled={somenteLeitura || !podeConfigurarPaginaInicial}
+                    onClick={aoAbrirGraficosPaginaInicialVendas}
+                  >
+                    <span className="iconeCartaoConfiguracao" aria-hidden="true">
+                      <span className="circuloIconeConfiguracao">
+                        <Icone nome="pedido" />
+                      </span>
+                    </span>
+                    <span className="conteudoCartaoConfiguracao">
+                      <strong>Graficos Vendas</strong>
+                      <small>Escolha as sessoes da aba Vendas, a ordem e quantas colunas cada uma ocupa.</small>
+                    </span>
+                  </button>
+                </div>
+                {!podeConfigurarPaginaInicial ? (
+                  <p className="descricaoOpcaoEmpresaPaginaInicial">
+                    Salve a empresa primeiro para liberar a configuracao da pagina inicial.
+                  </p>
+                ) : null}
               </div>
             </section>
           ) : null}

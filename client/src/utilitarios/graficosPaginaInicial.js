@@ -1,0 +1,313 @@
+export const TOTAL_COLUNAS_GRAFICOS_PAGINA_INICIAL = 10;
+const BASE_LEGADA_GRAFICOS_PAGINA_INICIAL = 4;
+
+export const graficosPaginaInicialOrcamentos = [
+  {
+    id: 'funilOrcamentos',
+    rotulo: 'Funil de orcamentos',
+    ordemPadrao: 1,
+    spanPadrao: 5,
+    visivelPadrao: true
+  },
+  {
+    id: 'orcamentosGrupoProdutos',
+    rotulo: 'Orcamentos em aberto por grupo de produtos',
+    ordemPadrao: 2,
+    spanPadrao: 5,
+    visivelPadrao: true
+  },
+  {
+    id: 'orcamentosMarca',
+    rotulo: 'Orcamentos em aberto por marca',
+    ordemPadrao: 3,
+    spanPadrao: 5,
+    visivelPadrao: true
+  },
+  {
+    id: 'motivosPerda',
+    rotulo: 'Motivos de perda do mes',
+    ordemPadrao: 4,
+    spanPadrao: 5,
+    visivelPadrao: true
+  }
+];
+
+export const graficosPaginaInicialVendas = [
+  {
+    id: 'devolucoes',
+    rotulo: 'Devolucoes do mes',
+    ordemPadrao: 1,
+    spanPadrao: 5,
+    visivelPadrao: true
+  },
+  {
+    id: 'vendasGrupoProdutos',
+    rotulo: 'Vendas do mes por grupo de produtos',
+    ordemPadrao: 2,
+    spanPadrao: 5,
+    visivelPadrao: true
+  },
+  {
+    id: 'vendasMarca',
+    rotulo: 'Vendas do mes por marca',
+    ordemPadrao: 3,
+    spanPadrao: 5,
+    visivelPadrao: true
+  },
+  {
+    id: 'vendasProdutos',
+    rotulo: 'Vendas do mes por produto',
+    ordemPadrao: 4,
+    spanPadrao: 5,
+    visivelPadrao: true
+  },
+  {
+    id: 'rankingVendas',
+    rotulo: 'Vendedores em destaque',
+    ordemPadrao: 5,
+    spanPadrao: 5,
+    visivelPadrao: true
+  }
+];
+
+const idsPermitidosGraficosPaginaInicialOrcamentos = new Set(
+  graficosPaginaInicialOrcamentos.map((grafico) => grafico.id)
+);
+const idsPermitidosGraficosPaginaInicialVendas = new Set(
+  graficosPaginaInicialVendas.map((grafico) => grafico.id)
+);
+
+const mapaGraficosPaginaInicialOrcamentos = new Map(
+  graficosPaginaInicialOrcamentos.map((grafico) => [grafico.id, grafico])
+);
+const mapaGraficosPaginaInicialVendas = new Map(
+  graficosPaginaInicialVendas.map((grafico) => [grafico.id, grafico])
+);
+
+export function normalizarConfiguracoesGraficosPaginaInicialOrcamentos(valor) {
+  return normalizarConfiguracoesGraficosPaginaInicial(
+    valor,
+    graficosPaginaInicialOrcamentos,
+    idsPermitidosGraficosPaginaInicialOrcamentos,
+    mapaGraficosPaginaInicialOrcamentos
+  );
+}
+
+export function normalizarConfiguracoesGraficosPaginaInicialVendas(valor) {
+  return normalizarConfiguracoesGraficosPaginaInicial(
+    valor,
+    graficosPaginaInicialVendas,
+    idsPermitidosGraficosPaginaInicialVendas,
+    mapaGraficosPaginaInicialVendas
+  );
+}
+
+export function reordenarConfiguracoesGraficosPaginaInicialOrcamentos(configuracoes) {
+  return reordenarConfiguracoesGraficosPaginaInicial(
+    configuracoes,
+    graficosPaginaInicialOrcamentos
+  );
+}
+
+export function reordenarConfiguracoesGraficosPaginaInicialVendas(configuracoes) {
+  return reordenarConfiguracoesGraficosPaginaInicial(
+    configuracoes,
+    graficosPaginaInicialVendas
+  );
+}
+
+export function reposicionarConfiguracaoGraficosPaginaInicialOrcamentos(configuracoes, idGrafico, ordemDesejada) {
+  return reposicionarConfiguracaoGraficosPaginaInicial(
+    configuracoes,
+    idGrafico,
+    ordemDesejada,
+    graficosPaginaInicialOrcamentos
+  );
+}
+
+export function reposicionarConfiguracaoGraficosPaginaInicialVendas(configuracoes, idGrafico, ordemDesejada) {
+  return reposicionarConfiguracaoGraficosPaginaInicial(
+    configuracoes,
+    idGrafico,
+    ordemDesejada,
+    graficosPaginaInicialVendas
+  );
+}
+
+function normalizarConfiguracoesGraficosPaginaInicial(valor, definicoes, idsPermitidos, mapaDefinicoes) {
+  const listaNormalizada = normalizarListaConfiguracoes(valor);
+  const configuracoesPorId = new Map();
+
+  listaNormalizada.forEach((item, indice) => {
+    const id = String(item?.id || '').trim();
+
+    if (!idsPermitidos.has(id)) {
+      return;
+    }
+
+    const graficoBase = mapaDefinicoes.get(id);
+    const configuracaoExistente = configuracoesPorId.get(id);
+    const baseConfiguracao = normalizarBaseConfiguracao(item?.base);
+
+    configuracoesPorId.set(id, {
+      id,
+      base: item?.base === undefined ? (configuracaoExistente?.base ?? baseConfiguracao) : baseConfiguracao,
+      rotulo: item?.rotulo === undefined
+        ? (configuracaoExistente?.rotulo ?? normalizarRotuloGrafico(item?.rotulo, graficoBase?.rotulo))
+        : normalizarRotuloGrafico(item.rotulo, graficoBase?.rotulo),
+      visivel: item?.visivel === undefined
+        ? (configuracaoExistente?.visivel ?? Boolean(graficoBase?.visivelPadrao))
+        : Boolean(item.visivel),
+      ordem: item?.ordem === undefined
+        ? (configuracaoExistente?.ordem ?? normalizarNumeroInteiro(item?.ordem, indice + 1))
+        : normalizarNumeroInteiro(item.ordem, indice + 1),
+      span: item?.span === undefined
+        ? (configuracaoExistente?.span ?? normalizarSpan(item?.span, graficoBase?.spanPadrao || 5, baseConfiguracao))
+        : normalizarSpan(item.span, graficoBase?.spanPadrao || 5, baseConfiguracao)
+    });
+  });
+
+  const configuracoesNormalizadas = definicoes.map((grafico, indice) => {
+    const configuracao = configuracoesPorId.get(grafico.id);
+
+    return {
+      ...grafico,
+      base: TOTAL_COLUNAS_GRAFICOS_PAGINA_INICIAL,
+      rotuloPadrao: grafico.rotulo,
+      rotulo: normalizarRotuloGrafico(configuracao?.rotulo, grafico.rotulo),
+      visivel: configuracao?.visivel ?? grafico.visivelPadrao,
+      ordem: configuracao?.visivel ?? grafico.visivelPadrao
+        ? normalizarNumeroInteiro(configuracao?.ordem, grafico.ordemPadrao || (indice + 1))
+        : null,
+      span: normalizarSpan(
+        configuracao?.span,
+        grafico.spanPadrao || 5,
+        normalizarBaseConfiguracao(configuracao?.base, TOTAL_COLUNAS_GRAFICOS_PAGINA_INICIAL)
+      )
+    };
+  });
+
+  return reordenarConfiguracoesGraficosPaginaInicial(configuracoesNormalizadas, definicoes);
+}
+
+function reordenarConfiguracoesGraficosPaginaInicial(configuracoes, definicoes) {
+  const lista = Array.isArray(configuracoes)
+    ? configuracoes.map((grafico) => ({ ...grafico }))
+    : [];
+  const visiveis = lista
+    .filter((grafico) => grafico.visivel)
+    .sort(ordenarConfiguracoesGraficosPaginaInicial)
+    .map((grafico, indice) => ({
+      ...grafico,
+      ordem: indice + 1,
+      visivel: true
+    }));
+  const ocultos = definicoes
+    .map((definicao) => lista.find((grafico) => grafico.id === definicao.id))
+    .filter(Boolean)
+    .filter((grafico) => !grafico.visivel)
+    .map((grafico) => ({
+      ...grafico,
+      ordem: null
+    }));
+
+  return [...visiveis, ...ocultos];
+}
+
+function reposicionarConfiguracaoGraficosPaginaInicial(configuracoes, idGrafico, ordemDesejada, definicoes) {
+  const lista = Array.isArray(configuracoes) ? configuracoes.map((grafico) => ({ ...grafico })) : [];
+  const graficoAlvo = lista.find((grafico) => grafico.id === idGrafico);
+
+  if (!graficoAlvo) {
+    return reordenarConfiguracoesGraficosPaginaInicial(lista, definicoes);
+  }
+
+  const visiveis = lista
+    .filter((grafico) => grafico.visivel)
+    .sort(ordenarConfiguracoesGraficosPaginaInicial)
+    .filter((grafico) => grafico.id !== idGrafico);
+
+  const indiceDestino = Math.min(
+    Math.max(normalizarNumeroInteiro(ordemDesejada, 1) - 1, 0),
+    visiveis.length
+  );
+
+  visiveis.splice(indiceDestino, 0, {
+    ...graficoAlvo,
+    visivel: true,
+    ordem: indiceDestino + 1
+  });
+
+  return reordenarConfiguracoesGraficosPaginaInicial([
+    ...visiveis,
+    ...lista.filter((grafico) => !grafico.visivel)
+  ], definicoes);
+}
+
+function ordenarConfiguracoesGraficosPaginaInicial(graficoA, graficoB) {
+  const ordemA = graficoA?.ordem == null ? Number.MAX_SAFE_INTEGER : Number(graficoA.ordem || 0);
+  const ordemB = graficoB?.ordem == null ? Number.MAX_SAFE_INTEGER : Number(graficoB.ordem || 0);
+
+  if (ordemA !== ordemB) {
+    return ordemA - ordemB;
+  }
+
+  return String(graficoA?.id || '').localeCompare(String(graficoB?.id || ''));
+}
+
+function normalizarListaConfiguracoes(valor) {
+  if (Array.isArray(valor)) {
+    return valor;
+  }
+
+  if (!valor) {
+    return [];
+  }
+
+  try {
+    const lista = JSON.parse(valor);
+    return Array.isArray(lista) ? lista : [];
+  } catch (_erro) {
+    return [];
+  }
+}
+
+function normalizarNumeroInteiro(valor, fallback = 1) {
+  const numero = Number(valor);
+  return Number.isInteger(numero) && numero > 0 ? numero : fallback;
+}
+
+function normalizarBaseConfiguracao(valor, fallback = TOTAL_COLUNAS_GRAFICOS_PAGINA_INICIAL) {
+  const numero = Number(valor);
+
+  if (numero === BASE_LEGADA_GRAFICOS_PAGINA_INICIAL || numero === TOTAL_COLUNAS_GRAFICOS_PAGINA_INICIAL) {
+    return numero;
+  }
+
+  return fallback;
+}
+
+function normalizarSpan(valor, fallback = 5, baseConfiguracao = TOTAL_COLUNAS_GRAFICOS_PAGINA_INICIAL) {
+  const numero = Number(valor);
+
+  if (!Number.isFinite(numero) || numero <= 0) {
+    return fallback;
+  }
+
+  if (baseConfiguracao === BASE_LEGADA_GRAFICOS_PAGINA_INICIAL) {
+    return Math.max(
+      1,
+      Math.min(
+        TOTAL_COLUNAS_GRAFICOS_PAGINA_INICIAL,
+        Math.floor((numero / BASE_LEGADA_GRAFICOS_PAGINA_INICIAL) * TOTAL_COLUNAS_GRAFICOS_PAGINA_INICIAL)
+      )
+    );
+  }
+
+  return Math.max(1, Math.min(TOTAL_COLUNAS_GRAFICOS_PAGINA_INICIAL, Math.floor(numero)));
+}
+
+function normalizarRotuloGrafico(valor, fallback = '') {
+  const texto = String(valor || '').trim();
+  return texto || fallback;
+}

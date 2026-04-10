@@ -1,0 +1,16 @@
+.inicioIndicadorConfiguravel {
+  min-width: 0;
+  grid-column: span var(--inicio-indicador-span, 2);
+}
+
+@media (max-width: 1500px) {
+  .inicioIndicadorConfiguravel {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 960px) {
+  .inicioIndicadorConfiguravel {
+    grid-column: auto;
+  }
+}

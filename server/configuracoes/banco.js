@@ -767,6 +767,9 @@ banco.serialize(() => {
       colunasGridProdutos TEXT,
       colunasGridPedidos TEXT,
       colunasGridAtendimentos TEXT,
+      graficosPaginaInicialOrcamentos TEXT,
+      graficosPaginaInicialVendas TEXT,
+      cardsPaginaInicial TEXT,
       corPrimariaOrcamento VARCHAR(7) NOT NULL DEFAULT '#111827',
       corSecundariaOrcamento VARCHAR(7) NOT NULL DEFAULT '#ef4444',
       corDestaqueOrcamento VARCHAR(7) NOT NULL DEFAULT '#f59e0b',
@@ -932,6 +935,30 @@ banco.serialize(() => {
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
       console.error('Nao foi possivel garantir a coluna colunasGridAtendimentos da empresa.', erro);
+    }
+  });
+
+  banco.run(`
+    ALTER TABLE empresa ADD COLUMN graficosPaginaInicialOrcamentos TEXT
+  `, (erro) => {
+    if (erro && !String(erro.message || '').includes('duplicate column name')) {
+      console.error('Nao foi possivel garantir a coluna graficosPaginaInicialOrcamentos da empresa.', erro);
+    }
+  });
+
+  banco.run(`
+    ALTER TABLE empresa ADD COLUMN graficosPaginaInicialVendas TEXT
+  `, (erro) => {
+    if (erro && !String(erro.message || '').includes('duplicate column name')) {
+      console.error('Nao foi possivel garantir a coluna graficosPaginaInicialVendas da empresa.', erro);
+    }
+  });
+
+  banco.run(`
+    ALTER TABLE empresa ADD COLUMN cardsPaginaInicial TEXT
+  `, (erro) => {
+    if (erro && !String(erro.message || '').includes('duplicate column name')) {
+      console.error('Nao foi possivel garantir a coluna cardsPaginaInicial da empresa.', erro);
     }
   });
 

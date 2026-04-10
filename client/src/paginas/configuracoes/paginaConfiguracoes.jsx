@@ -85,10 +85,27 @@ import { normalizarConfiguracoesColunasGridProdutos } from '../../utilitarios/co
 import { normalizarConfiguracoesColunasGridPedidos } from '../../utilitarios/colunasGridPedidos';
 import { atualizarUsuario, incluirUsuario, listarUsuarios } from '../../servicos/usuarios';
 import { normalizarConfiguracoesColunasGridAtendimentos } from '../../utilitarios/colunasGridAtendimentos';
+import {
+  normalizarConfiguracoesGraficosPaginaInicialOrcamentos,
+  normalizarConfiguracoesGraficosPaginaInicialVendas,
+  reordenarConfiguracoesGraficosPaginaInicialOrcamentos,
+  reordenarConfiguracoesGraficosPaginaInicialVendas,
+  reposicionarConfiguracaoGraficosPaginaInicialOrcamentos,
+  reposicionarConfiguracaoGraficosPaginaInicialVendas,
+  TOTAL_COLUNAS_GRAFICOS_PAGINA_INICIAL
+} from '../../utilitarios/graficosPaginaInicial';
+import {
+  normalizarConfiguracoesCardsPaginaInicial,
+  reordenarConfiguracoesCardsPaginaInicial,
+  reposicionarConfiguracaoCardsPaginaInicial,
+  TOTAL_COLUNAS_CARDS_PAGINA_INICIAL,
+  TOTAL_COLUNAS_MAXIMO_CARDS_PAGINA_INICIAL
+} from '../../utilitarios/cardsPaginaInicial';
 import { normalizarTelefone } from '../../utilitarios/normalizarTelefone';
 import { ModalAtualizacaoSistema } from './modalAtualizacaoSistema';
 import { ModalCadastroConfiguracao } from './modalCadastroConfiguracao';
 import { ModalEmpresa } from './modalEmpresa';
+import { ModalGraficosPaginaInicial } from './modalGraficosPaginaInicial';
 import { ModalGruposProduto } from './modalGruposProduto';
 import { ModalGruposEmpresa } from './modalGruposEmpresa';
 import { ModalLayoutOrcamento } from './modalLayoutOrcamento';
@@ -395,6 +412,7 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
   const [modalColunasGridProdutosAberto, definirModalColunasGridProdutosAberto] = useState(false);
   const [modalColunasGridPedidosAberto, definirModalColunasGridPedidosAberto] = useState(false);
   const [modalColunasGridAtendimentosAberto, definirModalColunasGridAtendimentosAberto] = useState(false);
+  const [modalGraficosPaginaInicialAberto, definirModalGraficosPaginaInicialAberto] = useState(null);
   const [modalUsuariosAberto, definirModalUsuariosAberto] = useState(false);
   const [modalAtualizacaoSistemaAberto, definirModalAtualizacaoSistemaAberto] = useState(false);
   const [relatorioConfiguracaoAberto, definirRelatorioConfiguracaoAberto] = useState(null);
@@ -430,6 +448,7 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
         && !modalColunasGridProdutosAberto
         && !modalColunasGridPedidosAberto
         && !modalColunasGridAtendimentosAberto
+        && !modalGraficosPaginaInicialAberto
         && !modalUsuariosAberto
         && !modalAtualizacaoSistemaAberto
         && !relatorioConfiguracaoAberto
@@ -454,6 +473,7 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
     modalColunasGridProdutosAberto,
     modalColunasGridPedidosAberto,
     modalColunasGridAtendimentosAberto,
+    modalGraficosPaginaInicialAberto,
     modalEmpresaAberto,
     modalLayoutOrcamentoAberto,
     modalManualAberto,
@@ -577,6 +597,54 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
     await carregarEmpresa();
     window.dispatchEvent(new CustomEvent('empresa-atualizada'));
     definirModalColunasGridPedidosAberto(false);
+  }
+
+  async function salvarGraficosPaginaInicialOrcamentos(graficos) {
+    if (!empresa?.idEmpresa) {
+      throw new Error('Cadastre a empresa antes de configurar os graficos da pagina inicial.');
+    }
+
+    const payload = normalizarPayloadEmpresa({
+      ...empresa,
+      graficosPaginaInicialOrcamentos: graficos
+    });
+
+    await atualizarEmpresa(empresa.idEmpresa, payload);
+    await carregarEmpresa();
+    window.dispatchEvent(new CustomEvent('empresa-atualizada'));
+    definirModalGraficosPaginaInicialAberto(null);
+  }
+
+  async function salvarGraficosPaginaInicialVendas(graficos) {
+    if (!empresa?.idEmpresa) {
+      throw new Error('Cadastre a empresa antes de configurar os graficos da pagina inicial.');
+    }
+
+    const payload = normalizarPayloadEmpresa({
+      ...empresa,
+      graficosPaginaInicialVendas: graficos
+    });
+
+    await atualizarEmpresa(empresa.idEmpresa, payload);
+    await carregarEmpresa();
+    window.dispatchEvent(new CustomEvent('empresa-atualizada'));
+    definirModalGraficosPaginaInicialAberto(null);
+  }
+
+  async function salvarCardsPaginaInicial(cards) {
+    if (!empresa?.idEmpresa) {
+      throw new Error('Cadastre a empresa antes de configurar os cards da pagina inicial.');
+    }
+
+    const payload = normalizarPayloadEmpresa({
+      ...empresa,
+      cardsPaginaInicial: cards
+    });
+
+    await atualizarEmpresa(empresa.idEmpresa, payload);
+    await carregarEmpresa();
+    window.dispatchEvent(new CustomEvent('empresa-atualizada'));
+    definirModalGraficosPaginaInicialAberto(null);
   }
 
   async function carregarUsuarios() {
@@ -1446,8 +1514,57 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
         empresa={empresa}
         etapasOrcamento={etapasOrcamento}
         modo={modoModalEmpresa}
+        podeConfigurarPaginaInicial={Boolean(empresa?.idEmpresa)}
+        aoAbrirCardsPaginaInicial={() => definirModalGraficosPaginaInicialAberto('cards')}
+        aoAbrirGraficosPaginaInicialOrcamentos={() => definirModalGraficosPaginaInicialAberto('orcamentos')}
+        aoAbrirGraficosPaginaInicialVendas={() => definirModalGraficosPaginaInicialAberto('vendas')}
         aoFechar={fecharModalEmpresa}
         aoSalvar={salvarEmpresa}
+      />
+      <ModalGraficosPaginaInicial
+        aberto={modalGraficosPaginaInicialAberto === 'cards'}
+        titulo="Cards resumo"
+        empresa={empresa}
+        configuracoesAtuais={empresa?.cardsPaginaInicial}
+        normalizarConfiguracoes={normalizarConfiguracoesCardsPaginaInicial}
+        reordenarConfiguracoes={reordenarConfiguracoesCardsPaginaInicial}
+        reposicionarConfiguracao={reposicionarConfiguracaoCardsPaginaInicial}
+        totalColunas={TOTAL_COLUNAS_CARDS_PAGINA_INICIAL}
+        limiteTotalColunas={TOTAL_COLUNAS_MAXIMO_CARDS_PAGINA_INICIAL}
+        maxLinhas={2}
+        permitirOrdenacao
+        somenteConsulta={usuarioSomenteConsulta}
+        camadaSecundaria={modalEmpresaAberto}
+        aoFechar={() => definirModalGraficosPaginaInicialAberto(null)}
+        aoSalvar={salvarCardsPaginaInicial}
+      />
+      <ModalGraficosPaginaInicial
+        aberto={modalGraficosPaginaInicialAberto === 'orcamentos'}
+        titulo="Graficos Orcamentos"
+        empresa={empresa}
+        configuracoesAtuais={empresa?.graficosPaginaInicialOrcamentos}
+        normalizarConfiguracoes={normalizarConfiguracoesGraficosPaginaInicialOrcamentos}
+        reordenarConfiguracoes={reordenarConfiguracoesGraficosPaginaInicialOrcamentos}
+        reposicionarConfiguracao={reposicionarConfiguracaoGraficosPaginaInicialOrcamentos}
+        totalColunas={TOTAL_COLUNAS_GRAFICOS_PAGINA_INICIAL}
+        somenteConsulta={usuarioSomenteConsulta}
+        camadaSecundaria={modalEmpresaAberto}
+        aoFechar={() => definirModalGraficosPaginaInicialAberto(null)}
+        aoSalvar={salvarGraficosPaginaInicialOrcamentos}
+      />
+      <ModalGraficosPaginaInicial
+        aberto={modalGraficosPaginaInicialAberto === 'vendas'}
+        titulo="Graficos Vendas"
+        empresa={empresa}
+        configuracoesAtuais={empresa?.graficosPaginaInicialVendas}
+        normalizarConfiguracoes={normalizarConfiguracoesGraficosPaginaInicialVendas}
+        reordenarConfiguracoes={reordenarConfiguracoesGraficosPaginaInicialVendas}
+        reposicionarConfiguracao={reposicionarConfiguracaoGraficosPaginaInicialVendas}
+        totalColunas={TOTAL_COLUNAS_GRAFICOS_PAGINA_INICIAL}
+        somenteConsulta={usuarioSomenteConsulta}
+        camadaSecundaria={modalEmpresaAberto}
+        aoFechar={() => definirModalGraficosPaginaInicialAberto(null)}
+        aoSalvar={salvarGraficosPaginaInicialVendas}
       />
       <ModalLayoutOrcamento
         aberto={modalLayoutOrcamentoAberto}
@@ -2049,6 +2166,36 @@ function normalizarPayloadEmpresa(dadosEmpresa) {
         visivel: coluna.obrigatoria ? true : Boolean(coluna.visivel),
         ordem: coluna.ordem,
         span: coluna.span
+      }))
+    ),
+    graficosPaginaInicialOrcamentos: JSON.stringify(
+      normalizarConfiguracoesGraficosPaginaInicialOrcamentos(dadosEmpresa.graficosPaginaInicialOrcamentos).map((grafico) => ({
+        id: grafico.id,
+        base: grafico.base,
+        rotulo: grafico.rotulo,
+        visivel: Boolean(grafico.visivel),
+        ordem: grafico.ordem,
+        span: grafico.span
+      }))
+    ),
+    graficosPaginaInicialVendas: JSON.stringify(
+      normalizarConfiguracoesGraficosPaginaInicialVendas(dadosEmpresa.graficosPaginaInicialVendas).map((grafico) => ({
+        id: grafico.id,
+        base: grafico.base,
+        rotulo: grafico.rotulo,
+        visivel: Boolean(grafico.visivel),
+        ordem: grafico.ordem,
+        span: grafico.span
+      }))
+    ),
+    cardsPaginaInicial: JSON.stringify(
+      normalizarConfiguracoesCardsPaginaInicial(dadosEmpresa.cardsPaginaInicial).map((card) => ({
+        id: card.id,
+        base: card.base,
+        rotulo: card.rotulo,
+        visivel: Boolean(card.visivel),
+        ordem: card.ordem,
+        span: card.span
       }))
     ),
     corPrimariaOrcamento: limparTextoOpcional(dadosEmpresa.corPrimariaOrcamento) || '#111827',

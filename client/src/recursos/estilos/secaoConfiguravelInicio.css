@@ -1,0 +1,16 @@
+.paginaInicioSecaoConfiguravel {
+  min-width: 0;
+  grid-column: span var(--pagina-inicio-span, 5);
+}
+
+@media (max-width: 1500px) {
+  .paginaInicioSecaoConfiguravel {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 960px) {
+  .paginaInicioSecaoConfiguravel {
+    grid-column: auto;
+  }
+}

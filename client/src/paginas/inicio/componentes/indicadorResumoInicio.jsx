@@ -8,7 +8,6 @@ export function IndicadorResumoInicio({
   valor,
   carregando,
   descricao,
-  destaque = '',
   ajuda = null
 }) {
   const valorTexto = carregando ? '...' : String(valor || '');
@@ -29,7 +28,6 @@ export function IndicadorResumoInicio({
       </div>
 
       {descricao ? <p className="inicioIndicadorResumoDescricao">{descricao}</p> : null}
-      {destaque ? <span className="inicioIndicadorResumoDestaque">{destaque}</span> : null}
 
       {ajuda ? (
         <span className="inicioIndicadorResumoTooltip" role="tooltip">

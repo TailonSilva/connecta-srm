@@ -6,6 +6,11 @@ import { normalizarConfiguracoesColunasGridOrcamentos } from '../utilitarios/col
 import { normalizarConfiguracoesColunasGridProdutos } from '../utilitarios/colunasGridProdutos';
 import { normalizarConfiguracoesColunasGridPedidos } from '../utilitarios/colunasGridPedidos';
 import { normalizarConfiguracoesColunasGridAtendimentos } from '../utilitarios/colunasGridAtendimentos';
+import {
+  normalizarConfiguracoesGraficosPaginaInicialOrcamentos,
+  normalizarConfiguracoesGraficosPaginaInicialVendas
+} from '../utilitarios/graficosPaginaInicial';
+import { normalizarConfiguracoesCardsPaginaInicial } from '../utilitarios/cardsPaginaInicial';
 
 export async function listarEmpresas(opcoes) {
   const empresas = await requisitarListaApi('/empresas', opcoes);
@@ -41,7 +46,10 @@ export function criarPayloadAtualizacaoColunasGrid(chave, colunas) {
     colunasGridOrcamentos: normalizarConfiguracoesColunasGridOrcamentos,
     colunasGridProdutos: normalizarConfiguracoesColunasGridProdutos,
     colunasGridPedidos: normalizarConfiguracoesColunasGridPedidos,
-    colunasGridAtendimentos: normalizarConfiguracoesColunasGridAtendimentos
+    colunasGridAtendimentos: normalizarConfiguracoesColunasGridAtendimentos,
+    graficosPaginaInicialOrcamentos: normalizarConfiguracoesGraficosPaginaInicialOrcamentos,
+    graficosPaginaInicialVendas: normalizarConfiguracoesGraficosPaginaInicialVendas,
+    cardsPaginaInicial: normalizarConfiguracoesCardsPaginaInicial
   };
 
   const normalizar = normalizadores[chave];
@@ -78,6 +86,9 @@ function normalizarEmpresa(empresa) {
     colunasGridProdutos: normalizarConfiguracoesColunasGridProdutos(empresa.colunasGridProdutos),
     colunasGridPedidos: normalizarConfiguracoesColunasGridPedidos(empresa.colunasGridPedidos),
     colunasGridAtendimentos: normalizarConfiguracoesColunasGridAtendimentos(empresa.colunasGridAtendimentos),
+    graficosPaginaInicialOrcamentos: normalizarConfiguracoesGraficosPaginaInicialOrcamentos(empresa.graficosPaginaInicialOrcamentos),
+    graficosPaginaInicialVendas: normalizarConfiguracoesGraficosPaginaInicialVendas(empresa.graficosPaginaInicialVendas),
+    cardsPaginaInicial: normalizarConfiguracoesCardsPaginaInicial(empresa.cardsPaginaInicial),
     imagem: adicionarCacheBusterImagem(empresa.imagem)
   };
 }

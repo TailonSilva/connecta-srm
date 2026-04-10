@@ -7,6 +7,7 @@ import { listarClientes, listarVendedores } from '../../servicos/clientes';
 import {
   listarEtapasOrcamentoConfiguracao,
   listarEtapasPedidoConfiguracao,
+  listarMotivosPerdaConfiguracao,
   listarMotivosDevolucaoConfiguracao
 } from '../../servicos/configuracoes';
 import { listarEmpresas } from '../../servicos/empresa';
@@ -15,15 +16,22 @@ import { listarPedidos } from '../../servicos/pedidos';
 import { listarGruposProduto, listarMarcas, listarProdutos } from '../../servicos/produtos';
 import { normalizarPreco } from '../../utilitarios/normalizarPreco';
 import { registroEstaAtivo } from '../../utilitarios/statusRegistro';
+import { normalizarConfiguracoesCardsPaginaInicial } from '../../utilitarios/cardsPaginaInicial';
 import { CabecalhoInicio } from './componentes/cabecalhoInicio';
-import { IconeAjudaSessaoInicio } from './componentes/iconeAjudaSessaoInicio';
+import { IndicadorConfiguravelInicio } from './componentes/indicadorConfiguravelInicio';
 import { IndicadorResumoInicio } from './componentes/indicadorResumoInicio';
 import { PainelHeroiInicio } from './componentes/painelHeroiInicio';
 import { SecaoDevolucoesInicio } from './componentes/secaoDevolucoesInicio';
 import { SecaoFunilOrcamentosInicio } from './componentes/secaoFunilOrcamentosInicio';
+import { SecaoMotivosPerdaInicio } from './componentes/secaoMotivosPerdaInicio';
+import { SecaoOrcamentosGrupoProdutosInicio } from './componentes/secaoOrcamentosGrupoProdutosInicio';
+import { SecaoOrcamentosMarcaInicio } from './componentes/secaoOrcamentosMarcaInicio';
 import { SecaoRankingInicio } from './componentes/secaoRankingInicio';
 import { SecaoVendasGrupoProdutosInicio } from './componentes/secaoVendasGrupoProdutosInicio';
 import { SecaoVendasMarcaInicio } from './componentes/secaoVendasMarcaInicio';
+import { SecaoVendasProdutosInicio } from './componentes/secaoVendasProdutosInicio';
+import { SecaoConfiguravelInicio } from './componentes/secaoConfiguravelInicio';
+import { ModalManualInicio } from './modalManualInicio';
 import { criarResumoFunilVendas } from './utilitarios/criarResumoFunilVendas';
 
 const IDS_ETAPAS_ORCAMENTO_FECHADAS = new Set([1, 2, 3, 4]);
@@ -35,14 +43,58 @@ export function PaginaInicio({ usuarioLogado }) {
   const [mensagemErro, definirMensagemErro] = useState('');
   const [painelBruto, definirPainelBruto] = useState(null);
   const [abaAtiva, definirAbaAtiva] = useState('orcamentos');
+  const [modalManualAberto, definirModalManualAberto] = useState(false);
 
   useEffect(() => {
     carregarPainel();
   }, [usuarioLogado?.idUsuario, usuarioLogado?.idVendedor, usuarioLogado?.tipo]);
 
+  useEffect(() => {
+    function tratarEmpresaAtualizada() {
+      carregarPainel();
+    }
+
+    window.addEventListener('empresa-atualizada', tratarEmpresaAtualizada);
+
+    return () => {
+      window.removeEventListener('empresa-atualizada', tratarEmpresaAtualizada);
+    };
+  }, [usuarioLogado?.idUsuario, usuarioLogado?.idVendedor, usuarioLogado?.tipo]);
+
+  useEffect(() => {
+    function tratarAtalhoManual(evento) {
+      if (evento.key !== 'F1') {
+        return;
+      }
+
+      evento.preventDefault();
+      if (!modalManualAberto) {
+        definirModalManualAberto(true);
+      }
+    }
+
+    window.addEventListener('keydown', tratarAtalhoManual);
+
+    return () => {
+      window.removeEventListener('keydown', tratarAtalhoManual);
+    };
+  }, [modalManualAberto]);
+
   const painel = useMemo(
     () => montarPainel(painelBruto, usuarioLogado),
     [painelBruto, usuarioLogado]
+  );
+  const secoesOrcamentosConfiguradas = useMemo(
+    () => montarSecoesOrcamentos(painel),
+    [painel]
+  );
+  const indicadoresConfigurados = useMemo(
+    () => montarIndicadoresConfigurados(painel),
+    [painel]
+  );
+  const secoesVendasConfiguradas = useMemo(
+    () => montarSecoesVendas(painel),
+    [painel]
   );
 
   async function carregarPainel() {
@@ -77,6 +129,7 @@ export function PaginaInicio({ usuarioLogado }) {
         listarMarcas(),
         listarEtapasOrcamentoConfiguracao(),
         listarEtapasPedidoConfiguracao(),
+        listarMotivosPerdaConfiguracao(),
         listarMotivosDevolucaoConfiguracao(),
         listarEmpresas()
       ]);
@@ -93,6 +146,7 @@ export function PaginaInicio({ usuarioLogado }) {
         marcasResultado,
         etapasOrcamentoResultado,
         etapasPedidoResultado,
+        motivosPerdaResultado,
         motivosDevolucaoResultado,
         empresasResultado
       ] = resultados;
@@ -108,6 +162,7 @@ export function PaginaInicio({ usuarioLogado }) {
       const marcas = marcasResultado.status === 'fulfilled' ? marcasResultado.value : [];
       const etapasOrcamento = etapasOrcamentoResultado.status === 'fulfilled' ? etapasOrcamentoResultado.value : [];
       const etapasPedido = etapasPedidoResultado.status === 'fulfilled' ? etapasPedidoResultado.value : [];
+      const motivosPerda = motivosPerdaResultado.status === 'fulfilled' ? motivosPerdaResultado.value : [];
       const motivosDevolucao = motivosDevolucaoResultado.status === 'fulfilled' ? motivosDevolucaoResultado.value : [];
       const empresas = empresasResultado.status === 'fulfilled' ? empresasResultado.value : [];
 
@@ -123,6 +178,7 @@ export function PaginaInicio({ usuarioLogado }) {
         marcas,
         etapasOrcamento,
         etapasPedido,
+        motivosPerda,
         motivosDevolucao,
         empresa: empresas[0] || null
       });
@@ -159,13 +215,14 @@ export function PaginaInicio({ usuarioLogado }) {
         ) : (
           <div className="paginaInicioLayout">
             <div className="paginaInicioGradeIndicadores">
-              {painel.indicadores.map((indicador) => (
-                <IndicadorResumoInicio
-                  key={indicador.titulo}
-                  ariaLabel={indicador.titulo}
-                  carregando={carregando}
-                  {...indicador}
-                />
+              {indicadoresConfigurados.map((indicador) => (
+                <IndicadorConfiguravelInicio key={indicador.id} colunas={indicador.span}>
+                  <IndicadorResumoInicio
+                    ariaLabel={indicador.titulo}
+                    carregando={carregando}
+                    {...indicador}
+                  />
+                </IndicadorConfiguravelInicio>
               ))}
             </div>
 
@@ -188,27 +245,29 @@ export function PaginaInicio({ usuarioLogado }) {
               ) : null}
 
               {abaAtiva === 'orcamentos' ? (
-                <SecaoFunilOrcamentosInicio itens={painel.funil} />
+                secoesOrcamentosConfiguradas.map((secao) => (
+                  <SecaoConfiguravelInicio key={secao.id} colunas={secao.span}>
+                    {secao.renderizar()}
+                  </SecaoConfiguravelInicio>
+                ))
               ) : (
-                <>
-                  <SecaoDevolucoesInicio itens={painel.devolucoes} />
-                  <SecaoVendasGrupoProdutosInicio itens={painel.vendasPorGrupo} />
-                  <SecaoVendasMarcaInicio itens={painel.vendasPorMarca} />
-                </>
+                secoesVendasConfiguradas.map((secao) => (
+                  <SecaoConfiguravelInicio key={secao.id} colunas={secao.span}>
+                    {secao.renderizar()}
+                  </SecaoConfiguravelInicio>
+                ))
               )}
-
-              {abaAtiva === 'vendas' ? (
-                <SecaoRankingInicio
-                  titulo={painel.tituloRanking}
-                  descricao={painel.descricaoRanking}
-                  itens={painel.ranking}
-                />
-              ) : null}
 
             </div>
           </div>
         )}
       </CorpoPagina>
+
+      <ModalManualInicio
+        aberto={modalManualAberto}
+        aoFechar={() => definirModalManualAberto(false)}
+        usuarioLogado={usuarioLogado}
+      />
     </>
   );
 }
@@ -271,8 +330,45 @@ function montarPainel(dados, usuarioLogado) {
       }
     }));
   const funil = montarFunil(criarResumoFunilVendas(dados.etapasOrcamento, orcamentosAbertos));
+  const orcamentosRecusadosMes = orcamentos.filter((item) => (
+    Number(item.idEtapaOrcamento) === 4
+    && dataNoPeriodo(item.dataFechamento || item.dataInclusao, inicioMes, fimMes)
+  ));
   const devolucoes = montarResumoDevolucoes(devolucoesMes, dados.motivosDevolucao);
-  const vendasPorGrupo = montarResumoVendasPorRelacionamento(
+  const motivosPerda = montarResumoMotivosPerda(orcamentosRecusadosMes, dados.motivosPerda);
+  const orcamentosPorGrupo = montarResumoPorRelacionamento(
+    orcamentosAbertos,
+    dados.produtos,
+    dados.gruposProduto,
+    'idGrupo',
+    'idGrupo',
+    'descricao',
+    'Sem grupo',
+    {
+      chaveRegistroId: 'idOrcamento',
+      sufixoQuantidadeRegistros: 'orc.',
+      conceitoBase: 'Resumo dos orcamentos em aberto',
+      calculoBase: 'orcamentos em aberto, somando',
+      observacao: 'A barra representa a participacao desse item no valor total dos orcamentos em aberto.'
+    }
+  );
+  const orcamentosPorMarca = montarResumoPorRelacionamento(
+    orcamentosAbertos,
+    dados.produtos,
+    dados.marcas,
+    'idMarca',
+    'idMarca',
+    'descricao',
+    'Sem marca',
+    {
+      chaveRegistroId: 'idOrcamento',
+      sufixoQuantidadeRegistros: 'orc.',
+      conceitoBase: 'Resumo dos orcamentos em aberto',
+      calculoBase: 'orcamentos em aberto, somando',
+      observacao: 'A barra representa a participacao desse item no valor total dos orcamentos em aberto.'
+    }
+  );
+  const vendasPorGrupo = montarResumoPorRelacionamento(
     pedidosMes,
     dados.produtos,
     dados.gruposProduto,
@@ -281,7 +377,7 @@ function montarPainel(dados, usuarioLogado) {
     'descricao',
     'Sem grupo'
   );
-  const vendasPorMarca = montarResumoVendasPorRelacionamento(
+  const vendasPorMarca = montarResumoPorRelacionamento(
     pedidosMes,
     dados.produtos,
     dados.marcas,
@@ -290,14 +386,25 @@ function montarPainel(dados, usuarioLogado) {
     'descricao',
     'Sem marca'
   );
+  const vendasPorProduto = montarResumoPorRelacionamento(
+    pedidosMes,
+    dados.produtos,
+    dados.produtos,
+    'idProduto',
+    'idProduto',
+    'descricao',
+    'Sem produto'
+  );
 
   return {
     ...base,
+    empresa: dados.empresa || null,
     resumo: usuarioLogado?.tipo === 'Usuario padrao'
       ? `${clientesVisiveis.length} clientes na sua carteira`
       : `${clientesVisiveis.length} clientes no acompanhamento`,
     indicadores: [
       {
+        id: 'orcamentosAbertos',
         icone: 'orcamento',
         titulo: 'Orcamentos em aberto',
         valor: String(orcamentosAbertos.length),
@@ -306,10 +413,11 @@ function montarPainel(dados, usuarioLogado) {
         ajuda: {
           conceito: 'Quantidade de orcamentos que ainda nao chegaram nas etapas finais.',
           calculo: 'Conta os orcamentos visiveis fora das etapas Fechado, Fechado sem pedido e Pedido excluido.',
-          observacao: `O destaque mostra ${normalizarPreco(valorAberto)} somados nesses orcamentos.`
+          observacao: `O valor total somado nesses orcamentos e ${normalizarPreco(valorAberto)}.`
         }
       },
       {
+        id: 'pedidosMes',
         icone: 'pedido',
         titulo: 'Pedidos no mes',
         valor: String(pedidosMes.length),
@@ -318,10 +426,11 @@ function montarPainel(dados, usuarioLogado) {
         ajuda: {
           conceito: 'Quantidade de pedidos incluidos no mes atual.',
           calculo: 'Conta pedidos visiveis com data de inclusao dentro do mes atual.',
-          observacao: `O destaque mostra ${normalizarPreco(faturamentoMes)} em valor somado desses pedidos.`
+          observacao: `O valor total somado desses pedidos e ${normalizarPreco(faturamentoMes)}.`
         }
       },
       {
+        id: 'catalogo',
         icone: 'atendimentos',
         titulo: 'Catalogo',
         valor: String(produtosAtivos.length),
@@ -334,6 +443,7 @@ function montarPainel(dados, usuarioLogado) {
         }
       },
       {
+        id: 'carteira',
         icone: 'selo',
         titulo: 'Carteira',
         valor: String(clientesAtivos.length),
@@ -417,9 +527,13 @@ function montarPainel(dados, usuarioLogado) {
     ],
     exibirFunil: dados.empresa?.exibirFunilPaginaInicial !== 0,
     funil,
+    motivosPerda,
+    orcamentosPorGrupo,
+    orcamentosPorMarca,
     devolucoes,
     vendasPorGrupo,
     vendasPorMarca,
+    vendasPorProduto,
     alertas: montarAlertas(orcamentosVencidos, orcamentosVencendo, pedidosEntregaProxima, clientesSemAtendimento),
     tituloRanking: usuarioLogado?.tipo === 'Usuario padrao' ? 'Clientes em destaque' : 'Vendedores em destaque',
     descricaoRanking: usuarioLogado?.tipo === 'Usuario padrao'
@@ -430,6 +544,101 @@ function montarPainel(dados, usuarioLogado) {
       : montarRankingVendedores(pedidosMes, vendedoresPorId),
     agenda
   };
+}
+
+function montarSecoesOrcamentos(painel) {
+  const configuracoes = Array.isArray(painel?.empresa?.graficosPaginaInicialOrcamentos)
+    ? painel.empresa.graficosPaginaInicialOrcamentos
+    : [];
+  const definicoes = new Map([
+    ['funilOrcamentos', {
+      renderizar: (configuracao) => <SecaoFunilOrcamentosInicio itens={painel.funil} titulo={configuracao.rotulo} />
+    }],
+    ['orcamentosGrupoProdutos', {
+      renderizar: (configuracao) => <SecaoOrcamentosGrupoProdutosInicio itens={painel.orcamentosPorGrupo} titulo={configuracao.rotulo} />
+    }],
+    ['orcamentosMarca', {
+      renderizar: (configuracao) => <SecaoOrcamentosMarcaInicio itens={painel.orcamentosPorMarca} titulo={configuracao.rotulo} />
+    }],
+    ['motivosPerda', {
+      renderizar: (configuracao) => <SecaoMotivosPerdaInicio itens={painel.motivosPerda} titulo={configuracao.rotulo} />
+    }]
+  ]);
+
+  return configuracoes
+    .filter((item) => item?.visivel !== false)
+    .sort((itemA, itemB) => Number(itemA?.ordem || 0) - Number(itemB?.ordem || 0))
+    .map((item) => ({
+      id: item.id,
+      span: item.span,
+      renderizar: () => definicoes.get(item.id)?.renderizar(item)
+    }))
+    .filter((item) => typeof item.renderizar === 'function');
+}
+
+function montarIndicadoresConfigurados(painel) {
+  const configuracoes = Array.isArray(painel?.empresa?.cardsPaginaInicial)
+    ? painel.empresa.cardsPaginaInicial
+    : normalizarConfiguracoesCardsPaginaInicial();
+  const indicadoresPorId = new Map(
+    (painel?.indicadores || []).map((indicador) => [indicador.id, indicador])
+  );
+
+  return configuracoes
+    .filter((item) => item?.visivel !== false)
+    .map((item) => {
+      const indicador = indicadoresPorId.get(item.id);
+
+      if (!indicador) {
+        return null;
+      }
+
+      return {
+        ...indicador,
+        titulo: item.rotulo || indicador.titulo,
+        span: item.span || 2
+      };
+    })
+    .filter(Boolean);
+}
+
+function montarSecoesVendas(painel) {
+  const configuracoes = Array.isArray(painel?.empresa?.graficosPaginaInicialVendas)
+    ? painel.empresa.graficosPaginaInicialVendas
+    : [];
+  const definicoes = new Map([
+    ['devolucoes', {
+      renderizar: (configuracao) => <SecaoDevolucoesInicio itens={painel.devolucoes} titulo={configuracao.rotulo} />
+    }],
+    ['vendasGrupoProdutos', {
+      renderizar: (configuracao) => <SecaoVendasGrupoProdutosInicio itens={painel.vendasPorGrupo} titulo={configuracao.rotulo} />
+    }],
+    ['vendasMarca', {
+      renderizar: (configuracao) => <SecaoVendasMarcaInicio itens={painel.vendasPorMarca} titulo={configuracao.rotulo} />
+    }],
+    ['vendasProdutos', {
+      renderizar: (configuracao) => <SecaoVendasProdutosInicio itens={painel.vendasPorProduto} titulo={configuracao.rotulo} />
+    }],
+    ['rankingVendas', {
+      renderizar: (configuracao) => (
+        <SecaoRankingInicio
+          titulo={configuracao.rotulo}
+          descricao={painel.descricaoRanking}
+          itens={painel.ranking}
+        />
+      )
+    }]
+  ]);
+
+  return configuracoes
+    .filter((item) => item?.visivel !== false)
+    .sort((itemA, itemB) => Number(itemA?.ordem || 0) - Number(itemB?.ordem || 0))
+    .map((item) => ({
+      id: item.id,
+      span: item.span,
+      renderizar: () => definicoes.get(item.id)?.renderizar(item)
+    }))
+    .filter((item) => typeof item.renderizar === 'function');
 }
 
 function criarPainelBase(usuarioLogado) {
@@ -446,18 +655,23 @@ function criarPainelBase(usuarioLogado) {
       ? 'Os dados exibidos aqui consideram somente seus clientes e seus registros.'
       : 'Leitura consolidada do funil, das vendas e das proximas acoes comerciais.',
     indicadores: [
-      { icone: 'orcamento', titulo: 'Orcamentos em aberto', valor: '0', descricao: '', destaque: '' },
-      { icone: 'pedido', titulo: 'Pedidos no mes', valor: '0', descricao: '', destaque: '' },
-      { icone: 'atendimentos', titulo: 'Catalogo', valor: '0', descricao: '', destaque: '' },
-      { icone: 'selo', titulo: 'Carteira', valor: '0', descricao: '', destaque: '' }
+      { id: 'orcamentosAbertos', icone: 'orcamento', titulo: 'Orcamentos em aberto', valor: '0', descricao: '' },
+      { id: 'pedidosMes', icone: 'pedido', titulo: 'Pedidos no mes', valor: '0', descricao: '' },
+      { id: 'catalogo', icone: 'atendimentos', titulo: 'Catalogo', valor: '0', descricao: '' },
+      { id: 'carteira', icone: 'selo', titulo: 'Carteira', valor: '0', descricao: '' }
     ],
     metricas: [],
     faixas: [],
+    empresa: null,
     exibirFunil: true,
     funil: [],
+    motivosPerda: [],
+    orcamentosPorGrupo: [],
+    orcamentosPorMarca: [],
     devolucoes: [],
     vendasPorGrupo: [],
     vendasPorMarca: [],
+    vendasPorProduto: [],
     alertas: [],
     tituloRanking: 'Ranking',
     descricaoRanking: '',
@@ -648,15 +862,67 @@ function montarResumoDevolucoes(pedidos, motivosDevolucao) {
   }));
 }
 
-function montarResumoVendasPorRelacionamento(
-  pedidos,
+function montarResumoMotivosPerda(orcamentos, motivosPerda) {
+  const motivosPorId = new Map((motivosPerda || []).map((motivo) => [
+    String(motivo.idMotivo),
+    motivo
+  ]));
+  const resumoPorMotivo = new Map();
+
+  (orcamentos || []).forEach((orcamento) => {
+    const chaveMotivo = String(orcamento.idMotivoPerda || 'sem-motivo');
+    const motivo = motivosPorId.get(chaveMotivo);
+    const atual = resumoPorMotivo.get(chaveMotivo) || {
+      id: chaveMotivo,
+      descricao: motivo?.descricao || 'Sem motivo informado',
+      quantidadeItens: 0,
+      valorTotal: 0,
+      quantidadeOrcamentos: 0
+    };
+
+    atual.quantidadeItens += 1;
+    atual.quantidadeOrcamentos += 1;
+    atual.valorTotal += totalRegistro(orcamento);
+    resumoPorMotivo.set(chaveMotivo, atual);
+  });
+
+  const lista = [...resumoPorMotivo.values()]
+    .filter((item) => item.quantidadeOrcamentos > 0 || item.valorTotal !== 0)
+    .sort((a, b) => b.valorTotal - a.valorTotal)
+    .slice(0, 8);
+  const totalQuantidade = lista.reduce((acumulado, item) => acumulado + (Number(item.quantidadeOrcamentos) || 0), 0);
+  const totalValor = lista.reduce((acumulado, item) => acumulado + Math.max(Number(item.valorTotal) || 0, 0), 0);
+
+  return lista.map((item) => ({
+    ...item,
+    valor: normalizarPreco(item.valorTotal),
+    percentualQuantidade: calcularPercentualParteDoTotal(Number(item.quantidadeOrcamentos || 0), totalQuantidade),
+    percentualValor: calcularPercentualParteDoTotal(Number(item.valorTotal || 0), totalValor),
+    ajuda: {
+      conceito: `Resumo dos motivos de perda para ${item.descricao}.`,
+      calculo: `${item.quantidadeOrcamentos} orc. recusados no mes atual, somando ${normalizarPreco(item.valorTotal)} em valor total.`,
+      observacao: 'A barra representa a participacao desse motivo no valor total dos orcamentos recusados no mes atual.'
+    }
+  }));
+}
+
+function montarResumoPorRelacionamento(
+  registros,
   produtos,
   relacionamentos,
   chaveProduto,
   chaveRelacionamento,
   chaveDescricao,
-  descricaoFallback
+  descricaoFallback,
+  opcoes = {}
 ) {
+  const {
+    chaveRegistroId = 'idPedido',
+    sufixoQuantidadeRegistros = 'ped.',
+    conceitoBase = 'Resumo das vendas do mes atual',
+    calculoBase = 'pedidos com data de entrada no mes atual, somando',
+    observacao = 'A barra representa a participacao desse item no saldo total da secao, considerando vendas e devolucoes cuja data de entrada pertence ao mes atual.'
+  } = opcoes;
   const produtosPorId = new Map((produtos || []).map((produto) => [
     String(produto.idProduto),
     produto
@@ -667,8 +933,8 @@ function montarResumoVendasPorRelacionamento(
   ]));
   const resumoPorRelacionamento = new Map();
 
-  (pedidos || []).forEach((pedido) => {
-    (pedido?.itens || []).forEach((item) => {
+  (registros || []).forEach((registro) => {
+    (registro?.itens || []).forEach((item) => {
       const produto = produtosPorId.get(String(item.idProduto || ''));
       const idRelacionamento = String(produto?.[chaveProduto] || 'sem-relacionamento');
       const relacionamento = relacionamentosPorId.get(idRelacionamento);
@@ -682,7 +948,7 @@ function montarResumoVendasPorRelacionamento(
 
       atual.quantidadeItens += Number(item.quantidade) || 0;
       atual.valorTotal += Number(item.valorTotal) || 0;
-      atual.pedidos.add(String(pedido.idPedido));
+      atual.pedidos.add(String(registro[chaveRegistroId]));
       resumoPorRelacionamento.set(idRelacionamento, atual);
     });
   });
@@ -690,7 +956,7 @@ function montarResumoVendasPorRelacionamento(
   const lista = [...resumoPorRelacionamento.values()]
     .map((item) => ({
       ...item,
-      quantidadePedidos: `${item.pedidos.size} ped.`,
+      quantidadePedidos: `${item.pedidos.size} ${sufixoQuantidadeRegistros}`,
       pedidos: undefined
     }))
     .filter((item) => item.quantidadeItens !== 0 || item.valorTotal !== 0)
@@ -711,9 +977,9 @@ function montarResumoVendasPorRelacionamento(
     percentualQuantidade: calcularPercentualParteDoTotal(Number(item.quantidadeItens || 0), totalQuantidade),
     percentualValor: calcularPercentualParteDoTotal(Number(item.valorTotal || 0), totalValor),
     ajuda: {
-      conceito: `Resumo das vendas do mes atual para ${item.descricao}.`,
-      calculo: `${item.quantidadePedidos} somando ${item.quantidadeItens} nas quantidades dos itens e ${normalizarPreco(item.valorTotal)} em valor total liquido, ja debitando devolucoes com data de entrada no mes atual.`,
-      observacao: 'A barra representa a participacao desse item no saldo total da secao, considerando vendas e devolucoes cuja data de entrada pertence ao mes atual.'
+      conceito: `${conceitoBase} para ${item.descricao}.`,
+      calculo: `${item.quantidadePedidos} ${calculoBase} ${item.quantidadeItens} nas quantidades dos itens e ${normalizarPreco(item.valorTotal)} em valor total liquido.`,
+      observacao
     }
   }));
 }
