@@ -1213,15 +1213,14 @@ function obterHoraAtualFormatoInput() {
 }
 
 function montarDadosIniciaisOrcamentoPeloAtendimento(atendimento, clientes, vendedores, usuarioLogado) {
-  const cliente = clientes.find((item) => String(item.idCliente) === String(atendimento?.idCliente || ''));
-  const vendedor = vendedores.find((item) => String(item.idVendedor) === String(cliente?.idVendedor || ''));
+  const vendedor = vendedores.find((item) => String(item.idVendedor) === String(usuarioLogado?.idVendedor || ''));
 
   return {
     idCliente: atendimento?.idCliente || '',
     idContato: atendimento?.idContato || '',
     idUsuario: atendimento?.idUsuario || usuarioLogado?.idUsuario || '',
     nomeUsuario: atendimento?.nomeUsuario || usuarioLogado?.nome || '',
-    idVendedor: cliente?.idVendedor || '',
+    idVendedor: usuarioLogado?.idVendedor || '',
     comissao: vendedor?.comissaoPadrao ?? 0,
     observacao: atendimento?.descricao || ''
   };

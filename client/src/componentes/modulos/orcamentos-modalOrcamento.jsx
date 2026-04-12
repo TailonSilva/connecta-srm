@@ -26,6 +26,7 @@ import { obterEtapasOrcamentoParaInputManual } from '../../utilitarios/etapasOrc
 const abasModalOrcamento = [
   { id: 'dadosGerais', label: 'Dados gerais' },
   { id: 'itens', label: 'Itens' },
+  { id: 'outros', label: 'Outros' },
   { id: 'campos', label: 'Campos do orcamento' }
 ];
 
@@ -111,6 +112,7 @@ export function ModalOrcamento({
   const somenteLeitura = modo === 'consulta';
   const modoInclusao = modo === 'novo';
   const modoEdicao = modo === 'edicao';
+  const vendedorBloqueado = Boolean(idVendedorBloqueado);
   const clientesAtivos = clientes.filter((cliente) => cliente.status !== 0);
   const contatosAtivos = contatos.filter((contato) => contato.status !== 0);
   const usuariosAtivos = usuarios.filter((usuario) => usuario.ativo !== 0);
@@ -140,6 +142,14 @@ export function ModalOrcamento({
   const totalOrcamento = useMemo(
     () => formulario.itens.reduce((total, item) => total + (converterPrecoParaNumero(item.valorTotal) || 0), 0),
     [formulario.itens]
+  );
+  const valorComissaoOrcamento = useMemo(() => {
+    const percentualComissao = converterPrecoParaNumero(formulario.comissao) || 0;
+    return Number(((totalOrcamento * percentualComissao) / 100).toFixed(2));
+  }, [formulario.comissao, totalOrcamento]);
+  const nomeVendedorSelecionado = useMemo(
+    () => vendedoresAtivos.find((item) => String(item.idVendedor) === String(formulario.idVendedor || ''))?.nome || '',
+    [vendedoresAtivos, formulario.idVendedor]
   );
   const {
     modalItemAberto,
@@ -181,7 +191,17 @@ export function ModalOrcamento({
       return;
     }
 
-    definirFormulario(criarFormularioInicial(orcamento, usuarioLogado, camposOrcamento, empresa));
+    definirFormulario(
+      criarFormularioInicial(
+        orcamento,
+        usuarioLogado,
+        camposOrcamento,
+        empresa,
+        usuariosAtivos,
+        vendedoresAtivos,
+        idVendedorBloqueado
+      )
+    );
     definirAbaAtiva(abasModalOrcamento[0].id);
     definirSalvando(false);
     definirGerandoPdf(false);
@@ -317,19 +337,21 @@ export function ModalOrcamento({
       };
 
       if (name === 'idCliente') {
-        const cliente = clientesAtivos.find((item) => String(item.idCliente) === String(value));
-
-        if (cliente) {
-          proximoEstado.idVendedor = cliente.idVendedor ? String(cliente.idVendedor) : '';
-          const vendedor = vendedoresAtivos.find((item) => String(item.idVendedor) === String(cliente.idVendedor));
-          proximoEstado.comissao = vendedor ? formatarPercentualInput(vendedor.comissaoPadrao) : '0,00';
-        } else {
-          proximoEstado.idVendedor = '';
-          proximoEstado.comissao = '0,00';
-        }
+        proximoEstado.idContato = '';
       }
 
-      if (name === 'idVendedor') {
+      if (name === 'idUsuario') {
+        const vendedorPadrao = obterVendedorPadrao(
+          value,
+          usuariosAtivos,
+          vendedoresAtivos,
+          idVendedorBloqueado
+        );
+        proximoEstado.idVendedor = vendedorPadrao.idVendedor;
+        proximoEstado.comissao = vendedorPadrao.comissao;
+      }
+
+      if (name === 'idVendedor' && !vendedorBloqueado) {
         const vendedor = vendedoresAtivos.find((item) => String(item.idVendedor) === String(value));
         proximoEstado.comissao = vendedor ? formatarPercentualInput(vendedor.comissaoPadrao) : '0,00';
       }
@@ -585,14 +607,10 @@ export function ModalOrcamento({
     }
 
     definirFormulario((estadoAtual) => {
-      const vendedor = vendedoresAtivos.find((item) => String(item.idVendedor) === String(cliente.idVendedor));
-
       return {
         ...estadoAtual,
         idCliente: String(cliente.idCliente),
-        idContato: '',
-        idVendedor: cliente.idVendedor ? String(cliente.idVendedor) : '',
-        comissao: vendedor ? formatarPercentualInput(vendedor.comissaoPadrao) : '0,00'
+        idContato: ''
       };
     });
 
@@ -768,18 +786,27 @@ export function ModalOrcamento({
               </div>
 
               <div className="linhaOrcamentoComercial">
-                <CampoSelect
-                  label="Vendedor"
-                  name="idVendedor"
-                  value={formulario.idVendedor}
-                  onChange={alterarCampo}
-                  options={vendedoresAtivos.map((vendedor) => ({
-                    valor: String(vendedor.idVendedor),
-                    label: vendedor.nome
-                  }))}
-                  disabled={somenteLeitura}
-                  required
-                />
+                {vendedorBloqueado ? (
+                  <CampoFormulario
+                    label="Vendedor"
+                    name="nomeVendedorBloqueado"
+                    value={nomeVendedorSelecionado}
+                    disabled
+                  />
+                ) : (
+                  <CampoSelect
+                    label="Vendedor"
+                    name="idVendedor"
+                    value={formulario.idVendedor}
+                    onChange={alterarCampo}
+                    options={vendedoresAtivos.map((vendedor) => ({
+                      valor: String(vendedor.idVendedor),
+                      label: vendedor.nome
+                    }))}
+                    disabled={somenteLeitura}
+                    required
+                  />
+                )}
                 <CampoSelect
                   label="Prazo de pagamento"
                   name="idPrazoPagamento"
@@ -803,13 +830,6 @@ export function ModalOrcamento({
                     />
                   ) : null}
                 />
-                <CampoFormulario
-                  label="Comissao (%)"
-                  name="comissao"
-                  value={formulario.comissao}
-                  onChange={alterarCampo}
-                  disabled={somenteLeitura}
-                />
               </div>
 
               <div className="linhaOrcamentoFechamento">
@@ -832,29 +852,6 @@ export function ModalOrcamento({
                 />
               </div>
 
-              {formulario.idMotivoPerda ? (
-                <div className="campoFormulario">
-                  <label htmlFor="motivoPerdaOrcamento">Motivo da perda</label>
-                  <input
-                    id="motivoPerdaOrcamento"
-                    className="entradaFormulario"
-                    value={motivosPerda.find((motivo) => String(motivo.idMotivo) === String(formulario.idMotivoPerda))?.descricao || ''}
-                    disabled
-                  />
-                </div>
-              ) : null}
-
-              {formulario.idPedidoVinculado ? (
-                <div className="campoFormulario">
-                  <label htmlFor="pedidoVinculadoOrcamento">Pedido vinculado</label>
-                  <input
-                    id="pedidoVinculadoOrcamento"
-                    className="entradaFormulario"
-                    value={`#${String(formulario.idPedidoVinculado).padStart(4, '0')}`}
-                    disabled
-                  />
-                </div>
-              ) : null}
             </section>
           ) : null}
 
@@ -950,6 +947,49 @@ export function ModalOrcamento({
               <div className="resumoTotalItensOrcamento resumoTotalItensOrcamentoRodape">
                 <span className="rotuloResumoTotalItensOrcamento">Total dos itens</span>
                 <strong className="valorResumoTotalItensOrcamento">{normalizarPreco(totalOrcamento)}</strong>
+              </div>
+            </section>
+          ) : null}
+
+          {abaAtiva === 'outros' ? (
+            <section className="layoutModalOrcamentoAba">
+              <div className="linhaOrcamentoComercial">
+                <CampoFormulario
+                  label="Pedido vinculado"
+                  name="pedidoVinculadoOrcamento"
+                  value={formulario.idPedidoVinculado
+                    ? `#${String(formulario.idPedidoVinculado).padStart(4, '0')}`
+                    : ''}
+                  placeholder="Sem pedido vinculado"
+                  disabled
+                />
+                <CampoFormulario
+                  label="Comissao (%)"
+                  name="comissao"
+                  value={formulario.comissao}
+                  onChange={alterarCampo}
+                  disabled={somenteLeitura}
+                />
+                <CampoFormulario
+                  label="Total comissao"
+                  name="valorComissaoOrcamento"
+                  value={normalizarPreco(valorComissaoOrcamento)}
+                  disabled
+                />
+              </div>
+
+              <div className="linhaOrcamentoFechamento">
+                <CampoSelect
+                  label="Motivo da perda"
+                  name="idMotivoPerda"
+                  value={formulario.idMotivoPerda}
+                  onChange={alterarCampo}
+                  options={motivosAtivos.map((motivo) => ({
+                    valor: String(motivo.idMotivo),
+                    label: motivo.descricao
+                  }))}
+                  disabled={somenteLeitura || !etapaSelecionada?.obrigarMotivoPerda}
+                />
               </div>
             </section>
           ) : null}
@@ -1249,7 +1289,7 @@ function agendarFocoCampo(referenciaCampo) {
   }, 0);
 }
 
-function criarFormularioInicial(orcamento, usuarioLogado, camposOrcamento, empresa) {
+function criarFormularioInicial(orcamento, usuarioLogado, camposOrcamento, empresa, usuarios = [], vendedores = [], idVendedorBloqueado = null) {
   const camposExtrasRegistro = Array.isArray(orcamento?.camposExtras) ? orcamento.camposExtras : [];
   const camposRegistroPorId = new Map(
     camposExtrasRegistro.map((campo) => [String(campo.idCampoOrcamento), campo.valor || ''])
@@ -1265,6 +1305,12 @@ function criarFormularioInicial(orcamento, usuarioLogado, camposOrcamento, empre
         descricaoPadrao: ''
       }))
   ];
+  const vendedorPadraoUsuario = obterVendedorPadrao(
+    usuarioLogado?.idUsuario,
+    usuarios,
+    vendedores,
+    idVendedorBloqueado
+  );
 
   if (!orcamento) {
     return {
@@ -1278,11 +1324,12 @@ function criarFormularioInicial(orcamento, usuarioLogado, camposOrcamento, empre
       solicitarPedidoAoSalvar: false,
       idUsuario: String(usuarioLogado?.idUsuario || ''),
       nomeUsuario: usuarioLogado?.nome || '',
-    comissao: '0,00',
-    camposExtras: camposMesclados.map((campo) => ({
-      idCampoOrcamento: campo.idCampoOrcamento,
-      titulo: campo.titulo,
-      valor: campo.descricaoPadrao || ''
+      idVendedor: vendedorPadraoUsuario.idVendedor,
+      comissao: vendedorPadraoUsuario.comissao,
+      camposExtras: camposMesclados.map((campo) => ({
+        idCampoOrcamento: campo.idCampoOrcamento,
+        titulo: campo.titulo,
+        valor: campo.descricaoPadrao || ''
       }))
     };
   }
@@ -1324,6 +1371,30 @@ function criarFormularioInicial(orcamento, usuarioLogado, camposOrcamento, empre
         : (campo.descricaoPadrao || '')
     }))
   };
+}
+
+function obterVendedorPadraoPorUsuarioId(idUsuario, usuarios = [], vendedores = []) {
+  const usuario = usuarios.find((item) => String(item.idUsuario) === String(idUsuario || ''));
+  const idVendedor = usuario?.idVendedor ? String(usuario.idVendedor) : '';
+  const vendedor = vendedores.find((item) => String(item.idVendedor) === idVendedor);
+
+  return {
+    idVendedor,
+    comissao: vendedor ? formatarPercentualInput(vendedor.comissaoPadrao) : '0,00'
+  };
+}
+
+function obterVendedorPadrao(idUsuario, usuarios = [], vendedores = [], idVendedorBloqueado = null) {
+  if (idVendedorBloqueado) {
+    const vendedor = vendedores.find((item) => String(item.idVendedor) === String(idVendedorBloqueado));
+
+    return {
+      idVendedor: String(idVendedorBloqueado),
+      comissao: vendedor ? formatarPercentualInput(vendedor.comissaoPadrao) : '0,00'
+    };
+  }
+
+  return obterVendedorPadraoPorUsuarioId(idUsuario, usuarios, vendedores);
 }
 
 function montarRotuloCliente(cliente, empresa) {

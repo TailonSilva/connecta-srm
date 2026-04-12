@@ -155,6 +155,7 @@ export function ModalPedido({
   const [modalCadastroMotivoDevolucaoAberto, definirModalCadastroMotivoDevolucaoAberto] = useState(false);
   const [motivoDevolucaoPendente, definirMotivoDevolucaoPendente] = useState('');
   const [motivosDevolucaoLocais, definirMotivosDevolucaoLocais] = useState(motivosDevolucao);
+  const vendedorBloqueado = Boolean(idVendedorBloqueado);
   const somenteLeitura = modo === 'consulta';
   const modoInclusao = !pedido;
   const registroBase = pedido || dadosIniciais || null;
@@ -182,6 +183,10 @@ export function ModalPedido({
     const percentualComissao = converterPrecoParaNumero(formulario.comissao) || 0;
     return Number(((totalPedido * percentualComissao) / 100).toFixed(2));
   }, [formulario.comissao, totalPedido]);
+  const nomeVendedorSelecionado = useMemo(
+    () => vendedoresAtivos.find((item) => String(item.idVendedor) === String(formulario.idVendedor || ''))?.nome || formulario.nomeVendedorSnapshot || '',
+    [vendedoresAtivos, formulario.idVendedor, formulario.nomeVendedorSnapshot]
+  );
   const contatosDoCliente = useMemo(
     () => combinarContatosDoCliente(contatosAtivos, contatosCriadosLocalmente, formulario.idCliente),
     [contatosAtivos, contatosCriadosLocalmente, formulario.idCliente]
@@ -230,7 +235,20 @@ export function ModalPedido({
       return;
     }
 
-    definirFormulario(criarFormularioInicialPedido(registroBase, usuarioLogado, camposPedido, empresa, { novo: !pedido }));
+    definirFormulario(
+      criarFormularioInicialPedido(
+        registroBase,
+        usuarioLogado,
+        camposPedido,
+        empresa,
+        usuariosAtivos,
+        vendedoresAtivos,
+        {
+          novo: !pedido,
+          idVendedorBloqueado
+        }
+      )
+    );
     definirAbaAtiva(abasModalPedido[0].id);
     definirSalvando(false);
     definirMensagemErro('');
@@ -338,10 +356,6 @@ export function ModalPedido({
         const cliente = clientesAtivos.find((item) => String(item.idCliente) === String(value));
         if (cliente) {
           proximoEstado.nomeClienteSnapshot = cliente.nomeFantasia || cliente.razaoSocial || '';
-          proximoEstado.idVendedor = cliente.idVendedor ? String(cliente.idVendedor) : '';
-          const vendedor = vendedoresAtivos.find((item) => String(item.idVendedor) === String(cliente.idVendedor));
-          proximoEstado.nomeVendedorSnapshot = vendedor?.nome || '';
-          proximoEstado.comissao = vendedor ? formatarPercentualInput(vendedor.comissaoPadrao) : '0,00';
         }
       }
 
@@ -350,7 +364,19 @@ export function ModalPedido({
         proximoEstado.nomeContatoSnapshot = contato?.nome || '';
       }
 
-      if (name === 'idVendedor') {
+      if (name === 'idUsuario') {
+        const vendedor = obterVendedorPadrao(
+          value,
+          usuariosAtivos,
+          vendedoresAtivos,
+          idVendedorBloqueado
+        );
+        proximoEstado.idVendedor = vendedor.idVendedor;
+        proximoEstado.nomeVendedorSnapshot = vendedor.nomeVendedor;
+        proximoEstado.comissao = vendedor.comissao;
+      }
+
+      if (name === 'idVendedor' && !vendedorBloqueado) {
         const vendedor = vendedoresAtivos.find((item) => String(item.idVendedor) === String(value));
         proximoEstado.nomeVendedorSnapshot = vendedor?.nome || '';
         proximoEstado.comissao = vendedor ? formatarPercentualInput(vendedor.comissaoPadrao) : '0,00';
@@ -534,17 +560,12 @@ export function ModalPedido({
     }
 
     definirFormulario((estadoAtual) => {
-      const vendedor = vendedoresAtivos.find((item) => String(item.idVendedor) === String(cliente.idVendedor));
-
       return {
         ...estadoAtual,
         idCliente: String(cliente.idCliente),
         idContato: '',
         nomeClienteSnapshot: cliente.nomeFantasia || cliente.razaoSocial || '',
         nomeContatoSnapshot: '',
-        idVendedor: cliente.idVendedor ? String(cliente.idVendedor) : '',
-        nomeVendedorSnapshot: vendedor?.nome || '',
-        comissao: vendedor ? formatarPercentualInput(vendedor.comissaoPadrao) : '0,00'
       };
     });
 
@@ -787,17 +808,26 @@ export function ModalPedido({
               <div className="linhaOrcamentoComercial">
                 {modoInclusao ? (
                   <>
-                    <CampoSelect
-                      label="Vendedor"
-                      name="idVendedor"
-                      value={formulario.idVendedor}
-                      onChange={alterarCampo}
-                      options={vendedoresAtivos.map((vendedor) => ({
-                        valor: String(vendedor.idVendedor),
-                        label: vendedor.nome
-                      }))}
-                      disabled={somenteLeitura}
-                    />
+                    {vendedorBloqueado ? (
+                      <CampoFormulario
+                        label="Vendedor"
+                        name="nomeVendedorBloqueado"
+                        value={nomeVendedorSelecionado}
+                        disabled
+                      />
+                    ) : (
+                      <CampoSelect
+                        label="Vendedor"
+                        name="idVendedor"
+                        value={formulario.idVendedor}
+                        onChange={alterarCampo}
+                        options={vendedoresAtivos.map((vendedor) => ({
+                          valor: String(vendedor.idVendedor),
+                          label: vendedor.nome
+                        }))}
+                        disabled={somenteLeitura}
+                      />
+                    )}
                     <CampoSelect
                       label="Prazo de pagamento"
                       name="idPrazoPagamento"
@@ -1273,7 +1303,15 @@ function CampoSelect({ label, name, options, acaoExtra = null, referenciaCampo =
   );
 }
 
-function criarFormularioInicialPedido(pedido, usuarioLogado, camposPedido, empresa, { novo = !pedido } = {}) {
+function criarFormularioInicialPedido(
+  pedido,
+  usuarioLogado,
+  camposPedido,
+  empresa,
+  usuarios = [],
+  vendedores = [],
+  { novo = !pedido, idVendedorBloqueado = null } = {}
+) {
   const pedidoOriginadoDeOrcamento = Boolean(pedido?.idOrcamento);
   const idTipoPedidoInicial = pedido?.idTipoPedido
     ? String(pedido.idTipoPedido)
@@ -1281,6 +1319,12 @@ function criarFormularioInicialPedido(pedido, usuarioLogado, camposPedido, empre
       ? String(ID_TIPO_PEDIDO_VENDA)
       : '';
   const nomeTipoPedidoInicial = pedido?.nomeTipoPedidoSnapshot || (pedidoOriginadoDeOrcamento ? 'Venda' : '');
+  const vendedorPadraoUsuario = obterVendedorPadrao(
+    usuarioLogado?.idUsuario,
+    usuarios,
+    vendedores,
+    idVendedorBloqueado
+  );
 
   if (!pedido || novo) {
     return {
@@ -1289,7 +1333,7 @@ function criarFormularioInicialPedido(pedido, usuarioLogado, camposPedido, empre
       idCliente: pedido?.idCliente ? String(pedido.idCliente) : '',
       idContato: pedido?.idContato ? String(pedido.idContato) : '',
       idUsuario: String(pedido?.idUsuario || usuarioLogado?.idUsuario || ''),
-      idVendedor: pedido?.idVendedor ? String(pedido.idVendedor) : '',
+      idVendedor: pedido?.idVendedor ? String(pedido.idVendedor) : vendedorPadraoUsuario.idVendedor,
       idPrazoPagamento: pedido?.idPrazoPagamento ? String(pedido.idPrazoPagamento) : '',
       idTipoPedido: idTipoPedidoInicial,
       idMotivoDevolucao: pedido?.idMotivoDevolucao ? String(pedido.idMotivoDevolucao) : '',
@@ -1301,13 +1345,15 @@ function criarFormularioInicialPedido(pedido, usuarioLogado, camposPedido, empre
       nomeClienteSnapshot: pedido?.nomeClienteSnapshot || '',
       nomeContatoSnapshot: pedido?.nomeContatoSnapshot || '',
       nomeUsuarioSnapshot: pedido?.nomeUsuarioSnapshot || usuarioLogado?.nome || '',
-      nomeVendedorSnapshot: pedido?.nomeVendedorSnapshot || '',
+      nomeVendedorSnapshot: pedido?.nomeVendedorSnapshot || vendedorPadraoUsuario.nomeVendedor,
       nomeMetodoPagamentoSnapshot: pedido?.nomeMetodoPagamentoSnapshot || '',
       nomePrazoPagamentoSnapshot: pedido?.nomePrazoPagamentoSnapshot || '',
       nomeTipoPedidoSnapshot: nomeTipoPedidoInicial,
       idEtapaPedido: pedido?.idEtapaPedido ? String(pedido.idEtapaPedido) : '',
       nomeEtapaPedidoSnapshot: pedido?.nomeEtapaPedidoSnapshot || '',
-      comissao: formatarPercentualInput(pedido?.comissao),
+      comissao: pedido?.comissao !== undefined && pedido?.comissao !== null
+        ? formatarPercentualInput(pedido?.comissao)
+        : vendedorPadraoUsuario.comissao,
       observacao: pedido?.observacao || '',
       codigoOrcamentoOrigem: pedido?.codigoOrcamentoOrigem || '',
       itens: Array.isArray(pedido?.itens) ? pedido.itens.map((item) => ({
@@ -1382,6 +1428,32 @@ function criarFormularioInicialPedido(pedido, usuarioLogado, camposPedido, empre
       valor: campo.valor || ''
     })) : []
   };
+}
+
+function obterVendedorPadraoPorUsuarioId(idUsuario, usuarios = [], vendedores = []) {
+  const usuario = usuarios.find((item) => String(item.idUsuario) === String(idUsuario || ''));
+  const idVendedor = usuario?.idVendedor ? String(usuario.idVendedor) : '';
+  const vendedor = vendedores.find((item) => String(item.idVendedor) === idVendedor);
+
+  return {
+    idVendedor,
+    nomeVendedor: vendedor?.nome || '',
+    comissao: vendedor ? formatarPercentualInput(vendedor.comissaoPadrao) : '0,00'
+  };
+}
+
+function obterVendedorPadrao(idUsuario, usuarios = [], vendedores = [], idVendedorBloqueado = null) {
+  if (idVendedorBloqueado) {
+    const vendedor = vendedores.find((item) => String(item.idVendedor) === String(idVendedorBloqueado));
+
+    return {
+      idVendedor: String(idVendedorBloqueado),
+      nomeVendedor: vendedor?.nome || '',
+      comissao: vendedor ? formatarPercentualInput(vendedor.comissaoPadrao) : '0,00'
+    };
+  }
+
+  return obterVendedorPadraoPorUsuarioId(idUsuario, usuarios, vendedores);
 }
 
 function formatarPercentualInput(valor) {

@@ -96,12 +96,15 @@ export function ModalManualOrcamentos({
           itens: [
             'Cliente e contato entram no mesmo fluxo do orcamento e abastecem a proposta comercial.',
             'Na busca de clientes do orcamento, Usuario padrao tambem pode selecionar clientes vinculados a outros vendedores para montar novas propostas.',
+            'Selecionar ou trocar o cliente nao puxa mais o vendedor do cadastro do cliente; o vendedor inicial do orcamento sempre segue o usuario do registro e so muda quando o proprio campo Vendedor for alterado no modal.',
             'A busca de clientes tambem permite incluir um novo cliente sem sair do fluxo.',
             'Ao abrir a busca de contatos com um cliente ja definido, o proprio modal permite cadastrar um novo contato e devolver esse contato ja selecionado no orcamento.',
             'Ao confirmar a busca de cliente ou contato, o foco retorna para o campo preenchido no orcamento.',
             'Itens e valores seguem o mesmo padrao visual do pedido, com descricao e imagem preservadas no proprio item.',
             'A imagem do item pode herdar a foto principal do produto, mas quando o usuario trocar essa imagem no orcamento ela passa a ser exclusiva daquele item e e recortada em 1024 x 1024 px.',
             'Prazos de pagamento podem ser mantidos dentro do modal, respeitando o perfil do usuario.',
+            'A aba Outros concentra o Pedido vinculado, a Comissao (%), o Total comissao calculado sobre o total liquido dos itens e o Motivo da perda usado nas etapas finais do funil.',
+            'O Total comissao do orcamento e atualizado em tempo real sempre que itens, valores ou percentual de comissao mudarem no formulario.',
             'O modo do modal controla corretamente inclusao, edicao e consulta, inclusive em saida sem salvar.',
             'Nas abas do modal do orcamento, `Alt + Seta para a esquerda` volta para a aba anterior e `Alt + Seta para a direita` avanca para a proxima, reposicionando o foco no primeiro campo da nova aba.',
             'O modal abre no primeiro campo editavel, confirmacoes focam a acao principal e `PageDown` prioriza Salvar; quando nao houver salvamento disponivel, ele aciona Adicionar, Incluir ou Novo no contexto atual.'
@@ -133,6 +136,12 @@ export function ModalManualOrcamentos({
           descricao: 'Quando uma etapa entra em fechamento e ainda nao ha pedido vinculado, o sistema prepara automaticamente os dados iniciais do pedido.',
           detalhe: 'O usuario pode aceitar agora ou deixar a pendencia para depois.',
           icone: 'pedido'
+        },
+        {
+          titulo: 'Vendedor do registro',
+          descricao: 'Em novos orcamentos, o vendedor e a comissao inicial seguem o usuario do registro e nao o vendedor cadastrado no cliente.',
+          detalhe: 'Trocar o cliente nao sobrescreve mais o vendedor nem o percentual de comissao automaticamente.',
+          icone: 'usuarios'
         },
         {
           titulo: 'Data de fechamento',

@@ -94,6 +94,7 @@ export function ModalManualPedidos({
           itens: [
             'Cliente, contato, usuario do registro e vendedor compoem a base comercial do pedido, com atalhos de busca para cliente e contato no modo de inclusao.',
             'Na busca de clientes do pedido, Usuario padrao tambem pode selecionar clientes vinculados a outros vendedores para abrir um novo pedido.',
+            'Selecionar ou trocar o cliente nao puxa mais o vendedor do cadastro do cliente; o vendedor inicial do pedido sempre segue o usuario do registro e so muda quando o proprio campo Vendedor for alterado no modal.',
             'A busca de clientes tambem permite incluir um novo cliente sem sair do fluxo.',
             'Ao abrir a busca de contatos com um cliente ja definido, o proprio modal permite cadastrar um novo contato e devolver esse contato ja selecionado no pedido.',
             'Ao confirmar a busca de cliente ou contato, o foco retorna para o campo preenchido no pedido.',
@@ -151,6 +152,12 @@ export function ModalManualPedidos({
           descricao: 'Os atalhos de prazo de pagamento dentro do pedido respeitam o mesmo modelo de permissao adotado em Atendimentos e Orcamentos.',
           detalhe: 'Isso evita diferenca de comportamento entre modais comerciais.',
           icone: 'configuracoes'
+        },
+        {
+          titulo: 'Vendedor do registro',
+          descricao: 'Em novos pedidos, o vendedor e a comissao inicial seguem o usuario do registro e nao o vendedor cadastrado no cliente.',
+          detalhe: 'Trocar o cliente nao sobrescreve mais o vendedor nem o percentual de comissao automaticamente.',
+          icone: 'usuarios'
         },
         {
           titulo: 'Consulta apos entrega',

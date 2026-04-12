@@ -1338,15 +1338,14 @@ function obterHoraAtualFormatoInput() {
 }
 
 function montarDadosOrcamentoAPartirDoAtendimentoAtual(formulario, clientes, vendedores, usuarioLogado) {
-  const cliente = clientes.find((item) => String(item.idCliente) === String(formulario?.idCliente || ''));
-  const vendedor = vendedores.find((item) => String(item.idVendedor) === String(cliente?.idVendedor || ''));
+  const vendedor = vendedores.find((item) => String(item.idVendedor) === String(usuarioLogado?.idVendedor || ''));
 
   return {
     idCliente: formulario?.idCliente || '',
     idContato: formulario?.idContato || '',
     idUsuario: formulario?.idUsuario || usuarioLogado?.idUsuario || '',
     nomeUsuario: formulario?.nomeUsuario || usuarioLogado?.nome || '',
-    idVendedor: cliente?.idVendedor || '',
+    idVendedor: usuarioLogado?.idVendedor || '',
     comissao: vendedor?.comissaoPadrao ?? 0,
     observacao: formulario?.descricao || ''
   };

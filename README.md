@@ -431,6 +431,9 @@ Filtros da agenda:
 - As observacoes do PDF incluem a observacao principal do orcamento, os campos extras preenchidos no orcamento e os textos padrao ativos configurados em `Campos do pedido`
 - O layout do PDF do orcamento foi separado em componente proprio para facilitar ajustes ou reversao da feature sem afetar o formulario principal
 - O modal de orcamento em modo de inclusao pede confirmacao antes de fechar por `Cancelar`, `Escape` ou clique fora, inclusive quando aberto a partir do atendimento
+- Em novos orcamentos, o vendedor e a comissao inicial passam a vir do vendedor vinculado ao usuario do registro; trocar o cliente nao sobrescreve mais esses campos automaticamente
+- A aba `Outros` do orcamento agora concentra `Pedido vinculado`, `% de comissao`, `Total comissao` calculado sobre o total liquido dos itens e `Motivo da perda`
+- O campo `Total comissao` do orcamento e recalculado em tempo real conforme itens, valores ou percentual de comissao forem alterados no modal
 
 ### Pedidos
 
@@ -449,6 +452,7 @@ Filtros da agenda:
 - A mesma exigencia do `Motivo da devolucao` tambem vale para a troca rapida de etapa direto no grid de pedidos
 - O modal de `Pedidos` agora possui a aba `Outros`, que concentra `Orcamento vinculado` e o campo visual do motivo, trazendo o valor preenchido quando existir ou vazio quando ainda nao houver motivo
 - A aba `Outros` do pedido tambem concentra `% de comissao` e `Valor da comissao`, mantendo o percentual editavel no proprio pedido e o valor calculado sobre o total liquido dos itens
+- Em novos pedidos, o vendedor e a comissao inicial passam a vir do vendedor vinculado ao usuario do registro; trocar o cliente nao sobrescreve mais esses campos automaticamente
 - O backend persiste `pedido.valorComissao` automaticamente em inclusao e edicao, calculando `total liquido dos itens x comissao (%)`; pedidos de devolucao debitam esse total por manterem valores negativos
 - A pagina inicial agora exibe a secao `Devolucoes do mes`, agrupando pedidos do tipo `Devolucao` por `Motivo da devolucao`, com quantidade por motivo e valor total convertido para positivo apenas para leitura do grafico
 - A pagina inicial agora exibe tambem `Vendas do mes por grupo de produtos`, com quantidade total dos itens vendidos, quantidade de pedidos e valor total por grupo nos pedidos com data de entrada no mes corrente
