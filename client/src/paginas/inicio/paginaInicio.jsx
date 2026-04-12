@@ -20,7 +20,7 @@ import { listarUsuarios } from '../../servicos/usuarios';
 import { formatarCodigoCliente } from '../../utilitarios/codigoCliente';
 import { normalizarPreco } from '../../utilitarios/normalizarPreco';
 import { registroEstaAtivo } from '../../utilitarios/statusRegistro';
-import { normalizarConfiguracoesCardsPaginaInicial } from '../../utilitarios/cardsPaginaInicial';
+import { normalizarConfiguracoesCardsPaginaInicial } from '../../dados/cardsPaginaInicial';
 import { CabecalhoInicio } from './componentes/cabecalhoInicio';
 import { IndicadorConfiguravelInicio } from './componentes/indicadorConfiguravelInicio';
 import { IndicadorResumoInicio } from './componentes/indicadorResumoInicio';

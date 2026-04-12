@@ -7,7 +7,7 @@ import {
   reposicionarConfiguracaoColunaGridPedidos,
   reordenarConfiguracoesColunasGridPedidos,
   TOTAL_COLUNAS_GRID_PEDIDOS
-} from '../../utilitarios/colunasGridPedidos';
+} from '../../dados/colunasGridPedidos';
 
 export function ModalColunasGridPedidos({
   aberto,

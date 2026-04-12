@@ -9,7 +9,7 @@ import { obterValorGrid } from '../../utilitarios/valorPadraoGrid';
 import {
   normalizarColunasGridProdutos,
   TOTAL_COLUNAS_GRID_PRODUTOS
-} from '../../utilitarios/colunasGridProdutos';
+} from '../../dados/colunasGridProdutos';
 import { ImagemProduto } from './imagemProduto';
 
 export function ListaProdutos({

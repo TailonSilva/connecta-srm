@@ -51,14 +51,14 @@ import {
   normalizarFiltrosPorPadrao,
   normalizarListaFiltroPersistido,
   useFiltrosPersistidos
-} from '../../utilitarios/useFiltrosPersistidos';
+} from '../../hooks/useFiltrosPersistidos';
 import { ModalPedido } from '../pedidos/modalPedido';
 import { ModalAtendimento } from './modalAtendimento';
 import { ModalManualAtendimento } from './modalManualAtendimento';
 import {
   normalizarColunasGridAtendimentos,
   TOTAL_COLUNAS_GRID_ATENDIMENTOS
-} from '../../utilitarios/colunasGridAtendimentos';
+} from '../../dados/colunasGridAtendimentos';
 import { obterValorGrid } from '../../utilitarios/valorPadraoGrid';
 import { ModalColunasGridAtendimentos } from '../configuracoes/modalColunasGridAtendimentos';
 

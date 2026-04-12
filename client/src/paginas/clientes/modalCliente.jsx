@@ -23,7 +23,7 @@ import {
   normalizarFiltrosPorPadrao,
   normalizarListaFiltroPersistido,
   useFiltrosPersistidos
-} from '../../utilitarios/useFiltrosPersistidos';
+} from '../../hooks/useFiltrosPersistidos';
 import { ModalAtendimento } from '../atendimentos/modalAtendimento';
 import { ModalGruposEmpresa } from '../configuracoes/modalGruposEmpresa';
 import { ModalRamosAtividade } from '../configuracoes/modalRamosAtividade';

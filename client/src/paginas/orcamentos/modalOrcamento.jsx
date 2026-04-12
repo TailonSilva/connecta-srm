@@ -10,7 +10,7 @@ import { MensagemErroPopup } from '../../componentes/comuns/mensagemErroPopup';
 import { ModalPrazosPagamento } from '../configuracoes/modalPrazosPagamento';
 import { ModalCliente } from '../clientes/modalCliente';
 import { formatarNomeContato } from '../../utilitarios/formatarNomeContato';
-import { useFormularioItemProduto } from '../../utilitarios/useFormularioItemProduto';
+import { useFormularioItemProduto } from '../../hooks/useFormularioItemProduto';
 import {
   converterPrecoParaNumero,
   desformatarPreco,

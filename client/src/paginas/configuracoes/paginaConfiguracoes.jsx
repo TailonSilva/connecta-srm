@@ -79,12 +79,12 @@ import {
   incluirTamanho
 } from '../../servicos/configuracoes';
 import { atualizarEmpresa, incluirEmpresa, listarEmpresas } from '../../servicos/empresa';
-import { normalizarConfiguracoesColunasGridClientes } from '../../utilitarios/colunasGridClientes';
-import { normalizarConfiguracoesColunasGridOrcamentos } from '../../utilitarios/colunasGridOrcamentos';
-import { normalizarConfiguracoesColunasGridProdutos } from '../../utilitarios/colunasGridProdutos';
-import { normalizarConfiguracoesColunasGridPedidos } from '../../utilitarios/colunasGridPedidos';
+import { normalizarConfiguracoesColunasGridClientes } from '../../dados/colunasGridClientes';
+import { normalizarConfiguracoesColunasGridOrcamentos } from '../../dados/colunasGridOrcamentos';
+import { normalizarConfiguracoesColunasGridProdutos } from '../../dados/colunasGridProdutos';
+import { normalizarConfiguracoesColunasGridPedidos } from '../../dados/colunasGridPedidos';
 import { atualizarUsuario, incluirUsuario, listarUsuarios } from '../../servicos/usuarios';
-import { normalizarConfiguracoesColunasGridAtendimentos } from '../../utilitarios/colunasGridAtendimentos';
+import { normalizarConfiguracoesColunasGridAtendimentos } from '../../dados/colunasGridAtendimentos';
 import {
   normalizarConfiguracoesGraficosPaginaInicialOrcamentos,
   normalizarConfiguracoesGraficosPaginaInicialAtendimentos,
@@ -96,14 +96,14 @@ import {
   reposicionarConfiguracaoGraficosPaginaInicialOrcamentos,
   reposicionarConfiguracaoGraficosPaginaInicialVendas,
   TOTAL_COLUNAS_GRAFICOS_PAGINA_INICIAL
-} from '../../utilitarios/graficosPaginaInicial';
+} from '../../dados/graficosPaginaInicial';
 import {
   normalizarConfiguracoesCardsPaginaInicial,
   reordenarConfiguracoesCardsPaginaInicial,
   reposicionarConfiguracaoCardsPaginaInicial,
   TOTAL_COLUNAS_CARDS_PAGINA_INICIAL,
   TOTAL_COLUNAS_MAXIMO_CARDS_PAGINA_INICIAL
-} from '../../utilitarios/cardsPaginaInicial';
+} from '../../dados/cardsPaginaInicial';
 import { normalizarTelefone } from '../../utilitarios/normalizarTelefone';
 import { ModalAtualizacaoSistema } from './modalAtualizacaoSistema';
 import { ModalCadastroConfiguracao } from './modalCadastroConfiguracao';

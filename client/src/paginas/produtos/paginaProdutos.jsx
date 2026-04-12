@@ -27,7 +27,7 @@ import {
   normalizarFiltrosPorPadrao,
   normalizarListaFiltroPersistido,
   useFiltrosPersistidos
-} from '../../utilitarios/useFiltrosPersistidos';
+} from '../../hooks/useFiltrosPersistidos';
 import { ModalFiltros } from '../../componentes/comuns/modalFiltros';
 import { ModalProduto } from './modalProduto';
 import { ModalImportacaoCadastro } from '../../componentes/comuns/modalImportacaoCadastro';

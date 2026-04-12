@@ -31,12 +31,15 @@ Observacao importante:
 
 - `client/`: aplicacao React
 - `client/src/componentes/`: componentes reutilizaveis da interface
+- `client/src/dados/`: catalogos e definicoes estaticas do frontend mantidos em `.js`, sem misturar com regras utilitarias
 - `client/src/idex.html`: pagina estatica de vendas em arquivo unico para apresentacao comercial da ferramenta
 - `client/src/paginas/`: paginas do sistema
 - `client/src/servicos/`: comunicacao com a API
+- `client/src/hooks/`: hooks reutilizaveis para regras globais e comportamentos compartilhados do frontend
 - `client/src/utilitarios/`: funcoes auxiliares e regras compartilhadas do frontend
 - `client/src/recursos/`: estilos e recursos visuais
 - `electron/`: processo principal e preload do desktop
+- `docs/`: documentacao tecnica complementar do projeto
 - `server/app.js`: configuracao principal da API Express
 - `server/index.js`: inicializacao do servidor
 - `server/rotas/`: rotas customizadas e autenticacao
@@ -54,6 +57,9 @@ Observacao importante:
 - Acoes de linha usam o componente central de acoes da interface
 - Selos de codigo usam o componente padrao de codigo do projeto
 - Funcoes reutilizaveis do frontend ficam em `client/src/utilitarios`
+- Arquivos orientados a dados fixos do frontend, como listas base de paginas, cards, graficos e definicoes estruturais de grade, devem ficar em `client/src/dados`
+- Regras globais de UX, atalhos, foco e helpers transversais da aplicacao devem ser extraidos de componentes-raiz quando fizer sentido e concentrados em `client/src/utilitarios`
+- Quando um comportamento global depender de ciclo de vida React, listeners ou efeitos colaterais, a logica deve preferencialmente viver em `client/src/hooks/` e nao permanecer inchando componentes-raiz como `App.jsx`
 - Servicos auxiliares de listagem usados por campos de busca e selecao retornam apenas registros ativos por padrao; listas principais de entidades continuam completas e modais de busca reutilizaveis filtram inativos automaticamente
 - Campos de formulario com botoes laterais de busca, consulta ou cadastro devem usar os contêineres compartilhados de acao do formulario para manter o botao ao lado do input/select sem quebrar a grade
 - Selects de contato devem exibir o rotulo no formato `Nome - Cargo` sempre que o cargo estiver preenchido

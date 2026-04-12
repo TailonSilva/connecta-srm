@@ -58,7 +58,7 @@ import {
   normalizarFiltrosPorPadrao,
   normalizarListaFiltroPersistido,
   useFiltrosPersistidos
-} from '../../utilitarios/useFiltrosPersistidos';
+} from '../../hooks/useFiltrosPersistidos';
 import { registroEstaAtivo } from '../../utilitarios/statusRegistro';
 import { ModalAtendimento } from '../atendimentos/modalAtendimento';
 import { ModalPedido } from '../pedidos/modalPedido';

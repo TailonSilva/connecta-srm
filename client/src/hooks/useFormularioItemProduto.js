@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { normalizarValorEntradaFormulario } from './normalizarTextoFormulario';
+import { normalizarValorEntradaFormulario } from '../utilitarios/normalizarTextoFormulario';
 
 export function useFormularioItemProduto({
   estadoInicialItem,

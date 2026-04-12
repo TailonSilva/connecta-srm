@@ -1,17 +1,17 @@
 import { requisitarApi } from './api';
 import { requisitarListaApi } from './listas';
 import { buscarCep } from './clientes';
-import { normalizarConfiguracoesColunasGridClientes } from '../utilitarios/colunasGridClientes';
-import { normalizarConfiguracoesColunasGridOrcamentos } from '../utilitarios/colunasGridOrcamentos';
-import { normalizarConfiguracoesColunasGridProdutos } from '../utilitarios/colunasGridProdutos';
-import { normalizarConfiguracoesColunasGridPedidos } from '../utilitarios/colunasGridPedidos';
-import { normalizarConfiguracoesColunasGridAtendimentos } from '../utilitarios/colunasGridAtendimentos';
+import { normalizarConfiguracoesColunasGridClientes } from '../dados/colunasGridClientes';
+import { normalizarConfiguracoesColunasGridOrcamentos } from '../dados/colunasGridOrcamentos';
+import { normalizarConfiguracoesColunasGridProdutos } from '../dados/colunasGridProdutos';
+import { normalizarConfiguracoesColunasGridPedidos } from '../dados/colunasGridPedidos';
+import { normalizarConfiguracoesColunasGridAtendimentos } from '../dados/colunasGridAtendimentos';
 import {
   normalizarConfiguracoesGraficosPaginaInicialOrcamentos,
   normalizarConfiguracoesGraficosPaginaInicialVendas,
   normalizarConfiguracoesGraficosPaginaInicialAtendimentos
-} from '../utilitarios/graficosPaginaInicial';
-import { normalizarConfiguracoesCardsPaginaInicial } from '../utilitarios/cardsPaginaInicial';
+} from '../dados/graficosPaginaInicial';
+import { normalizarConfiguracoesCardsPaginaInicial } from '../dados/cardsPaginaInicial';
 
 export async function listarEmpresas(opcoes) {
   const empresas = await requisitarListaApi('/empresas', opcoes);

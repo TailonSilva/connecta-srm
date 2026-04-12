@@ -36,12 +36,12 @@ import { obterValorGrid } from '../../utilitarios/valorPadraoGrid';
 import {
   normalizarColunasGridPedidos,
   TOTAL_COLUNAS_GRID_PEDIDOS
-} from '../../utilitarios/colunasGridPedidos';
+} from '../../dados/colunasGridPedidos';
 import {
   normalizarFiltrosPorPadrao,
   normalizarListaFiltroPersistido,
   useFiltrosPersistidos
-} from '../../utilitarios/useFiltrosPersistidos';
+} from '../../hooks/useFiltrosPersistidos';
 import { ModalPedido } from './modalPedido';
 import { ModalManualPedidos } from './modalManualPedidos';
 import { ModalColunasGridPedidos } from '../configuracoes/modalColunasGridPedidos';

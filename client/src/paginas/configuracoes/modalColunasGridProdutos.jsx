@@ -7,7 +7,7 @@ import {
   reposicionarConfiguracaoColunaGridProdutos,
   reordenarConfiguracoesColunasGridProdutos,
   TOTAL_COLUNAS_GRID_PRODUTOS
-} from '../../utilitarios/colunasGridProdutos';
+} from '../../dados/colunasGridProdutos';
 
 export function ModalColunasGridProdutos({
   aberto,

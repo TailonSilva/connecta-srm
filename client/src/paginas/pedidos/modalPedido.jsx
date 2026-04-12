@@ -15,7 +15,7 @@ import {
   listarMotivosDevolucaoConfiguracao
 } from '../../servicos/configuracoes';
 import { formatarNomeContato } from '../../utilitarios/formatarNomeContato';
-import { useFormularioItemProduto } from '../../utilitarios/useFormularioItemProduto';
+import { useFormularioItemProduto } from '../../hooks/useFormularioItemProduto';
 import {
   converterPrecoParaNumero,
   desformatarPreco,

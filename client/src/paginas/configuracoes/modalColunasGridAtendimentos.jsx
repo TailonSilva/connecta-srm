@@ -7,7 +7,7 @@ import {
   reposicionarConfiguracaoColunaGridAtendimentos,
   reordenarConfiguracoesColunasGridAtendimentos,
   TOTAL_COLUNAS_GRID_ATENDIMENTOS
-} from '../../utilitarios/colunasGridAtendimentos';
+} from '../../dados/colunasGridAtendimentos';
 
 export function ModalColunasGridAtendimentos({
   aberto,

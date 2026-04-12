@@ -10,7 +10,7 @@ import { AvatarCliente } from './avatarCliente';
 import {
   normalizarColunasGridClientes,
   TOTAL_COLUNAS_GRID_CLIENTES
-} from '../../utilitarios/colunasGridClientes';
+} from '../../dados/colunasGridClientes';
 
 export function ListaClientes({
   empresa,

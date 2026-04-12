@@ -43,7 +43,7 @@ import { listarUsuarios } from '../../servicos/usuarios';
 import {
   normalizarColunasGridOrcamentos,
   TOTAL_COLUNAS_GRID_ORCAMENTOS
-} from '../../utilitarios/colunasGridOrcamentos';
+} from '../../dados/colunasGridOrcamentos';
 import { normalizarPreco } from '../../utilitarios/normalizarPreco';
 import { formatarCodigoCliente } from '../../utilitarios/codigoCliente';
 import { obterEtapasOrcamentoParaInputManual } from '../../utilitarios/etapasOrcamento';
@@ -52,7 +52,7 @@ import {
   normalizarFiltrosPorPadrao,
   normalizarListaFiltroPersistido,
   useFiltrosPersistidos
-} from '../../utilitarios/useFiltrosPersistidos';
+} from '../../hooks/useFiltrosPersistidos';
 import { ModalOrcamento } from './modalOrcamento';
 import { ModalManualOrcamentos } from './modalManualOrcamentos';
 import { ModalPedido } from '../pedidos/modalPedido';

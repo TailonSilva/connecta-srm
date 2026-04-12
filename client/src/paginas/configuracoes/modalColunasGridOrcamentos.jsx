@@ -7,7 +7,7 @@ import {
   reposicionarConfiguracaoColunaGridOrcamentos,
   reordenarConfiguracoesColunasGridOrcamentos,
   TOTAL_COLUNAS_GRID_ORCAMENTOS
-} from '../../utilitarios/colunasGridOrcamentos';
+} from '../../dados/colunasGridOrcamentos';
 
 export function ModalColunasGridOrcamentos({
   aberto,

@@ -7,7 +7,7 @@ import {
   reposicionarConfiguracaoColunaGridClientes,
   reordenarConfiguracoesColunasGridClientes,
   TOTAL_COLUNAS_GRID_CLIENTES
-} from '../../utilitarios/colunasGridClientes';
+} from '../../dados/colunasGridClientes';
 
 export function ModalColunasGridClientes({
   aberto,
