@@ -137,7 +137,10 @@ export function ModalCadastroConfiguracao({
 
   function alterarCampo(evento) {
     const { name, value, type, checked } = evento.target;
-    const valorNormalizado = normalizarValorEntradaFormulario(evento);
+    const campoAtual = camposFormulario.find((campo) => campo.name === name);
+    const valorNormalizado = campoAtual?.preservarDigitacao
+      ? value
+      : normalizarValorEntradaFormulario(evento);
 
     definirFormulario((estadoAtual) => ({
       ...estadoAtual,

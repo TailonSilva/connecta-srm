@@ -22,6 +22,7 @@ import {
   incluirCliente,
   incluirContato,
   listarClientes,
+  listarConceitosCliente,
   listarContatos,
   listarRamosAtividade,
   listarVendedores
@@ -113,6 +114,7 @@ export function PaginaAtendimentos({ usuarioLogado }) {
   const [orcamentos, definirOrcamentos] = useState([]);
   const [metodosPagamento, definirMetodosPagamento] = useState([]);
   const [ramosAtividade, definirRamosAtividade] = useState([]);
+  const [conceitosCliente, definirConceitosCliente] = useState([]);
   const [tiposAtendimento, definirTiposAtendimento] = useState([]);
   const [canaisAtendimento, definirCanaisAtendimento] = useState([]);
   const [origensAtendimento, definirOrigensAtendimento] = useState([]);
@@ -204,6 +206,7 @@ export function PaginaAtendimentos({ usuarioLogado }) {
         listarVendedores(),
         listarOrcamentos(),
         listarRamosAtividade(),
+        listarConceitosCliente({ incluirInativos: true }),
         listarTiposAtendimento(),
         listarCanaisAtendimento(),
         listarOrigensAtendimento(),
@@ -227,6 +230,7 @@ export function PaginaAtendimentos({ usuarioLogado }) {
         vendedoresResultado,
         orcamentosResultado,
         ramosResultado,
+        conceitosResultado,
         tiposAtendimentoResultado,
         canaisResultado,
         origensResultado,
@@ -249,6 +253,7 @@ export function PaginaAtendimentos({ usuarioLogado }) {
       const vendedoresCarregados = vendedoresResultado.status === 'fulfilled' ? vendedoresResultado.value : [];
       const orcamentosCarregados = orcamentosResultado.status === 'fulfilled' ? orcamentosResultado.value : [];
       const ramosCarregados = ramosResultado.status === 'fulfilled' ? ramosResultado.value : [];
+      const conceitosCarregados = conceitosResultado.status === 'fulfilled' ? conceitosResultado.value : [];
       const tiposAtendimentoCarregados = tiposAtendimentoResultado.status === 'fulfilled' ? tiposAtendimentoResultado.value : [];
       const canaisCarregados = canaisResultado.status === 'fulfilled' ? canaisResultado.value : [];
       const origensCarregadas = origensResultado.status === 'fulfilled' ? origensResultado.value : [];
@@ -287,6 +292,7 @@ export function PaginaAtendimentos({ usuarioLogado }) {
       );
       definirMetodosPagamento(metodosCarregados);
       definirRamosAtividade(ramosCarregados);
+      definirConceitosCliente(conceitosCarregados);
       definirTiposAtendimento(tiposAtendimentoCarregados);
       definirCanaisAtendimento(canaisCarregados);
       definirOrigensAtendimento(origensCarregadas);
@@ -789,6 +795,7 @@ export function PaginaAtendimentos({ usuarioLogado }) {
         usuarioLogado={usuarioLogado}
         vendedores={vendedores}
         ramosAtividade={ramosAtividade}
+        conceitosCliente={conceitosCliente}
         tiposAtendimento={tiposAtendimento}
         canaisAtendimento={canaisAtendimento}
         origensAtendimento={origensAtendimento}
@@ -833,6 +840,7 @@ export function PaginaAtendimentos({ usuarioLogado }) {
         usuarios={usuarios}
         vendedores={vendedores}
         ramosAtividade={ramosAtividade}
+        conceitosCliente={conceitosCliente}
         metodosPagamento={metodosPagamento}
         prazosPagamento={prazosPagamento}
         tiposPedido={tiposPedido}
@@ -1128,6 +1136,7 @@ async function salvarContatosClienteAtendimento(idCliente, contatos) {
 function normalizarPayloadClienteAtendimento(dadosCliente) {
   return {
     idVendedor: Number(dadosCliente.idVendedor),
+    idConceito: Number(dadosCliente.idConceito),
     idRamo: Number(dadosCliente.idRamo),
     razaoSocial: String(dadosCliente.razaoSocial || '').trim(),
     nomeFantasia: String(dadosCliente.nomeFantasia || '').trim(),

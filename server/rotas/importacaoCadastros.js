@@ -132,6 +132,7 @@ async function importarClientes(linhas, opcoes = {}) {
     const payload = {
       idCliente,
       idVendedor: Number(idVendedor),
+      idConceito: 1,
       idRamo: Number(idRamo),
       idGrupoEmpresa: idGrupoEmpresa ? Number(idGrupoEmpresa) : null,
       codigoAlternativo: codigoAlternativo ? Number(codigoAlternativo) : null,

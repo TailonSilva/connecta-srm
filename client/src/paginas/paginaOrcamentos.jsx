@@ -13,6 +13,7 @@ import {
   incluirCliente,
   incluirContato,
   listarClientes,
+  listarConceitosCliente,
   listarContatos,
   listarRamosAtividade,
   listarVendedores
@@ -103,6 +104,7 @@ export function PaginaOrcamentos({ usuarioLogado }) {
   const [contatos, definirContatos] = useState([]);
   const [usuarios, definirUsuarios] = useState([]);
   const [ramosAtividade, definirRamosAtividade] = useState([]);
+  const [conceitosCliente, definirConceitosCliente] = useState([]);
   const [vendedores, definirVendedores] = useState([]);
   const [metodosPagamento, definirMetodosPagamento] = useState([]);
   const [prazosPagamento, definirPrazosPagamento] = useState([]);
@@ -248,6 +250,7 @@ export function PaginaOrcamentos({ usuarioLogado }) {
         listarContatos(),
         listarUsuarios(),
         listarRamosAtividade(),
+        listarConceitosCliente({ incluirInativos: true }),
         listarVendedores(),
         listarMetodosPagamentoConfiguracao(),
         listarPrazosPagamentoConfiguracao(),
@@ -267,6 +270,7 @@ export function PaginaOrcamentos({ usuarioLogado }) {
         contatosResultado,
         usuariosResultado,
         ramosResultado,
+        conceitosResultado,
         vendedoresResultado,
         metodosResultado,
         prazosResultado,
@@ -285,6 +289,7 @@ export function PaginaOrcamentos({ usuarioLogado }) {
       const contatosCarregados = contatosResultado.status === 'fulfilled' ? contatosResultado.value : [];
       const usuariosCarregados = usuariosResultado.status === 'fulfilled' ? usuariosResultado.value : [];
       const ramosCarregados = ramosResultado.status === 'fulfilled' ? ramosResultado.value : [];
+      const conceitosCarregados = conceitosResultado.status === 'fulfilled' ? conceitosResultado.value : [];
       const vendedoresCarregados = vendedoresResultado.status === 'fulfilled' ? vendedoresResultado.value : [];
       const metodosCarregados = metodosResultado.status === 'fulfilled' ? metodosResultado.value : [];
       const prazosCarregados = prazosResultado.status === 'fulfilled' ? prazosResultado.value : [];
@@ -306,6 +311,7 @@ export function PaginaOrcamentos({ usuarioLogado }) {
       definirContatos(contatosCarregados.filter((contato) => idsClientesDisponiveis.has(contato.idCliente)));
       definirUsuarios(usuariosCarregados);
       definirRamosAtividade(ramosCarregados);
+      definirConceitosCliente(conceitosCarregados);
       definirVendedores(vendedoresCarregados);
       definirMetodosPagamento(metodosCarregados);
       definirPrazosPagamento(enriquecerPrazosPagamento(prazosCarregados, metodosCarregados));
@@ -977,6 +983,7 @@ export function PaginaOrcamentos({ usuarioLogado }) {
         usuarios={usuarios}
         vendedores={vendedores}
         ramosAtividade={ramosAtividade}
+        conceitosCliente={conceitosCliente}
         metodosPagamento={metodosPagamento}
         prazosPagamento={prazosPagamento}
         etapasOrcamento={etapasOrcamento}
@@ -1005,6 +1012,7 @@ export function PaginaOrcamentos({ usuarioLogado }) {
         usuarios={usuarios}
         vendedores={vendedores}
         ramosAtividade={ramosAtividade}
+        conceitosCliente={conceitosCliente}
         metodosPagamento={metodosPagamento}
         prazosPagamento={prazosPagamento}
         tiposPedido={tiposPedido}
@@ -1308,6 +1316,18 @@ function renderizarCelulaOrcamento({
         {orcamento.idCliente
           ? <CodigoRegistro valor={formatarCodigoCliente(cliente || { idCliente: orcamento.idCliente }, empresa).replace('#', '')} />
           : '-'}
+      </CelulaLayoutOrcamento>
+    );
+  }
+
+  if (coluna.id === 'idConceito') {
+    const cliente = (Array.isArray(clientes) ? clientes : []).find(
+      (item) => String(item.idCliente) === String(orcamento.idCliente)
+    );
+
+    return (
+      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
+        <TextoGradeClamp>{obterValorGrid(cliente?.nomeConceito)}</TextoGradeClamp>
       </CelulaLayoutOrcamento>
     );
   }
@@ -1868,6 +1888,7 @@ async function salvarContatosClienteCadastro(idCliente, contatos) {
 function normalizarPayloadClienteCadastro(dadosCliente) {
   return {
     idVendedor: Number(dadosCliente.idVendedor),
+    idConceito: Number(dadosCliente.idConceito),
     idRamo: Number(dadosCliente.idRamo),
     razaoSocial: String(dadosCliente.razaoSocial || '').trim(),
     nomeFantasia: String(dadosCliente.nomeFantasia || '').trim(),

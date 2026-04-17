@@ -26,6 +26,10 @@ export function listarRamosAtividade(opcoes) {
   return requisitarListaApi('/ramosAtividade', opcoes);
 }
 
+export function listarConceitosCliente(opcoes) {
+  return requisitarListaApi('/conceitosCliente', opcoes);
+}
+
 export function listarGruposEmpresa(opcoes) {
   return requisitarListaApi('/gruposEmpresa', opcoes);
 }
@@ -62,6 +66,26 @@ export function incluirRamoAtividade(payload) {
 
 export function atualizarRamoAtividade(idRamo, payload) {
   return requisitarApi(`/ramosAtividade/${idRamo}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+}
+
+export function incluirConceitoCliente(payload) {
+  return requisitarApi('/conceitosCliente', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+}
+
+export function atualizarConceitoCliente(idConceito, payload) {
+  return requisitarApi(`/conceitosCliente/${idConceito}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json'

@@ -7,6 +7,13 @@ const entidades = [
     camposPermitidos: ['descricao', 'status']
   },
   {
+    nome: 'conceitoCliente',
+    rota: '/api/conceitosCliente',
+    chavePrimaria: 'idConceito',
+    camposObrigatorios: ['descricao'],
+    camposPermitidos: ['descricao', 'status']
+  },
+  {
     nome: 'vendedor',
     rota: '/api/vendedores',
     chavePrimaria: 'idVendedor',
@@ -302,6 +309,7 @@ const entidades = [
     chavePrimaria: 'idCliente',
     camposObrigatorios: [
       'idVendedor',
+      'idConceito',
       'idRamo',
       'razaoSocial',
       'nomeFantasia',
@@ -311,6 +319,7 @@ const entidades = [
     camposPermitidos: [
       'idCliente',
       'idVendedor',
+      'idConceito',
       'idGrupoEmpresa',
       'codigoAlternativo',
       'idRamo',

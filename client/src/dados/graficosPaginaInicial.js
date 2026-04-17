@@ -86,10 +86,18 @@ export const graficosPaginaInicialVendas = [
     visivelPadrao: true
   },
   {
+    id: 'vendasConceitosCliente',
+    rotulo: 'Vendas do mes por conceito de cliente',
+    ajudaConfiguracao: 'Mostra o valor liquido e a quantidade de itens vendidos no mes corrente por conceito de cliente.',
+    ordemPadrao: 6,
+    spanPadrao: 5,
+    visivelPadrao: true
+  },
+  {
     id: 'vendasProdutos',
     rotulo: 'Vendas do mes por produto',
     ajudaConfiguracao: 'Mostra o valor liquido e a quantidade de itens vendidos no mes corrente por produto.',
-    ordemPadrao: 6,
+    ordemPadrao: 7,
     spanPadrao: 5,
     visivelPadrao: true
   },
@@ -97,7 +105,7 @@ export const graficosPaginaInicialVendas = [
     id: 'rankingVendas',
     rotulo: 'Vendedores em destaque',
     ajudaConfiguracao: 'Mostra o ranking de vendedores por valor liquido de pedidos no mes corrente.',
-    ordemPadrao: 7,
+    ordemPadrao: 8,
     spanPadrao: 5,
     visivelPadrao: true
   }

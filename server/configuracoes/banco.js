@@ -9,6 +9,7 @@ const ID_ETAPA_ORCAMENTO_RECUSADO = 4;
 const ID_ETAPA_PEDIDO_ENTREGUE = 5;
 const ID_TIPO_PEDIDO_VENDA = 1;
 const ID_TIPO_PEDIDO_DEVOLUCAO = 2;
+const ID_CONCEITO_CLIENTE_SEM_CONCEITO = 1;
 const ID_STATUS_VISITA_AGENDADO = 1;
 const ID_STATUS_VISITA_CONFIRMADO = 2;
 const ID_STATUS_VISITA_REALIZADO = 3;
@@ -32,6 +33,14 @@ banco.serialize(() => {
   banco.run(`
     CREATE TABLE IF NOT EXISTS ramoAtividade (
       idRamo INTEGER PRIMARY KEY AUTOINCREMENT,
+      descricao VARCHAR(150) NOT NULL,
+      status BOOLEAN NOT NULL DEFAULT 1
+    )
+  `);
+
+  banco.run(`
+    CREATE TABLE IF NOT EXISTS conceitoCliente (
+      idConceito INTEGER PRIMARY KEY AUTOINCREMENT,
       descricao VARCHAR(150) NOT NULL,
       status BOOLEAN NOT NULL DEFAULT 1
     )
@@ -1082,6 +1091,7 @@ banco.serialize(() => {
     CREATE TABLE IF NOT EXISTS cliente (
       idCliente INTEGER PRIMARY KEY AUTOINCREMENT,
       idVendedor INTEGER NOT NULL,
+      idConceito INTEGER NOT NULL DEFAULT 1,
       idRamo INTEGER NOT NULL,
       idGrupoEmpresa INTEGER,
       codigoAlternativo INTEGER,
@@ -1104,10 +1114,29 @@ banco.serialize(() => {
       imagem VARCHAR(255),
       dataCriacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (idVendedor) REFERENCES vendedor (idVendedor),
+      FOREIGN KEY (idConceito) REFERENCES conceitoCliente (idConceito),
       FOREIGN KEY (idRamo) REFERENCES ramoAtividade (idRamo),
       FOREIGN KEY (idGrupoEmpresa) REFERENCES grupoEmpresa (idGrupoEmpresa)
     )
   `);
+
+  banco.run(`
+    ALTER TABLE cliente ADD COLUMN idConceito INTEGER NOT NULL DEFAULT 1
+  `, (erro) => {
+    if (erro && !String(erro.message || '').includes('duplicate column name')) {
+      console.error('Nao foi possivel garantir a coluna idConceito do cliente.', erro);
+    }
+  });
+
+  banco.run(`
+    UPDATE cliente
+    SET idConceito = 1
+    WHERE idConceito IS NULL OR CAST(idConceito AS TEXT) = ''
+  `, (erro) => {
+    if (erro && !String(erro.message || '').includes('no such column')) {
+      console.error('Nao foi possivel aplicar o conceito padrao nos clientes.', erro);
+    }
+  });
 
   banco.run(`
     ALTER TABLE cliente ADD COLUMN idGrupoEmpresa INTEGER
@@ -1871,11 +1900,42 @@ async function garantirRegistrosObrigatorios() {
   await removerColunaSiglaDosRecursos();
   await garantirPrazosPagamentoComDiasOpcionais();
   await garantirUsuarioAdministradorPadrao();
+  await garantirConceitosClienteObrigatorios();
   await garantirTiposPedidoObrigatorios();
   await garantirEtapasPedidoObrigatorias();
   await garantirEtapasOrcamentoObrigatorias();
   await garantirStatusAgendaObrigatorios();
   await garantirTiposAgendaObrigatorios();
+}
+
+async function garantirConceitosClienteObrigatorios() {
+  const conceitoObrigatorio = {
+    idConceito: ID_CONCEITO_CLIENTE_SEM_CONCEITO,
+    descricao: 'Sem Conceito',
+    status: 1
+  };
+
+  const existente = await consultarUm(
+    'SELECT idConceito FROM conceitoCliente WHERE idConceito = ?',
+    [conceitoObrigatorio.idConceito]
+  );
+
+  if (!existente) {
+    await executar(
+      'INSERT INTO conceitoCliente (idConceito, descricao, status) VALUES (?, ?, ?)',
+      [conceitoObrigatorio.idConceito, conceitoObrigatorio.descricao, conceitoObrigatorio.status]
+    );
+  } else {
+    await executar(
+      'UPDATE conceitoCliente SET descricao = ?, status = ? WHERE idConceito = ?',
+      [conceitoObrigatorio.descricao, conceitoObrigatorio.status, conceitoObrigatorio.idConceito]
+    );
+  }
+
+  await executar(
+    'UPDATE cliente SET idConceito = ? WHERE idConceito IS NULL OR CAST(idConceito AS TEXT) = \'\'',
+    [conceitoObrigatorio.idConceito]
+  );
 }
 
 async function garantirConfiguracaoAtualizacaoSistemaPadrao() {

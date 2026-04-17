@@ -36,6 +36,7 @@ export function ModalAgendamento({
   usuarios,
   vendedores = [],
   ramosAtividade = [],
+  conceitosCliente = [],
   tiposAgenda,
   statusVisita,
   empresa = null,
@@ -624,6 +625,7 @@ export function ModalAgendamento({
           contatos={[]}
           vendedores={vendedores}
           ramosAtividade={ramosAtividade}
+          conceitosCliente={conceitosCliente}
           modo="novo"
           classNameCamada="camadaModal camadaModalSecundaria"
           idVendedorBloqueado={idVendedorBloqueado}

@@ -162,6 +162,8 @@ Padroes aplicados recentemente:
 - Em modais com abas, `Alt + Seta para a esquerda` navega para a aba anterior e `Alt + Seta para a direita` navega para a proxima aba visivel; ao trocar de aba, o foco vai para o primeiro campo da nova secao
 - Quando a busca de contatos for aberta com um cliente ja definido, o proprio modal permite incluir um novo contato e devolve esse contato ja selecionado no formulario atual
 - O cadastro de cliente reaproveita o mesmo fluxo de `Ramo de Atividade` usado em configuracoes
+- O cadastro de cliente agora tambem usa a tabela auxiliar `Conceitos de cliente`, mantida em `Configuracoes`, com valor padrao obrigatorio `Sem Conceito`
+- A aba `Vendas` da pagina inicial agora pode exibir a sessao `Vendas do mes por conceito de cliente`, seguindo o mesmo padrao de top 5 na home e modal com a lista completa
 - No modal de cliente, as abas `Atendimento` e `Vendas` possuem grade propria com botao de filtro; os filtros de data abrem por padrao no mes corrente e o ultimo filtro aplicado fica salvo entre aberturas do modal, independentemente do cliente aberto
 - O cadastro de produto reaproveita os mesmos fluxos de configuracao para `Grupo de Produto`, `Marca` e `Unidade`
 - Modais com abas usam cabecalho e faixa de abas fixos, com rolagem apenas no corpo
@@ -255,6 +257,7 @@ Regras atualmente aplicadas no frontend:
 - No grid de busca de cliente para incluir `Orcamentos` e `Pedidos`, `Usuario padrao` pode selecionar clientes de outros vendedores quando precisar abrir um novo registro comercial
 - Na agenda, `Usuario padrao` nao pode excluir agendamentos
 - Em configuracoes reutilizadas dentro de cadastros, usuarios sem permissao entram em modo de consulta
+- O atalho `Vendedores` em `Configuracoes` permanece desabilitado para `Usuario padrao`
 
 Observacao:
 
@@ -287,12 +290,15 @@ Observacao:
 - Aba de contatos com grade propria
 - Formulario de contato reutilizavel
 - Campo `Grupo de empresa` no modal do cliente, com atalho lateral para cadastrar e selecionar o grupo sem sair do fluxo
+- Campo `Conceito` no modal do cliente, com atalho lateral para cadastrar e selecionar o conceito sem sair do fluxo
 - Cada cliente pode se vincular a no maximo um `Grupo de empresa`, enquanto um grupo pode atender varios clientes
 - Contatos do grupo aparecem como herdados no cadastro do cliente e ficam disponiveis para consulta no proprio modal
 - Abertura do mesmo modal de `Ramo de Atividade` usado em configuracoes
 - Inclusao e edicao de `Ramo de atividade` diretamente do cadastro de cliente, inclusive para `Usuario padrao`
-- Os atalhos de `Grupo de empresa` e `Ramo de atividade` preservam o formulario do cliente enquanto o cadastro auxiliar e aberto
-- Ao salvar um novo `Grupo de empresa` ou `Ramo de atividade` por esses atalhos, o registro retorna selecionado automaticamente no cliente
+- O cadastro de `Conceitos de cliente` nasce com `Sem Conceito` no `id 1`, esse registro fica protegido contra inativacao e todo novo cliente usa esse valor como padrao inicial
+- A descricao dos `Conceitos de cliente` preserva exatamente a digitacao do usuario e nao passa pela capitalizacao automatica usada em outros cadastros auxiliares
+- Os atalhos de `Grupo de empresa`, `Ramo de atividade` e `Conceito` preservam o formulario do cliente enquanto o cadastro auxiliar e aberto
+- Ao salvar um novo `Grupo de empresa`, `Ramo de atividade` ou `Conceito` por esses atalhos, o registro retorna selecionado automaticamente no cliente
 - Inativacao persiste no banco
 
 Filtros de clientes:
@@ -387,6 +393,7 @@ Filtros da agenda:
 - A empresa pode definir em `Configuracoes > Atendimentos > Colunas do grid` quais colunas do cadastro aparecem na listagem principal, incluindo `Codigo`, `Agendamento`, `Data`, `Inicio`, `Fim`, `Cliente`, `Contato`, `Assunto`, `Descricao`, `Canal`, `Origem` e `Usuario`
 - A configuracao do grid principal de `Atendimentos` tambem permite definir a ordem e o espaco ocupado por cada informacao em uma malha de `100` partes, com `Acoes` sempre visivel
 - O atalho geral `Colunas do grid` abre um seletor por modulo; hoje `Atendimentos`, `Clientes`, `Produtos`, `Orcamentos` e `Pedidos` ja permitem configurar visibilidade, ordem, espaco e o `rotulo` do cabecalho por empresa
+- As grades configuraveis de `Clientes`, `Orcamentos` e `Pedidos` tambem podem exibir a coluna `Conceito`, reaproveitando a classificacao cadastrada no cliente
 - As paginas principais desses modulos tambem exibem um botao direto de `Configurar grid` no cabecalho; `Usuario padrao` continua sem permissao para abrir esse ajuste
 - Campos de cliente, contato e orcamento no mesmo fluxo comercial
 - O modal de atendimento agora exige `Tipo de atendimento`, mantido em `Configuracoes > Atendimentos > Tipos de atendimento`
@@ -491,6 +498,7 @@ A tela de configuracoes usa cards grandes e modais padrao. Hoje ela cobre:
 - `Empresa`
 - `Usuarios`
 - `Ramos de atividade`
+- `Conceitos de cliente`
 - `Grupos de empresa`
 - `Vendedores`
 - `Grupos de produto`

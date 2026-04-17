@@ -121,11 +121,20 @@ export const colunasGridClientes = [
     visivelPadrao: false
   },
   {
+    id: 'idConceito',
+    rotulo: 'Conceito',
+    classe: 'colunaGradeTexto',
+    obrigatoria: false,
+    ordemPadrao: 14,
+    spanPadrao: 3,
+    visivelPadrao: false
+  },
+  {
     id: 'cidade',
     rotulo: 'Cidade',
     classe: 'colunaGradeTexto',
     obrigatoria: false,
-    ordemPadrao: 14,
+    ordemPadrao: 15,
     spanPadrao: 3,
     visivelPadrao: true
   },
@@ -134,7 +143,7 @@ export const colunasGridClientes = [
     rotulo: 'UF',
     classe: 'colunaGradeSigla',
     obrigatoria: false,
-    ordemPadrao: 15,
+    ordemPadrao: 16,
     spanPadrao: 1,
     visivelPadrao: true
   },
@@ -143,7 +152,7 @@ export const colunasGridClientes = [
     rotulo: 'CEP',
     classe: 'colunaGradeTexto',
     obrigatoria: false,
-    ordemPadrao: 16,
+    ordemPadrao: 17,
     spanPadrao: 2,
     visivelPadrao: false
   },
@@ -152,7 +161,7 @@ export const colunasGridClientes = [
     rotulo: 'Logradouro',
     classe: 'colunaGradeTexto',
     obrigatoria: false,
-    ordemPadrao: 17,
+    ordemPadrao: 18,
     spanPadrao: 4,
     visivelPadrao: false
   },
@@ -161,7 +170,7 @@ export const colunasGridClientes = [
     rotulo: 'Numero',
     classe: 'colunaGradeTextoCurto',
     obrigatoria: false,
-    ordemPadrao: 18,
+    ordemPadrao: 19,
     spanPadrao: 1,
     visivelPadrao: false
   },
@@ -170,7 +179,7 @@ export const colunasGridClientes = [
     rotulo: 'Complemento',
     classe: 'colunaGradeTexto',
     obrigatoria: false,
-    ordemPadrao: 19,
+    ordemPadrao: 20,
     spanPadrao: 3,
     visivelPadrao: false
   },
@@ -179,7 +188,7 @@ export const colunasGridClientes = [
     rotulo: 'Bairro',
     classe: 'colunaGradeTexto',
     obrigatoria: false,
-    ordemPadrao: 20,
+    ordemPadrao: 21,
     spanPadrao: 3,
     visivelPadrao: false
   },
@@ -188,7 +197,7 @@ export const colunasGridClientes = [
     rotulo: 'Contato',
     classe: 'colunaGradeTexto',
     obrigatoria: false,
-    ordemPadrao: 21,
+    ordemPadrao: 22,
     spanPadrao: 3,
     visivelPadrao: true
   },
@@ -197,7 +206,7 @@ export const colunasGridClientes = [
     rotulo: 'E-mail',
     classe: 'colunaGradeTexto',
     obrigatoria: false,
-    ordemPadrao: 22,
+    ordemPadrao: 23,
     spanPadrao: 3,
     visivelPadrao: true
   },
@@ -206,7 +215,7 @@ export const colunasGridClientes = [
     rotulo: 'E-mail do Cadastro',
     classe: 'colunaGradeTexto',
     obrigatoria: false,
-    ordemPadrao: 23,
+    ordemPadrao: 24,
     spanPadrao: 3,
     visivelPadrao: false
   },
@@ -215,7 +224,7 @@ export const colunasGridClientes = [
     rotulo: 'Telefone',
     classe: 'colunaGradeTexto',
     obrigatoria: false,
-    ordemPadrao: 24,
+    ordemPadrao: 25,
     spanPadrao: 2,
     visivelPadrao: false
   },
@@ -224,7 +233,7 @@ export const colunasGridClientes = [
     rotulo: 'Vendedor',
     classe: 'colunaGradeTexto',
     obrigatoria: false,
-    ordemPadrao: 25,
+    ordemPadrao: 26,
     spanPadrao: 2,
     visivelPadrao: true
   },
@@ -233,7 +242,7 @@ export const colunasGridClientes = [
     rotulo: 'Vendedor do Cadastro',
     classe: 'colunaGradeTexto',
     obrigatoria: false,
-    ordemPadrao: 26,
+    ordemPadrao: 27,
     spanPadrao: 3,
     visivelPadrao: false
   },
@@ -242,7 +251,7 @@ export const colunasGridClientes = [
     rotulo: 'Observacao',
     classe: 'colunaGradeTexto',
     obrigatoria: false,
-    ordemPadrao: 27,
+    ordemPadrao: 28,
     spanPadrao: 4,
     visivelPadrao: false
   },
@@ -251,7 +260,7 @@ export const colunasGridClientes = [
     rotulo: 'Data de Criacao',
     classe: 'colunaGradeTexto',
     obrigatoria: false,
-    ordemPadrao: 28,
+    ordemPadrao: 29,
     spanPadrao: 2,
     visivelPadrao: false
   },
@@ -260,7 +269,7 @@ export const colunasGridClientes = [
     rotulo: 'Status',
     classe: 'colunaGradeStatus',
     obrigatoria: false,
-    ordemPadrao: 29,
+    ordemPadrao: 30,
     spanPadrao: 1,
     visivelPadrao: true
   },
@@ -269,7 +278,7 @@ export const colunasGridClientes = [
     rotulo: 'Acoes',
     classe: 'colunaGradeAcoes',
     obrigatoria: true,
-    ordemPadrao: 30,
+    ordemPadrao: 31,
     spanPadrao: 2,
     visivelPadrao: true
   }

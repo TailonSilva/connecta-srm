@@ -74,6 +74,7 @@ export function ModalOrcamento({
   usuarios,
   vendedores,
   ramosAtividade = [],
+  conceitosCliente = [],
   metodosPagamento = [],
   prazosPagamento,
   etapasOrcamento,
@@ -1125,6 +1126,7 @@ export function ModalOrcamento({
           contatos={[]}
           vendedores={vendedores}
           ramosAtividade={ramosAtividade}
+          conceitosCliente={conceitosCliente}
           modo="novo"
           classNameCamada="camadaModal camadaModalSecundaria"
           idVendedorBloqueado={idVendedorBloqueado}

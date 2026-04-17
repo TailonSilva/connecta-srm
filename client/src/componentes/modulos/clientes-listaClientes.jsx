@@ -194,6 +194,14 @@ function renderizarCelulaCliente({ coluna, empresa, cliente, aoConsultar, aoEdit
     );
   }
 
+  if (coluna.id === 'idConceito') {
+    return (
+      <CelulaLayoutCliente coluna={coluna} {...propriedadesCelula}>
+        <TextoGradeClamp>{obterValorGrid(cliente.nomeConceito)}</TextoGradeClamp>
+      </CelulaLayoutCliente>
+    );
+  }
+
   if (coluna.id === 'cidade') {
     return (
       <CelulaLayoutCliente coluna={coluna} {...propriedadesCelula}>

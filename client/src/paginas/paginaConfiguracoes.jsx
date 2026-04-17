@@ -11,6 +11,7 @@ import {
   atualizarCanalAtendimento,
   atualizarCampoOrcamento,
   atualizarCampoPedido,
+  atualizarConceitoCliente,
   atualizarLocalAgenda,
   atualizarMarca,
   atualizarMetodoPagamento,
@@ -35,6 +36,7 @@ import {
   incluirCanalAtendimento,
   incluirCampoOrcamento,
   incluirCampoPedido,
+  incluirConceitoCliente,
   incluirLocalAgenda,
   incluirMarca,
   incluirMetodoPagamento,
@@ -59,6 +61,7 @@ import {
   listarCanaisAtendimentoConfiguracao,
   listarCamposOrcamentoConfiguracao,
   listarCamposPedidoConfiguracao,
+  listarConceitosClienteConfiguracao,
   listarLocaisAgendaConfiguracao,
   listarMarcasConfiguracao,
   listarMetodosPagamentoConfiguracao,
@@ -138,6 +141,11 @@ const atalhosConfiguracao = [
   {
     id: 'ramosAtividade',
     titulo: 'Ramos de atividade',
+    icone: 'cadastro'
+  },
+  {
+    id: 'conceitosCliente',
+    titulo: 'Conceitos de cliente',
     icone: 'cadastro'
   },
   {
@@ -318,6 +326,7 @@ const secoesConfiguracao = [
     titulo: 'Cadastros',
     atalhos: [
       'ramosAtividade',
+      'conceitosCliente',
       'gruposEmpresa',
       'gruposProduto',
       'marcas',
@@ -365,6 +374,7 @@ const IDS_STATUS_VISITA_CRITICOS = new Set([1, 2, 3, 4, 5]);
 const IDS_ETAPAS_PEDIDO_OBRIGATORIAS = new Set([5]);
 const IDS_ETAPAS_ORCAMENTO_OBRIGATORIAS = new Set([1, 2, 3, 4]);
 const IDS_TIPOS_PEDIDO_OBRIGATORIOS = new Set([1, 2]);
+const IDS_CONCEITOS_CLIENTE_OBRIGATORIOS = new Set([1]);
 
 function statusVisitaEhCritico(registro) {
   const idStatusVisita = Number(registro?.idStatusVisita);
@@ -386,6 +396,11 @@ function tipoPedidoEhObrigatorio(registro) {
   return Number.isFinite(idTipoPedido) && IDS_TIPOS_PEDIDO_OBRIGATORIOS.has(idTipoPedido);
 }
 
+function conceitoClienteEhObrigatorio(registro) {
+  const idConceito = Number(registro?.idConceito);
+  return Number.isFinite(idConceito) && IDS_CONCEITOS_CLIENTE_OBRIGATORIOS.has(idConceito);
+}
+
 export function PaginaConfiguracoes({ usuarioLogado }) {
   const [empresa, definirEmpresa] = useState(null);
   const [usuarios, definirUsuarios] = useState([]);
@@ -394,6 +409,7 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
   const [contatosGruposEmpresa, definirContatosGruposEmpresa] = useState([]);
   const [marcas, definirMarcas] = useState([]);
   const [ramosAtividade, definirRamosAtividade] = useState([]);
+  const [conceitosCliente, definirConceitosCliente] = useState([]);
   const [vendedores, definirVendedores] = useState([]);
   const [unidadesMedida, definirUnidadesMedida] = useState([]);
   const [metodosPagamento, definirMetodosPagamento] = useState([]);
@@ -705,6 +721,7 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
       listarContatosGruposEmpresaConfiguracao({ incluirInativos: true }),
       listarMarcasConfiguracao({ incluirInativos: true }),
       listarRamosAtividadeConfiguracao({ incluirInativos: true }),
+      listarConceitosClienteConfiguracao({ incluirInativos: true }),
       listarVendedoresConfiguracao({ incluirInativos: true }),
       listarUnidadesMedidaConfiguracao({ incluirInativos: true }),
       listarMetodosPagamentoConfiguracao({ incluirInativos: true }),
@@ -732,26 +749,27 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
     definirContatosGruposEmpresa(obterResultadoLista(resultados[2]));
     definirMarcas(obterResultadoLista(resultados[3]));
     definirRamosAtividade(obterResultadoLista(resultados[4]));
-    definirVendedores(obterResultadoLista(resultados[5]));
-    definirUnidadesMedida(obterResultadoLista(resultados[6]));
-    definirMetodosPagamento(obterResultadoLista(resultados[7]));
-    definirPrazosPagamento(obterResultadoLista(resultados[8]));
-    definirTiposPedido(obterResultadoLista(resultados[9]));
-    definirLocaisAgenda(obterResultadoLista(resultados[10]));
-    definirTiposRecurso(obterResultadoLista(resultados[11]));
-    definirRecursos(obterResultadoLista(resultados[12]));
-    definirTiposAgenda(ordenarRegistrosPorOrdem(obterResultadoLista(resultados[13]), 'idTipoAgenda'));
-    definirCanaisAtendimento(obterResultadoLista(resultados[14]));
-    definirOrigensAtendimento(obterResultadoLista(resultados[15]));
-    definirTiposAtendimento(obterResultadoLista(resultados[16]));
-    definirStatusVisita(ordenarRegistrosPorOrdem(obterResultadoLista(resultados[17]), 'idStatusVisita'));
-    definirMotivosDevolucao(obterResultadoLista(resultados[18]));
-    definirMotivosPerda(obterResultadoLista(resultados[19]));
-    definirEtapasPedido(ordenarRegistrosPorOrdem(obterResultadoLista(resultados[20]), 'idEtapa'));
-    definirEtapasOrcamento(ordenarRegistrosPorOrdem(obterResultadoLista(resultados[21]), 'idEtapaOrcamento'));
-    definirCamposOrcamento(obterResultadoLista(resultados[22]));
-    definirCamposPedido(obterResultadoLista(resultados[23]));
-    definirTamanhos(obterResultadoLista(resultados[24]));
+    definirConceitosCliente(obterResultadoLista(resultados[5]));
+    definirVendedores(obterResultadoLista(resultados[6]));
+    definirUnidadesMedida(obterResultadoLista(resultados[7]));
+    definirMetodosPagamento(obterResultadoLista(resultados[8]));
+    definirPrazosPagamento(obterResultadoLista(resultados[9]));
+    definirTiposPedido(obterResultadoLista(resultados[10]));
+    definirLocaisAgenda(obterResultadoLista(resultados[11]));
+    definirTiposRecurso(obterResultadoLista(resultados[12]));
+    definirRecursos(obterResultadoLista(resultados[13]));
+    definirTiposAgenda(ordenarRegistrosPorOrdem(obterResultadoLista(resultados[14]), 'idTipoAgenda'));
+    definirCanaisAtendimento(obterResultadoLista(resultados[15]));
+    definirOrigensAtendimento(obterResultadoLista(resultados[16]));
+    definirTiposAtendimento(obterResultadoLista(resultados[17]));
+    definirStatusVisita(ordenarRegistrosPorOrdem(obterResultadoLista(resultados[18]), 'idStatusVisita'));
+    definirMotivosDevolucao(obterResultadoLista(resultados[19]));
+    definirMotivosPerda(obterResultadoLista(resultados[20]));
+    definirEtapasPedido(ordenarRegistrosPorOrdem(obterResultadoLista(resultados[21]), 'idEtapa'));
+    definirEtapasOrcamento(ordenarRegistrosPorOrdem(obterResultadoLista(resultados[22]), 'idEtapaOrcamento'));
+    definirCamposOrcamento(obterResultadoLista(resultados[23]));
+    definirCamposPedido(obterResultadoLista(resultados[24]));
+    definirTamanhos(obterResultadoLista(resultados[25]));
   }
 
   async function salvarUsuario(dadosUsuario) {
@@ -995,6 +1013,21 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
     await carregarCadastrosConfiguracao();
   }
 
+  async function salvarConceitoCliente(dadosConceito) {
+    const payload = {
+      descricao: String(dadosConceito.descricao || '').trim(),
+      status: dadosConceito.status ? 1 : 0
+    };
+
+    if (dadosConceito.idConceito) {
+      await atualizarConceitoCliente(dadosConceito.idConceito, payload);
+    } else {
+      await incluirConceitoCliente(payload);
+    }
+
+    await carregarCadastrosConfiguracao();
+  }
+
   async function salvarLocalAgenda(dadosLocal) {
     const payload = {
       descricao: dadosLocal.descricao.trim(),
@@ -1221,6 +1254,11 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
 
   async function inativarRamoAtividade(registro) {
     await atualizarRamoAtividade(registro.idRamo, { status: 0 });
+    await carregarCadastrosConfiguracao();
+  }
+
+  async function inativarConceitoCliente(registro) {
+    await atualizarConceitoCliente(registro.idConceito, { status: 0 });
     await carregarCadastrosConfiguracao();
   }
 
@@ -1828,6 +1866,31 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
         aoFechar={fecharCadastroConfiguracao}
         aoSalvar={salvarRamoAtividade}
         aoInativar={inativarRamoAtividade}
+      />
+      <ModalCadastroConfiguracao
+        aberto={cadastroConfiguracaoAberto === 'conceitosCliente'}
+        titulo="Conceitos de cliente"
+        rotuloIncluir="Incluir conceito"
+        registros={conceitosCliente}
+        chavePrimaria="idConceito"
+        somenteConsulta={usuarioSomenteConsulta}
+        colunas={[
+          { key: 'descricao', label: 'Descricao' }
+        ]}
+        camposFormulario={[
+          { name: 'descricao', label: 'Descricao', required: true, preservarDigitacao: true },
+          {
+            name: 'status',
+            label: 'Registro ativo',
+            type: 'checkbox',
+            defaultValue: true,
+            disabled: ({ registroSelecionado }) => conceitoClienteEhObrigatorio(registroSelecionado)
+          }
+        ]}
+        aoFechar={fecharCadastroConfiguracao}
+        aoSalvar={salvarConceitoCliente}
+        aoInativar={inativarConceitoCliente}
+        podeInativarRegistro={(registro) => !conceitoClienteEhObrigatorio(registro)}
       />
       <ModalCadastroConfiguracao
         aberto={cadastroConfiguracaoAberto === 'vendedores'}

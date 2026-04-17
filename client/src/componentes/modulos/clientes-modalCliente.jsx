@@ -25,6 +25,7 @@ import {
   useFiltrosPersistidos
 } from '../../hooks/useFiltrosPersistidos';
 import { ModalAtendimento } from './atendimentos-modalAtendimento';
+import { ModalCadastroConfiguracao } from './configuracoes-modalCadastroConfiguracao';
 import { ModalGruposEmpresa } from './configuracoes-modalGruposEmpresa';
 import { ModalRamosAtividade } from './configuracoes-modalRamosAtividade';
 import { ModalHistoricoAtendimentosCliente } from './clientes-modalHistoricoAtendimentosCliente';
@@ -49,6 +50,7 @@ const abasVendasCliente = [
 
 const estadoInicialFormulario = {
   idVendedor: '',
+  idConceito: '1',
   idGrupoEmpresa: '',
   codigoAlternativo: '',
   idRamo: '',
@@ -128,6 +130,7 @@ export function ModalCliente({
   contatosGruposEmpresa = [],
   vendedores,
   ramosAtividade,
+  conceitosCliente = [],
   somenteConsultaRamos = false,
   somenteConsultaGrupos = false,
   classNameCamada = 'camadaModal',
@@ -135,7 +138,9 @@ export function ModalCliente({
   modo = 'novo',
   aoFechar,
   aoSalvarRamoAtividade,
+  aoSalvarConceitoCliente,
   aoInativarRamoAtividade,
+  aoInativarConceitoCliente,
   aoSalvarGrupoEmpresa,
   aoInativarGrupoEmpresa,
   aoSalvar
@@ -177,6 +182,7 @@ export function ModalCliente({
   const [pesquisaRapidaVendas, definirPesquisaRapidaVendas] = useState('');
   const [confirmandoSaida, definirConfirmandoSaida] = useState(false);
   const [modalRamosAtividadeAberto, definirModalRamosAtividadeAberto] = useState(false);
+  const [modalConceitosClienteAberto, definirModalConceitosClienteAberto] = useState(false);
   const [modalGruposEmpresaAberto, definirModalGruposEmpresaAberto] = useState(false);
   const somenteLeitura = modo === 'consulta';
   const modoInclusao = !cliente;
@@ -184,6 +190,7 @@ export function ModalCliente({
   const tipoPessoaFisica = formulario.tipo === 'Pessoa fisica';
   const rotuloDocumento = tipoPessoaFisica ? 'CPF' : 'CNPJ';
   const vendedoresAtivos = vendedores.filter((vendedor) => vendedor.status !== 0);
+  const conceitosAtivos = conceitosCliente.filter((conceito) => conceito.status !== 0);
   const gruposEmpresaAtivos = gruposEmpresa.filter((grupo) => grupo.status !== 0);
   const ramosAtivos = ramosAtividade.filter((ramo) => ramo.status !== 0);
   const contatosHerdados = useMemo(
@@ -257,6 +264,7 @@ export function ModalCliente({
     definirPesquisaRapidaVendas('');
     definirConfirmandoSaida(false);
     definirModalRamosAtividadeAberto(false);
+    definirModalConceitosClienteAberto(false);
     definirModalGruposEmpresaAberto(false);
   }, [aberto, cliente?.idCliente, idVendedorBloqueado]);
 
@@ -417,6 +425,7 @@ export function ModalCliente({
     const camposObrigatorios = [
       ['idVendedor', 'Selecione um vendedor.'],
       ['idRamo', 'Selecione um ramo de atividade.'],
+      ['idConceito', 'Selecione um conceito.'],
       ['razaoSocial', 'Informe a razao social.'],
       ['nomeFantasia', 'Informe o nome fantasia.'],
       ['tipo', 'Informe o tipo do cliente.'],
@@ -647,6 +656,19 @@ export function ModalCliente({
     definirModalRamosAtividadeAberto(false);
   }
 
+  function abrirModalConceitosCliente() {
+    if (somenteLeitura || typeof aoSalvarConceitoCliente !== 'function') {
+      return;
+    }
+
+    definirModalConceitosClienteAberto(true);
+    definirMensagemErro('');
+  }
+
+  function fecharModalConceitosCliente() {
+    definirModalConceitosClienteAberto(false);
+  }
+
   function abrirModalGruposEmpresa() {
     if (somenteLeitura || typeof aoSalvarGrupoEmpresa !== 'function') {
       return;
@@ -671,6 +693,13 @@ export function ModalCliente({
     definirFormulario((estadoAtual) => ({
       ...estadoAtual,
       idRamo: String(registro?.idRamo || estadoAtual.idRamo || '')
+    }));
+  }
+
+  function selecionarConceitoCliente(registro) {
+    definirFormulario((estadoAtual) => ({
+      ...estadoAtual,
+      idConceito: String(registro?.idConceito || estadoAtual.idConceito || '1')
     }));
   }
 
@@ -878,6 +907,29 @@ export function ModalCliente({
                     </Botao>
                   ) : null}
                 />
+                <CampoSelect
+                  label="Conceito"
+                  name="idConceito"
+                  value={formulario.idConceito}
+                  onChange={alterarCampo}
+                  options={conceitosAtivos.map((conceito) => ({ valor: String(conceito.idConceito), label: conceito.descricao }))}
+                  disabled={somenteLeitura}
+                  required
+                  acaoExtra={!somenteLeitura ? (
+                    <Botao
+                      variante="secundario"
+                      icone="adicionar"
+                      type="button"
+                      className="botaoCampoAcao"
+                      onClick={abrirModalConceitosCliente}
+                      somenteIcone
+                      title="Abrir conceitos de cliente"
+                      aria-label="Abrir conceitos de cliente"
+                    >
+                      Abrir conceitos de cliente
+                    </Botao>
+                  ) : null}
+                />
                 <label className="campoCheckboxFormulario" htmlFor="status">
                   <input id="status" type="checkbox" name="status" checked={formulario.status} onChange={alterarCampo} disabled={somenteLeitura} />
                   <span>Cliente ativo</span>
@@ -1080,6 +1132,34 @@ export function ModalCliente({
         aoSalvar={aoSalvarRamoAtividade}
         aoInativar={aoInativarRamoAtividade}
         aoSelecionarRamo={selecionarRamo}
+      />
+
+      <ModalCadastroConfiguracao
+        aberto={modalConceitosClienteAberto}
+        titulo="Conceitos de cliente"
+        rotuloIncluir="Incluir conceito"
+        registros={conceitosCliente}
+        chavePrimaria="idConceito"
+        somenteConsulta={false}
+        camadaSecundaria
+        colunas={[
+          { key: 'descricao', label: 'Descricao' }
+        ]}
+        camposFormulario={[
+          { name: 'descricao', label: 'Descricao', required: true, preservarDigitacao: true },
+          {
+            name: 'status',
+            label: 'Registro ativo',
+            type: 'checkbox',
+            defaultValue: true,
+            disabled: ({ registroSelecionado }) => Number(registroSelecionado?.idConceito) === 1
+          }
+        ]}
+        aoFechar={fecharModalConceitosCliente}
+        aoSalvar={aoSalvarConceitoCliente}
+        aoInativar={aoInativarConceitoCliente}
+        aoSalvarConcluido={selecionarConceitoCliente}
+        podeInativarRegistro={(registro) => Number(registro?.idConceito) !== 1}
       />
 
       <ModalGruposEmpresa
@@ -1414,12 +1494,14 @@ function criarFormularioCliente(cliente, idVendedorBloqueado) {
   if (!cliente) {
     return {
       ...estadoInicialFormulario,
+      idConceito: '1',
       idVendedor: idVendedorBloqueado ? String(idVendedorBloqueado) : ''
     };
   }
 
   return {
     idVendedor: String(cliente.idVendedor || ''),
+    idConceito: String(cliente.idConceito || 1),
     idGrupoEmpresa: String(cliente.idGrupoEmpresa || ''),
     codigoAlternativo: String(cliente.codigoAlternativo || ''),
     idRamo: String(cliente.idRamo || ''),

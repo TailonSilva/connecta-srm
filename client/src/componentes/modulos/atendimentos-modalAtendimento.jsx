@@ -39,6 +39,7 @@ export function ModalAtendimento({
   usuarioLogado,
   vendedores = [],
   ramosAtividade = [],
+  conceitosCliente = [],
   tiposAtendimento = [],
   canaisAtendimento = [],
   origensAtendimento = [],
@@ -1157,6 +1158,7 @@ export function ModalAtendimento({
       contatos={[]}
       vendedores={vendedores}
       ramosAtividade={ramosAtividade}
+      conceitosCliente={conceitosCliente}
       modo="novo"
       classNameCamada="camadaModal camadaModalSecundaria"
       idVendedorBloqueado={idVendedorBloqueado}

@@ -121,6 +121,7 @@ export function ModalManualOrcamentos({
             'O cabecalho da pagina tambem oferece um atalho direto de Configurar grid para ajustar colunas sem precisar entrar na tela de Configuracoes.',
             'A grade mostra rapidamente a etapa atual e permite acao rapida de evolucao do funil.',
             'As colunas foram redistribuidas para evitar rolagem horizontal e agora separam codigo, cliente, contato, etapa, vendedor e total em campos proprios.',
+            'A configuracao do grid tambem pode incluir a coluna Conceito do cliente para apoiar leitura comercial sem abrir o cadastro.',
             'Quando algum texto ultrapassa duas linhas, a grade aplica reticencias para preservar a altura das linhas.',
             'Registros fechados podem gerar pedido sem perder o contexto do orcamento.',
             'A exclusao depende do perfil e usa confirmacao dedicada antes de remover o registro.'

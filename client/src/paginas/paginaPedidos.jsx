@@ -12,6 +12,7 @@ import {
   incluirCliente,
   incluirContato,
   listarClientes,
+  listarConceitosCliente,
   listarContatos,
   listarRamosAtividade,
   listarVendedores
@@ -128,6 +129,7 @@ export function PaginaPedidos({ usuarioLogado }) {
   const [contatos, definirContatos] = useState([]);
   const [usuarios, definirUsuarios] = useState([]);
   const [ramosAtividade, definirRamosAtividade] = useState([]);
+  const [conceitosCliente, definirConceitosCliente] = useState([]);
   const [vendedores, definirVendedores] = useState([]);
   const [metodosPagamento, definirMetodosPagamento] = useState([]);
   const [prazosPagamento, definirPrazosPagamento] = useState([]);
@@ -222,6 +224,7 @@ export function PaginaPedidos({ usuarioLogado }) {
         listarContatos(),
         listarUsuarios(),
         listarRamosAtividade(),
+        listarConceitosCliente({ incluirInativos: true }),
         listarVendedores(),
         listarMetodosPagamentoConfiguracao(),
         listarPrazosPagamentoConfiguracao(),
@@ -238,6 +241,7 @@ export function PaginaPedidos({ usuarioLogado }) {
         contatosResultado,
         usuariosResultado,
         ramosResultado,
+        conceitosResultado,
         vendedoresResultado,
         metodosResultado,
         prazosResultado,
@@ -253,6 +257,7 @@ export function PaginaPedidos({ usuarioLogado }) {
       const contatosCarregados = contatosResultado.status === 'fulfilled' ? contatosResultado.value : [];
       const usuariosCarregados = usuariosResultado.status === 'fulfilled' ? usuariosResultado.value : [];
       const ramosCarregados = ramosResultado.status === 'fulfilled' ? ramosResultado.value : [];
+      const conceitosCarregados = conceitosResultado.status === 'fulfilled' ? conceitosResultado.value : [];
       const vendedoresCarregados = vendedoresResultado.status === 'fulfilled' ? vendedoresResultado.value : [];
       const metodosCarregados = metodosResultado.status === 'fulfilled' ? metodosResultado.value : [];
       const prazosCarregados = prazosResultado.status === 'fulfilled' ? prazosResultado.value : [];
@@ -269,6 +274,7 @@ export function PaginaPedidos({ usuarioLogado }) {
       definirContatos(contatosCarregados);
       definirUsuarios(usuariosCarregados);
       definirRamosAtividade(ramosCarregados);
+      definirConceitosCliente(conceitosCarregados);
       definirVendedores(vendedoresCarregados);
       definirMetodosPagamento(metodosCarregados);
       definirPrazosPagamento(enriquecerPrazosPagamento(prazosCarregados, metodosCarregados));
@@ -668,6 +674,7 @@ export function PaginaPedidos({ usuarioLogado }) {
         usuarios={usuarios}
         vendedores={vendedores}
         ramosAtividade={ramosAtividade}
+        conceitosCliente={conceitosCliente}
         metodosPagamento={metodosPagamento}
         prazosPagamento={prazosPagamento}
         tiposPedido={tiposPedido}
@@ -918,6 +925,18 @@ function renderizarCelulaPedido({
         {pedido.idCliente
           ? <CodigoRegistro valor={formatarCodigoCliente(cliente || { idCliente: pedido.idCliente }, empresa).replace('#', '')} />
           : '-'}
+      </CelulaLayoutPedido>
+    );
+  }
+
+  if (coluna.id === 'idConceito') {
+    const cliente = (Array.isArray(clientes) ? clientes : []).find(
+      (item) => String(item.idCliente) === String(pedido.idCliente)
+    );
+
+    return (
+      <CelulaLayoutPedido coluna={coluna} {...propriedadesCelula}>
+        <TextoGradeClamp>{obterValorGrid(cliente?.nomeConceito)}</TextoGradeClamp>
       </CelulaLayoutPedido>
     );
   }
@@ -1315,6 +1334,7 @@ async function salvarContatosClienteCadastro(idCliente, contatos) {
 function normalizarPayloadClienteCadastro(dadosCliente) {
   return {
     idVendedor: Number(dadosCliente.idVendedor),
+    idConceito: Number(dadosCliente.idConceito),
     idRamo: Number(dadosCliente.idRamo),
     razaoSocial: String(dadosCliente.razaoSocial || '').trim(),
     nomeFantasia: String(dadosCliente.nomeFantasia || '').trim(),

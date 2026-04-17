@@ -28,6 +28,7 @@ rotaListagens.get('/clientes', async (requisicao, resposta) => {
       'cliente.estado',
       'cliente.email',
       'grupoEmpresa.descricao',
+      'conceitoCliente.descricao',
       'contatoPrincipal.nome',
       'contatoPrincipal.email',
       'vendedor.nome'
@@ -44,12 +45,14 @@ rotaListagens.get('/clientes', async (requisicao, resposta) => {
       SELECT
         cliente.*,
         COALESCE(grupoEmpresa.descricao, '') AS nomeGrupoEmpresa,
+        COALESCE(conceitoCliente.descricao, '') AS nomeConceito,
         COALESCE(ramoAtividade.descricao, '') AS nomeRamo,
         COALESCE(vendedor.nome, '') AS nomeVendedor,
         COALESCE(contatoPrincipal.nome, '') AS nomeContatoPrincipal,
         COALESCE(contatoPrincipal.email, '') AS emailContatoPrincipal
       FROM cliente
       LEFT JOIN grupoEmpresa ON grupoEmpresa.idGrupoEmpresa = cliente.idGrupoEmpresa
+      LEFT JOIN conceitoCliente ON conceitoCliente.idConceito = cliente.idConceito
       LEFT JOIN ramoAtividade ON ramoAtividade.idRamo = cliente.idRamo
       LEFT JOIN vendedor ON vendedor.idVendedor = cliente.idVendedor
       LEFT JOIN contato AS contatoPrincipal

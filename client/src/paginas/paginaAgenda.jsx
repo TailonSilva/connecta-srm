@@ -27,6 +27,7 @@ import {
   incluirCliente,
   incluirContato,
   listarClientes,
+  listarConceitosCliente,
   listarContatos,
   listarRamosAtividade,
   listarVendedores
@@ -101,6 +102,7 @@ export function PaginaAgenda({ usuarioLogado }) {
   const [usuarios, definirUsuarios] = useState([]);
   const [vendedores, definirVendedores] = useState([]);
   const [ramosAtividade, definirRamosAtividade] = useState([]);
+  const [conceitosCliente, definirConceitosCliente] = useState([]);
   const [canaisAtendimento, definirCanaisAtendimento] = useState([]);
   const [origensAtendimento, definirOrigensAtendimento] = useState([]);
   const [orcamentos, definirOrcamentos] = useState([]);
@@ -329,6 +331,7 @@ export function PaginaAgenda({ usuarioLogado }) {
       listarContatos(),
       listarVendedores(),
       listarRamosAtividade(),
+      listarConceitosCliente({ incluirInativos: true }),
       listarUsuarios(),
       listarEmpresas()
     ]);
@@ -356,6 +359,7 @@ export function PaginaAgenda({ usuarioLogado }) {
       contatosResultado,
       vendedoresResultado,
       ramosResultado,
+      conceitosResultado,
       usuariosResultado,
       empresasResultado
     ] = resultados;
@@ -382,6 +386,7 @@ export function PaginaAgenda({ usuarioLogado }) {
     const contatosCarregados = contatosResultado.status === 'fulfilled' ? contatosResultado.value : [];
     const vendedoresCarregados = vendedoresResultado.status === 'fulfilled' ? vendedoresResultado.value : [];
     const ramosCarregados = ramosResultado.status === 'fulfilled' ? ramosResultado.value : [];
+    const conceitosCarregados = conceitosResultado.status === 'fulfilled' ? conceitosResultado.value : [];
     const usuariosCarregados = usuariosResultado.status === 'fulfilled' ? usuariosResultado.value : [];
     const empresasCarregadas = empresasResultado.status === 'fulfilled' ? empresasResultado.value : [];
 
@@ -427,6 +432,7 @@ export function PaginaAgenda({ usuarioLogado }) {
     definirContatos(contatosAtivos);
     definirVendedores(vendedoresAtivos);
     definirRamosAtividade(ramosCarregados);
+    definirConceitosCliente(conceitosCarregados);
     definirCanaisAtendimento(canaisAtivos);
     definirOrigensAtendimento(origensAtivas);
     definirUsuarios(usuariosAtivos);
@@ -1125,6 +1131,7 @@ export function PaginaAgenda({ usuarioLogado }) {
         usuarios={usuarios}
         vendedores={vendedores}
         ramosAtividade={ramosAtividade}
+        conceitosCliente={conceitosCliente}
         tiposAgenda={tiposAgenda}
         statusVisita={statusVisita}
         empresa={empresa}
@@ -1157,6 +1164,7 @@ export function PaginaAgenda({ usuarioLogado }) {
         usuarioLogado={usuarioLogado}
         vendedores={vendedores}
         ramosAtividade={ramosAtividade}
+        conceitosCliente={conceitosCliente}
         canaisAtendimento={canaisAtendimento}
         origensAtendimento={origensAtendimento}
         modo="novo"
@@ -1198,6 +1206,8 @@ export function PaginaAgenda({ usuarioLogado }) {
         contatos={contatos}
         usuarios={usuarios}
         vendedores={vendedores}
+        ramosAtividade={ramosAtividade}
+        conceitosCliente={conceitosCliente}
         metodosPagamento={metodosPagamento}
         prazosPagamento={prazosPagamento}
         tiposPedido={tiposPedido}
@@ -1435,6 +1445,7 @@ async function salvarContatosClienteAgenda(idCliente, contatos) {
 function normalizarPayloadClienteAgenda(dadosCliente) {
   return {
     idVendedor: Number(dadosCliente.idVendedor),
+    idConceito: Number(dadosCliente.idConceito),
     idRamo: Number(dadosCliente.idRamo),
     razaoSocial: String(dadosCliente.razaoSocial || '').trim(),
     nomeFantasia: String(dadosCliente.nomeFantasia || '').trim(),

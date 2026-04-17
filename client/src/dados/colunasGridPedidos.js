@@ -69,11 +69,20 @@ export const colunasGridPedidos = [
     visivelPadrao: false
   },
   {
+    id: 'idConceito',
+    rotulo: 'Conceito',
+    classe: 'colunaGradeTexto',
+    obrigatoria: false,
+    ordemPadrao: 7,
+    spanPadrao: 3,
+    visivelPadrao: false
+  },
+  {
     id: 'contato',
     rotulo: 'Contato',
     classe: 'colunaGradeTexto',
     obrigatoria: false,
-    ordemPadrao: 7,
+    ordemPadrao: 8,
     spanPadrao: 4,
     visivelPadrao: true
   },
@@ -82,7 +91,7 @@ export const colunasGridPedidos = [
     rotulo: 'Codigo do Contato',
     classe: 'colunaGradeTexto',
     obrigatoria: false,
-    ordemPadrao: 8,
+    ordemPadrao: 9,
     spanPadrao: 4,
     visivelPadrao: false
   },
@@ -91,7 +100,7 @@ export const colunasGridPedidos = [
     rotulo: 'Usuario',
     classe: 'colunaGradeTexto',
     obrigatoria: false,
-    ordemPadrao: 9,
+    ordemPadrao: 10,
     spanPadrao: 3,
     visivelPadrao: false
   },
@@ -100,7 +109,7 @@ export const colunasGridPedidos = [
     rotulo: 'Codigo do Usuario',
     classe: 'colunaGradeTexto',
     obrigatoria: false,
-    ordemPadrao: 10,
+    ordemPadrao: 11,
     spanPadrao: 3,
     visivelPadrao: false
   },
@@ -109,7 +118,7 @@ export const colunasGridPedidos = [
     rotulo: 'Vendedor',
     classe: 'colunaGradeTexto',
     obrigatoria: false,
-    ordemPadrao: 11,
+    ordemPadrao: 12,
     spanPadrao: 4,
     visivelPadrao: true
   },
@@ -118,7 +127,7 @@ export const colunasGridPedidos = [
     rotulo: 'Codigo do Vendedor',
     classe: 'colunaGradeTexto',
     obrigatoria: false,
-    ordemPadrao: 12,
+    ordemPadrao: 13,
     spanPadrao: 4,
     visivelPadrao: false
   },
@@ -127,7 +136,7 @@ export const colunasGridPedidos = [
     rotulo: 'Etapa',
     classe: 'colunaGradeSelecao',
     obrigatoria: false,
-    ordemPadrao: 13,
+    ordemPadrao: 14,
     spanPadrao: 4,
     visivelPadrao: true
   },
@@ -136,7 +145,7 @@ export const colunasGridPedidos = [
     rotulo: 'Codigo da Etapa',
     classe: 'colunaGradeTexto',
     obrigatoria: false,
-    ordemPadrao: 14,
+    ordemPadrao: 15,
     spanPadrao: 4,
     visivelPadrao: false
   },
@@ -145,7 +154,7 @@ export const colunasGridPedidos = [
     rotulo: 'Comissao',
     classe: 'colunaGradeValor',
     obrigatoria: false,
-    ordemPadrao: 15,
+    ordemPadrao: 16,
     spanPadrao: 2,
     visivelPadrao: false
   },
@@ -154,7 +163,7 @@ export const colunasGridPedidos = [
     rotulo: 'Prazo de Pagamento',
     classe: 'colunaGradeTexto',
     obrigatoria: false,
-    ordemPadrao: 16,
+    ordemPadrao: 17,
     spanPadrao: 4,
     visivelPadrao: false
   },
@@ -163,7 +172,7 @@ export const colunasGridPedidos = [
     rotulo: 'Codigo do Prazo',
     classe: 'colunaGradeTexto',
     obrigatoria: false,
-    ordemPadrao: 17,
+    ordemPadrao: 18,
     spanPadrao: 4,
     visivelPadrao: false
   },
@@ -172,7 +181,7 @@ export const colunasGridPedidos = [
     rotulo: 'Metodo de Pagamento',
     classe: 'colunaGradeTexto',
     obrigatoria: false,
-    ordemPadrao: 18,
+    ordemPadrao: 19,
     spanPadrao: 3,
     visivelPadrao: false
   },
@@ -181,7 +190,7 @@ export const colunasGridPedidos = [
     rotulo: 'Data de Inclusao',
     classe: 'colunaGradeTexto',
     obrigatoria: false,
-    ordemPadrao: 19,
+    ordemPadrao: 20,
     spanPadrao: 2,
     visivelPadrao: false
   },
@@ -190,7 +199,7 @@ export const colunasGridPedidos = [
     rotulo: 'Data de Entrega',
     classe: 'colunaGradeTexto',
     obrigatoria: false,
-    ordemPadrao: 20,
+    ordemPadrao: 21,
     spanPadrao: 2,
     visivelPadrao: false
   },
@@ -199,7 +208,7 @@ export const colunasGridPedidos = [
     rotulo: 'Data de Validade',
     classe: 'colunaGradeTexto',
     obrigatoria: false,
-    ordemPadrao: 21,
+    ordemPadrao: 22,
     spanPadrao: 2,
     visivelPadrao: false
   },
@@ -208,7 +217,7 @@ export const colunasGridPedidos = [
     rotulo: 'Observacao',
     classe: 'colunaGradeTexto',
     obrigatoria: false,
-    ordemPadrao: 22,
+    ordemPadrao: 23,
     spanPadrao: 5,
     visivelPadrao: false
   },
@@ -217,7 +226,7 @@ export const colunasGridPedidos = [
     rotulo: 'Total',
     classe: 'colunaGradeValor',
     obrigatoria: false,
-    ordemPadrao: 23,
+    ordemPadrao: 24,
     spanPadrao: 3,
     visivelPadrao: true
   },
@@ -226,7 +235,7 @@ export const colunasGridPedidos = [
     rotulo: 'Acoes',
     classe: 'colunaGradeAcoes',
     obrigatoria: true,
-    ordemPadrao: 24,
+    ordemPadrao: 25,
     spanPadrao: 2,
     visivelPadrao: true
   }

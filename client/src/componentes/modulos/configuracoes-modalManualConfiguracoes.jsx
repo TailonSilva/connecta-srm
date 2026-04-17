@@ -86,6 +86,8 @@ export function ModalManualConfiguracoes({
             'Conversao usa uma grade simples de orcamentos com colunas separadas de inclusao, fechamento, cliente e contato, filtros por cliente, usuario, vendedores, etapas, grupo de empresa, grupo de produto, marca e datas, exportacao em PDF e cards com orcamentos gerados, fechados, percentual de conversao, cancelados na etapa Recusado, percentual de perca e quantidade ainda em aberto; Pedido Excluido fica separado como etapa obrigatoria de controle tecnico quando um pedido vinculado e removido.',
             'Atendimentos tambem ja abre um relatorio funcional com a mesma base visual, cards de total, clientes atendidos, canal lider e origem lider, alem da grade de historico com o cliente exibido junto nas linhas, botao de filtros e exportacao em PDF; os filtros de usuario, canal e origem aceitam selecao multipla.',
             'Os cadastros de Ramo de atividade e Grupo de empresa seguem liberados tambem na propria pagina de Configuracoes para alimentar o fluxo comercial.',
+            'Conceitos de cliente tambem ficam em cadastro proprio para classificar a base comercial; o registro obrigatorio Sem Conceito nasce no banco com id 1 e nao pode ser inativado.',
+            'A descricao digitada nesse cadastro e preservada exatamente como o usuario escreveu, sem a capitalizacao automatica aplicada em outros formularios auxiliares.',
             'Cadastros auxiliares sensiveis seguem o mesmo principio quando abertos por atalhos internos em outros modais.',
             'Essa consistencia evita que um usuario altere uma tabela protegida por um caminho alternativo.'
           ]
@@ -99,8 +101,10 @@ export function ModalManualConfiguracoes({
             'Tipos de pedido abastecem o novo campo de classificacao do modal de Pedidos e deixam o fluxo preparado para personalizacoes futuras; Venda e Devolucao ja nascem como registros obrigatorios protegidos.',
             'Motivos da devolucao ficam disponiveis em tabela propria com abreviacao e descricao, para serem exigidos quando um pedido de Devolucao estiver em Entregue.',
             'Grupos de empresa e seus contatos abastecem o cadastro de clientes com heranca de contatos.',
+            'Conceitos de cliente abastecem o novo campo Conceito dentro do cadastro de clientes e novos registros nascem apontando para Sem Conceito ate que o usuario refine essa classificacao.',
             'A empresa define se o CRM usa o codigo padrao do cliente ou o Codigo alternativo como identificador principal nos grids que exibem codigo.',
             'A empresa tambem pode escolher quais colunas aparecem nos grids configuraveis, ajustar ordem, espaco e definir o rotulo que sera exibido no cabecalho de cada coluna.',
+            'Clientes, Orcamentos e Pedidos agora tambem aceitam a coluna Conceito dentro dessa configuracao de grade.',
             'A nova aba E-mail da empresa guarda assunto, corpo e assinatura padrao do envio comercial de orcamentos, com suporte a tags dinamicas para cliente, empresa, vendedor, observacao, campos personalizados e total.',
             'As etapas obrigatorias Fechado sem pedido e Pedido Excluido continuam cadastradas em Configuracoes, mas sao de uso automatico e nao aparecem nos selects manuais do fluxo comercial.',
             'As grades de configuracao, historico e relatorio priorizam leitura sem rolagem horizontal, com colunas curtas mais contidas e colunas textuais mais flexiveis.',

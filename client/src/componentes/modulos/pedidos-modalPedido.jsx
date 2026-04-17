@@ -121,6 +121,7 @@ export function ModalPedido({
   usuarios,
   vendedores,
   ramosAtividade = [],
+  conceitosCliente = [],
   metodosPagamento = [],
   prazosPagamento,
   tiposPedido = [],
@@ -1121,6 +1122,7 @@ export function ModalPedido({
           contatos={[]}
           vendedores={vendedores}
           ramosAtividade={ramosAtividade}
+          conceitosCliente={conceitosCliente}
           modo="novo"
           classNameCamada="camadaModal camadaModalSecundaria"
           idVendedorBloqueado={idVendedorBloqueado}

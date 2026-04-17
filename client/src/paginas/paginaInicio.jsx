@@ -3,7 +3,7 @@ import '../recursos/estilos/paginaInicio.css';
 import { CorpoPagina } from '../componentes/layout/corpoPagina';
 import { listarAgendamentos } from '../servicos/agenda';
 import { listarAtendimentosGrid } from '../servicos/atendimentos';
-import { listarClientes, listarVendedores } from '../servicos/clientes';
+import { listarClientes, listarConceitosCliente, listarVendedores } from '../servicos/clientes';
 import {
   listarCanaisAtendimentoConfiguracao,
   listarEtapasOrcamentoConfiguracao,
@@ -35,6 +35,7 @@ import { SecaoRankingInicio } from '../componentes/modulos/inicio-secaoRankingIn
 import { SecaoVendasGrupoProdutosInicio } from '../componentes/modulos/inicio-secaoVendasGrupoProdutosInicio';
 import { SecaoVendasMarcaInicio } from '../componentes/modulos/inicio-secaoVendasMarcaInicio';
 import { SecaoVendasClientesInicio } from '../componentes/modulos/inicio-secaoVendasClientesInicio';
+import { SecaoVendasConceitosClienteInicio } from '../componentes/modulos/inicio-secaoVendasConceitosClienteInicio';
 import { SecaoVendasProdutosInicio } from '../componentes/modulos/inicio-secaoVendasProdutosInicio';
 import { SecaoVendasUfInicio } from '../componentes/modulos/inicio-secaoVendasUfInicio';
 import { SecaoAtendimentosCanalInicio } from '../componentes/modulos/inicio-secaoAtendimentosCanalInicio';
@@ -130,6 +131,7 @@ export function PaginaInicio({ usuarioLogado }) {
       const dataFimAgenda = dataInput(new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() + 7));
       const resultados = await Promise.allSettled([
         listarClientes(),
+        listarConceitosCliente({ incluirInativos: true }),
         listarVendedores(),
         listarAtendimentosGrid({
           filtros: recorteUsuarioPadrao
@@ -157,6 +159,7 @@ export function PaginaInicio({ usuarioLogado }) {
 
       const [
         clientesResultado,
+        conceitosClienteResultado,
         vendedoresResultado,
         atendimentosResultado,
         agendamentosResultado,
@@ -177,6 +180,7 @@ export function PaginaInicio({ usuarioLogado }) {
       ] = resultados;
 
       const clientes = clientesResultado.status === 'fulfilled' ? clientesResultado.value : [];
+      const conceitosCliente = conceitosClienteResultado.status === 'fulfilled' ? conceitosClienteResultado.value : [];
       const vendedores = vendedoresResultado.status === 'fulfilled' ? vendedoresResultado.value : [];
       const atendimentos = atendimentosResultado.status === 'fulfilled' ? atendimentosResultado.value : [];
       const agendamentos = agendamentosResultado.status === 'fulfilled' ? agendamentosResultado.value : [];
@@ -197,6 +201,7 @@ export function PaginaInicio({ usuarioLogado }) {
 
       definirPainelBruto({
         clientes,
+        conceitosCliente,
         vendedores,
         atendimentos,
         agendamentos,
@@ -471,6 +476,11 @@ function montarPainel(dados, usuarioLogado) {
   );
   const vendasPorUf = montarResumoPorUf(pedidosMes, clientesVisiveis);
   const vendasPorCliente = montarResumoPorCliente(pedidosMes, clientesVisiveis, dados.empresa);
+  const vendasPorConceitoCliente = montarResumoPorConceitoCliente(
+    pedidosMes,
+    clientesVisiveis,
+    dados.conceitosCliente
+  );
   const atendimentosPorCanal = montarResumoAtendimentosPorRelacionamento(
     atendimentosMesHome,
     dados.canaisAtendimento,
@@ -732,6 +742,7 @@ function montarPainel(dados, usuarioLogado) {
     vendasPorMarca,
     vendasPorUf,
     vendasPorCliente,
+    vendasPorConceitoCliente,
     vendasPorProduto,
     atendimentosPorCanal,
     atendimentosPorOrigem,
@@ -828,6 +839,9 @@ function montarSecoesVendas(painel) {
     }],
     ['vendasClientes', {
       renderizar: (configuracao) => <SecaoVendasClientesInicio itens={painel.vendasPorCliente} titulo={configuracao.rotulo} />
+    }],
+    ['vendasConceitosCliente', {
+      renderizar: (configuracao) => <SecaoVendasConceitosClienteInicio itens={painel.vendasPorConceitoCliente} titulo={configuracao.rotulo} />
     }],
     ['vendasProdutos', {
       renderizar: (configuracao) => <SecaoVendasProdutosInicio itens={painel.vendasPorProduto} titulo={configuracao.rotulo} />
@@ -1049,6 +1063,7 @@ function criarPainelBase(usuarioLogado) {
     vendasPorMarca: [],
     vendasPorUf: [],
     vendasPorCliente: [],
+    vendasPorConceitoCliente: [],
     vendasPorProduto: [],
     atendimentosPorCanal: [],
     atendimentosPorOrigem: [],
@@ -1482,6 +1497,69 @@ function montarResumoPorCliente(pedidos, clientes, empresa) {
     percentualValor: calcularPercentualParteDoTotal(Number(item.valorTotal || 0), totalValor),
     ajuda: {
       composicao: `${item.quantidadePedidos}, ${item.quantidadeItens} itens e ${normalizarPreco(item.valorTotal)} para ${item.descricao}.`,
+      periodo: 'Mes corrente pela data de entrada do pedido.'
+    }
+  }));
+}
+
+// O conceito precisa ser resolvido a partir do cliente porque o pedido nao guarda esse snapshot hoje.
+function montarResumoPorConceitoCliente(pedidos, clientes, conceitosCliente) {
+  const clientesPorId = new Map((clientes || []).map((cliente) => [
+    String(cliente.idCliente),
+    cliente
+  ]));
+  const conceitosPorId = new Map((conceitosCliente || []).map((conceito) => [
+    String(conceito.idConceito),
+    conceito
+  ]));
+  const resumoPorConceito = new Map();
+
+  (pedidos || []).forEach((pedido) => {
+    const cliente = clientesPorId.get(String(pedido?.idCliente || ''));
+    const idConceito = String(cliente?.idConceito || 1);
+    const conceito = conceitosPorId.get(idConceito);
+    const descricaoConceito = conceito?.descricao || 'Sem Conceito';
+    const resumoAtual = resumoPorConceito.get(idConceito) || {
+      id: idConceito,
+      descricao: descricaoConceito,
+      quantidadeItens: 0,
+      valorTotal: 0,
+      pedidos: new Set()
+    };
+
+    (pedido?.itens || []).forEach((item) => {
+      resumoAtual.quantidadeItens += Number(item.quantidade) || 0;
+      resumoAtual.valorTotal += Number(item.valorTotal) || 0;
+    });
+
+    resumoAtual.pedidos.add(String(pedido.idPedido || ''));
+    resumoPorConceito.set(idConceito, resumoAtual);
+  });
+
+  const lista = [...resumoPorConceito.values()]
+    .map((item) => ({
+      ...item,
+      quantidadePedidos: `${item.pedidos.size} ped.`,
+      pedidos: undefined
+    }))
+    .filter((item) => item.quantidadeItens !== 0 || item.valorTotal !== 0)
+    .sort((itemA, itemB) => itemB.valorTotal - itemA.valorTotal);
+  const totalQuantidade = lista.reduce(
+    (acumulado, item) => acumulado + Math.max(Number(item.quantidadeItens) || 0, 0),
+    0
+  );
+  const totalValor = lista.reduce(
+    (acumulado, item) => acumulado + Math.max(Number(item.valorTotal) || 0, 0),
+    0
+  );
+
+  return lista.map((item) => ({
+    ...item,
+    valor: normalizarPreco(item.valorTotal),
+    percentualQuantidade: calcularPercentualParteDoTotal(Number(item.quantidadeItens || 0), totalQuantidade),
+    percentualValor: calcularPercentualParteDoTotal(Number(item.valorTotal || 0), totalValor),
+    ajuda: {
+      composicao: `${item.quantidadePedidos}, ${item.quantidadeItens} itens e ${normalizarPreco(item.valorTotal)} no conceito ${item.descricao}.`,
       periodo: 'Mes corrente pela data de entrada do pedido.'
     }
   }));

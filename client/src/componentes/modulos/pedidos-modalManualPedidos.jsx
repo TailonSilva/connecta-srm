@@ -123,6 +123,7 @@ export function ModalManualPedidos({
             'A grade permite trocar a etapa do pedido sem abrir o modal completo.',
             'Se a troca rapida levar um pedido de Devolucao para Entregue, a tela abre o mesmo modal externo para selecionar o Motivo da devolucao antes de concluir a alteracao.',
             'As colunas foram ajustadas para leitura sem rolagem horizontal e agora separam codigo, cliente, contato, etapa, vendedor e total em campos proprios.',
+            'A configuracao do grid tambem pode incluir a coluna Conceito do cliente para destacar a classificacao comercial na operacao de pedidos.',
             'Textos que excedem duas linhas passam a ser truncados com reticencias para manter a altura da grade sob controle.',
             'Ao reabrir a tela, os filtros anteriores sao restaurados automaticamente.'
           ]

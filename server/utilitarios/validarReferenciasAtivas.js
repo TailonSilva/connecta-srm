@@ -19,6 +19,13 @@ const validacoesPorEntidade = {
       mensagem: 'Selecione um vendedor ativo.'
     },
     {
+      campo: 'idConceito',
+      tabela: 'conceitoCliente',
+      chavePrimaria: 'idConceito',
+      colunaAtiva: 'status',
+      mensagem: 'Selecione um conceito ativo.'
+    },
+    {
       campo: 'idRamo',
       tabela: 'ramoAtividade',
       chavePrimaria: 'idRamo',

@@ -159,6 +159,10 @@ export function listarRamosAtividadeConfiguracao(opcoes) {
   return listarCadastroConfiguracao('/ramosAtividade', opcoes);
 }
 
+export function listarConceitosClienteConfiguracao(opcoes) {
+  return listarCadastroConfiguracao('/conceitosCliente', opcoes);
+}
+
 export function incluirRamoAtividade(payload) {
   return requisitarApi('/ramosAtividade', {
     method: 'POST',
@@ -171,6 +175,26 @@ export function incluirRamoAtividade(payload) {
 
 export function atualizarRamoAtividade(idRamo, payload) {
   return requisitarApi(`/ramosAtividade/${idRamo}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+}
+
+export function incluirConceitoCliente(payload) {
+  return requisitarApi('/conceitosCliente', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+}
+
+export function atualizarConceitoCliente(idConceito, payload) {
+  return requisitarApi(`/conceitosCliente/${idConceito}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json'

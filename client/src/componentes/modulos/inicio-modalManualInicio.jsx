@@ -34,8 +34,8 @@ export function ModalManualInicio({
         },
         {
           titulo: 'Aba Vendas',
-          descricao: 'Reune devolucoes, vendas por grupo, marca, UF, cliente, produto e ranking.',
-          detalhe: 'As leituras usam pedidos do mes corrente conforme a regra definida em cada sessao.',
+          descricao: 'Reune devolucoes, vendas por grupo, marca, UF, cliente, conceito, produto e ranking.',
+          detalhe: 'As leituras usam pedidos do mes corrente conforme a regra definida em cada sessao, incluindo a nova visao por conceito de cliente.',
           icone: 'pedido'
         },
         {
@@ -79,6 +79,7 @@ export function ModalManualInicio({
           titulo: 'Padrao atual dos graficos',
           itens: [
             'Graficos compactos da home usam o padrao `maximo de 5 itens + modal com lista completa`.',
+            'A sessao de vendas por conceito de cliente segue exatamente o mesmo padrao visual e operacional dos demais graficos de vendas.',
             'Todo novo card ou grafico criado para a home deve entrar tambem na lista de configuracao da empresa (aba Pagina inicial).',
             'Cards e graficos usam tooltip padrao curto no icone de Informacao, com duas linhas: Composicao e Periodo.',
             'As secoes de resumo por relacionamento ocupam 2 colunas no grid principal da home.',

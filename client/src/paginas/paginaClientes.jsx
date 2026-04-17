@@ -3,15 +3,18 @@ import { CabecalhoClientes } from '../componentes/modulos/clientes-cabecalhoClie
 import { CorpoClientes } from '../componentes/modulos/clientes-corpoClientes';
 import {
   atualizarCliente,
+  atualizarConceitoCliente,
   atualizarContato,
   atualizarGrupoEmpresa,
   atualizarRamoAtividade,
+  incluirConceitoCliente,
   incluirGrupoEmpresa,
   incluirRamoAtividade,
   incluirCliente,
   incluirContato,
   importarClientesPlanilha,
   listarClientesGrid,
+  listarConceitosCliente,
   listarContatos,
   listarGruposEmpresa,
   listarRamosAtividade,
@@ -56,6 +59,7 @@ export function PaginaClientes({ usuarioLogado }) {
   const [empresa, definirEmpresa] = useState(null);
   const [vendedores, definirVendedores] = useState([]);
   const [ramosAtividade, definirRamosAtividade] = useState([]);
+  const [conceitosCliente, definirConceitosCliente] = useState([]);
   const [carregandoContexto, definirCarregandoContexto] = useState(true);
   const [carregandoGrade, definirCarregandoGrade] = useState(true);
   const [mensagemErro, definirMensagemErro] = useState('');
@@ -142,7 +146,8 @@ export function PaginaClientes({ usuarioLogado }) {
         listarContatosGruposEmpresaConfiguracao({ incluirInativos: true }),
         listarEmpresas(),
         listarVendedores(),
-        listarRamosAtividade()
+        listarRamosAtividade(),
+        listarConceitosCliente({ incluirInativos: true })
       ]);
 
       const [
@@ -151,7 +156,8 @@ export function PaginaClientes({ usuarioLogado }) {
         contatosGrupoResultado,
         empresasResultado,
         vendedoresResultado,
-        ramosResultado
+        ramosResultado,
+        conceitosResultado
       ] = resultados;
 
       definirContatos(contatosResultado.status === 'fulfilled' ? contatosResultado.value : []);
@@ -164,6 +170,7 @@ export function PaginaClientes({ usuarioLogado }) {
       );
       definirVendedores(vendedoresResultado.status === 'fulfilled' ? vendedoresResultado.value : []);
       definirRamosAtividade(ramosResultado.status === 'fulfilled' ? ramosResultado.value : []);
+      definirConceitosCliente(conceitosResultado.status === 'fulfilled' ? conceitosResultado.value : []);
     } finally {
       definirCarregandoContexto(false);
     }
@@ -275,6 +282,26 @@ export function PaginaClientes({ usuarioLogado }) {
     return ramoSalvo;
   }
 
+  async function salvarConceitoCliente(dadosConceito) {
+    const payload = {
+      descricao: String(dadosConceito.descricao || '').trim(),
+      status: dadosConceito.status ? 1 : 0
+    };
+
+    let conceitoSalvo;
+
+    if (dadosConceito.idConceito) {
+      conceitoSalvo = await atualizarConceitoCliente(dadosConceito.idConceito, payload);
+    } else {
+      conceitoSalvo = await incluirConceitoCliente(payload);
+    }
+
+    const conceitosAtualizados = await listarConceitosCliente({ incluirInativos: true });
+    definirConceitosCliente(conceitosAtualizados);
+
+    return conceitoSalvo;
+  }
+
   async function salvarGrupoEmpresa(dadosGrupo) {
     const payloadGrupo = {
       descricao: String(dadosGrupo.descricao || '').trim(),
@@ -308,6 +335,12 @@ export function PaginaClientes({ usuarioLogado }) {
     await atualizarRamoAtividade(registro.idRamo, { status: 0 });
     const ramosAtualizados = await listarRamosAtividade();
     definirRamosAtividade(ramosAtualizados);
+  }
+
+  async function inativarConceitoClienteCadastro(registro) {
+    await atualizarConceitoCliente(registro.idConceito, { status: 0 });
+    const conceitosAtualizados = await listarConceitosCliente({ incluirInativos: true });
+    definirConceitosCliente(conceitosAtualizados);
   }
 
   async function inativarGrupoEmpresaCliente(registro) {
@@ -492,6 +525,7 @@ export function PaginaClientes({ usuarioLogado }) {
         contatosGruposEmpresa={contatosGruposEmpresa}
         vendedores={vendedoresDisponiveis}
         ramosAtividade={ramosAtividade}
+        conceitosCliente={conceitosCliente}
         modo={modoModalCliente}
         empresa={empresa}
         somenteConsultaRamos={false}
@@ -499,7 +533,9 @@ export function PaginaClientes({ usuarioLogado }) {
         idVendedorBloqueado={null}
         aoFechar={fecharModalCliente}
         aoSalvarRamoAtividade={salvarRamoAtividade}
+        aoSalvarConceitoCliente={salvarConceitoCliente}
         aoInativarRamoAtividade={inativarRamoAtividadeCliente}
+        aoInativarConceitoCliente={inativarConceitoClienteCadastro}
         aoSalvarGrupoEmpresa={salvarGrupoEmpresa}
         aoInativarGrupoEmpresa={inativarGrupoEmpresaCliente}
         aoSalvar={salvarCliente}
@@ -631,6 +667,7 @@ function obterContatosEditaveisDoCliente(contatos, idCliente) {
 function normalizarPayloadCliente(dadosCliente) {
   const payload = {
     idVendedor: Number(dadosCliente.idVendedor),
+    idConceito: Number(dadosCliente.idConceito),
     idGrupoEmpresa: dadosCliente.idGrupoEmpresa ? Number(dadosCliente.idGrupoEmpresa) : null,
     idRamo: Number(dadosCliente.idRamo),
     razaoSocial: dadosCliente.razaoSocial.trim(),
