@@ -399,7 +399,7 @@ function obterRotuloConfiguracaoColuna(coluna) {
   }
 
   if (coluna.id === 'contato') {
-    return 'Contato do Cliente';
+    return 'Contato do Fornecedor';
   }
 
   return coluna.rotulo;

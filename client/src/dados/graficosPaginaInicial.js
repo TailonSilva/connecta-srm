@@ -4,32 +4,32 @@ const BASE_LEGADA_GRAFICOS_PAGINA_INICIAL = 4;
 export const graficosPaginaInicialOrcamentos = [
   {
     id: 'funilOrcamentos',
-    rotulo: 'Funil de orcamentos',
-    ajudaConfiguracao: 'Mostra o valor e a quantidade de itens por etapa do funil de orcamentos em aberto.',
+    rotulo: 'Funil de cotacoes',
+    ajudaConfiguracao: 'Mostra o valor e a quantidade de itens por etapa do funil de cotacoes em aberto.',
     ordemPadrao: 1,
     spanPadrao: 5,
     visivelPadrao: true
   },
   {
     id: 'orcamentosGrupoProdutos',
-    rotulo: 'Orcamentos em aberto por grupo de produtos',
-    ajudaConfiguracao: 'Mostra o valor e a quantidade de itens dos orcamentos em aberto por grupo de produto.',
+    rotulo: 'Cotacoes em aberto por grupo de produtos',
+    ajudaConfiguracao: 'Mostra o valor e a quantidade de itens das cotacoes em aberto por grupo de produto.',
     ordemPadrao: 2,
     spanPadrao: 5,
     visivelPadrao: true
   },
   {
     id: 'orcamentosMarca',
-    rotulo: 'Orcamentos em aberto por marca',
-    ajudaConfiguracao: 'Mostra o valor e a quantidade de itens dos orcamentos em aberto por marca.',
+    rotulo: 'Cotacoes em aberto por marca',
+    ajudaConfiguracao: 'Mostra o valor e a quantidade de itens das cotacoes em aberto por marca.',
     ordemPadrao: 3,
     spanPadrao: 5,
     visivelPadrao: true
   },
   {
     id: 'orcamentosProdutos',
-    rotulo: 'Orcamentos em aberto por produto',
-    ajudaConfiguracao: 'Mostra o valor e a quantidade de itens dos orcamentos em aberto por produto.',
+    rotulo: 'Cotacoes em aberto por produto',
+    ajudaConfiguracao: 'Mostra o valor e a quantidade de itens das cotacoes em aberto por produto.',
     ordemPadrao: 4,
     spanPadrao: 5,
     visivelPadrao: true
@@ -37,7 +37,7 @@ export const graficosPaginaInicialOrcamentos = [
   {
     id: 'motivosPerda',
     rotulo: 'Motivos de perda do mes',
-    ajudaConfiguracao: 'Mostra os motivos de perda dos orcamentos recusados no mes corrente.',
+    ajudaConfiguracao: 'Mostra os motivos de perda das cotacoes recusados no mes corrente.',
     ordemPadrao: 5,
     spanPadrao: 5,
     visivelPadrao: true
@@ -79,7 +79,7 @@ export const graficosPaginaInicialVendas = [
   },
   {
     id: 'vendasClientes',
-    rotulo: 'Vendas do mes por cliente',
+    rotulo: 'Vendas do mes por fornecedor',
     ajudaConfiguracao: 'Mostra o valor liquido e a quantidade de itens vendidos no mes corrente por cliente.',
     ordemPadrao: 5,
     spanPadrao: 5,
@@ -87,7 +87,7 @@ export const graficosPaginaInicialVendas = [
   },
   {
     id: 'vendasConceitosCliente',
-    rotulo: 'Vendas do mes por conceito de cliente',
+    rotulo: 'Vendas do mes por conceito de fornecedor',
     ajudaConfiguracao: 'Mostra o valor liquido e a quantidade de itens vendidos no mes corrente por conceito de cliente.',
     ordemPadrao: 6,
     spanPadrao: 5,
@@ -103,8 +103,8 @@ export const graficosPaginaInicialVendas = [
   },
   {
     id: 'rankingVendas',
-    rotulo: 'Vendedores em destaque',
-    ajudaConfiguracao: 'Mostra o ranking de vendedores por valor liquido de pedidos no mes corrente.',
+    rotulo: 'Compradores em destaque',
+    ajudaConfiguracao: 'Mostra o ranking de compradores por valor liquido de ordens de compra no mes corrente.',
     ordemPadrao: 8,
     spanPadrao: 5,
     visivelPadrao: true
@@ -115,7 +115,7 @@ export const graficosPaginaInicialAtendimentos = [
   {
     id: 'atendimentosCanal',
     rotulo: 'Atendimentos do mes por canal',
-    ajudaConfiguracao: 'Mostra a quantidade de atendimentos e de clientes atendidos por canal no mes corrente.',
+    ajudaConfiguracao: 'Mostra a quantidade de atendimentos e de fornecedores atendidos por canal no mes corrente.',
     ordemPadrao: 1,
     spanPadrao: 5,
     visivelPadrao: true
@@ -123,15 +123,15 @@ export const graficosPaginaInicialAtendimentos = [
   {
     id: 'atendimentosOrigem',
     rotulo: 'Atendimentos do mes por origem',
-    ajudaConfiguracao: 'Mostra a quantidade de atendimentos e de clientes atendidos por origem no mes corrente.',
+    ajudaConfiguracao: 'Mostra a quantidade de atendimentos e de fornecedores atendidos por origem no mes corrente.',
     ordemPadrao: 2,
     spanPadrao: 5,
     visivelPadrao: true
   },
   {
     id: 'atendimentosCliente',
-    rotulo: 'Atendimentos do mes por cliente',
-    ajudaConfiguracao: 'Mostra a quantidade de atendimentos e a recorrencia por cliente no mes corrente.',
+    rotulo: 'Atendimentos do mes por fornecedor',
+    ajudaConfiguracao: 'Mostra a quantidade de atendimentos e a recorrencia por fornecedor no mes corrente.',
     ordemPadrao: 3,
     spanPadrao: 5,
     visivelPadrao: true
@@ -139,7 +139,7 @@ export const graficosPaginaInicialAtendimentos = [
   {
     id: 'atendimentosUsuario',
     rotulo: 'Atendimentos do mes por usuario',
-    ajudaConfiguracao: 'Mostra a quantidade de atendimentos e de clientes atendidos por usuario no mes corrente.',
+    ajudaConfiguracao: 'Mostra a quantidade de atendimentos e de fornecedores atendidos por usuario no mes corrente.',
     ordemPadrao: 4,
     spanPadrao: 5,
     visivelPadrao: true
@@ -147,7 +147,7 @@ export const graficosPaginaInicialAtendimentos = [
   {
     id: 'atendimentosTipo',
     rotulo: 'Atendimentos do mes por tipo',
-    ajudaConfiguracao: 'Mostra a quantidade de atendimentos e de clientes atendidos por tipo de atendimento no mes corrente.',
+    ajudaConfiguracao: 'Mostra a quantidade de atendimentos e de fornecedores atendidos por tipo de atendimento no mes corrente.',
     ordemPadrao: 5,
     spanPadrao: 5,
     visivelPadrao: true

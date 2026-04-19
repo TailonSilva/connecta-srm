@@ -761,7 +761,7 @@ export function ModalAtendimento({
             ) : null}
             {!somenteLeitura ? (
               <Botao variante="secundario" type="button" onClick={abrirModalNovoOrcamento} disabled={salvando}>
-                Incluir orcamento
+                Incluir cotacao
               </Botao>
             ) : null}
             <Botao variante="secundario" type="button" onClick={tentarFecharModal} disabled={salvando}>
@@ -835,12 +835,12 @@ export function ModalAtendimento({
                       icone="pesquisa"
                       className="botaoCampoAcao"
                       somenteIcone
-                      title="Buscar cliente"
-                      aria-label="Buscar cliente"
+                      title="Buscar fornecedor"
+                      aria-label="Buscar fornecedor"
                       data-atalho-busca-id="cliente"
                       onClick={abrirModalBuscaCliente}
                     >
-                      Buscar cliente
+                      Buscar fornecedor
                     </Botao>
                   ) : null}
                 />
@@ -892,8 +892,8 @@ export function ModalAtendimento({
                         icone="consultar"
                         className="botaoCampoAcao"
                         somenteIcone
-                        title="Consultar orcamento"
-                        aria-label="Consultar orcamento"
+                        title="Consultar cotacao"
+                        aria-label="Consultar cotacao"
                         onClick={abrirModalConsultaOrcamento}
                       />
                       {!somenteLeitura ? (
@@ -903,8 +903,8 @@ export function ModalAtendimento({
                           icone="editar"
                           className="botaoCampoAcao"
                           somenteIcone
-                          title="Editar orcamento"
-                          aria-label="Editar orcamento"
+                          title="Editar cotacao"
+                          aria-label="Editar cotacao"
                           onClick={abrirModalEdicaoOrcamento}
                         />
                       ) : null}
@@ -912,7 +912,7 @@ export function ModalAtendimento({
                   ) : null}
                 />
                 <CampoSelect
-                  label="Status do orcamento"
+                  label="Status da cotacao"
                   name="idEtapaOrcamento"
                   value={formulario.idEtapaOrcamento}
                   onChange={alterarStatusOrcamento}
@@ -997,11 +997,11 @@ export function ModalAtendimento({
               onMouseDown={(evento) => evento.stopPropagation()}
             >
               <div className="cabecalhoConfirmacaoModal">
-                <h4 id="tituloConfirmacaoPedidoAtendimento">Criar pedido</h4>
+                <h4 id="tituloConfirmacaoPedidoAtendimento">Criar ordem de compra</h4>
               </div>
 
               <div className="corpoConfirmacaoModal">
-                <p>Este orcamento esta sendo fechado. Deseja gerar um pedido a partir dele?</p>
+                <p>Este orcamento esta sendo fechado. Deseja gerar um ordem de compra a partir dele?</p>
               </div>
 
               <div className="acoesConfirmacaoModal">
@@ -1027,7 +1027,7 @@ export function ModalAtendimento({
             }}
           >
             <div
-              className="modalConfirmacaoAgenda modalEtapaRapidaOrcamento"
+              className="modalConfirmacaoAgenda modalEtapaRapidaCotacao"
               role="dialog"
               aria-modal="true"
               aria-labelledby="tituloMotivoPerdaAtendimento"
@@ -1037,7 +1037,7 @@ export function ModalAtendimento({
                 <h4 id="tituloMotivoPerdaAtendimento">Motivo da perda</h4>
               </div>
 
-              <div className="corpoConfirmacaoModal corpoModalEtapaRapidaOrcamento">
+              <div className="corpoConfirmacaoModal corpoModalEtapaRapidaCotacao">
                 <p>Essa etapa exige um motivo da perda para atualizar o orcamento vinculado.</p>
                 <div className="campoFormulario campoFormularioIntegral">
                   <label htmlFor="motivoPerdaAtendimento">Selecione o motivo</label>
@@ -1170,10 +1170,10 @@ export function ModalAtendimento({
       aberto={modalBuscaClienteAberto}
       empresa={empresa}
       clientes={clientes}
-      placeholder="Pesquisar cliente no grid"
-      ariaLabelPesquisa="Pesquisar cliente no grid"
-      rotuloAcaoPrimaria="Incluir cliente"
-      tituloAcaoPrimaria="Incluir cliente"
+      placeholder="Pesquisar fornecedor no grid"
+      ariaLabelPesquisa="Pesquisar fornecedor no grid"
+      rotuloAcaoPrimaria="Incluir fornecedor"
+      tituloAcaoPrimaria="Incluir fornecedor"
       iconeAcaoPrimaria="adicionar"
       aoAcionarPrimaria={() => {
         fecharModalBuscaCliente();
@@ -1187,8 +1187,8 @@ export function ModalAtendimento({
       aberto={modalBuscaContatoAberto}
       idCliente={formulario.idCliente}
       contatos={contatosDoCliente}
-      placeholder="Pesquisar contatos do cliente"
-      ariaLabelPesquisa="Pesquisar contatos do cliente"
+      placeholder="Pesquisar contatos do fornecedor"
+      ariaLabelPesquisa="Pesquisar contatos do fornecedor"
       aoCriarContato={registrarContatoCriado}
       aoSelecionar={selecionarContato}
       aoFechar={fecharModalBuscaContato}
@@ -1322,7 +1322,7 @@ function obterValorOrdemEtapa(ordem, fallback) {
 
 function montarRotuloCliente(cliente, empresa) {
   const codigo = formatarCodigoCliente(cliente, empresa);
-  const nome = cliente.nomeFantasia || cliente.razaoSocial || 'Cliente sem nome';
+  const nome = cliente.nomeFantasia || cliente.razaoSocial || 'Fornecedor sem nome';
   const localizacao = [cliente.cidade, cliente.estado].filter(Boolean).join('/');
 
   return localizacao ? `${codigo} - ${nome} - ${localizacao}` : `${codigo} - ${nome}`;

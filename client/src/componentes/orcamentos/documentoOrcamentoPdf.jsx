@@ -64,7 +64,7 @@ export function DocumentoOrcamentoPdf({ documento }) {
 
           <div className="documentoOrcamentoPdfHeroResumo">
             <span className="documentoOrcamentoPdfTituloAuxiliar">Documento comercial</span>
-            <h1>Orçamento</h1>
+            <h1>Cotação</h1>
             <div className="documentoOrcamentoPdfBadges">
               <span>{orcamento.codigo}</span>
               <span>{orcamento.dataInclusao}</span>
@@ -76,7 +76,7 @@ export function DocumentoOrcamentoPdf({ documento }) {
       <main className="documentoOrcamentoPdfConteudo">
         <section className="documentoOrcamentoPdfSecao documentoOrcamentoPdfSecaoCliente">
           <div className="documentoOrcamentoPdfSecaoCabecalho">
-            <h2>Cliente</h2>
+            <h2>Fornecedor</h2>
           </div>
 
           <div className="documentoOrcamentoPdfGradeInfo documentoOrcamentoPdfGradeInfoCliente">
@@ -154,12 +154,12 @@ export function DocumentoOrcamentoPdf({ documento }) {
 
         <section className="documentoOrcamentoPdfSecao documentoOrcamentoPdfSecaoMetadados">
           <div className="documentoOrcamentoPdfSecaoCabecalho">
-            <h2>Resumo do Orçamento</h2>
+            <h2>Resumo da Cotação</h2>
           </div>
 
           <div className="documentoOrcamentoPdfGradeInfo documentoOrcamentoPdfGradeInfoMetadados">
             <BlocoInfo rotulo="Validade" valor={orcamento.dataValidade} />
-            <BlocoInfo rotulo="Vendedor" valor={orcamento.vendedor} />
+            <BlocoInfo rotulo="Comprador" valor={orcamento.vendedor} />
             <BlocoInfo rotulo="Pagamento" valor={orcamento.prazoPagamento} />
           </div>
         </section>

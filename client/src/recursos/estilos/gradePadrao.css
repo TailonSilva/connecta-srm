@@ -78,7 +78,7 @@
 .cabecalhoGradeOrcamentos th,
 .cabecalhoGradePedidos th {
   border-bottom: 1px solid var(--corBorda);
-  background: linear-gradient(180deg, #f8fbfe 0%, #edf4f8 100%);
+  background: linear-gradient(180deg, #FFFBF6 0%, #FFF2E0 100%);
   color: var(--corTextoSuave);
   font-size: 0.78rem;
   font-weight: 700;
@@ -208,7 +208,7 @@
   align-items: center;
   padding: 0 16px;
   border-bottom: 1px solid var(--corBorda);
-  background: linear-gradient(180deg, #f8fbfe 0%, #edf4f8 100%);
+  background: linear-gradient(180deg, #FFFBF6 0%, #FFF2E0 100%);
 }
 
 .cabecalhoLayoutGradePadrao > * {

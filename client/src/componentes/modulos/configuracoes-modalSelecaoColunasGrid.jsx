@@ -12,7 +12,7 @@ const opcoesColunasGrid = [
   },
   {
     id: 'clientes',
-    titulo: 'Clientes',
+    titulo: 'Fornecedores',
     descricao: 'Configurar a grade principal dos clientes.',
     icone: 'clientes',
     disponivel: true
@@ -27,14 +27,14 @@ const opcoesColunasGrid = [
   {
     id: 'orcamentos',
     titulo: 'Orcamentos',
-    descricao: 'Configurar a grade principal dos orcamentos.',
+    descricao: 'Configurar a grade principal das cotacoes.',
     icone: 'orcamento',
     disponivel: true
   },
   {
     id: 'pedidos',
-    titulo: 'Pedidos',
-    descricao: 'Configurar a grade principal dos pedidos.',
+    titulo: 'Ordens de Compra',
+    descricao: 'Configurar a grade principal das ordens de compra.',
     icone: 'pedido',
     disponivel: true
   }

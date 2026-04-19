@@ -68,7 +68,7 @@ function montarDocumentoOrcamentoPdf({
       iniciais: obterIniciais(empresa?.nomeFantasia || empresa?.razaoSocial || 'Empresa')
     },
     cliente: {
-      nome: cliente?.nomeFantasia || cliente?.razaoSocial || 'Cliente nao informado',
+      nome: cliente?.nomeFantasia || cliente?.razaoSocial || 'Fornecedor nao informado',
       documento: cliente?.cnpj || '',
       contato: contato?.nome || '',
       telefone: contato?.telefone || contato?.whatsapp || cliente?.telefone || '',
@@ -138,7 +138,7 @@ function montarObservacoesPedido(camposPedido) {
     .filter((campo) => campo?.status !== 0 && String(campo?.descricaoPadrao || '').trim())
     .map((campo) => ({
       chave: `campo-pedido-${campo.idCampoPedido}`,
-      titulo: campo.titulo || 'Observacao padrao do pedido',
+      titulo: campo.titulo || 'Observacao padrao da ordem de compra',
       texto: String(campo.descricaoPadrao || '').trim()
     }));
 }
@@ -152,7 +152,7 @@ function criarObservacaoPrincipal(observacao) {
 
   return {
     chave: 'observacao-principal',
-    titulo: 'Observacao do orcamento',
+    titulo: 'Observacao da cotacao',
     texto
   };
 }
@@ -197,12 +197,12 @@ function formatarComissao(valor) {
 
 function montarNomeArquivoOrcamento(idOrcamento, nomeCliente) {
   const codigo = idOrcamento ? String(idOrcamento).padStart(4, '0') : 'previa';
-  const nomeNormalizado = String(nomeCliente || 'Cliente')
+  const nomeNormalizado = String(nomeCliente || 'Fornecedor')
     .replace(/[<>:"/\\|?*]+/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
 
-  return `Orçamento ${codigo} - ${nomeNormalizado || 'Cliente'}.pdf`;
+  return `Cotacao ${codigo} - ${nomeNormalizado || 'Fornecedor'}.pdf`;
 }
 
 function obterIniciais(nome) {

@@ -53,13 +53,13 @@ export function ModalManualAtendimento({
       icone: 'adicionar'
     },
     {
-      titulo: 'Vincular orcamento',
-      descricao: 'Dentro do atendimento e possivel criar, consultar, editar e acompanhar o status do orcamento sem sair do fluxo.',
+      titulo: 'Vincular cotacao',
+      descricao: 'Dentro do atendimento e possivel criar, consultar, editar e acompanhar o status da cotacao sem sair do fluxo.',
       icone: 'orcamento'
     },
     {
-      titulo: 'Fechar em pedido',
-      descricao: 'Quando o orcamento vai para fechamento, o sistema pode perguntar se deve abrir um pedido imediatamente.',
+      titulo: 'Fechar em ordem de compra',
+      descricao: 'Quando o orcamento vai para fechamento, o sistema pode perguntar se deve abrir um ordem de compra imediatamente.',
       icone: 'pedido'
     },
     {
@@ -110,10 +110,10 @@ export function ModalManualAtendimento({
       descricao="Guia visual com fluxo comercial, validacoes, permissoes e atalhos reais da pagina."
       eyebrow="Fluxo comercial"
       heroTitulo="Como a pagina de Atendimentos opera no Connecta CRM"
-      heroDescricao="A tela de Atendimentos concentra o registro operacional do relacionamento com o cliente, permitindo vincular contato, classificar tipo, canal e origem, abrir orcamento e evoluir para pedido sem quebrar o contexto do atendimento."
+      heroDescricao="A tela de Atendimentos concentra o registro operacional do relacionamento com o cliente, permitindo vincular contato, classificar tipo, canal e origem, abrir orcamento e evoluir para ordem de compra sem quebrar o contexto do atendimento."
       painelHeroi={[
         { valor: atendimentos.length, rotulo: 'Atendimentos visiveis na grade' },
-        { valor: orcamentos.length, rotulo: 'Orcamentos abertos disponiveis' },
+        { valor: orcamentos.length, rotulo: 'Cotacoes abertos disponiveis' },
         { valor: tiposAtendimento.length + canaisAtendimento.length + origensAtendimento.length, rotulo: 'Classificacoes comerciais carregadas' }
       ]}
       cardsResumo={cardsResumo}
@@ -138,7 +138,7 @@ export function ModalManualAtendimento({
           tag: 'Grade',
           titulo: 'Como usar a listagem principal',
           itens: [
-            'A grade permite pesquisar por texto e filtrar por cliente, usuario do registro, vendedor, canal e origem.',
+            'A grade permite pesquisar por texto e filtrar por cliente, usuario do registro, comprador, canal e origem.',
             'O cabecalho da pagina tambem oferece um atalho direto de Configurar grid para ajustar colunas sem precisar entrar na tela de Configuracoes.',
             'Os filtros ficam persistidos por usuario para reabrir a pagina no mesmo contexto de trabalho.',
             'As colunas da listagem foram ajustadas para evitar rolagem horizontal e agora separam cliente, contato, assunto e descricao em campos proprios.',
@@ -147,7 +147,7 @@ export function ModalManualAtendimento({
             'Sempre que um texto ultrapassa duas linhas na grade, a celula aplica reticencias para manter o ritmo visual da listagem.',
             'Cada linha oferece consultar, editar e excluir conforme o perfil e a permissao da sessao.',
             'Usuario padrao enxerga apenas a propria carteira e os registros ligados ao seu usuario.',
-            'Os dados exibidos na grade ja chegam enriquecidos com nomes de cliente, contato, canal, origem e vendedor.'
+            'Os dados exibidos na grade ja chegam enriquecidos com nomes de cliente, contato, canal, origem e comprador.'
           ]
         }
       ]}

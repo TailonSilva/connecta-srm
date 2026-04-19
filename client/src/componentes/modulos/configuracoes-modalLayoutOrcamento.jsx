@@ -73,7 +73,7 @@ export function ModalLayoutOrcamento({
     try {
       await aoSalvar(formulario);
     } catch (erro) {
-      definirMensagemErro(erro.message || 'Nao foi possivel salvar o layout do orcamento.');
+      definirMensagemErro(erro.message || 'Nao foi possivel salvar o layout da cotacao.');
       definirSalvando(false);
     }
   }
@@ -95,7 +95,7 @@ export function ModalLayoutOrcamento({
         onSubmit={submeterFormulario}
       >
         <header className="cabecalhoModalCliente">
-          <h2 id="tituloModalLayoutOrcamento">Layout Orcamento</h2>
+          <h2 id="tituloModalLayoutOrcamento">Layout Cotacao</h2>
 
           <div className="acoesCabecalhoModalCliente">
             <Botao variante="secundario" type="button" onClick={aoFechar} disabled={salvando}>
@@ -138,7 +138,7 @@ export function ModalLayoutOrcamento({
           </section>
         </div>
 
-        <MensagemErroPopup mensagem={mensagemErro} titulo="Nao foi possivel salvar o layout do orcamento." />
+        <MensagemErroPopup mensagem={mensagemErro} titulo="Nao foi possivel salvar o layout da cotacao." />
       </form>
     </div>
   );

@@ -11,7 +11,7 @@ const abasModalEmpresa = [
   { id: 'paginaInicial', label: 'Pagina inicial' },
   { id: 'endereco', label: 'Endereco' },
   { id: 'agenda', label: 'Agenda' },
-  { id: 'orcamentosPedidos', label: 'Orcamentos/Pedidos' },
+  { id: 'orcamentosPedidos', label: 'Cotacoes/Ordens de Compra' },
   { id: 'email', label: 'E-mail' }
 ];
 
@@ -40,7 +40,7 @@ const estadoInicialFormulario = {
   corSecundariaOrcamento: '#ef4444',
   corDestaqueOrcamento: '#f59e0b',
   destaqueItemOrcamentoPdf: 'descricao',
-  assuntoEmailOrcamento: 'Orcamento {orcamento_codigo} - {cliente_nome}',
+  assuntoEmailOrcamento: 'Cotacao {cotacao_codigo} - {fornecedor_nome}',
   corpoEmailOrcamento: 'Olá {cliente_nome},\n\nSegue o orçamento {orcamento_codigo} com validade até {orcamento_validade}.\n\n{orcamento_itens}\n\nTotal do orçamento: {orcamento_total}\n\nFico à disposição para qualquer ajuste.\n\nAtenciosamente,',
   assinaturaEmailOrcamento: '{vendedor_nome}\n{empresa_nome}',
   logradouro: '',
@@ -385,10 +385,10 @@ export function ModalEmpresa({
 
           {abaAtiva === 'orcamentosPedidos' ? (
             <section className="gradeCamposModalCliente">
-              <CampoFormulario label="Validade padrao do orcamento (dias)" name="diasValidadeOrcamento" type="number" min="0" value={formulario.diasValidadeOrcamento} onChange={alterarCampo} disabled={somenteLeitura} />
-              <CampoFormulario label="Prazo padrao de entrega do pedido (dias)" name="diasEntregaPedido" type="number" min="0" value={formulario.diasEntregaPedido} onChange={alterarCampo} disabled={somenteLeitura} />
+              <CampoFormulario label="Validade padrao da cotacao (dias)" name="diasValidadeOrcamento" type="number" min="0" value={formulario.diasValidadeOrcamento} onChange={alterarCampo} disabled={somenteLeitura} />
+              <CampoFormulario label="Prazo padrao de entrega da ordem de compra (dias)" name="diasEntregaPedido" type="number" min="0" value={formulario.diasEntregaPedido} onChange={alterarCampo} disabled={somenteLeitura} />
               <CampoSelect
-                label="Codigo principal do cliente"
+                label="Codigo principal do fornecedor"
                 name="codigoPrincipalCliente"
                 value={formulario.codigoPrincipalCliente}
                 onChange={alterarCampo}
@@ -411,8 +411,8 @@ export function ModalEmpresa({
               />
               <CampoSelecaoMultiplaModal
                 className="campoFormularioIntegral"
-                label="Filtro padrao de status do orcamento"
-                titulo="Status padrao do orcamento"
+                label="Filtro padrao de status da cotacao"
+                titulo="Status padrao da cotacao"
                 itens={etapasOrcamentoAtivasOrdenadas.map((etapa) => ({
                   valor: String(etapa.idEtapaOrcamento),
                   label: etapa.descricao
@@ -432,7 +432,7 @@ export function ModalEmpresa({
             <section className="gradeCamposModalCliente">
               <CampoFormulario
                 className="campoFormularioIntegral"
-                label="Assunto do e-mail do orcamento"
+                label="Assunto do e-mail da cotacao"
                 name="assuntoEmailOrcamento"
                 value={formulario.assuntoEmailOrcamento}
                 onChange={alterarCampo}
@@ -440,7 +440,7 @@ export function ModalEmpresa({
               />
               <CampoTextoLongo
                 className="campoFormularioIntegral"
-                label="Corpo do e-mail do orcamento"
+                label="Corpo do e-mail da cotacao"
                 name="corpoEmailOrcamento"
                 value={formulario.corpoEmailOrcamento}
                 onChange={alterarCampo}
@@ -449,7 +449,7 @@ export function ModalEmpresa({
               />
               <CampoTextoLongo
                 className="campoFormularioIntegral"
-                label="Assinatura do e-mail do orcamento"
+                label="Assinatura do e-mail da cotacao"
                 name="assinaturaEmailOrcamento"
                 value={formulario.assinaturaEmailOrcamento}
                 onChange={alterarCampo}
@@ -460,13 +460,13 @@ export function ModalEmpresa({
               <div className="campoFormularioIntegral painelOpcaoEmpresaPaginaInicial">
                 <strong>Tags disponiveis</strong>
                 <p className="descricaoOpcaoEmpresaPaginaInicial">
-                  Use estas tags para montar o texto dinamicamente: <code>{'{empresa_nome}'}</code>, <code>{'{cliente_codigo}'}</code>, <code>{'{cliente_codigo_principal}'}</code>, <code>{'{cliente_codigo_alternativo}'}</code>, <code>{'{cliente_nome}'}</code>, <code>{'{cliente_fantasia}'}</code>, <code>{'{cliente_cidade}'}</code>, <code>{'{cliente_uf}'}</code>, <code>{'{orcamento_codigo}'}</code>, <code>{'{orcamento_data}'}</code>, <code>{'{orcamento_validade}'}</code>, <code>{'{orcamento_total}'}</code>, <code>{'{orcamento_observacao}'}</code>, <code>{'{orcamento_campos_extras}'}</code>, <code>{'{orcamento_itens}'}</code>, <code>{'{vendedor_nome}'}</code> e <code>{'{contato_nome}'}</code>.
+                  Use estas tags para montar o texto dinamicamente: <code>{'{empresa_nome}'}</code>, <code>{'{fornecedor_codigo}'}</code>, <code>{'{fornecedor_codigo_principal}'}</code>, <code>{'{fornecedor_codigo_alternativo}'}</code>, <code>{'{fornecedor_nome}'}</code>, <code>{'{fornecedor_fantasia}'}</code>, <code>{'{fornecedor_cidade}'}</code>, <code>{'{fornecedor_uf}'}</code>, <code>{'{cotacao_codigo}'}</code>, <code>{'{cotacao_data}'}</code>, <code>{'{cotacao_validade}'}</code>, <code>{'{cotacao_total}'}</code>, <code>{'{cotacao_observacao}'}</code>, <code>{'{cotacao_campos_extras}'}</code>, <code>{'{cotacao_itens}'}</code>, <code>{'{vendedor_nome}'}</code> e <code>{'{contato_nome}'}</code>.
                 </p>
                 <p className="descricaoOpcaoEmpresaPaginaInicial">
-                  A tag <code>{'{orcamento_itens}'}</code> ja traz cada item com referencia, descricao, quantidade, valor unitario e valor total em linhas separadas.
+                  A tag <code>{'{cotacao_itens}'}</code> ja traz cada item com referencia, descricao, quantidade, valor unitario e valor total em linhas separadas.
                 </p>
                 <p className="descricaoOpcaoEmpresaPaginaInicial">
-                  A tag <code>{'{orcamento_observacao}'}</code> traz a observacao principal do orcamento, e <code>{'{orcamento_campos_extras}'}</code> monta um bloco com todos os campos personalizados preenchidos.
+                  A tag <code>{'{cotacao_observacao}'}</code> traz a observacao principal da cotacao, e <code>{'{cotacao_campos_extras}'}</code> monta um bloco com todos os campos personalizados preenchidos.
                 </p>
               </div>
             </section>

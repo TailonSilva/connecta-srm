@@ -157,7 +157,7 @@ const caminhosIcones = {
       <path d="M3.5 10.5h17M7 14h3" />
     </>
   ),
-  orcamento: (
+  cotacao: (
     <>
       <path d="M6.5 4.5h8l3 3V18A1.5 1.5 0 0 1 16 19.5H8A1.5 1.5 0 0 1 6.5 18Z" />
       <path d="M14.5 4.5V8h3M9 11h6M9 14h6" />
@@ -187,12 +187,22 @@ const caminhosIcones = {
   )
 };
 
+const aliasesIcones = {
+  cotacoes: 'cotacao',
+  orcamento: 'cotacao',
+  orcamentos: 'cotacao',
+  pedidos: 'pedido',
+  ordemCompra: 'pedido',
+  ordensCompra: 'pedido'
+};
+
 export function Icone({ nome, className = '' }) {
   const classes = ['iconeBase', className].filter(Boolean).join(' ');
+  const caminho = caminhosIcones[nome] || caminhosIcones[aliasesIcones[nome]];
 
   return (
     <svg viewBox="0 0 24 24" className={classes} aria-hidden="true">
-      {caminhosIcones[nome]}
+      {caminho}
     </svg>
   );
 }

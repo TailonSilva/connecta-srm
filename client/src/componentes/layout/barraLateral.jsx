@@ -21,7 +21,7 @@ function IconeMenu({ tipo }) {
     produtos: (
       <path d="M4.5 7.5 12 4l7.5 3.5L12 11 4.5 7.5Zm0 3.5L11 14v6L4.5 17Zm15 0V17L13 20v-6Z" />
     ),
-    orcamentos: (
+    cotacoes: (
       <path d="M6.5 4h8l4 4v10.5A1.5 1.5 0 0 1 17 20h-10A1.5 1.5 0 0 1 5.5 18.5v-13A1.5 1.5 0 0 1 7 4Zm7.5 1.5V9h3.5M8 12h8m-8 3h8" />
     ),
     pedidos: (
@@ -31,10 +31,19 @@ function IconeMenu({ tipo }) {
       <path d="m12 4 1.32 2.18 2.48.57-.84 2.4 1.69 1.9-1.69 1.9.84 2.4-2.48.57L12 20l-1.32-2.18-2.48-.57.84-2.4-1.69-1.9 1.69-1.9-.84-2.4 2.48-.57Z M12 9a3 3 0 1 0 3 3 3 3 0 0 0-3-3Z" />
     )
   };
+  const aliases = {
+    cotacao: 'cotacoes',
+    orcamento: 'cotacoes',
+    orcamentos: 'cotacoes',
+    pedido: 'pedidos',
+    ordemCompra: 'pedidos',
+    ordensCompra: 'pedidos'
+  };
+  const icone = icones[tipo] || icones[aliases[tipo]];
 
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
-      {icones[tipo]}
+      {icone}
     </svg>
   );
 }

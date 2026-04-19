@@ -1,9 +1,9 @@
 const { banco, executar, consultarTodos, caminhoBanco } = require('../configuracoes/banco');
 
-const IDS_ETAPAS_ORCAMENTO_OBRIGATORIAS = [1, 2, 3, 4];
+const IDS_ETAPAS_COTACAO_OBRIGATORIAS = [1, 2, 3, 4];
 const ID_ETAPA_PEDIDO_ENTREGUE = 5;
 const IDS_TIPOS_PEDIDO_OBRIGATORIOS = [1, 2];
-const ID_CONCEITO_CLIENTE_PADRAO = 1;
+const ID_CONCEITO_FORNECEDOR_PADRAO = 1;
 const STATUS_VISITA_OBRIGATORIOS = ['agendado', 'confirmado', 'realizado', 'cancelado', 'nao compareceu'];
 const TIPOS_AGENDA_OBRIGATORIOS = ['visita', 'reuniao', 'ligacao', 'apresentacao'];
 
@@ -30,26 +30,26 @@ const estrategiasPreservacao = {
       TIPOS_AGENDA_OBRIGATORIOS
     );
   },
-  etapaPedido: async () => {
-    await executar('DELETE FROM etapaPedido WHERE idEtapa <> ?', [ID_ETAPA_PEDIDO_ENTREGUE]);
+  etapaOrdemCompra: async () => {
+    await executar('DELETE FROM etapaOrdemCompra WHERE idEtapa <> ?', [ID_ETAPA_PEDIDO_ENTREGUE]);
   },
-  tipoPedido: async () => {
+  tipoOrdemCompra: async () => {
     const marcadores = IDS_TIPOS_PEDIDO_OBRIGATORIOS.map(() => '?').join(', ');
     await executar(
-      `DELETE FROM tipoPedido
-      WHERE idTipoPedido NOT IN (${marcadores})`,
+      `DELETE FROM tipoOrdemCompra
+      WHERE idTipoOrdemCompra NOT IN (${marcadores})`,
       IDS_TIPOS_PEDIDO_OBRIGATORIOS
     );
   },
-  conceitoCliente: async () => {
-    await executar('DELETE FROM conceitoCliente WHERE idConceito <> ?', [ID_CONCEITO_CLIENTE_PADRAO]);
+  conceitoFornecedor: async () => {
+    await executar('DELETE FROM conceitoFornecedor WHERE idConceito <> ?', [ID_CONCEITO_FORNECEDOR_PADRAO]);
   },
-  etapaOrcamento: async () => {
-    const marcadores = IDS_ETAPAS_ORCAMENTO_OBRIGATORIAS.map(() => '?').join(', ');
+  etapaCotacao: async () => {
+    const marcadores = IDS_ETAPAS_COTACAO_OBRIGATORIAS.map(() => '?').join(', ');
     await executar(
-      `DELETE FROM etapaOrcamento
-      WHERE idEtapaOrcamento NOT IN (${marcadores})`,
-      IDS_ETAPAS_ORCAMENTO_OBRIGATORIAS
+      `DELETE FROM etapaCotacao
+      WHERE idEtapaCotacao NOT IN (${marcadores})`,
+      IDS_ETAPAS_COTACAO_OBRIGATORIAS
     );
   }
 };
@@ -98,23 +98,23 @@ async function exibirResumo() {
     UNION ALL
     SELECT 'tipoAgenda' AS tabela, COUNT(*) AS total FROM tipoAgenda
     UNION ALL
-    SELECT 'tipoPedido' AS tabela, COUNT(*) AS total FROM tipoPedido
+    SELECT 'tipoOrdemCompra' AS tabela, COUNT(*) AS total FROM tipoOrdemCompra
     UNION ALL
-    SELECT 'conceitoCliente' AS tabela, COUNT(*) AS total FROM conceitoCliente
+    SELECT 'conceitoFornecedor' AS tabela, COUNT(*) AS total FROM conceitoFornecedor
     UNION ALL
-    SELECT 'etapaPedido' AS tabela, COUNT(*) AS total FROM etapaPedido
+    SELECT 'etapaOrdemCompra' AS tabela, COUNT(*) AS total FROM etapaOrdemCompra
     UNION ALL
-    SELECT 'etapaOrcamento' AS tabela, COUNT(*) AS total FROM etapaOrcamento
+    SELECT 'etapaCotacao' AS tabela, COUNT(*) AS total FROM etapaCotacao
     UNION ALL
     SELECT 'empresa' AS tabela, COUNT(*) AS total FROM empresa
     UNION ALL
-    SELECT 'cliente' AS tabela, COUNT(*) AS total FROM cliente
+    SELECT 'fornecedor' AS tabela, COUNT(*) AS total FROM fornecedor
     UNION ALL
     SELECT 'produto' AS tabela, COUNT(*) AS total FROM produto
     UNION ALL
-    SELECT 'orcamento' AS tabela, COUNT(*) AS total FROM orcamento
+    SELECT 'cotacao' AS tabela, COUNT(*) AS total FROM cotacao
     UNION ALL
-    SELECT 'pedido' AS tabela, COUNT(*) AS total FROM pedido
+    SELECT 'ordemCompra' AS tabela, COUNT(*) AS total FROM ordemCompra
     UNION ALL
     SELECT 'atendimento' AS tabela, COUNT(*) AS total FROM atendimento
     UNION ALL

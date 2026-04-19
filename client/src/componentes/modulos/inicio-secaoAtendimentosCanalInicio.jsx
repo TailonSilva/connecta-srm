@@ -7,7 +7,7 @@ export function SecaoAtendimentosCanalInicio({ itens, titulo = 'Atendimentos do 
       <SecaoResumoRelacionamentoComModalInicio
         titulo={titulo}
         itens={itens}
-        composicao="Quantidade de atendimentos e de clientes atendidos por canal."
+        composicao="Quantidade de atendimentos e de fornecedores atendidos por canal."
         periodo="Mes corrente pela data do atendimento."
         mensagemVazia="Nenhum atendimento registrado no mes atual por canal."
         modalTitulo={titulo}

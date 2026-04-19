@@ -447,7 +447,7 @@ export function PaginaClientes({ usuarioLogado }) {
       />
       <ModalFiltros
         aberto={modalFiltrosAberto}
-        titulo="Filtros de clientes"
+        titulo="Filtros de fornecedores"
         filtros={filtros}
         campos={[
           {
@@ -478,9 +478,9 @@ export function PaginaClientes({ usuarioLogado }) {
           },
           {
             name: 'idVendedor',
-            label: 'Vendedor',
+            label: 'Comprador',
             multiple: true,
-            placeholder: 'Todos os vendedores',
+            placeholder: 'Todos os compradores',
             options: vendedoresDisponiveis.map((vendedor) => ({
               valor: String(vendedor.idVendedor),
               label: vendedor.nome

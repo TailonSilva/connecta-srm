@@ -1,8 +1,19 @@
 {
-  "name": "connecta-crm",
-  "version": "1.5.3",
+  "name": "connecta-src",
+  "version": "0.0.0",
   "private": true,
-  "description": "Connecta CRM com Electron, React, Express e SQLite.",
+  "description": "Connecta SRM, Central de Fornecedores e Cotações",
+  "homepage": "https://github.com/TailonSilva/connecta-srm#readme",
+  "bugs": {
+    "url": "https://github.com/TailonSilva/connecta-srm/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TailonSilva/connecta-srm.git"
+  },
+  "license": "ISC",
+  "author": "Tailon Silva Dev",
+  "type": "commonjs",
   "main": "electron/main.js",
   "scripts": {
     "dev": "concurrently -k \"npm:dev:backend\" \"npm:dev:web\" \"npm:dev:electron\"",
@@ -39,9 +50,9 @@
     "wait-on": "^8.0.3"
   },
   "build": {
-    "appId": "com.crm.desktop",
-    "productName": "Connecta CRM",
-    "artifactName": "Connecta-CRM-Setup-${version}.${ext}",
+    "appId": "com.srm.desktop",
+    "productName": "Connecta SRM",
+    "artifactName": "Connecta-SRM-Setup-${version}.${ext}",
     "icon": "build/icon.png",
     "directories": {
       "output": "dist/electron"
@@ -50,7 +61,8 @@
       {
         "provider": "github",
         "owner": "TailonSilva",
-        "repo": "connecta-crm"
+        "repo": "connecta-srm",
+        "url": "https://github.com/TailonSilva/connecta-srm.git"
       }
     ],
     "win": {

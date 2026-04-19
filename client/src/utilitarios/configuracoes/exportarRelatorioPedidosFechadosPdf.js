@@ -42,7 +42,7 @@ function gerarHtmlRelatorioPedidosFechados({ pedidos, chips, cards, usuarioLogad
       <td>${escapeHtml(formatarData(pedido.dataInclusao))}</td>
       <td>${escapeHtml(formatarData(pedido.dataEntrega))}</td>
       <td>${escapeHtml(formatarCodigoPedido(pedido.idPedido))}</td>
-      <td>${escapeHtml(pedido.nomeClienteSnapshot || 'Cliente nao informado')}</td>
+      <td>${escapeHtml(pedido.nomeClienteSnapshot || 'Fornecedor nao informado')}</td>
       <td>${escapeHtml(pedido.nomeEtapaPedidoSnapshot || 'Sem etapa')}</td>
       <td>${escapeHtml(pedido.nomeVendedorSnapshot || 'Nao informado')}</td>
       <td>${escapeHtml(pedido.nomePrazoPagamentoSnapshot || 'Nao informado')}</td>
@@ -86,7 +86,7 @@ function gerarHtmlRelatorioPedidosFechados({ pedidos, chips, cards, usuarioLogad
           gap: 18px;
           padding: 24px;
           border-radius: 24px;
-          background: linear-gradient(135deg, #0f5f94 0%, #1791e2 100%);
+          background: linear-gradient(135deg, #9A5700 0%, #EC8702 100%);
           color: #ffffff;
           -webkit-print-color-adjust: exact;
           print-color-adjust: exact;
@@ -163,7 +163,7 @@ function gerarHtmlRelatorioPedidosFechados({ pedidos, chips, cards, usuarioLogad
         }
         .relatorioPedidosFechadosPdfCard strong {
           font-size: 24px;
-          color: #0f5f94;
+          color: #9A5700;
         }
         .relatorioPedidosFechadosPdfTabela {
           width: 100%;
@@ -183,7 +183,7 @@ function gerarHtmlRelatorioPedidosFechados({ pedidos, chips, cards, usuarioLogad
         }
         .relatorioPedidosFechadosPdfTabela th {
           background: #eff6fb;
-          color: #0f5f94;
+          color: #9A5700;
           font-size: 11px;
           text-transform: uppercase;
           letter-spacing: 0.04em;
@@ -231,10 +231,10 @@ function gerarHtmlRelatorioPedidosFechados({ pedidos, chips, cards, usuarioLogad
             <tr>
               <th>Inclusao</th>
               <th>Entrega</th>
-              <th>Pedido</th>
-              <th>Cliente</th>
+              <th>Ordem de Compra</th>
+              <th>Fornecedor</th>
               <th>Etapa</th>
-              <th>Vendedor</th>
+              <th>Comprador</th>
               <th>Prazo</th>
               <th>Quantidade</th>
               <th>Total</th>
@@ -262,7 +262,7 @@ function montarNomeArquivoRelatorio() {
     String(data.getDate()).padStart(2, '0')
   ].join('-');
 
-  return `Relatorio Pedidos Fechados - ${dataFormatada}.pdf`;
+  return `Relatorio Ordens de Compra Fechados - ${dataFormatada}.pdf`;
 }
 
 function formatarData(valor) {

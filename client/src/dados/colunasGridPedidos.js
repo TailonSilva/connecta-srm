@@ -2,15 +2,15 @@ export const TOTAL_COLUNAS_GRID_PEDIDOS = 100;
 const BASE_LEGADA_COLUNAS_GRID_PEDIDOS = 24;
 const MAX_SPAN_COLUNA_OCULTA = 19;
 const mapaRotulosLegadosColunasGridPedidos = new Map([
-  ['Codigo Interno do Pedido', 'Codigo Interno'],
-  ['Cliente Vinculado ao Pedido', 'Codigo do Cliente'],
-  ['Contato Vinculado ao Pedido', 'Codigo do Contato'],
+  ['Codigo Interno da Ordem de Compra', 'Codigo Interno'],
+  ['Fornecedor Vinculado ao Ordem de Compra', 'Codigo do Fornecedor'],
+  ['Contato Vinculado ao Ordem de Compra', 'Codigo do Contato'],
   ['Usuario do Registro', 'Codigo do Usuario'],
-  ['Vendedor Vinculado', 'Codigo do Vendedor'],
-  ['Etapa Vinculada ao Pedido', 'Codigo da Etapa'],
-  ['Prazo Vinculado ao Pedido', 'Codigo do Prazo'],
-  ['Codigo do Orcamento Vinculado', 'Codigo do Orcamento de Origem'],
-  ['Orcamento Vinculado', 'Codigo do Orcamento de Origem']
+  ['Comprador Vinculado', 'Codigo do Comprador'],
+  ['Etapa Vinculada ao Ordem de Compra', 'Codigo da Etapa'],
+  ['Prazo Vinculado ao Ordem de Compra', 'Codigo do Prazo'],
+  ['Codigo do Cotacao Vinculado', 'Codigo do Cotacao de Origem'],
+  ['Cotacao Vinculado', 'Codigo do Cotacao de Origem']
 ]);
 
 export const colunasGridPedidos = [
@@ -34,7 +34,7 @@ export const colunasGridPedidos = [
   },
   {
     id: 'idOrcamento',
-    rotulo: 'Orcamento de Origem',
+    rotulo: 'Cotacao de Origem',
     classe: 'colunaGradeCodigo',
     obrigatoria: false,
     ordemPadrao: 3,
@@ -43,7 +43,7 @@ export const colunasGridPedidos = [
   },
   {
     id: 'codigoOrcamentoOrigem',
-    rotulo: 'Codigo do Orcamento de Origem',
+    rotulo: 'Codigo do Cotacao de Origem',
     classe: 'colunaGradeCodigo',
     obrigatoria: false,
     ordemPadrao: 4,
@@ -52,7 +52,7 @@ export const colunasGridPedidos = [
   },
   {
     id: 'cliente',
-    rotulo: 'Cliente',
+    rotulo: 'Fornecedor',
     classe: 'colunaGradeTexto',
     obrigatoria: false,
     ordemPadrao: 5,
@@ -61,7 +61,7 @@ export const colunasGridPedidos = [
   },
   {
     id: 'idCliente',
-    rotulo: 'Codigo do Cliente',
+    rotulo: 'Codigo do Fornecedor',
     classe: 'colunaGradeTexto',
     obrigatoria: false,
     ordemPadrao: 6,
@@ -115,7 +115,7 @@ export const colunasGridPedidos = [
   },
   {
     id: 'vendedor',
-    rotulo: 'Vendedor',
+    rotulo: 'Comprador',
     classe: 'colunaGradeTexto',
     obrigatoria: false,
     ordemPadrao: 12,
@@ -124,7 +124,7 @@ export const colunasGridPedidos = [
   },
   {
     id: 'idVendedor',
-    rotulo: 'Codigo do Vendedor',
+    rotulo: 'Codigo do Comprador',
     classe: 'colunaGradeTexto',
     obrigatoria: false,
     ordemPadrao: 13,

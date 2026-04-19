@@ -1,6 +1,6 @@
 const express = require('express');
 const {
-  ID_ETAPA_ORCAMENTO_PEDIDO_EXCLUIDO,
+  ID_ETAPA_COTACAO_PEDIDO_EXCLUIDO,
   ID_ETAPA_PEDIDO_ENTREGUE,
   ID_TIPO_PEDIDO_DEVOLUCAO,
   consultarTodos,
@@ -11,7 +11,7 @@ const {
   ehCaminhoImagemLocal,
   ehDataUrlImagem,
   removerArquivoImagem,
-  salvarImagemItemPedido
+  salvarImagemItemOrdemCompra
 } = require('../utilitarios/imagens');
 const { montarUrlArquivo, obterBaseUrlApi } = require('../utilitarios/urlApi');
 const { validarReferenciasAtivasDaEntidade } = require('../utilitarios/validarReferenciasAtivas');
@@ -22,78 +22,83 @@ const {
   adicionarFiltroPeriodo,
   montarWhere
 } = require('../utilitarios/filtrosSql');
+const {
+  normalizarEntradaFornecedor,
+  normalizarSaidaFornecedor,
+  normalizarListaSaidaFornecedor
+} = require('../utilitarios/compatibilidadeFornecedor');
 
-const rotaPedidos = express.Router();
+const rotaOrdensCompra = express.Router();
 
-rotaPedidos.get('/', async (requisicao, resposta) => {
+rotaOrdensCompra.get('/', async (requisicao, resposta) => {
   try {
     const clausulas = [];
     const parametros = [];
-    const { query } = requisicao;
+    const query = normalizarEntradaFornecedor(requisicao.query);
 
     adicionarFiltroBusca(clausulas, parametros, query.search, [
-      'CAST(pedido.idPedido AS TEXT)',
-      'CAST(pedido.codigoOrcamentoOrigem AS TEXT)',
-      'pedido.nomeClienteSnapshot',
-      'pedido.nomeContatoSnapshot',
-      'pedido.nomeUsuarioSnapshot',
-      'pedido.nomeVendedorSnapshot',
-      'pedido.nomePrazoPagamentoSnapshot',
-      'pedido.nomeTipoPedidoSnapshot',
-      'pedido.nomeEtapaPedidoSnapshot',
-      'pedido.observacao'
+      'CAST(ordemCompra.idOrdemCompra AS TEXT)',
+      'CAST(ordemCompra.codigoCotacaoOrigem AS TEXT)',
+      'ordemCompra.nomeFornecedorSnapshot',
+      'ordemCompra.nomeContatoSnapshot',
+      'ordemCompra.nomeUsuarioSnapshot',
+      'ordemCompra.nomeCompradorSnapshot',
+      'ordemCompra.nomePrazoPagamentoSnapshot',
+      'ordemCompra.nomeTipoOrdemCompraSnapshot',
+      'ordemCompra.nomeEtapaOrdemCompraSnapshot',
+      'ordemCompra.observacao'
     ]);
-    adicionarFiltroIgual(clausulas, parametros, 'pedido.idCliente', query.idCliente, Number);
-    adicionarFiltroIgual(clausulas, parametros, 'pedido.idUsuario', query.idUsuario, Number);
-    adicionarFiltroLista(clausulas, parametros, 'pedido.idVendedor', query.idVendedor, Number);
-    adicionarFiltroLista(clausulas, parametros, 'pedido.idEtapaPedido', query.idEtapaPedido, Number);
-    adicionarFiltroPeriodo(clausulas, parametros, 'pedido.dataInclusao', query.dataInclusaoInicio, query.dataInclusaoFim);
-    adicionarFiltroPeriodo(clausulas, parametros, 'pedido.dataEntrega', query.dataEntregaInicio, query.dataEntregaFim);
+    adicionarFiltroIgual(clausulas, parametros, 'ordemCompra.idFornecedor', query.idFornecedor, Number);
+    adicionarFiltroIgual(clausulas, parametros, 'ordemCompra.idUsuario', query.idUsuario, Number);
+    adicionarFiltroLista(clausulas, parametros, 'ordemCompra.idComprador', query.idComprador, Number);
+    adicionarFiltroLista(clausulas, parametros, 'ordemCompra.idEtapaOrdemCompra', query.idEtapaOrdemCompra, Number);
+    adicionarFiltroPeriodo(clausulas, parametros, 'ordemCompra.dataInclusao', query.dataInclusaoInicio, query.dataInclusaoFim);
+    adicionarFiltroPeriodo(clausulas, parametros, 'ordemCompra.dataEntrega', query.dataEntregaInicio, query.dataEntregaFim);
 
-    if (query.escopoIdVendedor) {
-      clausulas.push('pedido.idVendedor = ?');
-      parametros.push(Number(query.escopoIdVendedor));
+    if (query.escopoIdComprador) {
+      clausulas.push('ordemCompra.idComprador = ?');
+      parametros.push(Number(query.escopoIdComprador));
     }
 
     const registros = await consultarTodos(`
-      SELECT pedido.idPedido
-      FROM pedido
-      LEFT JOIN cliente ON cliente.idCliente = pedido.idCliente
+      SELECT ordemCompra.idOrdemCompra
+      FROM ordemCompra
+      LEFT JOIN fornecedor ON fornecedor.idFornecedor = ordemCompra.idFornecedor
       ${montarWhere(clausulas)}
-      ORDER BY pedido.idPedido DESC
+      ORDER BY ordemCompra.idOrdemCompra DESC
     `, parametros);
 
     const registrosCompletos = await Promise.all(
-      registros.map((registro) => consultarPedidoCompleto(registro.idPedido))
+      registros.map((registro) => consultarOrdemCompraCompleto(registro.idOrdemCompra))
     );
 
-    resposta.json(registrosCompletos.filter(Boolean));
+    resposta.json(normalizarListaSaidaFornecedor(registrosCompletos.filter(Boolean)));
   } catch (_erro) {
     resposta.status(500).json({ mensagem: 'Ocorreu um erro ao processar a requisicao.' });
   }
 });
 
-rotaPedidos.get('/:id', async (requisicao, resposta) => {
+rotaOrdensCompra.get('/:id', async (requisicao, resposta) => {
   try {
-    const registro = await consultarPedidoCompleto(Number(requisicao.params.id));
+    const registro = await consultarOrdemCompraCompleto(Number(requisicao.params.id));
 
     if (!registro) {
       resposta.status(404).json({ mensagem: 'Registro nao encontrado.' });
       return;
     }
 
-    resposta.json(registro);
+    resposta.json(normalizarSaidaFornecedor(registro));
   } catch (_erro) {
     resposta.status(500).json({ mensagem: 'Ocorreu um erro ao processar a requisicao.' });
   }
 });
 
-rotaPedidos.post('/', async (requisicao, resposta) => {
+rotaOrdensCompra.post('/', async (requisicao, resposta) => {
   try {
-    const payload = aplicarAutomacoesPedido(normalizarPayloadPedido(requisicao.body || {}));
-    await validarReferenciasAtivasDaEntidade('pedido', payload);
-    const snapshots = await montarSnapshotsPedido(payload);
-    const mensagemValidacao = validarPayloadPedido(payload);
+    const payload = aplicarAutomacoesOrdemCompra(normalizarPayloadOrdemCompra(normalizarEntradaFornecedor(requisicao.body || {})));
+    await validarReferenciasAtivasDaEntidade('ordemCompra', payload);
+    const snapshots = await montarSnapshotsOrdemCompra(payload);
+    const mensagemValidacao = validarPayloadOrdemCompra(payload);
 
     if (mensagemValidacao) {
       resposta.status(400).json({ mensagem: mensagemValidacao });
@@ -103,97 +108,97 @@ rotaPedidos.post('/', async (requisicao, resposta) => {
     await executar('BEGIN TRANSACTION');
 
     const resultado = await executar(
-      `INSERT INTO pedido (
-        idOrcamento,
-        idCliente,
+      `INSERT INTO ordemCompra (
+        idCotacao,
+        idFornecedor,
         idContato,
         idUsuario,
-        idVendedor,
+        idComprador,
         comissao,
         valorComissao,
         idPrazoPagamento,
-        idTipoPedido,
-        idEtapaPedido,
+        idTipoOrdemCompra,
+        idEtapaOrdemCompra,
         idMotivoDevolucao,
         dataInclusao,
         dataEntrega,
         dataValidade,
         observacao,
-        codigoOrcamentoOrigem,
-        nomeClienteSnapshot,
+        codigoCotacaoOrigem,
+        nomeFornecedorSnapshot,
         nomeContatoSnapshot,
         nomeUsuarioSnapshot,
-        nomeVendedorSnapshot,
+        nomeCompradorSnapshot,
         nomeMetodoPagamentoSnapshot,
         nomePrazoPagamentoSnapshot,
-        nomeTipoPedidoSnapshot,
-        nomeEtapaPedidoSnapshot
+        nomeTipoOrdemCompraSnapshot,
+        nomeEtapaOrdemCompraSnapshot
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        payload.idOrcamento,
-        payload.idCliente,
+        payload.idCotacao,
+        payload.idFornecedor,
         payload.idContato,
         payload.idUsuario,
-        payload.idVendedor,
+        payload.idComprador,
         payload.comissao,
         payload.valorComissao,
         payload.idPrazoPagamento,
-        payload.idTipoPedido,
-        payload.idEtapaPedido,
+        payload.idTipoOrdemCompra,
+        payload.idEtapaOrdemCompra,
         payload.idMotivoDevolucao,
         payload.dataInclusao,
         payload.dataEntrega,
         payload.dataValidade,
         payload.observacao,
-        snapshots.codigoOrcamentoOrigem,
-        snapshots.nomeClienteSnapshot,
+        snapshots.codigoCotacaoOrigem,
+        snapshots.nomeFornecedorSnapshot,
         snapshots.nomeContatoSnapshot,
         snapshots.nomeUsuarioSnapshot,
-        snapshots.nomeVendedorSnapshot,
+        snapshots.nomeCompradorSnapshot,
         snapshots.nomeMetodoPagamentoSnapshot,
         snapshots.nomePrazoPagamentoSnapshot,
-        snapshots.nomeTipoPedidoSnapshot,
-        snapshots.nomeEtapaPedidoSnapshot
+        snapshots.nomeTipoOrdemCompraSnapshot,
+        snapshots.nomeEtapaOrdemCompraSnapshot
       ]
     );
 
-    await salvarItensPedido(resultado.id, payload.itens, snapshots.nomeClienteSnapshot);
-    await salvarCamposPedido(resultado.id, payload.camposExtras);
-    await sincronizarVinculoOrcamentoPedido(null, payload.idOrcamento, resultado.id);
+    await salvarItensOrdemCompra(resultado.id, payload.itens, snapshots.nomeFornecedorSnapshot);
+    await salvarCamposOrdemCompra(resultado.id, payload.camposExtras);
+    await sincronizarVinculoCotacaoOrdemCompra(null, payload.idCotacao, resultado.id);
     await executar('COMMIT');
 
-    const registro = await consultarPedidoCompleto(resultado.id);
-    resposta.status(201).json(registro);
+    const registro = await consultarOrdemCompraCompleto(resultado.id);
+    resposta.status(201).json(normalizarSaidaFornecedor(registro));
   } catch (_erro) {
     if (_erro.statusCode === 400) {
       resposta.status(400).json({ mensagem: _erro.message });
       return;
     }
 
-    console.error('Erro ao incluir pedido:', _erro);
+    console.error('Erro ao incluir ordemCompra:', _erro);
     await tentarRollback();
     resposta.status(500).json({ mensagem: 'Nao foi possivel concluir a operacao por violacao de integridade dos dados.' });
   }
 });
 
-rotaPedidos.put('/:id', async (requisicao, resposta) => {
+rotaOrdensCompra.put('/:id', async (requisicao, resposta) => {
   try {
-    const idPedido = Number(requisicao.params.id);
-    const existente = await consultarUm('SELECT * FROM pedido WHERE idPedido = ?', [idPedido]);
+    const idOrdemCompra = Number(requisicao.params.id);
+    const existente = await consultarUm('SELECT * FROM ordemCompra WHERE idOrdemCompra = ?', [idOrdemCompra]);
 
     if (!existente) {
       resposta.status(404).json({ mensagem: 'Registro nao encontrado.' });
       return;
     }
 
-    const payload = aplicarAutomacoesPedido(
-      normalizarPayloadPedido({ ...existente, ...(requisicao.body || {}) }),
+    const payload = aplicarAutomacoesOrdemCompra(
+      normalizarPayloadOrdemCompra({ ...existente, ...normalizarEntradaFornecedor(requisicao.body || {}) }),
       existente
     );
-    await validarReferenciasAtivasDaEntidade('pedido', payload);
-    const snapshots = await montarSnapshotsPedido(payload);
-    const itensAtuais = await consultarTodos('SELECT imagem FROM itemPedido WHERE idPedido = ?', [idPedido]);
-    const mensagemValidacao = validarPayloadPedido(payload);
+    await validarReferenciasAtivasDaEntidade('ordemCompra', payload);
+    const snapshots = await montarSnapshotsOrdemCompra(payload);
+    const itensAtuais = await consultarTodos('SELECT imagem FROM itemOrdemCompra WHERE idOrdemCompra = ?', [idOrdemCompra]);
+    const mensagemValidacao = validarPayloadOrdemCompra(payload);
 
     if (mensagemValidacao) {
       resposta.status(400).json({ mensagem: mensagemValidacao });
@@ -203,66 +208,66 @@ rotaPedidos.put('/:id', async (requisicao, resposta) => {
     await executar('BEGIN TRANSACTION');
 
     await executar(
-      `UPDATE pedido SET
-        idOrcamento = ?,
-        idCliente = ?,
+      `UPDATE ordemCompra SET
+        idCotacao = ?,
+        idFornecedor = ?,
         idContato = ?,
         idUsuario = ?,
-        idVendedor = ?,
+        idComprador = ?,
         comissao = ?,
         valorComissao = ?,
         idPrazoPagamento = ?,
-        idTipoPedido = ?,
-        idEtapaPedido = ?,
+        idTipoOrdemCompra = ?,
+        idEtapaOrdemCompra = ?,
         idMotivoDevolucao = ?,
         dataInclusao = ?,
         dataEntrega = ?,
         dataValidade = ?,
         observacao = ?,
-        codigoOrcamentoOrigem = ?,
-        nomeClienteSnapshot = ?,
+        codigoCotacaoOrigem = ?,
+        nomeFornecedorSnapshot = ?,
         nomeContatoSnapshot = ?,
         nomeUsuarioSnapshot = ?,
-        nomeVendedorSnapshot = ?,
+        nomeCompradorSnapshot = ?,
         nomeMetodoPagamentoSnapshot = ?,
         nomePrazoPagamentoSnapshot = ?,
-        nomeTipoPedidoSnapshot = ?,
-        nomeEtapaPedidoSnapshot = ?
-      WHERE idPedido = ?`,
+        nomeTipoOrdemCompraSnapshot = ?,
+        nomeEtapaOrdemCompraSnapshot = ?
+      WHERE idOrdemCompra = ?`,
       [
-        payload.idOrcamento,
-        payload.idCliente,
+        payload.idCotacao,
+        payload.idFornecedor,
         payload.idContato,
         payload.idUsuario,
-        payload.idVendedor,
+        payload.idComprador,
         payload.comissao,
         payload.valorComissao,
         payload.idPrazoPagamento,
-        payload.idTipoPedido,
-        payload.idEtapaPedido,
+        payload.idTipoOrdemCompra,
+        payload.idEtapaOrdemCompra,
         payload.idMotivoDevolucao,
         payload.dataInclusao,
         payload.dataEntrega,
         payload.dataValidade,
         payload.observacao,
-        snapshots.codigoOrcamentoOrigem,
-        snapshots.nomeClienteSnapshot,
+        snapshots.codigoCotacaoOrigem,
+        snapshots.nomeFornecedorSnapshot,
         snapshots.nomeContatoSnapshot,
         snapshots.nomeUsuarioSnapshot,
-        snapshots.nomeVendedorSnapshot,
+        snapshots.nomeCompradorSnapshot,
         snapshots.nomeMetodoPagamentoSnapshot,
         snapshots.nomePrazoPagamentoSnapshot,
-        snapshots.nomeTipoPedidoSnapshot,
-        snapshots.nomeEtapaPedidoSnapshot,
-        idPedido
+        snapshots.nomeTipoOrdemCompraSnapshot,
+        snapshots.nomeEtapaOrdemCompraSnapshot,
+        idOrdemCompra
       ]
     );
 
-    await executar('DELETE FROM itemPedido WHERE idPedido = ?', [idPedido]);
-    await executar('DELETE FROM valorCampoPedido WHERE idPedido = ?', [idPedido]);
-    await salvarItensPedido(idPedido, payload.itens, snapshots.nomeClienteSnapshot);
-    await salvarCamposPedido(idPedido, payload.camposExtras);
-    await sincronizarVinculoOrcamentoPedido(existente.idOrcamento, payload.idOrcamento, idPedido);
+    await executar('DELETE FROM itemOrdemCompra WHERE idOrdemCompra = ?', [idOrdemCompra]);
+    await executar('DELETE FROM valorCampoOrdemCompra WHERE idOrdemCompra = ?', [idOrdemCompra]);
+    await salvarItensOrdemCompra(idOrdemCompra, payload.itens, snapshots.nomeFornecedorSnapshot);
+    await salvarCamposOrdemCompra(idOrdemCompra, payload.camposExtras);
+    await sincronizarVinculoCotacaoOrdemCompra(existente.idCotacao, payload.idCotacao, idOrdemCompra);
     await executar('COMMIT');
 
     removerImagensItensNaoUtilizadas(
@@ -270,25 +275,25 @@ rotaPedidos.put('/:id', async (requisicao, resposta) => {
       payload.itens.map((item) => item.imagem)
     );
 
-    const registro = await consultarPedidoCompleto(idPedido);
-    resposta.json(registro);
+    const registro = await consultarOrdemCompraCompleto(idOrdemCompra);
+    resposta.json(normalizarSaidaFornecedor(registro));
   } catch (_erro) {
     if (_erro.statusCode === 400) {
       resposta.status(400).json({ mensagem: _erro.message });
       return;
     }
 
-    console.error('Erro ao atualizar pedido:', _erro);
+    console.error('Erro ao atualizar ordemCompra:', _erro);
     await tentarRollback();
     resposta.status(500).json({ mensagem: 'Nao foi possivel concluir a operacao por violacao de integridade dos dados.' });
   }
 });
 
-rotaPedidos.delete('/:id', async (requisicao, resposta) => {
+rotaOrdensCompra.delete('/:id', async (requisicao, resposta) => {
   try {
-    const idPedido = Number(requisicao.params.id);
-    const existente = await consultarUm('SELECT * FROM pedido WHERE idPedido = ?', [idPedido]);
-    const itensAtuais = await consultarTodos('SELECT imagem FROM itemPedido WHERE idPedido = ?', [idPedido]);
+    const idOrdemCompra = Number(requisicao.params.id);
+    const existente = await consultarUm('SELECT * FROM ordemCompra WHERE idOrdemCompra = ?', [idOrdemCompra]);
+    const itensAtuais = await consultarTodos('SELECT imagem FROM itemOrdemCompra WHERE idOrdemCompra = ?', [idOrdemCompra]);
 
     if (!existente) {
       resposta.status(404).json({ mensagem: 'Registro nao encontrado.' });
@@ -296,112 +301,112 @@ rotaPedidos.delete('/:id', async (requisicao, resposta) => {
     }
 
     await executar('BEGIN TRANSACTION');
-    await marcarOrcamentosComPedidoExcluido(idPedido);
-    await sincronizarVinculoOrcamentoPedido(existente.idOrcamento, null, idPedido);
-    await executar('DELETE FROM itemPedido WHERE idPedido = ?', [idPedido]);
-    await executar('DELETE FROM valorCampoPedido WHERE idPedido = ?', [idPedido]);
-    await executar('DELETE FROM pedido WHERE idPedido = ?', [idPedido]);
+    await marcarCotacoesComOrdemCompraExcluido(idOrdemCompra);
+    await sincronizarVinculoCotacaoOrdemCompra(existente.idCotacao, null, idOrdemCompra);
+    await executar('DELETE FROM itemOrdemCompra WHERE idOrdemCompra = ?', [idOrdemCompra]);
+    await executar('DELETE FROM valorCampoOrdemCompra WHERE idOrdemCompra = ?', [idOrdemCompra]);
+    await executar('DELETE FROM ordemCompra WHERE idOrdemCompra = ?', [idOrdemCompra]);
     await executar('COMMIT');
 
     itensAtuais.forEach((item) => {
-      if (ehImagemItemPedidoLocal(item.imagem)) {
+      if (ehImagemItemOrdemCompraLocal(item.imagem)) {
         removerArquivoImagem(item.imagem);
       }
     });
 
     resposta.status(204).send();
   } catch (_erro) {
-    console.error('Erro ao excluir pedido:', _erro);
+    console.error('Erro ao excluir ordemCompra:', _erro);
     await tentarRollback();
     resposta.status(500).json({ mensagem: 'Ocorreu um erro ao processar a requisicao.' });
   }
 });
 
-async function consultarPedidoCompleto(idPedido) {
-  const pedido = await consultarUm('SELECT * FROM pedido WHERE idPedido = ?', [idPedido]);
+async function consultarOrdemCompraCompleto(idOrdemCompra) {
+  const ordemCompra = await consultarUm('SELECT * FROM ordemCompra WHERE idOrdemCompra = ?', [idOrdemCompra]);
 
-  if (!pedido) {
+  if (!ordemCompra) {
     return null;
   }
 
   const [itens, camposExtras] = await Promise.all([
     consultarTodos(
-      'SELECT * FROM itemPedido WHERE idPedido = ? ORDER BY idItemPedido ASC',
-      [idPedido]
+      'SELECT * FROM itemOrdemCompra WHERE idOrdemCompra = ? ORDER BY idItemOrdemCompra ASC',
+      [idOrdemCompra]
     ),
     consultarTodos(
-      'SELECT * FROM valorCampoPedido WHERE idPedido = ? ORDER BY idValorCampoPedido ASC',
-      [idPedido]
+      'SELECT * FROM valorCampoOrdemCompra WHERE idOrdemCompra = ? ORDER BY idValorCampoOrdemCompra ASC',
+      [idOrdemCompra]
     )
   ]);
 
   return {
-    ...pedido,
+    ...ordemCompra,
     itens: itens.map(normalizarItemImagem),
     camposExtras
   };
 }
 
-function normalizarPayloadPedido(payload = {}) {
+function normalizarPayloadOrdemCompra(payload = {}) {
   return {
-    idOrcamento: payload.idOrcamento ? Number(payload.idOrcamento) : null,
-    idCliente: payload.idCliente ? Number(payload.idCliente) : null,
+    idCotacao: payload.idCotacao ? Number(payload.idCotacao) : null,
+    idFornecedor: payload.idFornecedor ? Number(payload.idFornecedor) : null,
     idContato: payload.idContato ? Number(payload.idContato) : null,
     idUsuario: payload.idUsuario ? Number(payload.idUsuario) : null,
-    idVendedor: payload.idVendedor ? Number(payload.idVendedor) : null,
+    idComprador: payload.idComprador ? Number(payload.idComprador) : null,
     comissao: normalizarNumeroDecimal(payload.comissao, 0),
     valorComissao: normalizarNumeroDecimal(payload.valorComissao, 0),
     idPrazoPagamento: payload.idPrazoPagamento ? Number(payload.idPrazoPagamento) : null,
-    idTipoPedido: payload.idTipoPedido ? Number(payload.idTipoPedido) : null,
-    idEtapaPedido: payload.idEtapaPedido ? Number(payload.idEtapaPedido) : null,
+    idTipoOrdemCompra: payload.idTipoOrdemCompra ? Number(payload.idTipoOrdemCompra) : null,
+    idEtapaOrdemCompra: payload.idEtapaOrdemCompra ? Number(payload.idEtapaOrdemCompra) : null,
     idMotivoDevolucao: payload.idMotivoDevolucao ? Number(payload.idMotivoDevolucao) : null,
     dataInclusao: limparTexto(payload.dataInclusao),
     dataEntrega: limparTexto(payload.dataEntrega || payload.dataValidade),
     dataValidade: limparTexto(payload.dataValidade),
     observacao: limparTexto(payload.observacao),
-    codigoOrcamentoOrigem: payload.codigoOrcamentoOrigem ? Number(payload.codigoOrcamentoOrigem) : null,
-    nomeClienteSnapshot: limparTexto(payload.nomeClienteSnapshot),
+    codigoCotacaoOrigem: payload.codigoCotacaoOrigem ? Number(payload.codigoCotacaoOrigem) : null,
+    nomeFornecedorSnapshot: limparTexto(payload.nomeFornecedorSnapshot),
     nomeContatoSnapshot: limparTexto(payload.nomeContatoSnapshot),
     nomeUsuarioSnapshot: limparTexto(payload.nomeUsuarioSnapshot),
-    nomeVendedorSnapshot: limparTexto(payload.nomeVendedorSnapshot),
+    nomeCompradorSnapshot: limparTexto(payload.nomeCompradorSnapshot),
     nomeMetodoPagamentoSnapshot: limparTexto(payload.nomeMetodoPagamentoSnapshot),
     nomePrazoPagamentoSnapshot: limparTexto(payload.nomePrazoPagamentoSnapshot),
-    nomeTipoPedidoSnapshot: limparTexto(payload.nomeTipoPedidoSnapshot),
-    nomeEtapaPedidoSnapshot: limparTexto(payload.nomeEtapaPedidoSnapshot),
-    itens: normalizarItensPedido(payload.itens),
-    camposExtras: normalizarCamposPedido(payload.camposExtras)
+    nomeTipoOrdemCompraSnapshot: limparTexto(payload.nomeTipoOrdemCompraSnapshot),
+    nomeEtapaOrdemCompraSnapshot: limparTexto(payload.nomeEtapaOrdemCompraSnapshot),
+    itens: normalizarItensOrdemCompra(payload.itens),
+    camposExtras: normalizarCamposOrdemCompra(payload.camposExtras)
   };
 }
 
-function aplicarAutomacoesPedido(payload, pedidoAtual = null) {
+function aplicarAutomacoesOrdemCompra(payload, ordemCompraAtual = null) {
   const proximoPayload = {
     ...payload
   };
-  const pedidoEhDevolucao = Number(proximoPayload.idTipoPedido) === ID_TIPO_PEDIDO_DEVOLUCAO;
-  const entrouNaEtapaEntregue = !etapaPedidoEhEntregue(pedidoAtual?.idEtapaPedido)
-    && etapaPedidoEhEntregue(proximoPayload.idEtapaPedido);
+  const ordemCompraEhDevolucao = Number(proximoPayload.idTipoOrdemCompra) === ID_TIPO_PEDIDO_DEVOLUCAO;
+  const entrouNaEtapaEntregue = !etapaOrdemCompraEhEntregue(ordemCompraAtual?.idEtapaOrdemCompra)
+    && etapaOrdemCompraEhEntregue(proximoPayload.idEtapaOrdemCompra);
 
-  if (pedidoEhDevolucao) {
-    proximoPayload.idEtapaPedido = ID_ETAPA_PEDIDO_ENTREGUE;
+  if (ordemCompraEhDevolucao) {
+    proximoPayload.idEtapaOrdemCompra = ID_ETAPA_PEDIDO_ENTREGUE;
   } else {
     proximoPayload.idMotivoDevolucao = null;
   }
 
-  if (entrouNaEtapaEntregue && (!proximoPayload.dataEntrega || proximoPayload.dataEntrega === limparTexto(pedidoAtual?.dataEntrega))) {
+  if (entrouNaEtapaEntregue && (!proximoPayload.dataEntrega || proximoPayload.dataEntrega === limparTexto(ordemCompraAtual?.dataEntrega))) {
     proximoPayload.dataEntrega = obterDataAtualFormatoInput();
   }
 
-  if (etapaPedidoEhEntregue(proximoPayload.idEtapaPedido) && !proximoPayload.dataEntrega) {
+  if (etapaOrdemCompraEhEntregue(proximoPayload.idEtapaOrdemCompra) && !proximoPayload.dataEntrega) {
     proximoPayload.dataEntrega = obterDataAtualFormatoInput();
   }
 
-  proximoPayload.itens = normalizarSinalItensPedido(proximoPayload.itens, proximoPayload.idTipoPedido);
-  proximoPayload.valorComissao = calcularValorComissaoPedido(proximoPayload.comissao, proximoPayload.itens);
+  proximoPayload.itens = normalizarSinalItensOrdemCompra(proximoPayload.itens, proximoPayload.idTipoOrdemCompra);
+  proximoPayload.valorComissao = calcularValorComissaoOrdemCompra(proximoPayload.comissao, proximoPayload.itens);
 
   return proximoPayload;
 }
 
-function normalizarItensPedido(itens) {
+function normalizarItensOrdemCompra(itens) {
   if (!Array.isArray(itens)) {
     return [];
   }
@@ -421,12 +426,12 @@ function normalizarItensPedido(itens) {
     .filter((item) => item.quantidade && item.valorUnitario !== null);
 }
 
-function normalizarSinalItensPedido(itens, idTipoPedido) {
+function normalizarSinalItensOrdemCompra(itens, idTipoOrdemCompra) {
   if (!Array.isArray(itens)) {
     return [];
   }
 
-  const ehDevolucao = Number(idTipoPedido) === ID_TIPO_PEDIDO_DEVOLUCAO;
+  const ehDevolucao = Number(idTipoOrdemCompra) === ID_TIPO_PEDIDO_DEVOLUCAO;
   const multiplicador = ehDevolucao ? -1 : 1;
 
   return itens.map((item) => {
@@ -453,36 +458,36 @@ function normalizarSinalItensPedido(itens, idTipoPedido) {
   });
 }
 
-function normalizarCamposPedido(camposExtras) {
+function normalizarCamposOrdemCompra(camposExtras) {
   if (!Array.isArray(camposExtras)) {
     return [];
   }
 
   return camposExtras
     .map((campo) => ({
-      idCampoPedido: campo.idCampoPedido ? Number(campo.idCampoPedido) : null,
-      idCampoOrcamento: campo.idCampoOrcamento ? Number(campo.idCampoOrcamento) : null,
+      idCampoOrdemCompra: campo.idCampoOrdemCompra ? Number(campo.idCampoOrdemCompra) : null,
+      idCampoCotacao: campo.idCampoCotacao ? Number(campo.idCampoCotacao) : null,
       tituloSnapshot: limparTexto(campo.tituloSnapshot || campo.titulo),
       valor: limparTexto(campo.valor)
     }))
-    .filter((campo) => campo.idCampoPedido || campo.idCampoOrcamento || campo.tituloSnapshot);
+    .filter((campo) => campo.idCampoOrdemCompra || campo.idCampoCotacao || campo.tituloSnapshot);
 }
 
-function validarPayloadPedido(payload) {
-  if (!payload.idCliente) {
-    return 'Selecione o cliente do pedido.';
+function validarPayloadOrdemCompra(payload) {
+  if (!payload.idFornecedor) {
+    return 'Selecione o fornecedor da ordemCompra.';
   }
 
   if (!payload.idUsuario) {
     return 'Selecione o usuario do registro.';
   }
 
-  if (!payload.idVendedor) {
-    return 'Selecione o vendedor.';
+  if (!payload.idComprador) {
+    return 'Selecione o comprador.';
   }
 
-  if (!payload.idTipoPedido) {
-    return 'Selecione o tipo de pedido.';
+  if (!payload.idTipoOrdemCompra) {
+    return 'Selecione o tipo de ordemCompra.';
   }
 
   if (!payload.idPrazoPagamento) {
@@ -490,12 +495,12 @@ function validarPayloadPedido(payload) {
   }
 
   if (payload.itens.length === 0) {
-    return 'Inclua ao menos um item no pedido.';
+    return 'Inclua ao menos um item na ordemCompra.';
   }
 
   if (
-    Number(payload.idTipoPedido) === ID_TIPO_PEDIDO_DEVOLUCAO
-    && Number(payload.idEtapaPedido) === ID_ETAPA_PEDIDO_ENTREGUE
+    Number(payload.idTipoOrdemCompra) === ID_TIPO_PEDIDO_DEVOLUCAO
+    && Number(payload.idEtapaOrdemCompra) === ID_ETAPA_PEDIDO_ENTREGUE
     && !payload.idMotivoDevolucao
   ) {
     return 'Selecione o motivo da devolucao.';
@@ -504,48 +509,48 @@ function validarPayloadPedido(payload) {
   return '';
 }
 
-async function montarSnapshotsPedido(payload) {
+async function montarSnapshotsOrdemCompra(payload) {
   const [
-    cliente,
+    fornecedor,
     contato,
     usuario,
-    vendedor,
+    comprador,
     prazo,
-    tipoPedido,
-    etapaPedido,
+    tipoOrdemCompra,
+    etapaOrdemCompra,
     motivoDevolucao,
-    orcamento
+    cotacao
   ] = await Promise.all([
-    obterCliente(payload.idCliente),
+    obterFornecedor(payload.idFornecedor),
     obterContato(payload.idContato),
     obterUsuario(payload.idUsuario),
-    obterVendedor(payload.idVendedor),
+    obterComprador(payload.idComprador),
     obterPrazoPagamento(payload.idPrazoPagamento),
-    obterTipoPedido(payload.idTipoPedido),
-    obterEtapaPedido(payload.idEtapaPedido),
+    obterTipoOrdemCompra(payload.idTipoOrdemCompra),
+    obterEtapaOrdemCompra(payload.idEtapaOrdemCompra),
     obterMotivoDevolucao(payload.idMotivoDevolucao),
-    obterOrcamento(payload.idOrcamento)
+    obterCotacao(payload.idCotacao)
   ]);
 
   return {
-    codigoOrcamentoOrigem: payload.codigoOrcamentoOrigem || orcamento?.idOrcamento || payload.idOrcamento || null,
-    nomeClienteSnapshot: payload.nomeClienteSnapshot || cliente?.nomeFantasia || cliente?.razaoSocial || null,
+    codigoCotacaoOrigem: payload.codigoCotacaoOrigem || cotacao?.idCotacao || payload.idCotacao || null,
+    nomeFornecedorSnapshot: payload.nomeFornecedorSnapshot || fornecedor?.nomeFantasia || fornecedor?.razaoSocial || null,
     nomeContatoSnapshot: payload.nomeContatoSnapshot || contato?.nome || null,
     nomeUsuarioSnapshot: payload.nomeUsuarioSnapshot || usuario?.nome || null,
-    nomeVendedorSnapshot: payload.nomeVendedorSnapshot || vendedor?.nome || null,
+    nomeCompradorSnapshot: payload.nomeCompradorSnapshot || comprador?.nome || null,
     nomeMetodoPagamentoSnapshot: payload.nomeMetodoPagamentoSnapshot || prazo?.nomeMetodoPagamento || null,
     nomePrazoPagamentoSnapshot: payload.nomePrazoPagamentoSnapshot || prazo?.descricaoFormatada || null,
-    nomeTipoPedidoSnapshot: payload.nomeTipoPedidoSnapshot || tipoPedido?.descricao || null,
-    nomeEtapaPedidoSnapshot: payload.nomeEtapaPedidoSnapshot || etapaPedido?.descricao || null
+    nomeTipoOrdemCompraSnapshot: payload.nomeTipoOrdemCompraSnapshot || tipoOrdemCompra?.descricao || null,
+    nomeEtapaOrdemCompraSnapshot: payload.nomeEtapaOrdemCompraSnapshot || etapaOrdemCompra?.descricao || null
   };
 }
 
-async function salvarItensPedido(idPedido, itens, nomeCliente) {
+async function salvarItensOrdemCompra(idOrdemCompra, itens, nomeFornecedor) {
   for (const item of itens) {
     const produto = await obterProduto(item.idProduto);
     const resultado = await executar(
-      `INSERT INTO itemPedido (
-        idPedido,
+      `INSERT INTO itemOrdemCompra (
+        idOrdemCompra,
         idProduto,
         quantidade,
         valorUnitario,
@@ -557,7 +562,7 @@ async function salvarItensPedido(idPedido, itens, nomeCliente) {
         unidadeProdutoSnapshot
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        idPedido,
+        idOrdemCompra,
         item.idProduto,
         item.quantidade,
         item.valorUnitario,
@@ -571,78 +576,78 @@ async function salvarItensPedido(idPedido, itens, nomeCliente) {
     );
 
     if (ehDataUrlImagem(item.imagem)) {
-      const caminhoImagem = salvarImagemItemPedido({
-        idPedido,
-        nomeCliente: nomeCliente || 'cliente',
-        idItemPedido: resultado.id,
+      const caminhoImagem = salvarImagemItemOrdemCompra({
+        idOrdemCompra,
+        nomeFornecedor: nomeFornecedor || 'fornecedor',
+        idItemOrdemCompra: resultado.id,
         valorImagem: item.imagem
       });
 
       await executar(
-        'UPDATE itemPedido SET imagem = ? WHERE idItemPedido = ?',
+        'UPDATE itemOrdemCompra SET imagem = ? WHERE idItemOrdemCompra = ?',
         [caminhoImagem, resultado.id]
       );
     }
   }
 }
 
-async function salvarCamposPedido(idPedido, camposExtras) {
+async function salvarCamposOrdemCompra(idOrdemCompra, camposExtras) {
   for (const campo of camposExtras) {
     await executar(
-      `INSERT INTO valorCampoPedido (
-        idPedido,
-        idCampoPedido,
-        idCampoOrcamento,
+      `INSERT INTO valorCampoOrdemCompra (
+        idOrdemCompra,
+        idCampoOrdemCompra,
+        idCampoCotacao,
         tituloSnapshot,
         valor
       ) VALUES (?, ?, ?, ?, ?)`,
-      [idPedido, campo.idCampoPedido, campo.idCampoOrcamento, campo.tituloSnapshot, campo.valor]
+      [idOrdemCompra, campo.idCampoOrdemCompra, campo.idCampoCotacao, campo.tituloSnapshot, campo.valor]
     );
   }
 }
 
-async function sincronizarVinculoOrcamentoPedido(idOrcamentoAnterior, idOrcamentoAtual, idPedido) {
-  if (!idOrcamentoAtual) {
+async function sincronizarVinculoCotacaoOrdemCompra(idCotacaoAnterior, idCotacaoAtual, idOrdemCompra) {
+  if (!idCotacaoAtual) {
     await executar(
-      'UPDATE orcamento SET idPedidoVinculado = NULL WHERE idPedidoVinculado = ?',
-      [idPedido]
+      'UPDATE cotacao SET idOrdemCompraVinculado = NULL WHERE idOrdemCompraVinculado = ?',
+      [idOrdemCompra]
     );
   }
 
-  if (idOrcamentoAnterior && String(idOrcamentoAnterior) !== String(idOrcamentoAtual || '')) {
+  if (idCotacaoAnterior && String(idCotacaoAnterior) !== String(idCotacaoAtual || '')) {
     await executar(
-      'UPDATE orcamento SET idPedidoVinculado = NULL WHERE idOrcamento = ? AND idPedidoVinculado = ?',
-      [idOrcamentoAnterior, idPedido]
+      'UPDATE cotacao SET idOrdemCompraVinculado = NULL WHERE idCotacao = ? AND idOrdemCompraVinculado = ?',
+      [idCotacaoAnterior, idOrdemCompra]
     );
   }
 
-  if (idOrcamentoAtual) {
+  if (idCotacaoAtual) {
     await executar(
-      'UPDATE orcamento SET idPedidoVinculado = ? WHERE idOrcamento = ?',
-      [idPedido, idOrcamentoAtual]
+      'UPDATE cotacao SET idOrdemCompraVinculado = ? WHERE idCotacao = ?',
+      [idOrdemCompra, idCotacaoAtual]
     );
   }
 }
 
-async function marcarOrcamentosComPedidoExcluido(idPedido) {
-  const etapaPedidoExcluido = await obterEtapaPedidoExcluido();
+async function marcarCotacoesComOrdemCompraExcluido(idOrdemCompra) {
+  const etapaOrdemCompraExcluido = await obterEtapaOrdemCompraExcluido();
 
-  if (!etapaPedidoExcluido?.idEtapaOrcamento) {
+  if (!etapaOrdemCompraExcluido?.idEtapaCotacao) {
     return;
   }
 
   await executar(
-    'UPDATE orcamento SET idEtapaOrcamento = ? WHERE idPedidoVinculado = ?',
-    [etapaPedidoExcluido.idEtapaOrcamento, idPedido]
+    'UPDATE cotacao SET idEtapaCotacao = ? WHERE idOrdemCompraVinculado = ?',
+    [etapaOrdemCompraExcluido.idEtapaCotacao, idOrdemCompra]
   );
 }
 
-async function obterCliente(idCliente) {
-  if (!idCliente) {
+async function obterFornecedor(idFornecedor) {
+  if (!idFornecedor) {
     return null;
   }
 
-  return consultarUm('SELECT idCliente, nomeFantasia, razaoSocial FROM cliente WHERE idCliente = ?', [idCliente]);
+  return consultarUm('SELECT idFornecedor, nomeFantasia, razaoSocial FROM fornecedor WHERE idFornecedor = ?', [idFornecedor]);
 }
 
 async function obterContato(idContato) {
@@ -661,12 +666,12 @@ async function obterUsuario(idUsuario) {
   return consultarUm('SELECT idUsuario, nome FROM usuario WHERE idUsuario = ?', [idUsuario]);
 }
 
-async function obterVendedor(idVendedor) {
-  if (!idVendedor) {
+async function obterComprador(idComprador) {
+  if (!idComprador) {
     return null;
   }
 
-  return consultarUm('SELECT idVendedor, nome FROM vendedor WHERE idVendedor = ?', [idVendedor]);
+  return consultarUm('SELECT idComprador, nome FROM comprador WHERE idComprador = ?', [idComprador]);
 }
 
 async function obterPrazoPagamento(idPrazoPagamento) {
@@ -698,33 +703,33 @@ async function obterPrazoPagamento(idPrazoPagamento) {
   });
 }
 
-async function obterEtapaPedido(idEtapaPedido) {
-  if (!idEtapaPedido) {
+async function obterEtapaOrdemCompra(idEtapaOrdemCompra) {
+  if (!idEtapaOrdemCompra) {
     return null;
   }
 
   return consultarUm(
     `SELECT
-      idEtapa AS idEtapaPedido,
+      idEtapa AS idEtapaOrdemCompra,
       descricao
-    FROM etapaPedido
+    FROM etapaOrdemCompra
     WHERE idEtapa = ?`,
-    [idEtapaPedido]
+    [idEtapaOrdemCompra]
   );
 }
 
-async function obterTipoPedido(idTipoPedido) {
-  if (!idTipoPedido) {
+async function obterTipoOrdemCompra(idTipoOrdemCompra) {
+  if (!idTipoOrdemCompra) {
     return null;
   }
 
   return consultarUm(
     `SELECT
-      idTipoPedido,
+      idTipoOrdemCompra,
       descricao
-    FROM tipoPedido
-    WHERE idTipoPedido = ?`,
-    [idTipoPedido]
+    FROM tipoOrdemCompra
+    WHERE idTipoOrdemCompra = ?`,
+    [idTipoOrdemCompra]
   );
 }
 
@@ -744,21 +749,21 @@ async function obterMotivoDevolucao(idMotivoDevolucao) {
   );
 }
 
-async function obterOrcamento(idOrcamento) {
-  if (!idOrcamento) {
+async function obterCotacao(idCotacao) {
+  if (!idCotacao) {
     return null;
   }
 
-  return consultarUm('SELECT idOrcamento FROM orcamento WHERE idOrcamento = ?', [idOrcamento]);
+  return consultarUm('SELECT idCotacao FROM cotacao WHERE idCotacao = ?', [idCotacao]);
 }
 
-async function obterEtapaPedidoExcluido() {
+async function obterEtapaOrdemCompraExcluido() {
   return consultarUm(
-    `SELECT idEtapaOrcamento, descricao
-    FROM etapaOrcamento
-    WHERE idEtapaOrcamento = ?
+    `SELECT idEtapaCotacao, descricao
+    FROM etapaCotacao
+    WHERE idEtapaCotacao = ?
     LIMIT 1`
-    , [ID_ETAPA_ORCAMENTO_PEDIDO_EXCLUIDO]
+    , [ID_ETAPA_COTACAO_PEDIDO_EXCLUIDO]
   );
 }
 
@@ -824,8 +829,8 @@ function desnormalizarCaminhoImagem(valorImagem) {
   return valorImagem || null;
 }
 
-function etapaPedidoEhEntregue(idEtapaPedido) {
-  return Number(idEtapaPedido) === ID_ETAPA_PEDIDO_ENTREGUE;
+function etapaOrdemCompraEhEntregue(idEtapaOrdemCompra) {
+  return Number(idEtapaOrdemCompra) === ID_ETAPA_PEDIDO_ENTREGUE;
 }
 
 function obterDataAtualFormatoInput() {
@@ -840,19 +845,19 @@ function obterDataAtualFormatoInput() {
 function removerImagensItensNaoUtilizadas(imagensAtuais, imagensNovas) {
   const imagensMantidas = new Set(
     imagensNovas
-      .filter((imagem) => ehImagemItemPedidoLocal(desnormalizarCaminhoImagem(imagem)))
+      .filter((imagem) => ehImagemItemOrdemCompraLocal(desnormalizarCaminhoImagem(imagem)))
       .map((imagem) => desnormalizarCaminhoImagem(imagem))
   );
 
   imagensAtuais.forEach((imagem) => {
-    if (ehImagemItemPedidoLocal(imagem) && !imagensMantidas.has(imagem)) {
+    if (ehImagemItemOrdemCompraLocal(imagem) && !imagensMantidas.has(imagem)) {
       removerArquivoImagem(imagem);
     }
   });
 }
 
-function ehImagemItemPedidoLocal(valorImagem) {
-  return ehCaminhoImagemLocal(valorImagem) && String(valorImagem).startsWith('imagens/pedidos/');
+function ehImagemItemOrdemCompraLocal(valorImagem) {
+  return ehCaminhoImagemLocal(valorImagem) && String(valorImagem).startsWith('imagens/ordensCompra/');
 }
 
 function limparTexto(valor) {
@@ -869,7 +874,7 @@ function normalizarNumeroDecimal(valor, fallback = 0) {
   return Number.isFinite(numero) ? numero : fallback;
 }
 
-function calcularValorComissaoPedido(comissao, itens) {
+function calcularValorComissaoOrdemCompra(comissao, itens) {
   const percentual = normalizarNumeroDecimal(comissao, 0);
   const valorTotalLiquido = Array.isArray(itens)
     ? itens.reduce((acumulado, item) => acumulado + normalizarNumeroDecimal(item?.valorTotal, 0), 0)
@@ -887,5 +892,5 @@ async function tentarRollback() {
 }
 
 module.exports = {
-  rotaPedidos
+  rotaOrdensCompra
 };

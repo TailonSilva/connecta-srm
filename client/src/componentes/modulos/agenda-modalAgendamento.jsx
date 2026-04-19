@@ -451,19 +451,19 @@ export function ModalAgendamento({
                   icone="pesquisa"
                   className="botaoCampoAcao"
                   somenteIcone
-                  title="Buscar cliente"
-                  aria-label="Buscar cliente"
+                  title="Buscar fornecedor"
+                  aria-label="Buscar fornecedor"
                   data-atalho-busca-id="cliente"
                   onClick={abrirModalBuscaCliente}
                   disabled={salvando}
                 >
-                  Buscar cliente
+                  Buscar fornecedor
                 </Botao>
               )}
             />
             <CampoSelect
               className="campoAgendamentoMetade"
-              label="Contato do cliente"
+              label="Contato do fornecedor"
               name="idContato"
               data-atalho-busca-id="contato"
               referenciaCampo={referenciaCampoContato}
@@ -637,10 +637,10 @@ export function ModalAgendamento({
           aberto={modalBuscaClienteAberto}
           empresa={empresa}
           clientes={clientesAtivos}
-          placeholder="Pesquisar clientes"
-          ariaLabelPesquisa="Pesquisar clientes"
-          rotuloAcaoPrimaria={aoIncluirCliente ? 'Incluir cliente' : ''}
-          tituloAcaoPrimaria={aoIncluirCliente ? 'Incluir cliente' : ''}
+          placeholder="Pesquisar fornecedores"
+          ariaLabelPesquisa="Pesquisar fornecedores"
+          rotuloAcaoPrimaria={aoIncluirCliente ? 'Incluir fornecedor' : ''}
+          tituloAcaoPrimaria={aoIncluirCliente ? 'Incluir fornecedor' : ''}
           iconeAcaoPrimaria="adicionar"
           aoAcionarPrimaria={aoIncluirCliente
             ? () => {
@@ -656,8 +656,8 @@ export function ModalAgendamento({
           aberto={modalBuscaContatoAberto}
           idCliente={formulario.idCliente}
           contatos={contatosDoCliente}
-          placeholder="Pesquisar contatos do cliente"
-          ariaLabelPesquisa="Pesquisar contatos do cliente"
+          placeholder="Pesquisar contatos do fornecedor"
+          ariaLabelPesquisa="Pesquisar contatos do fornecedor"
           aoSelecionar={selecionarContato}
           aoFechar={fecharModalBuscaContato}
         />
@@ -781,7 +781,7 @@ function obterProximoCodigoCliente(clientes) {
 
 function montarRotuloCliente(cliente, empresa) {
   const codigo = formatarCodigoCliente(cliente, empresa);
-  const nome = cliente?.nomeFantasia || cliente?.razaoSocial || 'Cliente sem nome';
+  const nome = cliente?.nomeFantasia || cliente?.razaoSocial || 'Fornecedor sem nome';
   const localizacao = [cliente?.cidade, cliente?.estado].filter(Boolean).join('/');
 
   return localizacao ? `${codigo} - ${nome} - ${localizacao}` : `${codigo} - ${nome}`;

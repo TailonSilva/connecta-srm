@@ -44,8 +44,8 @@ const abasModalCliente = [
 ];
 
 const abasVendasCliente = [
-  { id: 'pedidos', label: 'Pedidos' },
-  { id: 'itens', label: 'Itens do pedido' }
+  { id: 'pedidos', label: 'Ordens de Compra' },
+  { id: 'itens', label: 'Itens da ordem de compra' }
 ];
 
 const estadoInicialFormulario = {
@@ -349,7 +349,7 @@ export function ModalCliente({
       } catch (erro) {
         if (!cancelado) {
           definirMensagemErroAtendimentos('Nao foi possivel carregar os atendimentos deste cliente.');
-          definirMensagemErroPedidos('Nao foi possivel carregar os pedidos deste cliente.');
+          definirMensagemErroPedidos('Nao foi possivel carregar as ordens de compra deste cliente.');
         }
       } finally {
         if (!cancelado) {
@@ -423,7 +423,7 @@ export function ModalCliente({
     }
 
     const camposObrigatorios = [
-      ['idVendedor', 'Selecione um vendedor.'],
+      ['idVendedor', 'Selecione um comprador.'],
       ['idRamo', 'Selecione um ramo de atividade.'],
       ['idConceito', 'Selecione um conceito.'],
       ['razaoSocial', 'Informe a razao social.'],
@@ -784,7 +784,7 @@ export function ModalCliente({
         >
         <header className="cabecalhoModalCliente">
           <h2 id="tituloModalCliente">
-            {somenteLeitura ? 'Consultar cliente' : cliente ? 'Editar cliente' : 'Incluir cliente'}
+            {somenteLeitura ? 'Consultar fornecedor' : cliente ? 'Editar fornecedor' : 'Incluir fornecedor'}
           </h2>
 
           <div className="acoesCabecalhoModalCliente">
@@ -799,7 +799,7 @@ export function ModalCliente({
           </div>
         </header>
 
-        <div className="abasModalCliente" role="tablist" aria-label="Secoes do cadastro do cliente">
+        <div className="abasModalCliente" role="tablist" aria-label="Secoes do cadastro do fornecedor">
           {abasModalCliente.map((aba) => (
             <button
               key={aba.id}
@@ -861,7 +861,7 @@ export function ModalCliente({
                   required
                 />
                 <CampoFormulario label="Inscricao estadual" name="inscricaoEstadual" value={formulario.inscricaoEstadual} onChange={alterarCampo} disabled={somenteLeitura} />
-                <CampoSelect label="Vendedor" name="idVendedor" value={formulario.idVendedor} onChange={alterarCampo} options={vendedoresAtivos.map((vendedor) => ({ valor: String(vendedor.idVendedor), label: vendedor.nome }))} disabled={somenteLeitura || vendedorBloqueado} required />
+                <CampoSelect label="Comprador" name="idVendedor" value={formulario.idVendedor} onChange={alterarCampo} options={vendedoresAtivos.map((vendedor) => ({ valor: String(vendedor.idVendedor), label: vendedor.nome }))} disabled={somenteLeitura || vendedorBloqueado} required />
                 <CampoSelect
                   label="Grupo de empresa"
                   name="idGrupoEmpresa"
@@ -923,16 +923,16 @@ export function ModalCliente({
                       className="botaoCampoAcao"
                       onClick={abrirModalConceitosCliente}
                       somenteIcone
-                      title="Abrir conceitos de cliente"
-                      aria-label="Abrir conceitos de cliente"
+                      title="Abrir conceitos de fornecedor"
+                      aria-label="Abrir conceitos de fornecedor"
                     >
-                      Abrir conceitos de cliente
+                      Abrir conceitos de fornecedor
                     </Botao>
                   ) : null}
                 />
                 <label className="campoCheckboxFormulario" htmlFor="status">
                   <input id="status" type="checkbox" name="status" checked={formulario.status} onChange={alterarCampo} disabled={somenteLeitura} />
-                  <span>Cliente ativo</span>
+                  <span>Fornecedor ativo</span>
                 </label>
               </div>
             </section>
@@ -1136,7 +1136,7 @@ export function ModalCliente({
 
       <ModalCadastroConfiguracao
         aberto={modalConceitosClienteAberto}
-        titulo="Conceitos de cliente"
+        titulo="Conceitos de fornecedor"
         rotuloIncluir="Incluir conceito"
         registros={conceitosCliente}
         chavePrimaria="idConceito"
@@ -1270,7 +1270,7 @@ export function ModalCliente({
 
       <ModalFiltros
         aberto={modalFiltrosPedidosAberto}
-        titulo="Filtros de pedidos"
+        titulo="Filtros de ordens de compra"
         filtros={filtrosPedidos}
         campos={[
           {
@@ -1278,7 +1278,7 @@ export function ModalCliente({
             label: 'Datas',
             type: 'date-filters-modal',
             placeholder: 'Selecionar datas',
-            tituloSelecao: 'Filtros de datas dos pedidos',
+            tituloSelecao: 'Filtros de datas das ordens de compra',
             periodos: [
               {
                 titulo: 'Data de inclusao',
@@ -1302,9 +1302,9 @@ export function ModalCliente({
           },
           {
             name: 'codigoPedido',
-            label: 'Pedido',
+            label: 'Ordem de Compra',
             multiple: true,
-            placeholder: 'Todos os pedidos',
+            placeholder: 'Todos as ordens de compra',
             options: pedidosCliente.map((pedido) => ({
               valor: String(pedido.idPedido),
               label: `#${String(pedido.idPedido || '').padStart(4, '0')} - ${pedido.dataInclusao || '-'}`
@@ -1330,9 +1330,9 @@ export function ModalCliente({
           },
           {
             name: 'idVendedor',
-            label: 'Vendedor',
+            label: 'Comprador',
             multiple: true,
-            placeholder: 'Todos os vendedores',
+            placeholder: 'Todos os compradores',
             options: vendedores.map((vendedor) => ({
               valor: String(vendedor.idVendedor),
               label: vendedor.nome

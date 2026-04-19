@@ -7,6 +7,11 @@ const {
   adicionarFiltroPeriodo,
   montarWhere
 } = require('../utilitarios/filtrosSql');
+const {
+  normalizarEntradaFornecedor,
+  normalizarSaidaFornecedor,
+  normalizarListaSaidaFornecedor
+} = require('../utilitarios/compatibilidadeFornecedor');
 
 const rotaAgendamentos = express.Router();
 
@@ -14,12 +19,12 @@ rotaAgendamentos.get('/', async (requisicao, resposta) => {
   try {
     const clausulas = [];
     const parametros = [];
-    const { query } = requisicao;
+    const query = normalizarEntradaFornecedor(requisicao.query);
 
     adicionarFiltroPeriodo(clausulas, parametros, 'agendamento.data', query.dataInicio, query.dataFim);
-    adicionarFiltroIgual(clausulas, parametros, 'agendamento.idCliente', query.idCliente, Number);
+    adicionarFiltroIgual(clausulas, parametros, 'agendamento.idFornecedor', query.idFornecedor, Number);
     adicionarFiltroLista(clausulas, parametros, 'agendamento.idLocal', query.idLocal, Number);
-    adicionarFiltroLista(clausulas, parametros, 'cliente.idVendedor', query.idVendedor, Number);
+    adicionarFiltroLista(clausulas, parametros, 'fornecedor.idComprador', query.idComprador, Number);
 
     const idsUsuarios = normalizarListaQuery(query.idUsuario)
       .map(Number)
@@ -79,10 +84,10 @@ rotaAgendamentos.get('/', async (requisicao, resposta) => {
       }
     }
 
-    if (!Number.isNaN(Number(query.escopoIdVendedor)) && !Number.isNaN(escopoIdUsuario) && Number(query.escopoIdVendedor) > 0 && escopoIdUsuario > 0) {
+    if (!Number.isNaN(Number(query.escopoIdComprador)) && !Number.isNaN(escopoIdUsuario) && Number(query.escopoIdComprador) > 0 && escopoIdUsuario > 0) {
       clausulas.push(`
         (
-          cliente.idVendedor = ?
+          fornecedor.idComprador = ?
           OR EXISTS (
             SELECT 1
             FROM agendamentoUsuario
@@ -91,7 +96,7 @@ rotaAgendamentos.get('/', async (requisicao, resposta) => {
           )
         )
       `);
-      parametros.push(Number(query.escopoIdVendedor), escopoIdUsuario);
+      parametros.push(Number(query.escopoIdComprador), escopoIdUsuario);
     }
 
     const registros = await consultarTodos(`
@@ -113,12 +118,12 @@ rotaAgendamentos.get('/', async (requisicao, resposta) => {
           WHERE agendamentoStatusUsuario.idAgendamento = agendamento.idAgendamento
         ) AS statusUsuarios
       FROM agendamento
-      LEFT JOIN cliente ON cliente.idCliente = agendamento.idCliente
+      LEFT JOIN fornecedor ON fornecedor.idFornecedor = agendamento.idFornecedor
       ${montarWhere(clausulas)}
       ORDER BY agendamento.idAgendamento DESC
     `, parametros);
 
-    resposta.json(registros.map(normalizarAgendamentoRetornado));
+    resposta.json(normalizarListaSaidaFornecedor(registros.map(normalizarAgendamentoRetornado)));
   } catch (_erro) {
     resposta.status(500).json({ mensagem: 'Ocorreu um erro ao processar a requisicao.' });
   }
@@ -153,7 +158,7 @@ rotaAgendamentos.get('/:id', async (requisicao, resposta) => {
       return;
     }
 
-    resposta.json(normalizarAgendamentoRetornado(registro));
+    resposta.json(normalizarSaidaFornecedor(normalizarAgendamentoRetornado(registro)));
   } catch (_erro) {
     resposta.status(500).json({ mensagem: 'Ocorreu um erro ao processar a requisicao.' });
   }
@@ -161,7 +166,7 @@ rotaAgendamentos.get('/:id', async (requisicao, resposta) => {
 
 rotaAgendamentos.post('/', async (requisicao, resposta) => {
   try {
-    const payload = normalizarPayloadAgendamento(requisicao.body);
+    const payload = normalizarPayloadAgendamento(normalizarEntradaFornecedor(requisicao.body));
     const tipoAgenda = await obterTipoAgenda(payload.idTipoAgenda);
     const mensagemReferenciasInvalidas = await validarReferenciasAtivasAgendamento(payload);
 
@@ -187,7 +192,7 @@ rotaAgendamentos.post('/', async (requisicao, resposta) => {
         horaFim,
         idLocal,
         idRecurso,
-        idCliente,
+        idFornecedor,
         idContato,
         idUsuario,
         tipo,
@@ -202,7 +207,7 @@ rotaAgendamentos.post('/', async (requisicao, resposta) => {
         payload.horaFim,
         payload.idLocal,
         payload.idRecurso,
-        payload.idCliente,
+        payload.idFornecedor,
         payload.idContato,
         payload.idUsuario,
         payload.tipo,
@@ -258,7 +263,7 @@ rotaAgendamentos.put('/:id', async (requisicao, resposta) => {
 
     const payload = normalizarPayloadAgendamento({
       ...registroExistente,
-      ...requisicao.body
+      ...normalizarEntradaFornecedor(requisicao.body)
     });
     const tipoAgenda = await obterTipoAgenda(payload.idTipoAgenda);
     const mensagemReferenciasInvalidas = await validarReferenciasAtivasAgendamento(payload);
@@ -285,7 +290,7 @@ rotaAgendamentos.put('/:id', async (requisicao, resposta) => {
         horaFim = ?,
         idLocal = ?,
         idRecurso = ?,
-        idCliente = ?,
+        idFornecedor = ?,
         idContato = ?,
         idUsuario = ?,
         tipo = ?,
@@ -300,7 +305,7 @@ rotaAgendamentos.put('/:id', async (requisicao, resposta) => {
         payload.horaFim,
         payload.idLocal,
         payload.idRecurso,
-        payload.idCliente,
+        payload.idFornecedor,
         payload.idContato,
         payload.idUsuario,
         payload.tipo,
@@ -345,7 +350,7 @@ rotaAgendamentos.put('/:id', async (requisicao, resposta) => {
       WHERE agendamento.idAgendamento = ?
     `, [Number(requisicao.params.id)]);
 
-    resposta.json(normalizarAgendamentoRetornado(registro));
+    resposta.json(normalizarSaidaFornecedor(normalizarAgendamentoRetornado(registro)));
   } catch (_erro) {
     resposta.status(500).json({ mensagem: 'Nao foi possivel concluir a operacao por violacao de integridade dos dados.' });
   }
@@ -389,8 +394,9 @@ rotaAgendamentos.delete('/:id', async (requisicao, resposta) => {
 rotaAgendamentos.put('/:id/status-usuario', async (requisicao, resposta) => {
   try {
     const idAgendamento = Number(requisicao.params.id);
-    const idUsuario = Number(requisicao.body?.idUsuario);
-    const idStatusVisita = Number(requisicao.body?.idStatusVisita);
+    const corpo = normalizarEntradaFornecedor(requisicao.body);
+    const idUsuario = Number(corpo?.idUsuario);
+    const idStatusVisita = Number(corpo?.idStatusVisita);
 
     if (!idAgendamento || !idUsuario || !idStatusVisita) {
       resposta.status(400).json({ mensagem: 'Dados obrigatorios nao informados.' });
@@ -457,7 +463,7 @@ rotaAgendamentos.put('/:id/status-usuario', async (requisicao, resposta) => {
       WHERE agendamento.idAgendamento = ?
     `, [idAgendamento]);
 
-    resposta.json(normalizarAgendamentoRetornado(registro));
+    resposta.json(normalizarSaidaFornecedor(normalizarAgendamentoRetornado(registro)));
   } catch (_erro) {
     resposta.status(500).json({ mensagem: 'Nao foi possivel atualizar o status da agenda.' });
   }
@@ -521,7 +527,7 @@ function normalizarPayloadAgendamento(payload) {
     horaFim: payload.horaFim,
     idLocal: payload.idLocal ? Number(payload.idLocal) : null,
     idRecurso: idsRecursosNormalizados[0] || (payload.idRecurso ? Number(payload.idRecurso) : null),
-    idCliente: payload.idCliente ? Number(payload.idCliente) : null,
+    idFornecedor: payload.idFornecedor ? Number(payload.idFornecedor) : null,
     idContato: payload.idContato ? Number(payload.idContato) : null,
     idUsuario: idsUsuariosNormalizados[0] || (payload.idUsuario ? Number(payload.idUsuario) : null),
     tipo: payload.tipo || null,
@@ -585,7 +591,7 @@ async function validarReferenciasAtivasAgendamento(payload) {
     ['tipo de agenda', payload.idTipoAgenda, 'tipoAgenda', 'idTipoAgenda', 'status'],
     ['status da agenda', payload.idStatusVisita, 'statusVisita', 'idStatusVisita', 'status'],
     ['local da agenda', payload.idLocal, 'localAgenda', 'idLocal', 'status'],
-    ['cliente', payload.idCliente, 'cliente', 'idCliente', 'status'],
+    ['fornecedor', payload.idFornecedor, 'fornecedor', 'idFornecedor', 'status'],
     ['contato', payload.idContato, 'contato', 'idContato', 'status']
   ];
 
@@ -640,12 +646,12 @@ function validarCamposObrigatorios(payload, tipoAgenda) {
     ['idStatusVisita', payload.idStatusVisita]
   ];
 
-  if (tipoAgenda?.obrigarCliente) {
-    campos.push(['idCliente', payload.idCliente]);
+  if (tipoAgenda?.obrigarFornecedor) {
+    campos.push(['idFornecedor', payload.idFornecedor]);
     campos.push(['idContato', payload.idContato]);
   }
 
-  if (payload.idCliente) {
+  if (payload.idFornecedor) {
     campos.push(['idContato', payload.idContato]);
   }
 

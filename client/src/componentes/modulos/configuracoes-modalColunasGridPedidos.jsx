@@ -183,7 +183,7 @@ export function ModalColunasGridPedidos({
         }))
       });
     } catch (erro) {
-      definirMensagemErro(erro.message || 'Nao foi possivel salvar as colunas do grid de pedidos.');
+      definirMensagemErro(erro.message || 'Nao foi possivel salvar as colunas do grid de ordens de compra.');
       definirSalvando(false);
     }
   }
@@ -205,7 +205,7 @@ export function ModalColunasGridPedidos({
         onSubmit={submeterFormulario}
       >
         <header className="cabecalhoModalCliente">
-          <h2 id="tituloModalColunasGridPedidos">Colunas do Grid de Pedidos</h2>
+          <h2 id="tituloModalColunasGridPedidos">Colunas do Grid de Ordens de Compra</h2>
 
           <div className="acoesCabecalhoModalCliente">
             <Botao variante="secundario" type="button" onClick={aoFechar} disabled={salvando}>
@@ -365,22 +365,22 @@ function obterRotuloConfiguracaoColuna(coluna) {
   }
 
   if (coluna.id === 'codigo' || coluna.id === 'idPedido') {
-    return 'Codigo do Pedido';
+    return 'Codigo da Ordem de Compra';
   }
 
   if (coluna.id === 'idOrcamento' || coluna.id === 'codigoOrcamentoOrigem') {
-    return 'Codigo do Orcamento de Origem';
+    return 'Codigo do Cotacao de Origem';
   }
 
   if (coluna.id === 'cliente') {
-    return 'Cliente do Pedido';
+    return 'Fornecedor da Ordem de Compra';
   }
   if (coluna.id === 'idCliente') {
-    return 'Codigo do Cliente';
+    return 'Codigo do Fornecedor';
   }
 
   if (coluna.id === 'contato') {
-    return 'Contato do Cliente';
+    return 'Contato do Fornecedor';
   }
   if (coluna.id === 'idContato') {
     return 'Codigo do Contato';
@@ -394,14 +394,14 @@ function obterRotuloConfiguracaoColuna(coluna) {
   }
 
   if (coluna.id === 'vendedor') {
-    return 'Vendedor do Pedido';
+    return 'Comprador da Ordem de Compra';
   }
   if (coluna.id === 'idVendedor') {
-    return 'Codigo do Vendedor';
+    return 'Codigo do Comprador';
   }
 
   if (coluna.id === 'etapa') {
-    return 'Etapa do Pedido';
+    return 'Etapa da Ordem de Compra';
   }
   if (coluna.id === 'idEtapaPedido') {
     return 'Codigo da Etapa';
@@ -431,15 +431,15 @@ function obterRotuloConfiguracaoColuna(coluna) {
   }
 
   if (coluna.id === 'comissao') {
-    return 'Comissao do Pedido';
+    return 'Comissao da Ordem de Compra';
   }
 
   if (coluna.id === 'observacao') {
-    return 'Observacao do Pedido';
+    return 'Observacao da Ordem de Compra';
   }
 
   if (coluna.id === 'total') {
-    return 'Valor Total do Pedido';
+    return 'Valor Total da Ordem de Compra';
   }
 
   return coluna.rotulo;

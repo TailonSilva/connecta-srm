@@ -92,7 +92,7 @@ export function FunilVendas({ etapas = [], carregando = false, mensagemErro = ''
           <header className="funilVendasCabecalho">
             <div>
               <span className="funilVendasCabecalhoRotulo">Funil de vendas</span>
-              <h2>Visao Por Etapa Do Orcamento</h2>
+              <h2>Visao Por Etapa Do Cotacao</h2>
             </div>
           </header>
           <p className="funilVendasMensagem">{mensagemErro}</p>
@@ -107,7 +107,7 @@ export function FunilVendas({ etapas = [], carregando = false, mensagemErro = ''
         <header className="funilVendasCabecalho">
           <div>
             <span className="funilVendasCabecalhoRotulo">Funil de vendas</span>
-            <h2>Visao Por Etapa Do Orcamento</h2>
+            <h2>Visao Por Etapa Do Cotacao</h2>
           </div>
         </header>
         <p className="funilVendasMensagem">

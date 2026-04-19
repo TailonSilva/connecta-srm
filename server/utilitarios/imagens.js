@@ -66,7 +66,7 @@ function salvarImagemBase64({ nomeEntidade, idRegistro, valorImagem }) {
   return caminhoRelativo;
 }
 
-function salvarImagemItemOrcamento({ idOrcamento, nomeCliente, idItemOrcamento, valorImagem }) {
+function salvarImagemItemCotacao({ idCotacao, nomeFornecedor, idItemCotacao, valorImagem }) {
   if (!ehDataUrlImagem(valorImagem)) {
     return valorImagem;
   }
@@ -81,23 +81,23 @@ function salvarImagemItemOrcamento({ idOrcamento, nomeCliente, idItemOrcamento, 
 
   const [, mimeType, conteudoBase64] = correspondencia;
   const extensao = mimeType.includes('png') ? 'png' : 'jpg';
-  const nomePastaOrcamento = `${String(idOrcamento).padStart(4, '0')}-${normalizarNomeArquivo(nomeCliente || 'cliente')}`;
-  const diretorioOrcamento = path.join(diretorioImagens, 'orcamentos', nomePastaOrcamento);
+  const nomePastaCotacao = `${String(idCotacao).padStart(4, '0')}-${normalizarNomeArquivo(nomeFornecedor || 'fornecedor')}`;
+  const diretorioCotacao = path.join(diretorioImagens, 'cotacoes', nomePastaCotacao);
 
-  if (!fs.existsSync(diretorioOrcamento)) {
-    fs.mkdirSync(diretorioOrcamento, { recursive: true });
+  if (!fs.existsSync(diretorioCotacao)) {
+    fs.mkdirSync(diretorioCotacao, { recursive: true });
   }
 
-  const nomeArquivo = `item-${idItemOrcamento}.${extensao}`;
-  const caminhoRelativo = path.posix.join('imagens', 'orcamentos', nomePastaOrcamento, nomeArquivo);
-  const caminhoArquivo = path.join(diretorioOrcamento, nomeArquivo);
+  const nomeArquivo = `item-${idItemCotacao}.${extensao}`;
+  const caminhoRelativo = path.posix.join('imagens', 'cotacoes', nomePastaCotacao, nomeArquivo);
+  const caminhoArquivo = path.join(diretorioCotacao, nomeArquivo);
 
   fs.writeFileSync(caminhoArquivo, Buffer.from(conteudoBase64, 'base64'));
 
   return caminhoRelativo;
 }
 
-function salvarImagemItemPedido({ idPedido, nomeCliente, idItemPedido, valorImagem }) {
+function salvarImagemItemOrdemCompra({ idOrdemCompra, nomeFornecedor, idItemOrdemCompra, valorImagem }) {
   if (!ehDataUrlImagem(valorImagem)) {
     return valorImagem;
   }
@@ -112,16 +112,16 @@ function salvarImagemItemPedido({ idPedido, nomeCliente, idItemPedido, valorImag
 
   const [, mimeType, conteudoBase64] = correspondencia;
   const extensao = mimeType.includes('png') ? 'png' : 'jpg';
-  const nomePastaPedido = `${String(idPedido).padStart(4, '0')}-${normalizarNomeArquivo(nomeCliente || 'cliente')}`;
-  const diretorioPedido = path.join(diretorioImagens, 'pedidos', nomePastaPedido);
+  const nomePastaOrdemCompra = `${String(idOrdemCompra).padStart(4, '0')}-${normalizarNomeArquivo(nomeFornecedor || 'fornecedor')}`;
+  const diretorioOrdemCompra = path.join(diretorioImagens, 'ordensCompra', nomePastaOrdemCompra);
 
-  if (!fs.existsSync(diretorioPedido)) {
-    fs.mkdirSync(diretorioPedido, { recursive: true });
+  if (!fs.existsSync(diretorioOrdemCompra)) {
+    fs.mkdirSync(diretorioOrdemCompra, { recursive: true });
   }
 
-  const nomeArquivo = `item-${idItemPedido}.${extensao}`;
-  const caminhoRelativo = path.posix.join('imagens', 'pedidos', nomePastaPedido, nomeArquivo);
-  const caminhoArquivo = path.join(diretorioPedido, nomeArquivo);
+  const nomeArquivo = `item-${idItemOrdemCompra}.${extensao}`;
+  const caminhoRelativo = path.posix.join('imagens', 'ordensCompra', nomePastaOrdemCompra, nomeArquivo);
+  const caminhoArquivo = path.join(diretorioOrdemCompra, nomeArquivo);
 
   fs.writeFileSync(caminhoArquivo, Buffer.from(conteudoBase64, 'base64'));
 
@@ -130,7 +130,7 @@ function salvarImagemItemPedido({ idPedido, nomeCliente, idItemPedido, valorImag
 
 function normalizarNomeDiretorio(nomeEntidade) {
   const mapaDiretorios = {
-    cliente: 'clientes',
+    fornecedor: 'fornecedores',
     produto: 'produtos',
     usuario: 'usuarios',
     empresa: 'empresa'
@@ -154,6 +154,6 @@ module.exports = {
   ehDataUrlImagem,
   removerArquivoImagem,
   salvarImagemBase64,
-  salvarImagemItemOrcamento,
-  salvarImagemItemPedido
+  salvarImagemItemCotacao,
+  salvarImagemItemOrdemCompra
 };

@@ -23,13 +23,13 @@ import { exportarRelatorioPedidosFechadosPdf } from '../../utilitarios/configura
 const relatoriosConfiguracao = {
   relatorioPedidosFechados: {
     titulo: 'Vendas',
-    subtitulo: 'Leitura baseada nas datas de inclusao e entrega dos pedidos.',
+    subtitulo: 'Leitura baseada nas datas de inclusao e entrega das ordens de compra.',
     tituloFiltro: 'Filtrar vendas',
     ariaFiltro: 'Filtrar vendas'
   },
   relatorioPedidosEntregues: {
     titulo: 'Conversao',
-    subtitulo: 'Leitura consolidada dos orcamentos para acompanhar geracao, fechamento e conversao.',
+    subtitulo: 'Leitura consolidada das cotacoes para acompanhar geracao, fechamento e conversao.',
     tituloFiltro: 'Filtrar conversao',
     ariaFiltro: 'Filtrar conversao'
   },
@@ -168,7 +168,7 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
         definirTiposPedidoRelatorio(filtrarRegistrosAtivosLocais(tiposPedidoCarregados, 'status'));
       } catch (_erro) {
         if (!cancelado) {
-          definirMensagemErroPedidos('Nao foi possivel carregar os pedidos do relatorio.');
+          definirMensagemErroPedidos('Nao foi possivel carregar as ordens de compra do relatorio.');
           definirPedidos([]);
           definirClientes([]);
           definirVendedores([]);
@@ -564,7 +564,7 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
     }
 
     if (pedidosFechadosFiltrados.length === 0) {
-      adicionarAvisoPdf('erro', 'Nao foi possivel gerar o PDF.', 'Nao ha pedidos no recorte atual para exportar o relatorio.');
+      adicionarAvisoPdf('erro', 'Nao foi possivel gerar o PDF.', 'Nao ha ordens de compra no recorte atual para exportar o relatorio.');
       return;
     }
 
@@ -729,7 +729,7 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
               pedidos={pedidosFechadosFiltrados}
               contextoSalvo
               mensagemSemContexto="O relatorio ficara disponivel apos carregar os pedidos."
-              mensagemVazia="Nenhum pedido encontrado para o periodo informado."
+              mensagemVazia="Nenhum ordem de compra encontrado para o periodo informado."
               exibirCliente
               exibirTipoPedido
               exibirAcoes={false}
@@ -744,8 +744,8 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
           campos={[
             {
               name: 'idCliente',
-              label: 'Cliente',
-              placeholder: 'Todos os clientes',
+              label: 'Fornecedor',
+              placeholder: 'Todos os fornecedores',
               options: clientes.map((cliente) => ({
                 valor: String(cliente.idCliente),
                 label: cliente.nomeFantasia || cliente.razaoSocial || `Cliente #${cliente.idCliente}`
@@ -757,23 +757,23 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
                   icone="pesquisa"
                   className="botaoCampoAcao"
                   somenteIcone
-                  title="Buscar cliente"
-                  aria-label="Buscar cliente"
+                  title="Buscar fornecedor"
+                  aria-label="Buscar fornecedor"
                   onClick={() => definirModalBuscaClienteAberto(true)}
                 >
-                  Buscar cliente
+                  Buscar fornecedor
                 </Botao>
               )
             },
             {
               name: 'idsVendedores',
-              label: 'Vendedor',
+              label: 'Comprador',
               multiple: true,
-              tituloSelecao: 'Selecionar vendedores',
-              placeholder: 'Todos os vendedores',
+              tituloSelecao: 'Selecionar compradores',
+              placeholder: 'Todos os compradores',
               options: vendedores.map((vendedor) => ({
                 valor: String(vendedor.idVendedor),
-                label: vendedor.nome || `Vendedor #${vendedor.idVendedor}`
+                label: vendedor.nome || `Comprador #${vendedor.idVendedor}`
               }))
             },
             {
@@ -813,7 +813,7 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
                 name: 'idsEtapasPedido',
                 label: 'Etapa',
                 multiple: true,
-                tituloSelecao: 'Selecionar etapas do pedido',
+                tituloSelecao: 'Selecionar etapas da ordem de compra',
                 placeholder: 'Todas as etapas',
                 options: etapasPedido.map((etapa) => ({
                   valor: String(etapa.idEtapaPedido),
@@ -947,8 +947,8 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
           campos={[
             {
               name: 'idCliente',
-              label: 'Cliente',
-              placeholder: 'Todos os clientes',
+              label: 'Fornecedor',
+              placeholder: 'Todos os fornecedores',
               options: clientes.map((cliente) => ({
                 valor: String(cliente.idCliente),
                 label: cliente.nomeFantasia || cliente.razaoSocial || `Cliente #${cliente.idCliente}`
@@ -960,11 +960,11 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
                   icone="pesquisa"
                   className="botaoCampoAcao"
                   somenteIcone
-                  title="Buscar cliente"
-                  aria-label="Buscar cliente"
+                  title="Buscar fornecedor"
+                  aria-label="Buscar fornecedor"
                   onClick={() => definirModalBuscaClienteAtendimentosAberto(true)}
                 >
-                  Buscar cliente
+                  Buscar fornecedor
                 </Botao>
               )
             },
@@ -1130,8 +1130,8 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
           campos={[
             {
               name: 'idCliente',
-              label: 'Cliente',
-              placeholder: 'Todos os clientes',
+              label: 'Fornecedor',
+              placeholder: 'Todos os fornecedores',
               options: clientes.map((cliente) => ({
                 valor: String(cliente.idCliente),
                 label: cliente.nomeFantasia || cliente.razaoSocial || `Cliente #${cliente.idCliente}`
@@ -1143,11 +1143,11 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
                   icone="pesquisa"
                   className="botaoCampoAcao"
                   somenteIcone
-                  title="Buscar cliente"
-                  aria-label="Buscar cliente"
+                  title="Buscar fornecedor"
+                  aria-label="Buscar fornecedor"
                   onClick={() => definirModalBuscaClienteConversaoAberto(true)}
                 >
-                  Buscar cliente
+                  Buscar fornecedor
                 </Botao>
               )
             },
@@ -1163,22 +1163,22 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
             },
             {
               name: 'idVendedorCliente',
-              label: 'Clientes do vendedor',
+              label: 'Fornecedores do comprador',
               multiple: true,
-              placeholder: 'Todos os vendedores',
+              placeholder: 'Todos os compradores',
               options: vendedores.map((vendedor) => ({
                 valor: String(vendedor.idVendedor),
-                label: vendedor.nome || `Vendedor #${vendedor.idVendedor}`
+                label: vendedor.nome || `Comprador #${vendedor.idVendedor}`
               }))
             },
             {
               name: 'idVendedor',
-              label: 'Vendedor do orcamento',
+              label: 'Comprador da cotacao',
               multiple: true,
-              placeholder: 'Todos os vendedores',
+              placeholder: 'Todos os compradores',
               options: vendedores.map((vendedor) => ({
                 valor: String(vendedor.idVendedor),
-                label: vendedor.nome || `Vendedor #${vendedor.idVendedor}`
+                label: vendedor.nome || `Comprador #${vendedor.idVendedor}`
               }))
             },
             {
@@ -1218,7 +1218,7 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
               name: 'idsEtapaOrcamento',
               label: 'Etapa',
               multiple: true,
-              tituloSelecao: 'Selecionar etapas do orcamento',
+              tituloSelecao: 'Selecionar etapas da cotacao',
               placeholder: 'Todas as etapas',
               options: etapasOrcamentoConversao.map((etapa) => ({
                 valor: String(etapa.idEtapaOrcamento),
@@ -1444,7 +1444,7 @@ function montarCardsPedidosFechados(pedidos) {
 
   return [
     {
-      titulo: 'Pedidos no recorte',
+      titulo: 'Ordens de Compra no recorte',
       valor: String(totalPedidos)
     },
     {
@@ -1569,7 +1569,7 @@ function montarChipsFiltrosPedidosFechados(filtros, {
       const vendedor = vendedores.find((item) => String(item.idVendedor) === String(idVendedor));
       chips.push({
         id: `vendedor-${idVendedor}`,
-        rotulo: `Vendedor: ${vendedor?.nome || `#${idVendedor}`}`
+        rotulo: `Comprador: ${vendedor?.nome || `#${idVendedor}`}`
       });
     });
   }
@@ -1744,7 +1744,7 @@ function montarCardsRelatorioAtendimentos(atendimentos) {
       valor: String(totalAtendimentos)
     },
     {
-      titulo: 'Clientes atendidos',
+      titulo: 'Fornecedores atendidos',
       valor: String(totalClientes)
     },
     {
@@ -2028,11 +2028,11 @@ function montarCardsConversao(orcamentos) {
 
   return [
     {
-      titulo: 'Orcamentos gerados',
+      titulo: 'Cotacoes gerados',
       valor: String(totalGerados)
     },
     {
-      titulo: 'Orcamentos fechados',
+      titulo: 'Cotacoes fechados',
       valor: String(totalFechados)
     },
     {
@@ -2040,7 +2040,7 @@ function montarCardsConversao(orcamentos) {
       valor: formatarPercentualResumo(conversao)
     },
     {
-      titulo: 'Orcamentos cancelados',
+      titulo: 'Cotacoes cancelados',
       valor: String(totalCancelados)
     },
     {
@@ -2048,7 +2048,7 @@ function montarCardsConversao(orcamentos) {
       valor: formatarPercentualResumo(perda)
     },
     {
-      titulo: 'Orcamentos em aberto',
+      titulo: 'Cotacoes em aberto',
       valor: String(totalEmAberto)
     }
   ];
@@ -2166,8 +2166,8 @@ function montarChipsFiltrosConversao(filtros, {
     filtros.idVendedorCliente.forEach((idVendedorCliente) => {
       const vendedor = vendedores.find((item) => String(item.idVendedor) === String(idVendedorCliente));
       chips.push({
-        id: `vendedor-cliente-${idVendedorCliente}`,
-        rotulo: `Vendedor do cliente: ${vendedor?.nome || `#${idVendedorCliente}`}`
+        id: `vendedor-fornecedor-${idVendedorCliente}`,
+        rotulo: `Comprador do cliente: ${vendedor?.nome || `#${idVendedorCliente}`}`
       });
     });
   }
@@ -2176,8 +2176,8 @@ function montarChipsFiltrosConversao(filtros, {
     filtros.idVendedor.forEach((idVendedor) => {
       const vendedor = vendedores.find((item) => String(item.idVendedor) === String(idVendedor));
       chips.push({
-        id: `vendedor-orcamento-${idVendedor}`,
-        rotulo: `Vendedor do orcamento: ${vendedor?.nome || `#${idVendedor}`}`
+        id: `vendedor-cotacao-${idVendedor}`,
+        rotulo: `Comprador da cotacao: ${vendedor?.nome || `#${idVendedor}`}`
       });
     });
   }

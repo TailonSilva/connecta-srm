@@ -205,7 +205,7 @@ export function ModalColunasGridClientes({
         onSubmit={submeterFormulario}
       >
         <header className="cabecalhoModalCliente">
-          <h2 id="tituloModalColunasGridClientes">Colunas do Grid de Clientes</h2>
+          <h2 id="tituloModalColunasGridClientes">Colunas do Grid de Fornecedores</h2>
 
           <div className="acoesCabecalhoModalCliente">
             <Botao variante="secundario" type="button" onClick={aoFechar} disabled={salvando}>
@@ -365,19 +365,19 @@ function obterRotuloConfiguracaoColuna(coluna) {
   }
 
   if (coluna.id === 'codigo') {
-    return 'Codigo Principal do Cliente';
+    return 'Codigo Principal do Fornecedor';
   }
 
   if (coluna.id === 'idCliente') {
-    return 'Codigo Interno do Cliente';
+    return 'Codigo Interno do Fornecedor';
   }
 
   if (coluna.id === 'codigoAlternativo') {
-    return 'Codigo Alternativo do Cliente';
+    return 'Codigo Alternativo do Fornecedor';
   }
 
   if (coluna.id === 'cliente') {
-    return 'Nome do Cliente';
+    return 'Nome do Fornecedor';
   }
 
   if (coluna.id === 'razaoSocial') {
@@ -413,7 +413,7 @@ function obterRotuloConfiguracaoColuna(coluna) {
   }
 
   if (coluna.id === 'contato') {
-    return 'Contato Principal do Cliente';
+    return 'Contato Principal do Fornecedor';
   }
 
   if (coluna.id === 'emailContatoPrincipal') {
@@ -449,7 +449,7 @@ function obterRotuloConfiguracaoColuna(coluna) {
   }
 
   if (coluna.id === 'vendedor' || coluna.id === 'idVendedor') {
-    return 'Vendedor do Cliente';
+    return 'Comprador do Fornecedor';
   }
 
   if (coluna.id === 'observacao') {

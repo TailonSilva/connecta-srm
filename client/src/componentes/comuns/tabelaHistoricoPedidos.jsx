@@ -9,7 +9,7 @@ export function TabelaHistoricoPedidos({
   pedidos = [],
   contextoSalvo = true,
   mensagemSemContexto = 'Nenhum contexto disponivel.',
-  mensagemVazia = 'Nenhum pedido encontrado.',
+  mensagemVazia = 'Nenhum ordem de compra encontrado.',
   exibirCliente = false,
   exibirTipoPedido = false,
   exibirAcoes = true,
@@ -24,11 +24,11 @@ export function TabelaHistoricoPedidos({
         <tr>
           <th className="colunaHistoricoData">Inclusao</th>
           <th className="colunaHistoricoData">Entrega</th>
-          <th className="colunaHistoricoPedido">Pedido</th>
-          {exibirCliente ? <th className="colunaHistoricoCliente">Cliente</th> : null}
+          <th className="colunaHistoricoPedido">Ordem de Compra</th>
+          {exibirCliente ? <th className="colunaHistoricoCliente">Fornecedor</th> : null}
           <th className="colunaHistoricoEtapa">Etapa</th>
           {exibirTipoPedido ? <th className="colunaHistoricoEtapa">Tipo</th> : null}
-          <th className="colunaHistoricoVendedor">Vendedor</th>
+          <th className="colunaHistoricoVendedor">Comprador</th>
           <th className="colunaHistoricoPrazoPagamento">Prazo de pagamento</th>
           <th className="colunaHistoricoValorTotal">Total</th>
           {exibirAcoes ? <th className="cabecalhoAcoesContato">Acoes</th> : null}
@@ -37,7 +37,7 @@ export function TabelaHistoricoPedidos({
       carregando={carregando}
       mensagemErro={mensagemErro}
       temItens={contextoSalvo && pedidos.length > 0}
-      mensagemCarregando="Carregando pedidos..."
+      mensagemCarregando="Carregando ordens de compra..."
       mensagemVazia={contextoSalvo ? mensagemVazia : mensagemSemContexto}
     >
       {pedidos.map((pedido) => (
@@ -47,7 +47,7 @@ export function TabelaHistoricoPedidos({
           <td className="colunaHistoricoPedido">
             <span className="codigoHistoricoPedido">{`#${String(pedido.idPedido).padStart(4, '0')}`}</span>
           </td>
-          {exibirCliente ? <td className="colunaHistoricoCliente">{pedido.nomeClienteSnapshot || 'Cliente nao informado'}</td> : null}
+          {exibirCliente ? <td className="colunaHistoricoCliente">{pedido.nomeClienteSnapshot || 'Fornecedor nao informado'}</td> : null}
           <td className="colunaHistoricoEtapa">{pedido.nomeEtapaPedidoSnapshot || 'Sem etapa'}</td>
           {exibirTipoPedido ? <td className="colunaHistoricoEtapa">{pedido.nomeTipoPedidoSnapshot || 'Nao informado'}</td> : null}
           <td className="colunaHistoricoVendedor">{pedido.nomeVendedorSnapshot || 'Nao informado'}</td>
@@ -56,7 +56,7 @@ export function TabelaHistoricoPedidos({
           {exibirAcoes ? (
             <td>
               <div className="acoesContatoModal">
-                <BotaoAcaoGrade icone="consultar" titulo="Consultar pedido" onClick={() => onConsultarPedido?.(pedido)} />
+                <BotaoAcaoGrade icone="consultar" titulo="Consultar ordem de compra" onClick={() => onConsultarPedido?.(pedido)} />
               </div>
             </td>
           ) : null}

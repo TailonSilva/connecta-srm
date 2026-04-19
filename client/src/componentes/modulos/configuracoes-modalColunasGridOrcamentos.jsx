@@ -195,7 +195,7 @@ export function ModalColunasGridOrcamentos({
     <div className="camadaModal" role="presentation" onMouseDown={fecharAoClicarNoFundo}>
       <form className="modalCliente" role="dialog" aria-modal="true" aria-labelledby="tituloModalColunasGridOrcamentos" onMouseDown={(evento) => evento.stopPropagation()} onSubmit={submeterFormulario}>
         <header className="cabecalhoModalCliente">
-          <h2 id="tituloModalColunasGridOrcamentos">Colunas do Grid de Orcamentos</h2>
+          <h2 id="tituloModalColunasGridOrcamentos">Colunas do Grid de Cotacoes</h2>
           <div className="acoesCabecalhoModalCliente">
             <Botao variante="secundario" type="button" onClick={aoFechar} disabled={salvando}>
               {somenteConsulta ? 'Fechar' : 'Cancelar'}
@@ -306,19 +306,19 @@ function obterRotuloConfiguracaoColuna(coluna) {
     return '';
   }
   if (coluna.id === 'codigo') {
-    return 'Codigo do Orcamento';
+    return 'Codigo do Cotacao';
   }
   if (coluna.id === 'idOrcamento') {
-    return 'Codigo Interno do Orcamento';
+    return 'Codigo Interno do Cotacao';
   }
   if (coluna.id === 'cliente') {
-    return 'Cliente do Orcamento';
+    return 'Fornecedor do Cotacao';
   }
   if (coluna.id === 'idCliente') {
-    return 'Codigo do Cliente';
+    return 'Codigo do Fornecedor';
   }
   if (coluna.id === 'contato') {
-    return 'Contato do Cliente';
+    return 'Contato do Fornecedor';
   }
   if (coluna.id === 'idContato') {
     return 'Codigo do Contato';
@@ -330,22 +330,22 @@ function obterRotuloConfiguracaoColuna(coluna) {
     return 'Codigo do Usuario';
   }
   if (coluna.id === 'idPedidoVinculado') {
-    return 'Codigo do Pedido Vinculado';
+    return 'Codigo da Ordem de Compra Vinculado';
   }
   if (coluna.id === 'idVendedor') {
-    return 'Codigo do Vendedor';
+    return 'Codigo do Comprador';
   }
   if (coluna.id === 'etapa') {
-    return 'Etapa do Orcamento';
+    return 'Etapa do Cotacao';
   }
   if (coluna.id === 'idEtapaOrcamento') {
     return 'Codigo da Etapa';
   }
   if (coluna.id === 'vendedor') {
-    return 'Vendedor do Orcamento';
+    return 'Comprador do Cotacao';
   }
   if (coluna.id === 'comissao') {
-    return 'Comissao do Orcamento';
+    return 'Comissao do Cotacao';
   }
   if (coluna.id === 'prazoPagamento') {
     return 'Prazo de Pagamento';
@@ -369,10 +369,10 @@ function obterRotuloConfiguracaoColuna(coluna) {
     return 'Data de Fechamento';
   }
   if (coluna.id === 'observacao') {
-    return 'Observacao do Orcamento';
+    return 'Observacao do Cotacao';
   }
   if (coluna.id === 'total') {
-    return 'Valor Total do Orcamento';
+    return 'Valor Total do Cotacao';
   }
   return coluna.rotulo;
 }

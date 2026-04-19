@@ -29,7 +29,7 @@ const abasModalPedido = [
   { id: 'dadosGerais', label: 'Dados gerais' },
   { id: 'itens', label: 'Itens' },
   { id: 'outros', label: 'Outros' },
-  { id: 'campos', label: 'Campos do pedido' }
+  { id: 'campos', label: 'Campos da ordem de compra' }
 ];
 
 const ID_ETAPA_PEDIDO_ENTREGUE = 5;
@@ -445,7 +445,7 @@ export function ModalPedido({
     }
 
     if (!String(formularioParaSalvar.idCliente || '').trim()) {
-      definirMensagemErro('Selecione o cliente do pedido.');
+      definirMensagemErro('Selecione o fornecedor do pedido.');
       return;
     }
 
@@ -455,7 +455,7 @@ export function ModalPedido({
     }
 
     if (!String(formularioParaSalvar.idVendedor || '').trim()) {
-      definirMensagemErro('Selecione o vendedor.');
+      definirMensagemErro('Selecione o comprador.');
       return;
     }
 
@@ -687,7 +687,7 @@ export function ModalPedido({
           <div className="cabecalhoModalOrcamento">
             <div>
               <h2 id="tituloModalPedido">
-                {somenteLeitura ? 'Consultar pedido' : pedido ? 'Editar pedido' : 'Incluir pedido'}
+                {somenteLeitura ? 'Consultar ordem de compra' : pedido ? 'Editar ordem de compra' : 'Incluir ordem de compra'}
               </h2>
             </div>
             {pedido?.idPedido ? <CodigoRegistro valor={pedido.idPedido} /> : null}
@@ -705,7 +705,7 @@ export function ModalPedido({
           </div>
         </header>
 
-        <div className="abasModalCliente" role="tablist" aria-label="Secoes do pedido">
+        <div className="abasModalCliente" role="tablist" aria-label="Secoes da ordem de compra">
           {abasModalPedido.map((aba) => (
             <button
               key={aba.id}
@@ -765,12 +765,12 @@ export function ModalPedido({
                           icone="pesquisa"
                           className="botaoCampoAcao"
                           somenteIcone
-                          title="Buscar cliente"
-                          aria-label="Buscar cliente"
+                          title="Buscar fornecedor"
+                          aria-label="Buscar fornecedor"
                           data-atalho-busca-id="cliente"
                           onClick={abrirModalBuscaCliente}
                         >
-                          Buscar cliente
+                          Buscar fornecedor
                         </Botao>
                       ) : null}
                     />
@@ -816,14 +816,14 @@ export function ModalPedido({
                   <>
                     {vendedorBloqueado ? (
                       <CampoFormulario
-                        label="Vendedor"
+                        label="Comprador"
                         name="nomeVendedorBloqueado"
                         value={nomeVendedorSelecionado}
                         disabled
                       />
                     ) : (
                       <CampoSelect
-                        label="Vendedor"
+                        label="Comprador"
                         name="idVendedor"
                         value={formulario.idVendedor}
                         onChange={alterarCampo}
@@ -858,7 +858,7 @@ export function ModalPedido({
                       ) : null}
                     />
                     <CampoSelect
-                      label="Tipo de pedido"
+                      label="Tipo de ordem de compra"
                       name="idTipoPedido"
                       value={formulario.idTipoPedido}
                       onChange={alterarCampo}
@@ -871,16 +871,16 @@ export function ModalPedido({
                   </>
                 ) : (
                   <>
-                    <CampoFormulario label="Vendedor" name="nomeVendedorSnapshot" value={formulario.nomeVendedorSnapshot} disabled />
+                    <CampoFormulario label="Comprador" name="nomeVendedorSnapshot" value={formulario.nomeVendedorSnapshot} disabled />
                     <CampoFormulario label="Prazo de pagamento" name="nomePrazoPagamentoSnapshot" value={formulario.nomePrazoPagamentoSnapshot} disabled />
-                    <CampoFormulario label="Tipo de pedido" name="nomeTipoPedidoSnapshot" value={formulario.nomeTipoPedidoSnapshot} disabled />
+                    <CampoFormulario label="Tipo de ordem de compra" name="nomeTipoPedidoSnapshot" value={formulario.nomeTipoPedidoSnapshot} disabled />
                   </>
                 )}
               </div>
 
               <div className="linhaOrcamentoFechamento">
                 <CampoSelect
-                  label="Etapa do pedido"
+                  label="Etapa da ordem de compra"
                   name="idEtapaPedido"
                   value={formulario.idEtapaPedido}
                   onChange={alterarCampo}
@@ -899,7 +899,7 @@ export function ModalPedido({
             <section className="layoutModalOrcamentoAba layoutModalOrcamentoAbaItens">
               <section className="painelItensOrcamento">
                 <div className="cabecalhoItensOrcamento">
-                  <h3>Itens do pedido</h3>
+                  <h3>Itens da ordem de compra</h3>
                   {!somenteLeitura ? (
                     <Botao variante="secundario" type="button" onClick={() => {
                       abrirNovoItem();
@@ -911,7 +911,7 @@ export function ModalPedido({
 
                 <GradePadrao
                   className="gradeContatosModal gradeItensOrcamentoRolavel"
-                  classNameTabela="tabelaContatosModal tabelaItensOrcamento"
+                  classNameTabela="tabelaContatosModal tabelaItensCotacao"
                   classNameMensagem="mensagemTabelaContatosModal"
                   cabecalho={(
                     <tr>
@@ -936,7 +936,7 @@ export function ModalPedido({
                       <tr key={`${item.idItemPedido || indice}-${indice}`}>
                         <td>
                           {imagemItem ? (
-                            <img src={imagemItem} alt={item.descricaoProdutoSnapshot || 'Item do pedido'} className="miniaturaItemOrcamento" />
+                            <img src={imagemItem} alt={item.descricaoProdutoSnapshot || 'Item da ordem de compra'} className="miniaturaItemOrcamento" />
                           ) : (
                             <div className="miniaturaItemOrcamentoPlaceholder">
                               {obterIniciaisItemPedido(item)}
@@ -974,7 +974,7 @@ export function ModalPedido({
                   })}
                 </GradePadrao>
               </section>
-              <div className="resumoTotalItensOrcamento resumoTotalItensOrcamentoRodape">
+              <div className="resumoTotalItensCotacao resumoTotalItensOrcamentoRodape">
                 <span className="rotuloResumoTotalItensOrcamento">Total dos itens</span>
                 <strong className="valorResumoTotalItensOrcamento">{normalizarPreco(totalPedido)}</strong>
               </div>
@@ -985,12 +985,12 @@ export function ModalPedido({
             <section className="layoutModalOrcamentoAba">
               <div className="linhaOrcamentoComercial">
                 <CampoFormulario
-                  label="Orcamento vinculado"
+                  label="Cotacao vinculado"
                   name="orcamentoOrigemPedido"
                   value={formulario.codigoOrcamentoOrigem
                     ? `#${String(formulario.codigoOrcamentoOrigem).padStart(4, '0')}`
                     : ''}
-                  placeholder="Sem orcamento vinculado"
+                  placeholder="Sem cotacao vinculado"
                   disabled
                 />
                 <CampoFormulario
@@ -1035,7 +1035,7 @@ export function ModalPedido({
           {abaAtiva === 'campos' ? (
             <section className="layoutModalOrcamentoAba layoutModalOrcamentoCampos">
               <div className="campoFormulario campoFormularioIntegral">
-                <label htmlFor="observacaoPedido">Observacao do pedido</label>
+                <label htmlFor="observacaoPedido">Observacao da ordem de compra</label>
                 <textarea
                   id="observacaoPedido"
                   name="observacao"
@@ -1098,7 +1098,7 @@ export function ModalPedido({
 
       <ModalItemProduto
           aberto={modalItemAberto}
-          titulo={somenteLeitura ? 'Consultar item do pedido' : 'Editar item do pedido'}
+          titulo={somenteLeitura ? 'Consultar item da ordem de compra' : 'Editar item da ordem de compra'}
           somenteLeitura={somenteLeitura}
           itemFormulario={itemFormulario}
           produtos={produtosAtivos}
@@ -1134,8 +1134,8 @@ export function ModalPedido({
           aberto={modalBuscaClienteAberto}
           empresa={empresa}
           clientes={clientesAtivos}
-          rotuloAcaoPrimaria={aoIncluirCliente ? 'Incluir cliente' : ''}
-          tituloAcaoPrimaria={aoIncluirCliente ? 'Incluir cliente' : ''}
+          rotuloAcaoPrimaria={aoIncluirCliente ? 'Incluir fornecedor' : ''}
+          tituloAcaoPrimaria={aoIncluirCliente ? 'Incluir fornecedor' : ''}
           iconeAcaoPrimaria="adicionar"
           aoAcionarPrimaria={aoIncluirCliente
             ? () => {
@@ -1173,7 +1173,7 @@ export function ModalPedido({
       {modalMotivoDevolucaoAberto ? (
           <div className="camadaConfirmacaoModal" role="presentation" onMouseDown={fecharModalMotivoDevolucao}>
             <div
-              className="modalConfirmacaoAgenda modalEtapaRapidaOrcamento"
+              className="modalConfirmacaoAgenda modalEtapaRapidaCotacao"
               role="alertdialog"
               aria-modal="true"
               aria-labelledby="tituloMotivoDevolucaoPedido"
@@ -1635,7 +1635,7 @@ function obterProximoCodigoCliente(clientes) {
 
 function montarRotuloCliente(cliente, empresa) {
   const codigo = formatarCodigoCliente(cliente, empresa);
-  const nome = cliente?.nomeFantasia || cliente?.razaoSocial || 'Cliente sem nome';
+  const nome = cliente?.nomeFantasia || cliente?.razaoSocial || 'Fornecedor sem nome';
   const localizacao = [cliente?.cidade, cliente?.estado].filter(Boolean).join('/');
 
   return localizacao ? `${codigo} - ${nome} - ${localizacao}` : `${codigo} - ${nome}`;

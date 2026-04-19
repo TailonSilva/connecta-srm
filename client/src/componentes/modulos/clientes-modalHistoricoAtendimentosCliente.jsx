@@ -18,8 +18,8 @@ export function ModalHistoricoAtendimentosCliente({
   return (
     <ModalHistoricoGrade
       aberto={aberto}
-      titulo="Atendimentos do cliente"
-      subtitulo={cliente?.nomeFantasia || cliente?.razaoSocial || 'Cliente nao salvo'}
+      titulo="Atendimentos do fornecedor"
+      subtitulo={cliente?.nomeFantasia || cliente?.razaoSocial || 'Fornecedor nao salvo'}
       className="modalHistoricoAtendimentosCliente"
       filtrosAtivos={filtrosAtivos}
       tituloFiltro="Filtrar atendimentos"

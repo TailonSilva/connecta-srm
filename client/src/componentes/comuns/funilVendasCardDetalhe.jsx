@@ -44,7 +44,7 @@ export function FunilVendasCardDetalhe({ referencia, etapaSelecionada, indiceSel
     <aside
       ref={referencia}
       className="funilVendasCardDetalhe"
-      style={{ '--cor-etapa-funil': etapaSelecionada.cor || '#1791e2' }}
+      style={{ '--cor-etapa-funil': etapaSelecionada.cor || '#EC8702' }}
     >
       <div className="funilVendasCardDetalheTopo">
         <div>

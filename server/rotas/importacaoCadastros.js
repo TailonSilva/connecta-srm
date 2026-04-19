@@ -4,12 +4,12 @@ const { entidades } = require('../configuracoes/entidades');
 const { inserirRegistro } = require('../repositorios/crudRepositorio');
 
 const rotaImportacaoCadastros = express.Router();
-const entidadeCliente = entidades.find((entidade) => entidade.nome === 'cliente');
+const entidadeFornecedor = entidades.find((entidade) => entidade.nome === 'fornecedor');
 const entidadeProduto = entidades.find((entidade) => entidade.nome === 'produto');
 
-rotaImportacaoCadastros.post('/clientes', async (requisicao, resposta) => {
+async function importarFornecedoresPelaRota(requisicao, resposta) {
   const linhas = Array.isArray(requisicao.body?.linhas) ? requisicao.body.linhas : [];
-  const idVendedorPadrao = requisicao.body?.idVendedorPadrao ? Number(requisicao.body.idVendedorPadrao) : null;
+  const idCompradorPadrao = requisicao.body?.idCompradorPadrao ? Number(requisicao.body.idCompradorPadrao) : null;
 
   if (linhas.length === 0) {
     resposta.status(400).json({ mensagem: 'Informe ao menos uma linha para importar.' });
@@ -17,12 +17,15 @@ rotaImportacaoCadastros.post('/clientes', async (requisicao, resposta) => {
   }
 
   try {
-    const resultado = await importarClientes(linhas, { idVendedorPadrao });
+    const resultado = await importarFornecedores(linhas, { idCompradorPadrao });
     resposta.json(resultado);
   } catch (erro) {
-    resposta.status(500).json({ mensagem: erro.message || 'Nao foi possivel importar os clientes.' });
+    resposta.status(500).json({ mensagem: erro.message || 'Nao foi possivel importar os fornecedores.' });
   }
-});
+}
+
+rotaImportacaoCadastros.post('/fornecedores', importarFornecedoresPelaRota);
+rotaImportacaoCadastros.post('/clientes', importarFornecedoresPelaRota);
 
 rotaImportacaoCadastros.post('/produtos', async (requisicao, resposta) => {
   const linhas = Array.isArray(requisicao.body?.linhas) ? requisicao.body.linhas : [];
@@ -40,18 +43,18 @@ rotaImportacaoCadastros.post('/produtos', async (requisicao, resposta) => {
   }
 });
 
-async function importarClientes(linhas, opcoes = {}) {
-  const [clientesExistentes, vendedores, ramos, grupos] = await Promise.all([
-    consultarTodos('SELECT idCliente, cnpj, codigoAlternativo FROM cliente'),
-    consultarTodos('SELECT idVendedor, nome, status FROM vendedor'),
+async function importarFornecedores(linhas, opcoes = {}) {
+  const [fornecedoresExistentes, compradores, ramos, grupos] = await Promise.all([
+    consultarTodos('SELECT idFornecedor, cnpj, codigoAlternativo FROM fornecedor'),
+    consultarTodos('SELECT idComprador, nome, status FROM comprador'),
     consultarTodos('SELECT idRamo, descricao, status FROM ramoAtividade'),
     consultarTodos('SELECT idGrupoEmpresa, descricao, status FROM grupoEmpresa')
   ]);
 
-  const idsOcupados = new Set(clientesExistentes.map((item) => Number(item.idCliente)).filter(Number.isFinite));
-  const cnpjsExistentes = new Set(clientesExistentes.map((item) => normalizarDocumento(item.cnpj)).filter(Boolean));
-  const codigosAlternativosExistentes = new Set(clientesExistentes.map((item) => normalizarInteiroTexto(item.codigoAlternativo)).filter(Boolean));
-  const vendedoresPorNome = criarIndiceReferencias(vendedores, 'nome', 'idVendedor');
+  const idsOcupados = new Set(fornecedoresExistentes.map((item) => Number(item.idFornecedor)).filter(Number.isFinite));
+  const cnpjsExistentes = new Set(fornecedoresExistentes.map((item) => normalizarDocumento(item.cnpj)).filter(Boolean));
+  const codigosAlternativosExistentes = new Set(fornecedoresExistentes.map((item) => normalizarInteiroTexto(item.codigoAlternativo)).filter(Boolean));
+  const compradoresPorNome = criarIndiceReferencias(compradores, 'nome', 'idComprador');
   const ramosPorDescricao = criarIndiceReferencias(ramos, 'descricao', 'idRamo');
   const gruposPorDescricao = criarIndiceReferencias(grupos, 'descricao', 'idGrupoEmpresa');
   const rejeitados = [];
@@ -66,12 +69,12 @@ async function importarClientes(linhas, opcoes = {}) {
     const statusNormalizado = normalizarStatusTexto(linha.status);
     const codigoAlternativo = validarInteiroImportado(linha.codigoAlternativo, 'Codigo alternativo', erros);
     const codigo = validarInteiroImportado(linha.codigo, 'Codigo', erros);
-    const referenciaVendedor = opcoes.idVendedorPadrao
-      ? { situacao: 'ativo', id: Number(opcoes.idVendedorPadrao), valorInformado: '' }
-      : resolverReferencia(vendedoresPorNome, linha.vendedor);
+    const referenciaComprador = opcoes.idCompradorPadrao
+      ? { situacao: 'ativo', id: Number(opcoes.idCompradorPadrao), valorInformado: '' }
+      : resolverReferencia(compradoresPorNome, linha.comprador);
     const referenciaRamo = resolverReferencia(ramosPorDescricao, linha.ramoAtividade);
     const referenciaGrupo = resolverReferencia(gruposPorDescricao, linha.grupoEmpresa);
-    const idVendedor = referenciaVendedor.id;
+    const idComprador = referenciaComprador.id;
     const idRamo = referenciaRamo.id;
     const idGrupoEmpresa = referenciaGrupo.id;
 
@@ -79,7 +82,7 @@ async function importarClientes(linhas, opcoes = {}) {
     validarObrigatorioTexto(linha.nomeFantasia, 'Nome fantasia', erros);
     validarObrigatorioTexto(linha.tipo, 'Tipo', erros);
     validarObrigatorioTexto(linha.cnpj, 'CNPJ/CPF', erros);
-    validarReferenciaObrigatoria(referenciaVendedor, 'vendedor', 'Vendedor', 'Use o nome exato de um vendedor ativo.', erros, pendenciasReferencias);
+    validarReferenciaObrigatoria(referenciaComprador, 'comprador', 'Comprador', 'Use o nome exato de um comprador ativo.', erros, pendenciasReferencias);
     validarReferenciaObrigatoria(referenciaRamo, 'ramoAtividade', 'Ramo de atividade', 'Use a descricao exata de um ramo ativo.', erros, pendenciasReferencias);
     validarReferenciaOpcional(referenciaGrupo, 'grupoEmpresa', 'Grupo de empresa', 'Use a descricao exata de um grupo ativo.', erros, pendenciasReferencias);
     validarTamanho(linha.razaoSocial, 255, 'Razao social', erros);
@@ -106,11 +109,11 @@ async function importarClientes(linhas, opcoes = {}) {
     }
 
     if (documentoValido && cnpjNormalizado && cnpjsExistentes.has(cnpjNormalizado)) {
-      erros.push('Ja existe cliente cadastrado com este CNPJ/CPF.');
+      erros.push('Ja existe fornecedor cadastrado com este CNPJ/CPF.');
     }
 
     if (codigoAlternativo && codigosAlternativosExistentes.has(codigoAlternativo)) {
-      erros.push('Ja existe cliente cadastrado com este Codigo alternativo.');
+      erros.push('Ja existe fornecedor cadastrado com este Codigo alternativo.');
     }
 
     if (codigo && idsOcupados.has(Number(codigo))) {
@@ -128,10 +131,10 @@ async function importarClientes(linhas, opcoes = {}) {
       continue;
     }
 
-    const idCliente = codigo ? Number(codigo) : obterProximoCodigoDisponivel(idsOcupados);
+    const idFornecedor = codigo ? Number(codigo) : obterProximoCodigoDisponivel(idsOcupados);
     const payload = {
-      idCliente,
-      idVendedor: Number(idVendedor),
+      idFornecedor,
+      idComprador: Number(idComprador),
       idConceito: 1,
       idRamo: Number(idRamo),
       idGrupoEmpresa: idGrupoEmpresa ? Number(idGrupoEmpresa) : null,
@@ -156,9 +159,9 @@ async function importarClientes(linhas, opcoes = {}) {
     };
 
     try {
-      await inserirRegistro(entidadeCliente, payload);
+      await inserirRegistro(entidadeFornecedor, payload);
       importados += 1;
-      idsOcupados.add(idCliente);
+      idsOcupados.add(idFornecedor);
       cnpjsExistentes.add(cnpjNormalizado);
       if (codigoAlternativo) {
         codigosAlternativosExistentes.add(codigoAlternativo);
@@ -167,7 +170,7 @@ async function importarClientes(linhas, opcoes = {}) {
       rejeitados.push({
         linha: linha.linha,
         identificador,
-        motivos: [erro.message || 'Falha ao inserir cliente.'],
+        motivos: [erro.message || 'Falha ao inserir fornecedor.'],
         pendenciasReferencias,
         dados: serializarLinhaImportacao(linha)
       });

@@ -3,24 +3,24 @@ const { consultarUm } = require('../configuracoes/banco');
 const validacoesPorEntidade = {
   usuario: [
     {
-      campo: 'idVendedor',
-      tabela: 'vendedor',
-      chavePrimaria: 'idVendedor',
+      campo: 'idComprador',
+      tabela: 'comprador',
+      chavePrimaria: 'idComprador',
       colunaAtiva: 'status',
-      mensagem: 'Selecione um vendedor ativo.'
+      mensagem: 'Selecione um comprador ativo.'
     }
   ],
-  cliente: [
+  fornecedor: [
     {
-      campo: 'idVendedor',
-      tabela: 'vendedor',
-      chavePrimaria: 'idVendedor',
+      campo: 'idComprador',
+      tabela: 'comprador',
+      chavePrimaria: 'idComprador',
       colunaAtiva: 'status',
-      mensagem: 'Selecione um vendedor ativo.'
+      mensagem: 'Selecione um comprador ativo.'
     },
     {
       campo: 'idConceito',
-      tabela: 'conceitoCliente',
+      tabela: 'conceitoFornecedor',
       chavePrimaria: 'idConceito',
       colunaAtiva: 'status',
       mensagem: 'Selecione um conceito ativo.'
@@ -51,11 +51,11 @@ const validacoesPorEntidade = {
   ],
   contato: [
     {
-      campo: 'idCliente',
-      tabela: 'cliente',
-      chavePrimaria: 'idCliente',
+      campo: 'idFornecedor',
+      tabela: 'fornecedor',
+      chavePrimaria: 'idFornecedor',
       colunaAtiva: 'status',
-      mensagem: 'Selecione um cliente ativo.'
+      mensagem: 'Selecione um fornecedor ativo.'
     }
   ],
   produto: [
@@ -117,11 +117,11 @@ const validacoesPorEntidade = {
   ],
   atendimento: [
     {
-      campo: 'idCliente',
-      tabela: 'cliente',
-      chavePrimaria: 'idCliente',
+      campo: 'idFornecedor',
+      tabela: 'fornecedor',
+      chavePrimaria: 'idFornecedor',
       colunaAtiva: 'status',
-      mensagem: 'Selecione um cliente ativo.'
+      mensagem: 'Selecione um fornecedor ativo.'
     },
     {
       campo: 'idContato',
@@ -159,13 +159,13 @@ const validacoesPorEntidade = {
       mensagem: 'Selecione uma origem de atendimento ativa.'
     }
   ],
-  orcamento: [
+  cotacao: [
     {
-      campo: 'idCliente',
-      tabela: 'cliente',
-      chavePrimaria: 'idCliente',
+      campo: 'idFornecedor',
+      tabela: 'fornecedor',
+      chavePrimaria: 'idFornecedor',
       colunaAtiva: 'status',
-      mensagem: 'Selecione um cliente ativo.'
+      mensagem: 'Selecione um fornecedor ativo.'
     },
     {
       campo: 'idContato',
@@ -182,11 +182,11 @@ const validacoesPorEntidade = {
       mensagem: 'Selecione um usuario ativo.'
     },
     {
-      campo: 'idVendedor',
-      tabela: 'vendedor',
-      chavePrimaria: 'idVendedor',
+      campo: 'idComprador',
+      tabela: 'comprador',
+      chavePrimaria: 'idComprador',
       colunaAtiva: 'status',
-      mensagem: 'Selecione um vendedor ativo.'
+      mensagem: 'Selecione um comprador ativo.'
     },
     {
       campo: 'idPrazoPagamento',
@@ -196,11 +196,11 @@ const validacoesPorEntidade = {
       mensagem: 'Selecione um prazo de pagamento ativo.'
     },
     {
-      campo: 'idEtapaOrcamento',
-      tabela: 'etapaOrcamento',
-      chavePrimaria: 'idEtapaOrcamento',
+      campo: 'idEtapaCotacao',
+      tabela: 'etapaCotacao',
+      chavePrimaria: 'idEtapaCotacao',
       colunaAtiva: 'status',
-      mensagem: 'Selecione uma etapa de orcamento ativa.'
+      mensagem: 'Selecione uma etapa de cotacao ativa.'
     },
     {
       campo: 'idMotivoPerda',
@@ -210,7 +210,7 @@ const validacoesPorEntidade = {
       mensagem: 'Selecione um motivo da perda ativo.'
     }
   ],
-  itemOrcamento: [
+  itemCotacao: [
     {
       campo: 'idProduto',
       tabela: 'produto',
@@ -219,22 +219,22 @@ const validacoesPorEntidade = {
       mensagem: 'Selecione um produto ativo.'
     }
   ],
-  valorCampoOrcamento: [
+  valorCampoCotacao: [
     {
-      campo: 'idCampoOrcamento',
-      tabela: 'campoOrcamentoConfiguravel',
-      chavePrimaria: 'idCampoOrcamento',
+      campo: 'idCampoCotacao',
+      tabela: 'campoCotacaoConfiguravel',
+      chavePrimaria: 'idCampoCotacao',
       colunaAtiva: 'status',
-      mensagem: 'Selecione um campo do orcamento ativo.'
+      mensagem: 'Selecione um campo da cotacao ativo.'
     }
   ],
-  pedido: [
+  ordemCompra: [
     {
-      campo: 'idCliente',
-      tabela: 'cliente',
-      chavePrimaria: 'idCliente',
+      campo: 'idFornecedor',
+      tabela: 'fornecedor',
+      chavePrimaria: 'idFornecedor',
       colunaAtiva: 'status',
-      mensagem: 'Selecione um cliente ativo.'
+      mensagem: 'Selecione um fornecedor ativo.'
     },
     {
       campo: 'idContato',
@@ -251,11 +251,11 @@ const validacoesPorEntidade = {
       mensagem: 'Selecione um usuario ativo.'
     },
     {
-      campo: 'idVendedor',
-      tabela: 'vendedor',
-      chavePrimaria: 'idVendedor',
+      campo: 'idComprador',
+      tabela: 'comprador',
+      chavePrimaria: 'idComprador',
       colunaAtiva: 'status',
-      mensagem: 'Selecione um vendedor ativo.'
+      mensagem: 'Selecione um comprador ativo.'
     },
     {
       campo: 'idPrazoPagamento',
@@ -265,11 +265,11 @@ const validacoesPorEntidade = {
       mensagem: 'Selecione um prazo de pagamento ativo.'
     },
     {
-      campo: 'idTipoPedido',
-      tabela: 'tipoPedido',
-      chavePrimaria: 'idTipoPedido',
+      campo: 'idTipoOrdemCompra',
+      tabela: 'tipoOrdemCompra',
+      chavePrimaria: 'idTipoOrdemCompra',
       colunaAtiva: 'status',
-      mensagem: 'Selecione um tipo de pedido ativo.'
+      mensagem: 'Selecione um tipo de ordem de compra ativa.'
     },
     {
       campo: 'idMotivoDevolucao',
@@ -279,14 +279,14 @@ const validacoesPorEntidade = {
       mensagem: 'Selecione um motivo da devolucao ativo.'
     },
     {
-      campo: 'idEtapaPedido',
-      tabela: 'etapaPedido',
+      campo: 'idEtapaOrdemCompra',
+      tabela: 'etapaOrdemCompra',
       chavePrimaria: 'idEtapa',
       colunaAtiva: 'status',
-      mensagem: 'Selecione uma etapa de pedido ativa.'
+      mensagem: 'Selecione uma etapa de ordem de compra ativa.'
     }
   ],
-  itemPedido: [
+  itemOrdemCompra: [
     {
       campo: 'idProduto',
       tabela: 'produto',
@@ -295,20 +295,20 @@ const validacoesPorEntidade = {
       mensagem: 'Selecione um produto ativo.'
     }
   ],
-  valorCampoPedido: [
+  valorCampoOrdemCompra: [
     {
-      campo: 'idCampoPedido',
-      tabela: 'campoPedidoConfiguravel',
-      chavePrimaria: 'idCampoPedido',
+      campo: 'idCampoOrdemCompra',
+      tabela: 'campoOrdemCompraConfiguravel',
+      chavePrimaria: 'idCampoOrdemCompra',
       colunaAtiva: 'status',
-      mensagem: 'Selecione um campo do pedido ativo.'
+      mensagem: 'Selecione um campo do ordem de compra ativa.'
     },
     {
-      campo: 'idCampoOrcamento',
-      tabela: 'campoOrcamentoConfiguravel',
-      chavePrimaria: 'idCampoOrcamento',
+      campo: 'idCampoCotacao',
+      tabela: 'campoCotacaoConfiguravel',
+      chavePrimaria: 'idCampoCotacao',
       colunaAtiva: 'status',
-      mensagem: 'Selecione um campo do orcamento ativo.'
+      mensagem: 'Selecione um campo da cotacao ativo.'
     }
   ]
 };

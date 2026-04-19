@@ -6,7 +6,7 @@ const path = require('node:path');
 
 const isDev = !app.isPackaged;
 const urlFrontendDev = 'http://localhost:5174';
-const nomeDiretorioPersistencia = 'Connecta CRM';
+const nomeDiretorioPersistencia = 'Connecta SRM';
 let apiServer;
 let mainWindow;
 let autoUpdater;
@@ -134,7 +134,7 @@ function obterDiretoriosDadosLegados() {
 }
 
 function migrarBancoSeNecessario(diretorioDestino) {
-  const caminhoBancoDestino = path.join(diretorioDestino, 'crm.sqlite');
+  const caminhoBancoDestino = path.join(diretorioDestino, 'srm.sqlite');
 
   if (fs.existsSync(caminhoBancoDestino)) {
     return;
@@ -148,7 +148,7 @@ function migrarBancoSeNecessario(diretorioDestino) {
       continue;
     }
 
-    const caminhoBancoLegado = path.join(caminhoLegadoNormalizado, 'crm.sqlite');
+    const caminhoBancoLegado = path.join(caminhoLegadoNormalizado, 'crm.sqlite'); // Mantém para migração de legado
 
     if (!fs.existsSync(caminhoBancoLegado)) {
       continue;
@@ -166,7 +166,7 @@ function migrarBancoSeNecessario(diretorioDestino) {
 
 async function criarBackupDadosAntesAtualizacao() {
   const diretorioOrigem = obterDiretorioDadosPersistente();
-  const caminhoBancoOrigem = path.join(diretorioOrigem, 'crm.sqlite');
+  const caminhoBancoOrigem = path.join(diretorioOrigem, 'srm.sqlite');
 
   if (!fs.existsSync(caminhoBancoOrigem)) {
     return null;
@@ -235,7 +235,7 @@ function copiarDiretorioSemBanco(diretorioOrigem, diretorioDestino) {
   fs.cpSync(diretorioOrigem, diretorioDestino, {
     recursive: true,
     force: true,
-    filter: (origem) => path.basename(origem) !== 'crm.sqlite'
+    filter: (origem) => path.basename(origem) !== 'srm.sqlite'
   });
 }
 
@@ -265,8 +265,8 @@ function gerarCopiaConsistenteBanco(caminhoDestinoBanco) {
 }
 
 async function prepararConteudoBackup(diretorioOrigem, diretorioDestino) {
-  const caminhoBancoOrigem = path.join(diretorioOrigem, 'crm.sqlite');
-  const caminhoBancoDestino = path.join(diretorioDestino, 'crm.sqlite');
+  const caminhoBancoOrigem = path.join(diretorioOrigem, 'srm.sqlite');
+  const caminhoBancoDestino = path.join(diretorioDestino, 'srm.sqlite');
 
   fs.rmSync(diretorioDestino, { recursive: true, force: true });
   fs.mkdirSync(diretorioDestino, { recursive: true });

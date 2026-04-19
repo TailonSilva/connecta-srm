@@ -1,8 +1,8 @@
 import { ModalHistoricoVendasCadastro } from '../comuns/modalHistoricoVendasCadastro';
 
 const abasVendasHistoricoCliente = [
-  { id: 'pedidos', label: 'Pedidos' },
-  { id: 'itens', label: 'Itens do pedido' }
+  { id: 'pedidos', label: 'Ordens de Compra' },
+  { id: 'itens', label: 'Itens da ordem de compra' }
 ];
 
 export function ModalHistoricoVendasCliente({
@@ -24,11 +24,11 @@ export function ModalHistoricoVendasCliente({
   return (
     <ModalHistoricoVendasCadastro
       aberto={aberto}
-      titulo="Vendas do cliente"
-      subtitulo={cliente?.nomeFantasia || cliente?.razaoSocial || 'Cliente nao salvo'}
+      titulo="Vendas do fornecedor"
+      subtitulo={cliente?.nomeFantasia || cliente?.razaoSocial || 'Fornecedor nao salvo'}
       filtrosAtivos={filtrosAtivos}
-      tituloFiltro="Filtrar pedidos"
-      ariaFiltro="Filtrar pedidos"
+      tituloFiltro="Filtrar ordens de compra"
+      ariaFiltro="Filtrar ordens de compra"
       valorPesquisa={valorPesquisa}
       onAlterarPesquisa={onAlterarPesquisa}
       placeholderPesquisa="Pesquisar em vendas..."
@@ -44,10 +44,10 @@ export function ModalHistoricoVendasCliente({
       itensPedidos={itensPedidos}
       exibirPedidos
       contextoSalvo={Boolean(cliente?.idCliente)}
-      mensagemSemContextoPedidos="Os pedidos ficarao disponiveis apos salvar o cliente."
-      mensagemSemContextoItens="Os itens dos pedidos ficarao disponiveis apos salvar o cliente."
-      mensagemVazioPedidos="Nenhum pedido encontrado com os filtros informados."
-      mensagemVazioItens="Nenhum item de pedido encontrado com os filtros informados."
+      mensagemSemContextoPedidos="Os ordens de compra ficarao disponiveis apos salvar o cliente."
+      mensagemSemContextoItens="Os itens das ordens de compra ficarao disponiveis apos salvar o cliente."
+      mensagemVazioPedidos="Nenhum ordem de compra encontrado com os filtros informados."
+      mensagemVazioItens="Nenhum item de ordem de compra encontrado com os filtros informados."
       exibirProdutoNosItens
       onConsultarPedido={onConsultarPedido}
     />

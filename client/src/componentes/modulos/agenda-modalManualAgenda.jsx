@@ -162,7 +162,7 @@ export function ModalManualAgenda({
           titulo: 'Campos e validacoes principais',
           itens: [
             'Assunto, dia, horario de inicio, horario de fim, tipo e status sao obrigatorios em qualquer agendamento.',
-            'Contato do cliente depende do cliente escolhido e fica bloqueado ate haver cliente selecionado.',
+            'Contato do fornecedor depende do fornecedor escolhido e fica bloqueado ate haver fornecedor selecionado.',
             'Cliente e contato usam os mesmos modais reutilizaveis de busca do fluxo comercial.',
             'Quando o foco estiver em Cliente ou Contato do cliente, `F8` abre a busca correspondente sem precisar clicar no botao lateral.',
             'Ao confirmar a busca de cliente ou contato, o foco retorna para o campo preenchido no agendamento.',
@@ -222,9 +222,9 @@ function criarResumoObrigatoriedades(tiposAgenda) {
     .map((tipoAgenda) => ({
       id: tipoAgenda.idTipoAgenda,
       nome: tipoAgenda.descricao || 'Tipo sem descricao',
-      cor: tipoAgenda.cor || '#1791e2',
+      cor: tipoAgenda.cor || '#EC8702',
       tags: [
-        { rotulo: 'Cliente', obrigatorio: Boolean(tipoAgenda.obrigarCliente) },
+        { rotulo: 'Fornecedor', obrigatorio: Boolean(tipoAgenda.obrigarCliente) },
         { rotulo: 'Local', obrigatorio: Boolean(tipoAgenda.obrigarLocal) },
         { rotulo: 'Recurso', obrigatorio: Boolean(tipoAgenda.obrigarRecurso) }
       ]

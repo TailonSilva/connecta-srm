@@ -338,9 +338,9 @@ function renderizarCelulaCliente({ coluna, empresa, cliente, aoConsultar, aoEdit
     return (
       <CelulaLayoutCliente coluna={coluna} {...propriedadesCelula}>
         <AcoesRegistro
-          rotuloConsulta="Consultar cliente"
-          rotuloEdicao="Editar cliente"
-          rotuloInativacao="Inativar cliente"
+          rotuloConsulta="Consultar fornecedor"
+          rotuloEdicao="Editar fornecedor"
+          rotuloInativacao="Inativar fornecedor"
           aoConsultar={aoConsultar}
           aoEditar={aoEditar}
           aoInativar={aoInativar}

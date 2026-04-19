@@ -161,7 +161,7 @@ export function ModalUsuarios({
     }
 
     if (formulario.tipo === 'Usuario padrao' && !formulario.idVendedor) {
-      definirMensagemErro('Selecione o vendedor vinculado ao usuario padrao.');
+      definirMensagemErro('Selecione o comprador vinculado ao usuario padrao.');
       return;
     }
 
@@ -255,7 +255,7 @@ export function ModalUsuarios({
                   <th>Nome</th>
                   <th>Codigo</th>
                   <th>Tipo</th>
-                  <th>Vendedor</th>
+                  <th>Comprador</th>
                   <th>Status</th>
                   <th className="cabecalhoAcoesContato">Acoes</th>
                 </tr>
@@ -379,7 +379,7 @@ export function ModalUsuarios({
                     <CampoFormulario label="Senha" name="senha" type="password" value={formulario.senha} onChange={alterarCampo} disabled={modoFormulario === 'consulta'} required />
                     <CampoSelect label="Tipo" name="tipo" value={formulario.tipo} onChange={alterarCampo} options={tiposUsuario} disabled={modoFormulario === 'consulta'} required />
                     <CampoSelect
-                      label="Vendedor"
+                      label="Comprador"
                       name="idVendedor"
                       value={formulario.idVendedor}
                       onChange={alterarCampo}

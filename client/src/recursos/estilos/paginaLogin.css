@@ -4,14 +4,14 @@
   place-items: center;
   padding: 24px;
   background:
-    radial-gradient(circle at top, rgba(91, 189, 245, 0.26), transparent 28%),
-    linear-gradient(180deg, #f8fbfe 0%, #e7f0f7 100%);
+    radial-gradient(circle at top, rgba(255, 179, 71, 0.26), transparent 28%),
+    linear-gradient(180deg, #FFFBF6 0%, #e7f0f7 100%);
 }
 
 .paginaLoginCartao {
   width: min(440px, 100%);
   padding: 28px;
-  border: 1px solid rgba(23, 145, 226, 0.14);
+  border: 1px solid rgba(236, 135, 2, 0.14);
   border-radius: 28px;
   background: rgba(255, 255, 255, 0.98);
   box-shadow: 0 28px 60px rgba(28, 58, 82, 0.18);

@@ -32,7 +32,7 @@ export function SecaoRankingInicio({ titulo, descricao, itens }) {
             <IconeAjudaSessaoInicio
               titulo={titulo}
               ajuda={{
-                composicao: 'Ranking por valor liquido dos pedidos.',
+                composicao: 'Ranking por valor liquido das ordens de compra.',
                 periodo: 'Mes corrente pela data de entrada do pedido.'
               }}
             />

@@ -20,7 +20,7 @@
   align-items: center;
   gap: 10px;
   padding: 6px;
-  border: 1px solid rgba(23, 145, 226, 0.12);
+  border: 1px solid rgba(236, 135, 2, 0.12);
   border-radius: 999px;
   background: rgba(248, 251, 254, 0.86);
 }
@@ -48,5 +48,5 @@
 .inicioCabecalhoAba.ativa {
   background: linear-gradient(135deg, var(--corPrimaria) 0%, var(--corPrimariaForte) 100%);
   color: #ffffff;
-  box-shadow: 0 12px 22px rgba(23, 145, 226, 0.2);
+  box-shadow: 0 12px 22px rgba(236, 135, 2, 0.2);
 }

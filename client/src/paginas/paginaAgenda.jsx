@@ -1311,9 +1311,9 @@ export function PaginaAgenda({ usuarioLogado }) {
           },
           {
             name: 'idVendedor',
-            label: 'Vendedor',
+            label: 'Comprador',
             multiple: true,
-            placeholder: 'Todos os vendedores',
+            placeholder: 'Todos os compradores',
             options: vendedores.map((vendedor) => ({
               valor: String(vendedor.idVendedor),
               label: vendedor.nome
@@ -1321,7 +1321,7 @@ export function PaginaAgenda({ usuarioLogado }) {
           },
           {
             name: 'idCliente',
-            label: 'Cliente',
+            label: 'Fornecedor',
             acaoExtra: (
                 <Botao
                   variante="secundario"
@@ -1330,10 +1330,10 @@ export function PaginaAgenda({ usuarioLogado }) {
                   className="botaoCampoAcao"
                   onClick={() => definirModalBuscaClienteFiltrosAberto(true)}
                   somenteIcone
-                title="Buscar cliente"
-                aria-label="Buscar cliente"
+                title="Buscar fornecedor"
+                aria-label="Buscar fornecedor"
               >
-                Buscar cliente
+                Buscar fornecedor
               </Botao>
             ),
             options: clientes.map((cliente) => ({
@@ -1391,8 +1391,8 @@ export function PaginaAgenda({ usuarioLogado }) {
         aberto={modalBuscaClienteFiltrosAberto}
         empresa={empresa}
         clientes={clientes}
-        placeholder="Pesquisar cliente no filtro"
-        ariaLabelPesquisa="Pesquisar cliente no filtro"
+        placeholder="Pesquisar fornecedor no filtro"
+        ariaLabelPesquisa="Pesquisar fornecedor no filtro"
         aoSelecionar={(cliente) => {
           definirFiltrosEmEdicao((estadoAtual) => ({
             ...(estadoAtual || criarFiltrosIniciaisAgenda(usuarioLogado)),
@@ -2086,7 +2086,7 @@ function criarLinhasTooltipAgendamento(agendamento) {
   }
 
   if (agendamento.nomeVendedor) {
-    linhas.push(`Vendedor: ${agendamento.nomeVendedor}`);
+    linhas.push(`Comprador: ${agendamento.nomeVendedor}`);
   }
 
   if (agendamento.nomeLocal && agendamento.nomeLocal !== 'Nao informado') {

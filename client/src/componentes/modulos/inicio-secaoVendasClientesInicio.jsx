@@ -1,7 +1,7 @@
 import '../../recursos/estilos/secaoVendasClientesInicio.css';
 import { SecaoResumoRelacionamentoComModalInicio } from './inicio-secaoResumoRelacionamentoComModalInicio';
 
-export function SecaoVendasClientesInicio({ itens, titulo = 'Vendas do mes por cliente' }) {
+export function SecaoVendasClientesInicio({ itens, titulo = 'Vendas do mes por fornecedor' }) {
   return (
     <SecaoResumoRelacionamentoComModalInicio
       titulo={titulo}
@@ -12,8 +12,8 @@ export function SecaoVendasClientesInicio({ itens, titulo = 'Vendas do mes por c
       colunasPainel={2}
       mensagemVazia="Nenhuma venda registrada no mes atual por cliente."
       modalTitulo={titulo}
-      modalSubtitulo="Lista completa das vendas por cliente no mes corrente."
-      ariaAcao="Abrir lista completa das vendas por cliente no mes"
+      modalSubtitulo="Lista completa das vendas por fornecedor no mes corrente."
+      ariaAcao="Abrir lista completa das vendas por fornecedor no mes"
     />
   );
 }

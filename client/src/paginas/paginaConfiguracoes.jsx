@@ -145,12 +145,12 @@ const atalhosConfiguracao = [
   },
   {
     id: 'conceitosCliente',
-    titulo: 'Conceitos de cliente',
+    titulo: 'Conceitos de fornecedor',
     icone: 'cadastro'
   },
   {
     id: 'vendedores',
-    titulo: 'Vendedores',
+    titulo: 'Compradores',
     icone: 'usuarios'
   },
   {
@@ -185,7 +185,7 @@ const atalhosConfiguracao = [
   },
   {
     id: 'tiposPedido',
-    titulo: 'Tipos de pedido',
+    titulo: 'Tipos de ordem de compra',
     icone: 'pedido'
   },
   {
@@ -245,27 +245,27 @@ const atalhosConfiguracao = [
   },
   {
     id: 'orcamentos',
-    titulo: 'Campos do orcamento',
+    titulo: 'Campos da cotacao',
     icone: 'orcamento'
   },
   {
     id: 'pedidos',
-    titulo: 'Campos do pedido',
+    titulo: 'Campos da ordem de compra',
     icone: 'pedido'
   },
   {
     id: 'layoutOrcamento',
-    titulo: 'Layout Orcamento',
+    titulo: 'Layout Cotacao',
     icone: 'orcamento'
   },
   {
     id: 'etapasPedido',
-    titulo: 'Etapas do pedido',
+    titulo: 'Etapas da ordem de compra',
     icone: 'orcamento'
   },
   {
     id: 'etapasOrcamento',
-    titulo: 'Etapas do orcamento',
+    titulo: 'Etapas da cotacao',
     icone: 'orcamento'
   },
   {
@@ -337,7 +337,7 @@ const secoesConfiguracao = [
   },
   {
     id: 'orcamentosPedidos',
-    titulo: 'Orcamentos/Pedidos',
+    titulo: 'Cotacoes/Ordens de Compra',
     atalhos: atalhosConfiguracao
       .map((atalho) => atalho.id)
       .filter((id) => ![
@@ -533,7 +533,7 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
 
   async function salvarLayoutOrcamento(dadosLayout) {
     if (!empresa?.idEmpresa) {
-      throw new Error('Cadastre a empresa antes de configurar o layout do orcamento.');
+      throw new Error('Cadastre a empresa antes de configurar o layout da cotacao.');
     }
 
     const payload = normalizarPayloadEmpresa({
@@ -779,7 +779,7 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
       );
 
       if (!vendedorAtivo) {
-        throw new Error('Selecione um vendedor ativo para vincular ao usuario.');
+        throw new Error('Selecione um comprador ativo para vincular ao usuario.');
       }
     }
 
@@ -1619,7 +1619,7 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
                           </span>
                         </span>
                         <span className="conteudoCartaoConfiguracao">
-                          <strong>Graficos Orcamentos</strong>
+                          <strong>Graficos Cotacoes</strong>
                         </span>
                       </button>
 
@@ -1699,7 +1699,7 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
       />
       <ModalGraficosPaginaInicial
         aberto={modalGraficosPaginaInicialAberto === 'orcamentos'}
-        titulo="Graficos Orcamentos"
+        titulo="Graficos Cotacoes"
         empresa={empresa}
         configuracoesAtuais={empresa?.graficosPaginaInicialOrcamentos}
         normalizarConfiguracoes={normalizarConfiguracoesGraficosPaginaInicialOrcamentos}
@@ -1869,7 +1869,7 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
       />
       <ModalCadastroConfiguracao
         aberto={cadastroConfiguracaoAberto === 'conceitosCliente'}
-        titulo="Conceitos de cliente"
+        titulo="Conceitos de fornecedor"
         rotuloIncluir="Incluir conceito"
         registros={conceitosCliente}
         chavePrimaria="idConceito"
@@ -1894,8 +1894,8 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
       />
       <ModalCadastroConfiguracao
         aberto={cadastroConfiguracaoAberto === 'vendedores'}
-        titulo="Vendedores"
-        rotuloIncluir="Incluir vendedor"
+        titulo="Compradores"
+        rotuloIncluir="Incluir comprador"
         registros={vendedores}
         chavePrimaria="idVendedor"
         exibirConsulta={false}
@@ -1952,7 +1952,7 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
       />
       <ModalCadastroConfiguracao
         aberto={cadastroConfiguracaoAberto === 'tiposPedido'}
-        titulo="Tipos de pedido"
+        titulo="Tipos de ordem de compra"
         rotuloIncluir="Incluir tipo"
         registros={tiposPedido}
         chavePrimaria="idTipoPedido"
@@ -2059,8 +2059,8 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
         camposFormulario={[
           { name: 'ordem', label: 'Ordem', type: 'number', required: true, defaultValue: 1, min: 1, max: 999, step: 1, inputMode: 'numeric' },
           { name: 'descricao', label: 'Descricao', required: true },
-          { name: 'cor', label: 'Cor', type: 'color', required: true, defaultValue: '#0B74D1' },
-          { name: 'obrigarCliente', label: 'Exigir cliente', type: 'checkbox', defaultValue: false },
+          { name: 'cor', label: 'Cor', type: 'color', required: true, defaultValue: '#EC8702' },
+          { name: 'obrigarCliente', label: 'Exigir fornecedor', type: 'checkbox', defaultValue: false },
           { name: 'obrigarLocal', label: 'Exigir local', type: 'checkbox', defaultValue: false },
           { name: 'obrigarRecurso', label: 'Exigir recurso', type: 'checkbox', defaultValue: false },
           { name: 'status', label: 'Registro ativo', type: 'checkbox', defaultValue: true }
@@ -2191,7 +2191,7 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
       />
       <ModalCadastroConfiguracao
         aberto={cadastroConfiguracaoAberto === 'etapasPedido'}
-        titulo="Etapas do pedido"
+        titulo="Etapas da ordem de compra"
         rotuloIncluir="Incluir etapa"
         registros={etapasPedido}
         chavePrimaria="idEtapa"
@@ -2206,7 +2206,7 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
         camposFormulario={[
           { name: 'ordem', label: 'Ordem', type: 'number', required: true, defaultValue: 1, min: 1, max: 999, step: 1, inputMode: 'numeric' },
           { name: 'descricao', label: 'Descricao', required: true },
-          { name: 'cor', label: 'Cor', type: 'color', required: true, defaultValue: '#0B74D1' },
+          { name: 'cor', label: 'Cor', type: 'color', required: true, defaultValue: '#EC8702' },
           {
             name: 'status',
             label: 'Registro ativo',
@@ -2222,7 +2222,7 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
       />
       <ModalCadastroConfiguracao
         aberto={cadastroConfiguracaoAberto === 'etapasOrcamento'}
-        titulo="Etapas do orcamento"
+        titulo="Etapas da cotacao"
         rotuloIncluir="Incluir etapa"
         registros={etapasOrcamento}
         chavePrimaria="idEtapaOrcamento"
@@ -2251,7 +2251,7 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
         camposFormulario={[
           { name: 'ordem', label: 'Ordem', type: 'number', required: true, defaultValue: 1, min: 1, max: 999, step: 1, inputMode: 'numeric' },
           { name: 'descricao', label: 'Descricao', required: true },
-          { name: 'cor', label: 'Cor', type: 'color', required: true, defaultValue: '#0B74D1' },
+          { name: 'cor', label: 'Cor', type: 'color', required: true, defaultValue: '#EC8702' },
           { name: 'obrigarMotivoPerda', label: 'Exigir motivo da perda', type: 'checkbox', defaultValue: false },
           { name: 'consideraFunilVendas', label: 'Considera no Funil de Vendas', type: 'checkbox', defaultValue: true },
           { name: 'status', label: 'Registro ativo', type: 'checkbox', defaultValue: true }
@@ -2263,7 +2263,7 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
       />
       <ModalCadastroConfiguracao
         aberto={cadastroConfiguracaoAberto === 'orcamentos'}
-        titulo="Campos do orcamento"
+        titulo="Campos da cotacao"
         rotuloIncluir="Incluir campo"
         registros={camposOrcamento}
         chavePrimaria="idCampoOrcamento"
@@ -2282,7 +2282,7 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
       />
       <ModalCadastroConfiguracao
         aberto={cadastroConfiguracaoAberto === 'pedidos'}
-        titulo="Campos do pedido"
+        titulo="Campos da ordem de compra"
         rotuloIncluir="Incluir campo"
         registros={camposPedido}
         chavePrimaria="idCampoPedido"

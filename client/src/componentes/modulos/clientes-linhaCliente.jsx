@@ -29,9 +29,9 @@ export function LinhaCliente({ empresa, cliente, aoConsultar, aoEditar, aoInativ
       </td>
       <td className="colunaGradeAcoes">
         <AcoesRegistro
-          rotuloConsulta="Consultar cliente"
-          rotuloEdicao="Editar cliente"
-          rotuloInativacao="Inativar cliente"
+          rotuloConsulta="Consultar fornecedor"
+          rotuloEdicao="Editar fornecedor"
+          rotuloInativacao="Inativar fornecedor"
           aoConsultar={aoConsultar}
           aoEditar={aoEditar}
           aoInativar={aoInativar}

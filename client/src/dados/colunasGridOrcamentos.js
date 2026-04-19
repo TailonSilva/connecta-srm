@@ -2,16 +2,16 @@ export const TOTAL_COLUNAS_GRID_ORCAMENTOS = 100;
 const BASE_LEGADA_COLUNAS_GRID_ORCAMENTOS = 24;
 const MAX_SPAN_COLUNA_OCULTA = 19;
 const mapaRotulosLegadosColunasGridOrcamentos = new Map([
-  ['Codigo Interno do Orcamento', 'Codigo Interno'],
-  ['Codigo do Orcamento', 'Codigo Interno'],
-  ['Cliente Vinculado ao Orcamento', 'Codigo do Cliente'],
-  ['Contato Vinculado ao Orcamento', 'Codigo do Contato'],
+  ['Codigo Interno do Cotacao', 'Codigo Interno'],
+  ['Codigo do Cotacao', 'Codigo Interno'],
+  ['Fornecedor Vinculado ao Cotacao', 'Codigo do Fornecedor'],
+  ['Contato Vinculado ao Cotacao', 'Codigo do Contato'],
   ['Usuario do Registro', 'Codigo do Usuario'],
-  ['Vendedor Vinculado', 'Codigo do Vendedor'],
-  ['Pedido Vinculado', 'Codigo do Pedido Vinculado'],
-  ['Numero do Pedido Vinculado', 'Codigo do Pedido Vinculado'],
-  ['Etapa Vinculada ao Orcamento', 'Codigo da Etapa'],
-  ['Prazo Vinculado ao Orcamento', 'Codigo do Prazo']
+  ['Comprador Vinculado', 'Codigo do Comprador'],
+  ['Ordem de Compra Vinculado', 'Codigo da Ordem de Compra Vinculado'],
+  ['Numero da Ordem de Compra Vinculado', 'Codigo da Ordem de Compra Vinculado'],
+  ['Etapa Vinculada ao Cotacao', 'Codigo da Etapa'],
+  ['Prazo Vinculado ao Cotacao', 'Codigo do Prazo']
 ]);
 
 export const colunasGridOrcamentos = [
@@ -35,7 +35,7 @@ export const colunasGridOrcamentos = [
   },
   {
     id: 'cliente',
-    rotulo: 'Cliente',
+    rotulo: 'Fornecedor',
     classe: 'colunaGradeTexto',
     obrigatoria: false,
     ordemPadrao: 3,
@@ -44,7 +44,7 @@ export const colunasGridOrcamentos = [
   },
   {
     id: 'idCliente',
-    rotulo: 'Codigo do Cliente',
+    rotulo: 'Codigo do Fornecedor',
     classe: 'colunaGradeTexto',
     obrigatoria: false,
     ordemPadrao: 4,
@@ -98,7 +98,7 @@ export const colunasGridOrcamentos = [
   },
   {
     id: 'idPedidoVinculado',
-    rotulo: 'Codigo do Pedido Vinculado',
+    rotulo: 'Codigo da Ordem de Compra Vinculado',
     classe: 'colunaGradeCodigo',
     obrigatoria: false,
     ordemPadrao: 10,
@@ -107,7 +107,7 @@ export const colunasGridOrcamentos = [
   },
   {
     id: 'idVendedor',
-    rotulo: 'Codigo do Vendedor',
+    rotulo: 'Codigo do Comprador',
     classe: 'colunaGradeTexto',
     obrigatoria: false,
     ordemPadrao: 11,
@@ -134,7 +134,7 @@ export const colunasGridOrcamentos = [
   },
   {
     id: 'vendedor',
-    rotulo: 'Vendedor',
+    rotulo: 'Comprador',
     classe: 'colunaGradeTexto',
     obrigatoria: false,
     ordemPadrao: 14,

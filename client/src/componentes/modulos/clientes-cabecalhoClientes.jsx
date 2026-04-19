@@ -15,16 +15,16 @@ export function CabecalhoClientes({
   return (
     <header className="cabecalhoPagina">
       <div>
-        <h1>Clientes</h1>
-        <p>Gerencie o cadastro e a consulta dos clientes do CRM.</p>
+        <h1>Fornecedores</h1>
+        <p>Gerencie o cadastro e a consulta dos fornecedores do CRM.</p>
       </div>
 
       <div className="acoesCabecalhoPagina">
         <CampoPesquisa
           valor={pesquisa}
           aoAlterar={aoAlterarPesquisa}
-          placeholder="Pesquisar clientes"
-          ariaLabel="Pesquisar clientes"
+          placeholder="Pesquisar fornecedores"
+          ariaLabel="Pesquisar fornecedores"
         />
         <Botao
           variante={filtrosAtivos ? 'primario' : 'secundario'}
@@ -48,8 +48,8 @@ export function CabecalhoClientes({
           variante="primario"
           icone="adicionar"
           somenteIcone
-          title="Novo cliente"
-          aria-label="Novo cliente"
+          title="Novo fornecedor"
+          aria-label="Novo fornecedor"
           onClick={aoNovoCliente}
         />
       </div>

@@ -204,11 +204,11 @@ export function atualizarConceitoCliente(idConceito, payload) {
 }
 
 export function listarVendedoresConfiguracao(opcoes) {
-  return listarCadastroConfiguracao('/vendedores', opcoes);
+  return listarCadastroConfiguracao('/compradores', opcoes);
 }
 
 export function incluirVendedor(payload) {
-  return requisitarApi('/vendedores', {
+  return requisitarApi('/compradores', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -218,7 +218,7 @@ export function incluirVendedor(payload) {
 }
 
 export function atualizarVendedor(idVendedor, payload) {
-  return requisitarApi(`/vendedores/${idVendedor}`, {
+  return requisitarApi(`/compradores/${idVendedor}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json'

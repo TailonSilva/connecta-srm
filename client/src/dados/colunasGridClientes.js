@@ -41,7 +41,7 @@ export const colunasGridClientes = [
   },
   {
     id: 'cliente',
-    rotulo: 'Cliente',
+    rotulo: 'Fornecedor',
     classe: 'colunaGradeTexto',
     obrigatoria: false,
     ordemPadrao: 5,
@@ -230,7 +230,7 @@ export const colunasGridClientes = [
   },
   {
     id: 'vendedor',
-    rotulo: 'Vendedor',
+    rotulo: 'Comprador',
     classe: 'colunaGradeTexto',
     obrigatoria: false,
     ordemPadrao: 26,
@@ -239,7 +239,7 @@ export const colunasGridClientes = [
   },
   {
     id: 'idVendedor',
-    rotulo: 'Vendedor do Cadastro',
+    rotulo: 'Comprador do Cadastro',
     classe: 'colunaGradeTexto',
     obrigatoria: false,
     ordemPadrao: 27,

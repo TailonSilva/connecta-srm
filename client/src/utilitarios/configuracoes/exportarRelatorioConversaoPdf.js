@@ -85,7 +85,7 @@ function gerarHtmlRelatorioConversao({ orcamentos, chips, cards, usuarioLogado }
           gap: 18px;
           padding: 24px;
           border-radius: 24px;
-          background: linear-gradient(135deg, #0f5f94 0%, #1791e2 100%);
+          background: linear-gradient(135deg, #9A5700 0%, #EC8702 100%);
           color: #ffffff;
           break-inside: avoid;
         }
@@ -159,7 +159,7 @@ function gerarHtmlRelatorioConversao({ orcamentos, chips, cards, usuarioLogado }
         }
         .relatorioConversaoPdfCard strong {
           font-size: 24px;
-          color: #0f5f94;
+          color: #9A5700;
         }
         .relatorioConversaoPdfTabela {
           width: 100%;
@@ -178,7 +178,7 @@ function gerarHtmlRelatorioConversao({ orcamentos, chips, cards, usuarioLogado }
         }
         .relatorioConversaoPdfTabela th {
           background: #eff6fb;
-          color: #0f5f94;
+          color: #9A5700;
           font-size: 11px;
           text-transform: uppercase;
           letter-spacing: 0.04em;
@@ -223,10 +223,10 @@ function gerarHtmlRelatorioConversao({ orcamentos, chips, cards, usuarioLogado }
               <th>Inclusao</th>
               <th>Fechamento</th>
               <th>Codigo</th>
-              <th>Cliente</th>
+              <th>Fornecedor</th>
               <th>Contato</th>
               <th>Etapa</th>
-              <th>Vendedor</th>
+              <th>Comprador</th>
               <th>Total</th>
             </tr>
           </thead>

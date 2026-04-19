@@ -19,10 +19,10 @@
   place-items: center;
   width: 120px;
   height: 120px;
-  border: 1px dashed rgba(23, 145, 226, 0.28);
+  border: 1px dashed rgba(236, 135, 2, 0.28);
   border-radius: 24px;
   background:
-    radial-gradient(circle at top, rgba(91, 189, 245, 0.2), transparent 38%),
+    radial-gradient(circle at top, rgba(255, 179, 71, 0.2), transparent 38%),
     linear-gradient(180deg, rgba(248, 251, 254, 1) 0%, rgba(237, 244, 248, 0.92) 100%);
   overflow: hidden;
 }
@@ -39,7 +39,7 @@
   width: 72px;
   height: 72px;
   border-radius: 22px;
-  background: linear-gradient(135deg, rgba(23, 145, 226, 0.18), rgba(13, 120, 200, 0.3));
+  background: linear-gradient(135deg, rgba(236, 135, 2, 0.18), rgba(198, 111, 0, 0.3));
   color: var(--corPrimariaForte);
   font-size: 1.1rem;
   font-weight: 800;
@@ -66,7 +66,7 @@
   display: grid;
   gap: 20px;
   padding: 24px;
-  border: 1px solid rgba(23, 145, 226, 0.12);
+  border: 1px solid rgba(236, 135, 2, 0.12);
   border-radius: 28px;
   background: rgba(255, 255, 255, 0.98);
   box-shadow: 0 26px 56px rgba(18, 39, 58, 0.24);
@@ -142,8 +142,8 @@
   background: transparent;
   box-shadow:
     0 0 0 999px rgba(20, 34, 46, 0.42),
-    0 0 0 1px rgba(13, 120, 200, 0.24),
-    inset 0 0 0 1px rgba(13, 120, 200, 0.1);
+    0 0 0 1px rgba(198, 111, 0, 0.24),
+    inset 0 0 0 1px rgba(198, 111, 0, 0.1);
   pointer-events: none;
 }
 
@@ -163,7 +163,7 @@
   align-items: center;
   gap: 10px;
   padding: 10px 12px;
-  border: 1px solid rgba(23, 145, 226, 0.14);
+  border: 1px solid rgba(236, 135, 2, 0.14);
   border-radius: 14px;
   background: rgba(245, 250, 255, 0.92);
   color: var(--corTextoTitulo);
@@ -181,7 +181,7 @@
   gap: 10px;
   min-height: 44px;
   padding: 6px 10px;
-  border: 1px solid rgba(23, 145, 226, 0.14);
+  border: 1px solid rgba(236, 135, 2, 0.14);
   border-radius: 14px;
   background: rgba(245, 250, 255, 0.92);
 }

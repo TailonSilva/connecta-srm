@@ -41,7 +41,7 @@ function gerarHtmlRelatorioAtendimentos({ atendimentos, chips, cards, usuarioLog
       <td>${escapeHtml(formatarData(atendimento.data))}</td>
       <td>${escapeHtml(atendimento.horaInicio || '--:--')}</td>
       <td>${escapeHtml(atendimento.horaFim || '--:--')}</td>
-      <td>${escapeHtml(atendimento.nomeCliente || 'Cliente nao informado')}</td>
+      <td>${escapeHtml(atendimento.nomeCliente || 'Fornecedor nao informado')}</td>
       <td>${escapeHtml(atendimento.assunto || 'Sem assunto')}</td>
       <td>${escapeHtml(atendimento.nomeContato || 'Contato nao informado')}</td>
       <td>${escapeHtml(atendimento.nomeCanalAtendimento || 'Nao informado')}</td>
@@ -84,7 +84,7 @@ function gerarHtmlRelatorioAtendimentos({ atendimentos, chips, cards, usuarioLog
           gap: 18px;
           padding: 24px;
           border-radius: 24px;
-          background: linear-gradient(135deg, #0f5f94 0%, #1791e2 100%);
+          background: linear-gradient(135deg, #9A5700 0%, #EC8702 100%);
           color: #ffffff;
           -webkit-print-color-adjust: exact;
           print-color-adjust: exact;
@@ -161,7 +161,7 @@ function gerarHtmlRelatorioAtendimentos({ atendimentos, chips, cards, usuarioLog
         }
         .relatorioAtendimentosPdfCard strong {
           font-size: 24px;
-          color: #0f5f94;
+          color: #9A5700;
         }
         .relatorioAtendimentosPdfTabela {
           width: 100%;
@@ -180,7 +180,7 @@ function gerarHtmlRelatorioAtendimentos({ atendimentos, chips, cards, usuarioLog
         }
         .relatorioAtendimentosPdfTabela th {
           background: #eff6fb;
-          color: #0f5f94;
+          color: #9A5700;
           font-size: 11px;
           text-transform: uppercase;
           letter-spacing: 0.04em;
@@ -229,7 +229,7 @@ function gerarHtmlRelatorioAtendimentos({ atendimentos, chips, cards, usuarioLog
               <th>Data</th>
               <th>Inicio</th>
               <th>Fim</th>
-              <th>Cliente</th>
+              <th>Fornecedor</th>
               <th>Assunto</th>
               <th>Contato</th>
               <th>Canal</th>

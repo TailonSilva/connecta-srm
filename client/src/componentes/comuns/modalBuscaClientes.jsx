@@ -5,8 +5,8 @@ export function ModalBuscaClientes({
   aberto,
   empresa = null,
   clientes = [],
-  placeholder = 'Pesquisar cliente no grid',
-  ariaLabelPesquisa = 'Pesquisar cliente no grid',
+  placeholder = 'Pesquisar fornecedor no grid',
+  ariaLabelPesquisa = 'Pesquisar fornecedor no grid',
   rotuloAcaoPrimaria = '',
   tituloAcaoPrimaria = '',
   iconeAcaoPrimaria = 'adicionar',
@@ -17,7 +17,7 @@ export function ModalBuscaClientes({
   return (
     <ModalBuscaTabela
       aberto={aberto}
-      titulo="Buscar cliente"
+      titulo="Buscar fornecedor"
       placeholder={placeholder}
       ariaLabelPesquisa={ariaLabelPesquisa}
       colunas={[

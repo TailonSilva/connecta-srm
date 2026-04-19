@@ -790,8 +790,8 @@ export function PaginaOrcamentos({ usuarioLogado }) {
           <CampoPesquisa
             valor={pesquisa}
             aoAlterar={definirPesquisa}
-            placeholder="Pesquisar orcamentos"
-            ariaLabel="Pesquisar orcamentos"
+            placeholder="Pesquisar cotacoes"
+            ariaLabel="Pesquisar cotacoes"
           />
           <Botao
             variante={filtrosAtivos ? 'primario' : 'secundario'}
@@ -814,8 +814,8 @@ export function PaginaOrcamentos({ usuarioLogado }) {
             variante="primario"
             icone="adicionar"
             somenteIcone
-            title="Novo orcamento"
-            aria-label="Novo orcamento"
+            title="Nova cotacao"
+            aria-label="Nova cotacao"
             onClick={abrirNovoOrcamento}
           />
         </div>
@@ -829,7 +829,7 @@ export function PaginaOrcamentos({ usuarioLogado }) {
           carregando={carregando}
           mensagemErro={mensagemErro}
           temItens={orcamentos.length > 0}
-          mensagemCarregando="Carregando orcamentos..."
+          mensagemCarregando="Carreganda cotacaos..."
           mensagemVazia="Nenhum orcamento encontrado."
         >
           {orcamentos.map((orcamento) => (
@@ -858,12 +858,12 @@ export function PaginaOrcamentos({ usuarioLogado }) {
 
       <ModalFiltros
         aberto={modalFiltrosAberto}
-        titulo="Filtros de orcamentos"
+        titulo="Filtros de cotacoes"
         filtros={filtrosEmEdicao || filtros}
         campos={[
           {
             name: 'idCliente',
-            label: 'Cliente',
+            label: 'Fornecedor',
             acaoExtra: (
               <Botao
                 variante="secundario"
@@ -872,10 +872,10 @@ export function PaginaOrcamentos({ usuarioLogado }) {
                 className="botaoCampoAcao"
                 onClick={() => definirModalBuscaClienteFiltrosAberto(true)}
                 somenteIcone
-                title="Buscar cliente"
-                aria-label="Buscar cliente"
+                title="Buscar fornecedor"
+                aria-label="Buscar fornecedor"
               >
-                Buscar cliente
+                Buscar fornecedor
               </Botao>
             ),
             options: clientes.map((cliente) => ({
@@ -895,9 +895,9 @@ export function PaginaOrcamentos({ usuarioLogado }) {
           },
           {
             name: 'idVendedorCliente',
-            label: 'Clientes do vendedor',
+            label: 'Fornecedores do comprador',
             multiple: true,
-            placeholder: 'Todos os vendedores',
+            placeholder: 'Todos os compradores',
             options: vendedores.map((vendedor) => ({
               valor: String(vendedor.idVendedor),
               label: vendedor.nome
@@ -905,10 +905,10 @@ export function PaginaOrcamentos({ usuarioLogado }) {
           },
           {
             name: 'idVendedor',
-            label: 'Vendedor do orcamento',
+            label: 'Comprador da cotacao',
             multiple: true,
             disabled: Boolean(usuarioSomenteVendedor),
-            placeholder: 'Todos os vendedores',
+            placeholder: 'Todos os compradores',
             options: vendedores.map((vendedor) => ({
               valor: String(vendedor.idVendedor),
               label: vendedor.nome
@@ -916,9 +916,9 @@ export function PaginaOrcamentos({ usuarioLogado }) {
           },
           {
             name: 'idsEtapaOrcamento',
-            label: 'Status do orcamento',
+            label: 'Status da cotacao',
             multiple: true,
-            tituloSelecao: 'Status do orcamento',
+            tituloSelecao: 'Status da cotacao',
             options: etapasOrcamento.map((etapa) => ({
               valor: String(etapa.idEtapaOrcamento),
               label: etapa.descricao
@@ -928,7 +928,7 @@ export function PaginaOrcamentos({ usuarioLogado }) {
             name: 'periodosDatasOrcamento',
             label: 'Datas',
             type: 'date-filters-modal',
-            tituloSelecao: 'Filtros de datas do orcamento',
+            tituloSelecao: 'Filtros de datas da cotacao',
             placeholder: 'Selecionar datas',
             periodos: [
               {
@@ -963,8 +963,8 @@ export function PaginaOrcamentos({ usuarioLogado }) {
         aberto={modalBuscaClienteFiltrosAberto}
         empresa={empresa}
         clientes={clientes}
-        placeholder="Pesquisar cliente no filtro"
-        ariaLabelPesquisa="Pesquisar cliente no filtro"
+        placeholder="Pesquisar fornecedor no filtro"
+        ariaLabelPesquisa="Pesquisar fornecedor no filtro"
         aoSelecionar={(cliente) => {
           definirFiltrosEmEdicao((estadoAtual) => ({
             ...(estadoAtual || criarFiltrosIniciaisOrcamentos(usuarioLogado, empresa)),
@@ -1060,11 +1060,11 @@ export function PaginaOrcamentos({ usuarioLogado }) {
             onMouseDown={(evento) => evento.stopPropagation()}
           >
             <div className="cabecalhoConfirmacaoModal">
-              <h4 id="tituloConfirmacaoExclusaoOrcamento">Excluir orcamento</h4>
+              <h4 id="tituloConfirmacaoExclusaoOrcamento">Excluir cotacao</h4>
             </div>
 
             <div className="corpoConfirmacaoModal">
-              <p>Tem certeza que deseja excluir este orcamento?</p>
+              <p>Tem certeza que deseja excluir este cotacao?</p>
             </div>
 
             <div className="acoesConfirmacaoModal">
@@ -1082,7 +1082,7 @@ export function PaginaOrcamentos({ usuarioLogado }) {
       {alteracaoEtapaPendente ? (
         <div className="camadaConfirmacaoModal" role="presentation" onMouseDown={() => definirAlteracaoEtapaPendente(null)}>
           <div
-            className="modalConfirmacaoAgenda modalEtapaRapidaOrcamento"
+            className="modalConfirmacaoAgenda modalEtapaRapidaCotacao"
             role="dialog"
             aria-modal="true"
             aria-labelledby="tituloMotivoPerdaEtapaRapida"
@@ -1092,7 +1092,7 @@ export function PaginaOrcamentos({ usuarioLogado }) {
               <h4 id="tituloMotivoPerdaEtapaRapida">Motivo da perda</h4>
             </div>
 
-            <div className="corpoConfirmacaoModal corpoModalEtapaRapidaOrcamento">
+            <div className="corpoConfirmacaoModal corpoModalEtapaRapidaCotacao">
               <p>
                 A etapa <strong>{alteracaoEtapaPendente.nomeEtapa}</strong> exige um motivo da perda.
               </p>
@@ -1192,11 +1192,11 @@ export function PaginaOrcamentos({ usuarioLogado }) {
             onMouseDown={(evento) => evento.stopPropagation()}
           >
             <div className="cabecalhoConfirmacaoModal">
-              <h4 id="tituloConfirmacaoCriarPedido">Criar pedido</h4>
+              <h4 id="tituloConfirmacaoCriarPedido">Criar ordem de compra</h4>
             </div>
 
             <div className="corpoConfirmacaoModal">
-              <p>Este orcamento foi fechado. Deseja criar um pedido a partir dele?</p>
+              <p>Este orcamento foi fechado. Deseja criar um ordem de compra a partir dele?</p>
             </div>
 
             <div className="acoesConfirmacaoModal">
@@ -1216,7 +1216,7 @@ export function PaginaOrcamentos({ usuarioLogado }) {
 
 function CabecalhoGradeOrcamentos({ colunas }) {
   return (
-    <div className="cabecalhoLayoutGradePadrao cabecalhoGradeOrcamentos">
+    <div className="cabecalhoLayoutGradePadrao cabecalhoGradeCotacoes">
       {colunas.map((coluna) => (
         <div key={coluna.id} className={coluna.classe} style={obterEstiloColunaLayout(coluna)}>
           {coluna.rotulo}
@@ -1242,7 +1242,7 @@ function LinhaOrcamento({
   aoExcluir
 }) {
   return (
-    <div className="linhaLayoutGradePadrao linhaOrcamento">
+    <div className="linhaLayoutGradePadrao linhaCotacao">
       {colunas.map((coluna) => renderizarCelulaOrcamento({
         coluna,
         orcamento,
@@ -1398,7 +1398,7 @@ function renderizarCelulaOrcamento({
             style={criarEstiloEtapaOrcamento(orcamento.corEtapaOrcamento)}
             value={orcamento.idEtapaOrcamento ? String(orcamento.idEtapaOrcamento) : ''}
             onChange={(evento) => aoAlterarEtapa(evento.target.value)}
-            aria-label={`Alterar etapa do orcamento ${orcamento.idOrcamento}`}
+            aria-label={`Alterar etapa da cotacao ${orcamento.idOrcamento}`}
             disabled={!permitirAlteracaoEtapa}
           >
             <option value="">Sem etapa</option>
@@ -1513,9 +1513,9 @@ function renderizarCelulaOrcamento({
     return (
       <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
         <AcoesRegistro
-          rotuloConsulta="Consultar orcamento"
-          rotuloEdicao={permitirEdicao ? 'Editar orcamento' : obterRotuloBloqueioEdicaoOrcamento(orcamento, usuarioLogado)}
-          rotuloInativacao="Excluir orcamento"
+          rotuloConsulta="Consultar cotacao"
+          rotuloEdicao={permitirEdicao ? 'Editar cotacao' : obterRotuloBloqueioEdicaoOrcamento(orcamento, usuarioLogado)}
+          rotuloInativacao="Excluir cotacao"
           iconeInativacao="limpar"
           exibirInativacao={permitirExcluir && !orcamento.idPedidoVinculado}
           desabilitarEdicao={!permitirEdicao}
@@ -1950,7 +1950,7 @@ function normalizarNumeroDecimal(valor) {
 }
 
 function criarEstiloEtapaOrcamento(cor) {
-  const corBase = normalizarCorHexadecimal(cor || '#1791e2');
+  const corBase = normalizarCorHexadecimal(cor || '#EC8702');
 
   return {
     background: converterHexParaRgba(corBase, 0.22),
@@ -2012,7 +2012,7 @@ function orcamentoBloqueadoParaEdicao(orcamento, usuarioLogado) {
 
 function obterRotuloBloqueioEdicaoOrcamento(orcamento, usuarioLogado) {
   if (Number(orcamento?.idPedidoVinculado) > 0) {
-    return 'Orcamento com pedido vinculado: consulta apenas.';
+    return 'Orcamento com ordem de compra vinculado: consulta apenas.';
   }
 
   if (Number(orcamento?.idEtapaOrcamento) === ID_ETAPA_ORCAMENTO_RECUSADO) {
@@ -2023,7 +2023,7 @@ function obterRotuloBloqueioEdicaoOrcamento(orcamento, usuarioLogado) {
     return 'Orcamento fechado: usuario padrao consulta apenas.';
   }
 
-  return 'Editar orcamento';
+  return 'Editar cotacao';
 }
 
 function etapaOrcamentoEhFechamento(etapa) {
@@ -2109,7 +2109,7 @@ function obterDataAtualFormatoInput() {
 
 function normalizarCorHexadecimal(cor) {
   const texto = String(cor || '').trim();
-  return /^#([0-9a-fA-F]{6})$/.test(texto) ? texto : '#1791e2';
+  return /^#([0-9a-fA-F]{6})$/.test(texto) ? texto : '#EC8702';
 }
 
 function escurecerCorHexadecimal(cor, intensidade = 0.2) {

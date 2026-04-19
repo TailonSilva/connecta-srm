@@ -21,21 +21,21 @@ export function ModalManualPedidos({
     <ModalManualPagina
       aberto={aberto}
       aoFechar={aoFechar}
-      titulo="Manual de Pedidos"
-      descricao="Guia visual do acompanhamento de pedidos, etapas comerciais, pagamento e regras de permissao da tela."
+      titulo="Manual de Ordens de Compra"
+      descricao="Guia visual do acompanhamento de ordens de compra, etapas comerciais, pagamento e regras de permissao da tela."
       eyebrow="Execucao comercial"
-      heroTitulo="Como a pagina de Pedidos acompanha o fechamento do CRM"
-      heroDescricao="A pagina de Pedidos acompanha os registros gerados a partir das propostas fechadas ou criados diretamente na tela. Ela concentra etapa do pedido, pagamento, itens e consulta operacional da execucao comercial."
+      heroTitulo="Como a pagina de Ordens de Compra acompanha o fechamento do CRM"
+      heroDescricao="A pagina de Ordens de Compra acompanha os registros gerados a partir das propostas fechadas ou criados diretamente na tela. Ela concentra etapa da ordem de compra, pagamento, itens e consulta operacional da execucao comercial."
       painelHeroi={[
-        { valor: pedidos.length, rotulo: 'Pedidos na grade atual' },
-        { valor: etapasPedido.length, rotulo: 'Etapas de pedido' },
+        { valor: pedidos.length, rotulo: 'Ordens de Compra na grade atual' },
+        { valor: etapasPedido.length, rotulo: 'Etapas de ordem de compra' },
         { valor: prazosPagamento.length, rotulo: 'Prazos de pagamento carregados' }
       ]}
       cardsResumo={[
         {
           titulo: 'Grade operacional',
-          descricao: `${pedidos.length} pedido(s) aparecem no recorte atual.`,
-          detalhe: 'Para Usuario padrao, a listagem considera apenas os pedidos em que ele proprio e o vendedor do registro.',
+          descricao: `${pedidos.length} ordem de compra(s) aparecem no recorte atual.`,
+          detalhe: 'Para Usuario padrao, a listagem considera apenas as ordens de compra em que ele proprio e o comprador do registro.',
           icone: 'pedido'
         },
         {
@@ -45,8 +45,8 @@ export function ModalManualPedidos({
           icone: 'cadastro'
         },
         {
-          titulo: 'Classificacao do pedido',
-          descricao: 'O pedido agora pode receber um Tipo de pedido definido em tabela auxiliar propria.',
+          titulo: 'Classificacao da ordem de compra',
+          descricao: 'O ordem de compra agora pode receber um Tipo de ordem de compra definido em tabela auxiliar propria.',
           detalhe: 'Quando o tipo for Devolucao, quantidade, valores e total ficam negativos, a etapa passa automaticamente para Entregue e o sistema exige um motivo da devolucao em modal externo.',
           icone: 'pedido'
         },
@@ -67,8 +67,8 @@ export function ModalManualPedidos({
       ]}
       cardsFluxo={[
         {
-          titulo: 'Criar pedido',
-          descricao: 'O pedido pode nascer diretamente pela tela ou a partir do fechamento de um orcamento.',
+          titulo: 'Criar ordem de compra',
+          descricao: 'O ordem de compra pode nascer diretamente pela tela ou a partir do fechamento de um orcamento.',
           icone: 'adicionar'
         },
         {
@@ -78,7 +78,7 @@ export function ModalManualPedidos({
         },
         {
           titulo: 'Controlar etapa',
-          descricao: 'Cada pedido recebe uma etapa de acompanhamento e pode ter a etapa alterada direto no grid para agilizar a operacao.',
+          descricao: 'Cada ordem de compra recebe uma etapa de acompanhamento e pode ter a etapa alterada direto no grid para agilizar a operacao.',
           icone: 'editar'
         },
         {
@@ -92,24 +92,24 @@ export function ModalManualPedidos({
           tag: 'Formulario',
           titulo: 'O que o modal concentra',
           itens: [
-            'Cliente, contato, usuario do registro e vendedor compoem a base comercial do pedido, com atalhos de busca para cliente e contato no modo de inclusao.',
-            'Na busca de clientes do pedido, Usuario padrao tambem pode selecionar clientes vinculados a outros vendedores para abrir um novo pedido.',
-            'Selecionar ou trocar o cliente nao puxa mais o vendedor do cadastro do cliente; o vendedor inicial do pedido sempre segue o usuario do registro e so muda quando o proprio campo Vendedor for alterado no modal.',
+            'Cliente, contato, usuario do registro e comprador compoem a base comercial da ordem de compra, com atalhos de busca para cliente e contato no modo de inclusao.',
+            'Na busca de fornecedores da ordem de compra, Usuario padrao tambem pode selecionar clientes vinculados a outros compradores para abrir um novo pedido.',
+            'Selecionar ou trocar o cliente nao puxa mais o comprador do cadastro do cliente; o comprador inicial da ordem de compra sempre segue o usuario do registro e so muda quando o proprio campo Comprador for alterado no modal.',
             'A busca de clientes tambem permite incluir um novo cliente sem sair do fluxo.',
             'Ao abrir a busca de contatos com um cliente ja definido, o proprio modal permite cadastrar um novo contato e devolver esse contato ja selecionado no pedido.',
             'Quando o foco estiver em Cliente ou Contato, `F8` abre a busca correspondente sem depender do clique no botao lateral.',
             'Ao confirmar a busca de cliente ou contato, o foco retorna para o campo preenchido no pedido.',
-            'O campo Tipo de pedido usa uma tabela auxiliar propria para classificar o registro sem depender da etapa comercial.',
-            'Quando o tipo escolhido for Devolucao, o sistema transforma automaticamente a quantidade, os valores dos itens e o total do pedido para negativo.',
-            'Pedidos de Devolucao usam automaticamente a etapa Entregue e esse campo fica travado no modal.',
+            'O campo Tipo de ordem de compra usa uma tabela auxiliar propria para classificar o registro sem depender da etapa comercial.',
+            'Quando o tipo escolhido for Devolucao, o sistema transforma automaticamente a quantidade, os valores dos itens e o total da ordem de compra para negativo.',
+            'Ordens de Compra de Devolucao usam automaticamente a etapa Entregue e esse campo fica travado no modal.',
             'A aba Outros concentra o Orcamento vinculado, a Comissao (%) e o Valor da comissao, alem do campo visual do Motivo do cancelamento.',
-            'Quando o pedido estiver como Devolucao e na etapa Entregue, o sistema abre um modal externo para selecionar o Motivo da devolucao cadastrado em Configuracoes.',
+            'Quando a ordem de compra estiver como Devolucao e na etapa Entregue, o sistema abre um modal externo para selecionar o Motivo da devolucao cadastrado em Configuracoes.',
             'Itens, valores e pagamento sao herdados do fluxo comercial e podem ser ajustados no modal.',
             'Dentro do item, `F8` tambem abre a busca de Produto quando o foco estiver no campo correspondente.',
-            'A imagem do item pode herdar o que veio do orcamento; quando o usuario trocar essa imagem no pedido, ela passa a ser exclusiva daquele item e e recortada em 1024 x 1024 px.',
+            'A imagem do item pode herdar o que veio da cotacao; quando o usuario trocar essa imagem na ordem de compra, ela passa a ser exclusiva daquele item e e recortada em 1024 x 1024 px.',
             'Prazos de pagamento podem ser cadastrados no proprio fluxo, respeitando o perfil.',
-            'Campos personalizados do pedido aparecem conforme a configuracao carregada no sistema.',
-            'Nas abas do modal do pedido, `Alt + Seta para a esquerda` volta para a aba anterior e `Alt + Seta para a direita` avanca para a proxima, reposicionando o foco no primeiro campo da nova aba.',
+            'Campos personalizados da ordem de compra aparecem conforme a configuracao carregada no sistema.',
+            'Nas abas do modal da ordem de compra, `Alt + Seta para a esquerda` volta para a aba anterior e `Alt + Seta para a direita` avanca para a proxima, reposicionando o foco no primeiro campo da nova aba.',
             'O modal abre no primeiro campo editavel, confirmacoes focam a acao principal, `PageDown` prioriza Salvar e `F8` abre a busca contextual de Cliente, Contato ou Produto quando o foco estiver nesses campos.'
           ]
         },
@@ -117,13 +117,13 @@ export function ModalManualPedidos({
           tag: 'Grade',
           titulo: 'Como usar a listagem principal',
           itens: [
-            'A pesquisa textual ajuda a localizar rapidamente pedidos por dados do cliente e do registro.',
+            'A pesquisa textual ajuda a localizar rapidamente ordens de compra por dados do fornecedor e do registro.',
             'O cabecalho da pagina tambem oferece um atalho direto de Configurar grid para ajustar colunas sem precisar entrar na tela de Configuracoes.',
-            'Os filtros incluem cliente, usuario do registro, vendedor, uma ou mais etapas e um botao Datas que abre o painel com os periodos de inclusao e entrega.',
-            'A grade permite trocar a etapa do pedido sem abrir o modal completo.',
-            'Se a troca rapida levar um pedido de Devolucao para Entregue, a tela abre o mesmo modal externo para selecionar o Motivo da devolucao antes de concluir a alteracao.',
-            'As colunas foram ajustadas para leitura sem rolagem horizontal e agora separam codigo, cliente, contato, etapa, vendedor e total em campos proprios.',
-            'A configuracao do grid tambem pode incluir a coluna Conceito do cliente para destacar a classificacao comercial na operacao de pedidos.',
+            'Os filtros incluem cliente, usuario do registro, comprador, uma ou mais etapas e um botao Datas que abre o painel com os periodos de inclusao e entrega.',
+            'A grade permite trocar a etapa da ordem de compra sem abrir o modal completo.',
+            'Se a troca rapida levar um ordem de compra de Devolucao para Entregue, a tela abre o mesmo modal externo para selecionar o Motivo da devolucao antes de concluir a alteracao.',
+            'As colunas foram ajustadas para leitura sem rolagem horizontal e agora separam codigo, cliente, contato, etapa, comprador e total em campos proprios.',
+            'A configuracao do grid tambem pode incluir a coluna Conceito do cliente para destacar a classificacao comercial na operacao de ordens de compra.',
             'Textos que excedem duas linhas passam a ser truncados com reticencias para manter a altura da grade sob controle.',
             'Ao reabrir a tela, os filtros anteriores sao restaurados automaticamente.'
           ]
@@ -139,33 +139,33 @@ export function ModalManualPedidos({
         {
           titulo: 'Permissao de exclusao',
           descricao: usuarioLogado?.tipo === 'Usuario padrao'
-            ? 'Usuario padrao nao pode excluir pedidos diretamente pela grade.'
-            : 'Perfis com permissao podem excluir pedidos mediante confirmacao explicita.',
+            ? 'Usuario padrao nao pode excluir ordens de compra diretamente pela grade.'
+            : 'Perfis com permissao podem excluir ordens de compra mediante confirmacao explicita.',
           detalhe: 'A regra segue a politica operacional do CRM.',
           icone: 'usuarios'
         },
         {
           titulo: 'Etapa entregue automatica',
-          descricao: 'Ao mover o pedido para a etapa Entregue, a data de entrega passa automaticamente para a data atual.',
-          detalhe: 'Dentro do modal do pedido, essa data ainda pode ser ajustada manualmente antes de salvar.',
+          descricao: 'Ao mover a ordem de compra para a etapa Entregue, a data de entrega passa automaticamente para a data atual.',
+          detalhe: 'Dentro do modal da ordem de compra, essa data ainda pode ser ajustada manualmente antes de salvar.',
           icone: 'confirmar'
         },
         {
           titulo: 'Prazos coerentes com o sistema',
-          descricao: 'Os atalhos de prazo de pagamento dentro do pedido respeitam o mesmo modelo de permissao adotado em Atendimentos e Orcamentos.',
+          descricao: 'Os atalhos de prazo de pagamento dentro da ordem de compra respeitam o mesmo modelo de permissao adotado em Atendimentos e Orcamentos.',
           detalhe: 'Isso evita diferenca de comportamento entre modais comerciais.',
           icone: 'configuracoes'
         },
         {
-          titulo: 'Vendedor do registro',
-          descricao: 'Em novos pedidos, o vendedor e a comissao inicial seguem o usuario do registro e nao o vendedor cadastrado no cliente.',
-          detalhe: 'Trocar o cliente nao sobrescreve mais o vendedor nem o percentual de comissao automaticamente.',
+          titulo: 'Comprador do registro',
+          descricao: 'Em novas ordens de compra, o comprador e a comissao inicial seguem o usuario do registro e nao o comprador cadastrado no cliente.',
+          detalhe: 'Trocar o cliente nao sobrescreve mais o comprador nem o percentual de comissao automaticamente.',
           icone: 'usuarios'
         },
         {
           titulo: 'Consulta apos entrega',
           descricao: usuarioLogado?.tipo === 'Usuario padrao'
-            ? 'Quando o pedido chega em Entregue, o perfil Usuario padrao passa a consultar o registro sem edicao.'
+            ? 'Quando a ordem de compra chega em Entregue, o perfil Usuario padrao passa a consultar o registro sem edicao.'
             : 'A etapa Entregue bloqueia a edicao apenas para Usuario padrao; perfis administrativos seguem com gestao completa.',
           detalhe: 'A validacao do status operacional usa o identificador fixo da etapa do sistema.',
           icone: 'pedido'

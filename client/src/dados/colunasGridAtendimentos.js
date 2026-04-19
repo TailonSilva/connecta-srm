@@ -50,7 +50,7 @@ export const colunasGridAtendimentos = [
   },
   {
     id: 'cliente',
-    rotulo: 'Cliente',
+    rotulo: 'Fornecedor',
     classe: 'colunaGradeTexto',
     obrigatoria: false,
     ordemPadrao: 6,

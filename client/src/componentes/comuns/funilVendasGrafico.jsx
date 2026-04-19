@@ -40,7 +40,7 @@ export function FunilVendasGrafico({ etapas, totalValor, idEtapaSelecionada, aoS
             role="listitem"
             className={`funilVendasGraficoLinha ${ativa ? 'funilVendasGraficoLinhaAtiva' : ''}`}
             style={{
-              '--cor-etapa-funil': etapa.cor || '#1791e2',
+              '--cor-etapa-funil': etapa.cor || '#EC8702',
               '--largura-etapa-funil': `${percentual}%`
             }}
             onClick={() => aoSelecionarEtapa(etapa.idEtapaOrcamento)}

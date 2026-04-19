@@ -27,7 +27,7 @@ export function ModalItemProduto({
   return (
     <div className="camadaModalContato" role="presentation" onMouseDown={onFechar}>
       <div
-        className="modalContatoCliente modalItemOrcamento modalItemProduto"
+        className="modalContatoCliente modalItemCotacao modalItemProduto"
         role="dialog"
         aria-modal="true"
         aria-labelledby="tituloModalItemProduto"

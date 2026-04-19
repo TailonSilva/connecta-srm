@@ -22,9 +22,9 @@ export const paginasPainel = [
   },
   {
     id: 'clientes',
-    rotulo: 'Clientes',
-    titulo: 'Pagina de clientes',
-    descricao: 'Estrutura inicial para cadastro, consulta e manutencao de clientes.',
+    rotulo: 'Fornecedores',
+    titulo: 'Pagina de fornecedores',
+    descricao: 'Estrutura inicial para cadastro, consulta e manutencao de fornecedores.',
     icone: 'clientes'
   },
   {
@@ -36,16 +36,16 @@ export const paginasPainel = [
   },
   {
     id: 'orcamentos',
-    rotulo: 'Orcamentos',
-    titulo: 'Pagina de orcamentos',
+    rotulo: 'Cotacoes',
+    titulo: 'Pagina de cotacoes',
     descricao: 'Area reservada para propostas comerciais e simulacoes.',
     icone: 'orcamentos'
   },
   {
     id: 'pedidos',
-    rotulo: 'Pedidos',
-    titulo: 'Pagina de pedidos',
-    descricao: 'Espaco preparado para pedidos, status e acompanhamentos.',
+    rotulo: 'Ordens de Compra',
+    titulo: 'Pagina de ordens de compra',
+    descricao: 'Espaco preparado para ordens de compra, status e acompanhamentos.',
     icone: 'pedidos'
   },
   {

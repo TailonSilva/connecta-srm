@@ -12,6 +12,7 @@ const {
   excluirRegistro,
   montarCampos
 } = require('../repositorios/crudRepositorio');
+const { normalizarEntradaFornecedor } = require('../utilitarios/compatibilidadeFornecedor');
 
 function criarMensagemErro(erro) {
   if (erro.code === 'SQLITE_CONSTRAINT') {
@@ -29,10 +30,10 @@ function validarCamposObrigatorios(entidade, corpo) {
 }
 
 const etapasCriticasProtegidas = {
-  etapaPedido: new Set([ID_ETAPA_PEDIDO_ENTREGUE]),
-  etapaOrcamento: new Set([1, 2, 3, 4]),
+  etapaOrdemCompra: new Set([ID_ETAPA_PEDIDO_ENTREGUE]),
+  etapaCotacao: new Set([1, 2, 3, 4]),
   statusVisita: new Set([1, 2, 3, 4, 5]),
-  tipoPedido: new Set([ID_TIPO_PEDIDO_VENDA, ID_TIPO_PEDIDO_DEVOLUCAO])
+  tipoOrdemCompra: new Set([ID_TIPO_PEDIDO_VENDA, ID_TIPO_PEDIDO_DEVOLUCAO])
 };
 
 function registroEhRegraCritica(entidade, registro) {
@@ -65,14 +66,14 @@ function statusSolicitaInativacao(valorStatus) {
 }
 
 function criarMensagemRegraCritica(entidade) {
-  return entidade.nome === 'etapaPedido'
-    ? 'A etapa critica de pedido usada pela logica do sistema nao pode ser inativada ou excluida.'
-    : entidade.nome === 'etapaOrcamento'
-      ? 'As etapas obrigatorias de orcamento nao podem ser inativadas ou excluidas.'
+  return entidade.nome === 'etapaOrdemCompra'
+    ? 'A etapa critica de ordem de compra usada pela logica do sistema nao pode ser inativada ou excluida.'
+    : entidade.nome === 'etapaCotacao'
+      ? 'As etapas obrigatorias de cotacao nao podem ser inativadas ou excluidas.'
       : entidade.nome === 'statusVisita'
         ? 'Os status criticos da agenda nao podem ser inativados ou excluidos.'
-        : entidade.nome === 'tipoPedido'
-          ? 'Os tipos de pedido obrigatorios do sistema nao podem ser inativados ou excluidos.'
+        : entidade.nome === 'tipoOrdemCompra'
+          ? 'Os tipos de ordem de compra obrigatorios do sistema nao podem ser inativados ou excluidos.'
         : 'Este registro critico nao pode ser inativado ou excluido.';
 }
 
@@ -104,7 +105,8 @@ function criarRotaCrud(entidade) {
   });
 
   rota.post('/', async (requisicao, resposta) => {
-    const camposFaltantes = validarCamposObrigatorios(entidade, requisicao.body);
+    const corpo = normalizarEntradaFornecedor(requisicao.body);
+    const camposFaltantes = validarCamposObrigatorios(entidade, corpo);
 
     if (camposFaltantes.length > 0) {
       resposta.status(400).json({
@@ -114,7 +116,7 @@ function criarRotaCrud(entidade) {
     }
 
     try {
-      const registro = await inserirRegistro(entidade, requisicao.body);
+      const registro = await inserirRegistro(entidade, corpo);
       resposta.status(201).json(registro);
     } catch (erro) {
       if (erro.statusCode === 400) {
@@ -127,8 +129,9 @@ function criarRotaCrud(entidade) {
   });
 
   rota.put('/:id', async (requisicao, resposta) => {
+    const corpo = normalizarEntradaFornecedor(requisicao.body);
     const camposAtualizaveis = montarCampos(
-      requisicao.body,
+      corpo,
       entidade.camposPermitidos
     );
 
@@ -152,7 +155,7 @@ function criarRotaCrud(entidade) {
 
       if (
         registroEhRegraCritica(entidade, registroExistente)
-        && statusSolicitaInativacao(requisicao.body.status)
+        && statusSolicitaInativacao(corpo.status)
       ) {
         resposta.status(400).json({ mensagem: criarMensagemRegraCritica(entidade) });
         return;
@@ -161,7 +164,7 @@ function criarRotaCrud(entidade) {
       const registroAtualizado = await atualizarRegistro(
         entidade,
         requisicao.params.id,
-        requisicao.body
+        corpo
       );
 
       resposta.json(registroAtualizado);

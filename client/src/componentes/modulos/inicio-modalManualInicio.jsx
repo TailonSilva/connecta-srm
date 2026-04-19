@@ -15,7 +15,7 @@ export function ModalManualInicio({
       heroTitulo="Leitura comercial por abas"
       heroDescricao="A pagina inicial separa `Orcamentos`, `Vendas` e `Atendimentos` em abas e usa secoes compactas com leitura visual padronizada."
       painelHeroi={[
-        { valor: '3 abas', rotulo: 'Orcamentos, Vendas e Atendimentos' },
+        { valor: '3 abas', rotulo: 'Cotacoes, Vendas e Atendimentos' },
         { valor: 'Top 5', rotulo: 'Itens exibidos por grafico' },
         { valor: 'Modal completo', rotulo: 'Lista total por sessao' }
       ]}
@@ -23,19 +23,19 @@ export function ModalManualInicio({
         {
           titulo: 'Indicadores iniciais',
           descricao: 'A home abre com cards compactos de leitura rapida.',
-          detalhe: 'Hoje incluem Orcamentos em aberto, Pedidos no mes, Media de dias para conversao, Atendimentos no mes, Prospeccao no mes, Comissao no mes, Comissao entregue no mes, Positivacao no mes, % Positivacao da carteira, Catalogo e Carteira.',
+          detalhe: 'Hoje incluem Cotacoes em aberto, Ordens de Compra no mes, Media de dias para conversao, Atendimentos no mes, Prospeccao no mes, Comissao no mes, Comissao entregue no mes, Positivacao no mes, % Positivacao da carteira, Catalogo e Carteira.',
           icone: 'inicio'
         },
         {
-          titulo: 'Aba Orcamentos',
-          descricao: 'Reune o funil e os resumos de orcamentos em aberto.',
+          titulo: 'Aba Cotacoes',
+          descricao: 'Reune o funil e os resumos de cotacoes em aberto.',
           detalhe: 'As secoes usam apenas etapas em aberto, com visoes por grupo, marca e produto, sempre validando etapas obrigatorias por ID.',
           icone: 'orcamento'
         },
         {
           titulo: 'Aba Vendas',
           descricao: 'Reune devolucoes, vendas por grupo, marca, UF, cliente, conceito, produto e ranking.',
-          detalhe: 'As leituras usam pedidos do mes corrente conforme a regra definida em cada sessao, incluindo a nova visao por conceito de cliente.',
+          detalhe: 'As leituras usam ordens de compra do mes corrente conforme a regra definida em cada sessao, incluindo a nova visao por conceito de cliente.',
           icone: 'pedido'
         },
         {
@@ -93,7 +93,7 @@ export function ModalManualInicio({
           items: undefined,
           itens: [
             usuarioLogado?.tipo === 'Usuario padrao'
-              ? 'Usuario padrao ve cards e graficos da home com `orcamentos` e `pedidos` do proprio vendedor e com `atendimentos` do proprio usuario do registro.'
+              ? 'Usuario padrao ve cards e graficos da home com `orcamentos` e `ordens de compra` do proprio comprador e com `atendimentos` do proprio usuario do registro.'
               : 'Perfis administrativos veem a home com leitura geral da operacao.',
             'O mesmo padrao visual das secoes e mantido independentemente do perfil.',
             'As explicacoes das secoes ajudam a identificar o periodo e a logica de calculo usada em cada bloco.'

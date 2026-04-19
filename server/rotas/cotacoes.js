@@ -4,7 +4,7 @@ const {
   ehCaminhoImagemLocal,
   ehDataUrlImagem,
   removerArquivoImagem,
-  salvarImagemItemOrcamento
+  salvarImagemItemCotacao
 } = require('../utilitarios/imagens');
 const { montarUrlArquivo, obterBaseUrlApi } = require('../utilitarios/urlApi');
 const { validarReferenciasAtivasDaEntidade } = require('../utilitarios/validarReferenciasAtivas');
@@ -15,91 +15,96 @@ const {
   adicionarFiltroPeriodo,
   montarWhere
 } = require('../utilitarios/filtrosSql');
+const {
+  normalizarEntradaFornecedor,
+  normalizarSaidaFornecedor,
+  normalizarListaSaidaFornecedor
+} = require('../utilitarios/compatibilidadeFornecedor');
 
-const rotaOrcamentos = express.Router();
-const IDS_ETAPAS_ORCAMENTO_FECHADAS = new Set([1, 2, 3, 4]);
+const rotaCotacoes = express.Router();
+const IDS_ETAPAS_COTACAO_FECHADAS = new Set([1, 2, 3, 4]);
 
-rotaOrcamentos.get('/', async (requisicao, resposta) => {
+rotaCotacoes.get('/', async (requisicao, resposta) => {
   try {
     const clausulas = [];
     const parametros = [];
-    const { query } = requisicao;
+    const query = normalizarEntradaFornecedor(requisicao.query);
 
     adicionarFiltroBusca(clausulas, parametros, query.search, [
-      'COALESCE(cliente.nomeFantasia, cliente.razaoSocial)',
+      'COALESCE(fornecedor.nomeFantasia, fornecedor.razaoSocial)',
       'contato.nome',
       'usuario.nome',
-      'vendedorCliente.nome',
-      'vendedorOrcamento.nome',
+      'compradorFornecedor.nome',
+      'compradorCotacao.nome',
       'prazoPagamento.descricao',
       'metodoPagamento.descricao',
-      'etapaOrcamento.descricao',
+      'etapaCotacao.descricao',
       'motivoPerda.descricao',
-      'orcamento.observacao',
-      'CAST(orcamento.idOrcamento AS TEXT)'
+      'cotacao.observacao',
+      'CAST(cotacao.idCotacao AS TEXT)'
     ]);
-    adicionarFiltroIgual(clausulas, parametros, 'orcamento.idCliente', query.idCliente, Number);
-    adicionarFiltroLista(clausulas, parametros, 'orcamento.idUsuario', query.idUsuario, Number);
-    adicionarFiltroLista(clausulas, parametros, 'cliente.idVendedor', query.idVendedorCliente, Number);
-    adicionarFiltroLista(clausulas, parametros, 'orcamento.idVendedor', query.idVendedor, Number);
-    adicionarFiltroLista(clausulas, parametros, 'orcamento.idEtapaOrcamento', query.idsEtapaOrcamento, Number);
-    adicionarFiltroPeriodo(clausulas, parametros, 'orcamento.dataInclusao', query.dataInclusaoInicio, query.dataInclusaoFim);
-    adicionarFiltroPeriodo(clausulas, parametros, 'orcamento.dataFechamento', query.dataFechamentoInicio, query.dataFechamentoFim);
+    adicionarFiltroIgual(clausulas, parametros, 'cotacao.idFornecedor', query.idFornecedor, Number);
+    adicionarFiltroLista(clausulas, parametros, 'cotacao.idUsuario', query.idUsuario, Number);
+    adicionarFiltroLista(clausulas, parametros, 'fornecedor.idComprador', query.idCompradorFornecedor, Number);
+    adicionarFiltroLista(clausulas, parametros, 'cotacao.idComprador', query.idComprador, Number);
+    adicionarFiltroLista(clausulas, parametros, 'cotacao.idEtapaCotacao', query.idsEtapaCotacao, Number);
+    adicionarFiltroPeriodo(clausulas, parametros, 'cotacao.dataInclusao', query.dataInclusaoInicio, query.dataInclusaoFim);
+    adicionarFiltroPeriodo(clausulas, parametros, 'cotacao.dataFechamento', query.dataFechamentoInicio, query.dataFechamentoFim);
 
-    if (query.escopoIdVendedor) {
-      clausulas.push('orcamento.idVendedor = ?');
-      parametros.push(Number(query.escopoIdVendedor));
+    if (query.escopoIdComprador) {
+      clausulas.push('cotacao.idComprador = ?');
+      parametros.push(Number(query.escopoIdComprador));
     }
 
     const registros = await consultarTodos(`
       SELECT
-        orcamento.idOrcamento
-      FROM orcamento
-      LEFT JOIN cliente ON cliente.idCliente = orcamento.idCliente
-      LEFT JOIN contato ON contato.idContato = orcamento.idContato
-      LEFT JOIN usuario ON usuario.idUsuario = orcamento.idUsuario
-      LEFT JOIN vendedor AS vendedorCliente ON vendedorCliente.idVendedor = cliente.idVendedor
-      LEFT JOIN vendedor AS vendedorOrcamento ON vendedorOrcamento.idVendedor = orcamento.idVendedor
-      LEFT JOIN prazoPagamento ON prazoPagamento.idPrazoPagamento = orcamento.idPrazoPagamento
+        cotacao.idCotacao
+      FROM cotacao
+      LEFT JOIN fornecedor ON fornecedor.idFornecedor = cotacao.idFornecedor
+      LEFT JOIN contato ON contato.idContato = cotacao.idContato
+      LEFT JOIN usuario ON usuario.idUsuario = cotacao.idUsuario
+      LEFT JOIN comprador AS compradorFornecedor ON compradorFornecedor.idComprador = fornecedor.idComprador
+      LEFT JOIN comprador AS compradorCotacao ON compradorCotacao.idComprador = cotacao.idComprador
+      LEFT JOIN prazoPagamento ON prazoPagamento.idPrazoPagamento = cotacao.idPrazoPagamento
       LEFT JOIN metodoPagamento ON metodoPagamento.idMetodoPagamento = prazoPagamento.idMetodoPagamento
-      LEFT JOIN etapaOrcamento ON etapaOrcamento.idEtapaOrcamento = orcamento.idEtapaOrcamento
-      LEFT JOIN motivoPerda ON motivoPerda.idMotivo = orcamento.idMotivoPerda
+      LEFT JOIN etapaCotacao ON etapaCotacao.idEtapaCotacao = cotacao.idEtapaCotacao
+      LEFT JOIN motivoPerda ON motivoPerda.idMotivo = cotacao.idMotivoPerda
       ${montarWhere(clausulas)}
-      ORDER BY orcamento.idOrcamento DESC
+      ORDER BY cotacao.idCotacao DESC
     `, parametros);
 
     const registrosCompletos = await Promise.all(
-      registros.map((registro) => consultarOrcamentoCompleto(registro.idOrcamento))
+      registros.map((registro) => consultarCotacaoCompleto(registro.idCotacao))
     );
 
-    resposta.json(registrosCompletos.filter(Boolean));
+    resposta.json(normalizarListaSaidaFornecedor(registrosCompletos.filter(Boolean)));
   } catch (_erro) {
     resposta.status(500).json({ mensagem: 'Ocorreu um erro ao processar a requisicao.' });
   }
 });
 
-rotaOrcamentos.get('/:id', async (requisicao, resposta) => {
+rotaCotacoes.get('/:id', async (requisicao, resposta) => {
   try {
-    const registro = await consultarOrcamentoCompleto(Number(requisicao.params.id));
+    const registro = await consultarCotacaoCompleto(Number(requisicao.params.id));
 
     if (!registro) {
       resposta.status(404).json({ mensagem: 'Registro nao encontrado.' });
       return;
     }
 
-    resposta.json(registro);
+    resposta.json(normalizarSaidaFornecedor(registro));
   } catch (_erro) {
     resposta.status(500).json({ mensagem: 'Ocorreu um erro ao processar a requisicao.' });
   }
 });
 
-rotaOrcamentos.post('/', async (requisicao, resposta) => {
+rotaCotacoes.post('/', async (requisicao, resposta) => {
   try {
-    const payload = aplicarAutomacoesFechamentoOrcamento(normalizarPayloadOrcamento(requisicao.body));
-    await validarReferenciasAtivasDaEntidade('orcamento', payload);
-    const etapaOrcamento = await obterEtapaOrcamento(payload.idEtapaOrcamento);
-    const cliente = await obterCliente(payload.idCliente);
-    const mensagemValidacao = validarPayloadOrcamento(payload, etapaOrcamento);
+    const payload = aplicarAutomacoesFechamentoCotacao(normalizarPayloadCotacao(normalizarEntradaFornecedor(requisicao.body)));
+    await validarReferenciasAtivasDaEntidade('cotacao', payload);
+    const etapaCotacao = await obterEtapaCotacao(payload.idEtapaCotacao);
+    const fornecedor = await obterFornecedor(payload.idFornecedor);
+    const mensagemValidacao = validarPayloadCotacao(payload, etapaCotacao);
 
     if (mensagemValidacao) {
       resposta.status(400).json({ mensagem: mensagemValidacao });
@@ -109,14 +114,14 @@ rotaOrcamentos.post('/', async (requisicao, resposta) => {
     await executar('BEGIN TRANSACTION');
 
     const resultado = await executar(
-      `INSERT INTO orcamento (
-        idCliente,
+      `INSERT INTO cotacao (
+        idFornecedor,
         idContato,
         idUsuario,
-        idVendedor,
+        idComprador,
         comissao,
         idPrazoPagamento,
-        idEtapaOrcamento,
+        idEtapaCotacao,
         idMotivoPerda,
         dataInclusao,
         dataValidade,
@@ -124,13 +129,13 @@ rotaOrcamentos.post('/', async (requisicao, resposta) => {
         observacao
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        payload.idCliente,
+        payload.idFornecedor,
         payload.idContato,
         payload.idUsuario,
-        payload.idVendedor,
+        payload.idComprador,
         payload.comissao,
         payload.idPrazoPagamento,
-        payload.idEtapaOrcamento,
+        payload.idEtapaCotacao,
         payload.idMotivoPerda,
         payload.dataInclusao,
         payload.dataValidade,
@@ -139,12 +144,12 @@ rotaOrcamentos.post('/', async (requisicao, resposta) => {
       ]
     );
 
-    await salvarItensOrcamento(resultado.id, payload.itens, cliente);
-    await salvarCamposOrcamento(resultado.id, payload.camposExtras);
+    await salvarItensCotacao(resultado.id, payload.itens, fornecedor);
+    await salvarCamposCotacao(resultado.id, payload.camposExtras);
     await executar('COMMIT');
 
-    const registro = await consultarOrcamentoCompleto(resultado.id);
-    resposta.status(201).json(registro);
+    const registro = await consultarCotacaoCompleto(resultado.id);
+    resposta.status(201).json(normalizarSaidaFornecedor(registro));
   } catch (_erro) {
     if (_erro.statusCode === 400) {
       resposta.status(400).json({ mensagem: _erro.message });
@@ -156,86 +161,86 @@ rotaOrcamentos.post('/', async (requisicao, resposta) => {
   }
 });
 
-rotaOrcamentos.put('/:id', async (requisicao, resposta) => {
+rotaCotacoes.put('/:id', async (requisicao, resposta) => {
   try {
-    const idOrcamento = Number(requisicao.params.id);
-    const existente = await consultarUm('SELECT * FROM orcamento WHERE idOrcamento = ?', [idOrcamento]);
+    const idCotacao = Number(requisicao.params.id);
+    const existente = await consultarUm('SELECT * FROM cotacao WHERE idCotacao = ?', [idCotacao]);
 
     if (!existente) {
       resposta.status(404).json({ mensagem: 'Registro nao encontrado.' });
       return;
     }
 
-    const payload = aplicarAutomacoesFechamentoOrcamento(normalizarPayloadOrcamento({
+    const payload = aplicarAutomacoesFechamentoCotacao(normalizarPayloadCotacao({
       ...existente,
-      ...requisicao.body
+      ...normalizarEntradaFornecedor(requisicao.body)
     }), existente);
-    await validarReferenciasAtivasDaEntidade('orcamento', payload);
-    const etapaOrcamento = await obterEtapaOrcamento(payload.idEtapaOrcamento);
-    const cliente = await obterCliente(payload.idCliente);
-    const itensAtuais = await consultarTodos('SELECT imagem FROM itemOrcamento WHERE idOrcamento = ?', [idOrcamento]);
-    const mensagemValidacao = validarPayloadOrcamento(payload, etapaOrcamento);
+    await validarReferenciasAtivasDaEntidade('cotacao', payload);
+    const etapaCotacao = await obterEtapaCotacao(payload.idEtapaCotacao);
+    const fornecedor = await obterFornecedor(payload.idFornecedor);
+    const itensAtuais = await consultarTodos('SELECT imagem FROM itemCotacao WHERE idCotacao = ?', [idCotacao]);
+    const mensagemValidacao = validarPayloadCotacao(payload, etapaCotacao);
 
     if (mensagemValidacao) {
       resposta.status(400).json({ mensagem: mensagemValidacao });
       return;
     }
 
-    if (orcamentoBloqueadoPorPedidoVinculado(existente)) {
-      resposta.status(400).json({ mensagem: 'Nao e possivel editar um orcamento com pedido vinculado.' });
+    if (cotacaoBloqueadoPorOrdemCompraVinculado(existente)) {
+      resposta.status(400).json({ mensagem: 'Nao e possivel editar um cotacao com ordem de compra vinculada.' });
       return;
     }
 
-    if (orcamentoEhRecusado(existente)) {
-      resposta.status(400).json({ mensagem: 'Nao e possivel editar um orcamento recusado.' });
+    if (cotacaoEhRecusado(existente)) {
+      resposta.status(400).json({ mensagem: 'Nao e possivel editar um cotacao recusado.' });
       return;
     }
 
     if (
-      existente.idPedidoVinculado &&
-      String(existente.idEtapaOrcamento || '') !== String(payload.idEtapaOrcamento || '')
+      existente.idOrdemCompraVinculado &&
+      String(existente.idEtapaCotacao || '') !== String(payload.idEtapaCotacao || '')
     ) {
-      resposta.status(400).json({ mensagem: 'Nao e possivel alterar a etapa de um orcamento com pedido vinculado.' });
+      resposta.status(400).json({ mensagem: 'Nao e possivel alterar a etapa de um cotacao com ordem de compra vinculada.' });
       return;
     }
 
     await executar('BEGIN TRANSACTION');
     await executar(
-      `UPDATE orcamento SET
-        idCliente = ?,
+      `UPDATE cotacao SET
+        idFornecedor = ?,
         idContato = ?,
         idUsuario = ?,
-        idVendedor = ?,
+        idComprador = ?,
         comissao = ?,
         idPrazoPagamento = ?,
-        idEtapaOrcamento = ?,
+        idEtapaCotacao = ?,
         idMotivoPerda = ?,
         dataInclusao = ?,
         dataValidade = ?,
         dataFechamento = ?,
         observacao = ?
-      WHERE idOrcamento = ?`,
+      WHERE idCotacao = ?`,
       [
-        payload.idCliente,
+        payload.idFornecedor,
         payload.idContato,
         payload.idUsuario,
-        payload.idVendedor,
+        payload.idComprador,
         payload.comissao,
         payload.idPrazoPagamento,
-        payload.idEtapaOrcamento,
+        payload.idEtapaCotacao,
         payload.idMotivoPerda,
         payload.dataInclusao,
         payload.dataValidade,
         payload.dataFechamento,
         payload.observacao,
-        idOrcamento
+        idCotacao
       ]
     );
 
-    await executar('DELETE FROM itemOrcamento WHERE idOrcamento = ?', [idOrcamento]);
-    await executar('DELETE FROM valorCampoOrcamento WHERE idOrcamento = ?', [idOrcamento]);
-    await salvarItensOrcamento(idOrcamento, payload.itens, cliente);
-    await salvarCamposOrcamento(idOrcamento, payload.camposExtras);
+    await executar('DELETE FROM itemCotacao WHERE idCotacao = ?', [idCotacao]);
+    await executar('DELETE FROM valorCampoCotacao WHERE idCotacao = ?', [idCotacao]);
+    await salvarItensCotacao(idCotacao, payload.itens, fornecedor);
+    await salvarCamposCotacao(idCotacao, payload.camposExtras);
     await executar('COMMIT');
 
     removerImagensItensNaoUtilizadas(
@@ -243,8 +248,8 @@ rotaOrcamentos.put('/:id', async (requisicao, resposta) => {
       payload.itens.map((item) => item.imagem)
     );
 
-    const registro = await consultarOrcamentoCompleto(idOrcamento);
-    resposta.json(registro);
+    const registro = await consultarCotacaoCompleto(idCotacao);
+    resposta.json(normalizarSaidaFornecedor(registro));
   } catch (_erro) {
     if (_erro.statusCode === 400) {
       resposta.status(400).json({ mensagem: _erro.message });
@@ -256,30 +261,30 @@ rotaOrcamentos.put('/:id', async (requisicao, resposta) => {
   }
 });
 
-rotaOrcamentos.delete('/:id', async (requisicao, resposta) => {
+rotaCotacoes.delete('/:id', async (requisicao, resposta) => {
   try {
-    const idOrcamento = Number(requisicao.params.id);
-    const existente = await consultarUm('SELECT * FROM orcamento WHERE idOrcamento = ?', [idOrcamento]);
-    const itensAtuais = await consultarTodos('SELECT imagem FROM itemOrcamento WHERE idOrcamento = ?', [idOrcamento]);
+    const idCotacao = Number(requisicao.params.id);
+    const existente = await consultarUm('SELECT * FROM cotacao WHERE idCotacao = ?', [idCotacao]);
+    const itensAtuais = await consultarTodos('SELECT imagem FROM itemCotacao WHERE idCotacao = ?', [idCotacao]);
 
     if (!existente) {
       resposta.status(404).json({ mensagem: 'Registro nao encontrado.' });
       return;
     }
 
-    if (existente.idPedidoVinculado) {
-      resposta.status(400).json({ mensagem: 'Nao e possivel excluir um orcamento com pedido vinculado.' });
+    if (existente.idOrdemCompraVinculado) {
+      resposta.status(400).json({ mensagem: 'Nao e possivel excluir um cotacao com ordem de compra vinculada.' });
       return;
     }
 
     await executar('BEGIN TRANSACTION');
-    await executar('DELETE FROM itemOrcamento WHERE idOrcamento = ?', [idOrcamento]);
-    await executar('DELETE FROM valorCampoOrcamento WHERE idOrcamento = ?', [idOrcamento]);
-    await executar('DELETE FROM orcamento WHERE idOrcamento = ?', [idOrcamento]);
+    await executar('DELETE FROM itemCotacao WHERE idCotacao = ?', [idCotacao]);
+    await executar('DELETE FROM valorCampoCotacao WHERE idCotacao = ?', [idCotacao]);
+    await executar('DELETE FROM cotacao WHERE idCotacao = ?', [idCotacao]);
     await executar('COMMIT');
 
     itensAtuais.forEach((item) => {
-      if (ehImagemItemOrcamentoLocal(item.imagem)) {
+      if (ehImagemItemCotacaoLocal(item.imagem)) {
         removerArquivoImagem(item.imagem);
       }
     });
@@ -291,70 +296,70 @@ rotaOrcamentos.delete('/:id', async (requisicao, resposta) => {
   }
 });
 
-async function consultarOrcamentoCompleto(idOrcamento) {
-  const orcamento = await consultarUm(
-    'SELECT * FROM orcamento WHERE idOrcamento = ?',
-    [idOrcamento]
+async function consultarCotacaoCompleto(idCotacao) {
+  const cotacao = await consultarUm(
+    'SELECT * FROM cotacao WHERE idCotacao = ?',
+    [idCotacao]
   );
 
-  if (!orcamento) {
+  if (!cotacao) {
     return null;
   }
 
   const [itens, camposExtras] = await Promise.all([
     consultarTodos(
-      `SELECT * FROM itemOrcamento WHERE idOrcamento = ? ORDER BY idItemOrcamento ASC`,
-      [idOrcamento]
+      `SELECT * FROM itemCotacao WHERE idCotacao = ? ORDER BY idItemCotacao ASC`,
+      [idCotacao]
     ),
     consultarTodos(
-      `SELECT * FROM valorCampoOrcamento WHERE idOrcamento = ? ORDER BY idValorCampoOrcamento ASC`,
-      [idOrcamento]
+      `SELECT * FROM valorCampoCotacao WHERE idCotacao = ? ORDER BY idValorCampoCotacao ASC`,
+      [idCotacao]
     )
   ]);
 
   return {
-    ...orcamento,
+    ...cotacao,
     itens: itens.map(normalizarItemImagem),
     camposExtras
   };
 }
 
-function normalizarPayloadOrcamento(payload) {
+function normalizarPayloadCotacao(payload) {
   return {
-    idCliente: payload.idCliente ? Number(payload.idCliente) : null,
+    idFornecedor: payload.idFornecedor ? Number(payload.idFornecedor) : null,
     idContato: payload.idContato ? Number(payload.idContato) : null,
     idUsuario: payload.idUsuario ? Number(payload.idUsuario) : null,
-    idVendedor: payload.idVendedor ? Number(payload.idVendedor) : null,
+    idComprador: payload.idComprador ? Number(payload.idComprador) : null,
     comissao: payload.comissao === '' || payload.comissao === null || payload.comissao === undefined
       ? 0
       : Number(payload.comissao),
     idPrazoPagamento: payload.idPrazoPagamento ? Number(payload.idPrazoPagamento) : null,
-    idEtapaOrcamento: payload.idEtapaOrcamento ? Number(payload.idEtapaOrcamento) : null,
+    idEtapaCotacao: payload.idEtapaCotacao ? Number(payload.idEtapaCotacao) : null,
     idMotivoPerda: payload.idMotivoPerda ? Number(payload.idMotivoPerda) : null,
     dataInclusao: limparTexto(payload.dataInclusao),
     dataValidade: limparTexto(payload.dataValidade),
     dataFechamento: limparTexto(payload.dataFechamento),
     observacao: limparTexto(payload.observacao),
-    itens: normalizarItensOrcamento(payload.itens),
+    itens: normalizarItensCotacao(payload.itens),
     camposExtras: normalizarCamposExtras(payload.camposExtras)
   };
 }
 
-function aplicarAutomacoesFechamentoOrcamento(payload, orcamentoAtual = null) {
+function aplicarAutomacoesFechamentoCotacao(payload, cotacaoAtual = null) {
   const proximoPayload = {
     ...payload
   };
-  const entrouEmEtapaFechada = !etapaOrcamentoEhFechada(orcamentoAtual?.idEtapaOrcamento)
-    && etapaOrcamentoEhFechada(proximoPayload.idEtapaOrcamento);
+  const entrouEmEtapaFechada = !etapaCotacaoEhFechada(cotacaoAtual?.idEtapaCotacao)
+    && etapaCotacaoEhFechada(proximoPayload.idEtapaCotacao);
 
-  if (entrouEmEtapaFechada && (!proximoPayload.dataFechamento || proximoPayload.dataFechamento === limparTexto(orcamentoAtual?.dataFechamento))) {
+  if (entrouEmEtapaFechada && (!proximoPayload.dataFechamento || proximoPayload.dataFechamento === limparTexto(cotacaoAtual?.dataFechamento))) {
     proximoPayload.dataFechamento = obterDataAtualFormatoInput();
   }
 
   return proximoPayload;
 }
 
-function normalizarItensOrcamento(itens) {
+function normalizarItensCotacao(itens) {
   if (!Array.isArray(itens)) {
     return [];
   }
@@ -387,46 +392,46 @@ function normalizarCamposExtras(camposExtras) {
 
   return camposExtras
     .map((campo) => ({
-      idCampoOrcamento: campo.idCampoOrcamento ? Number(campo.idCampoOrcamento) : null,
+      idCampoCotacao: campo.idCampoCotacao ? Number(campo.idCampoCotacao) : null,
       valor: limparTexto(campo.valor)
     }))
-    .filter((campo) => campo.idCampoOrcamento);
+    .filter((campo) => campo.idCampoCotacao);
 }
 
-function validarPayloadOrcamento(payload, etapaOrcamento) {
-  if (!payload.idCliente) {
-    return 'Selecione o cliente do orcamento.';
+function validarPayloadCotacao(payload, etapaCotacao) {
+  if (!payload.idFornecedor) {
+    return 'Selecione o fornecedor da cotacao.';
   }
 
   if (!payload.idUsuario) {
     return 'Selecione o usuario do registro.';
   }
 
-  if (!payload.idVendedor) {
-    return 'Selecione o vendedor.';
+  if (!payload.idComprador) {
+    return 'Selecione o comprador.';
   }
 
   if (payload.itens.length === 0) {
-    return 'Inclua ao menos um item no orcamento.';
+    return 'Inclua ao menos um item na cotacao.';
   }
 
-  if (etapaOrcamentoEhFechada(payload.idEtapaOrcamento) && !payload.dataFechamento) {
-    return 'Informe a data de fechamento para orcamentos nas etapas Fechado, Fechado sem pedido, Pedido Excluido ou Recusado.';
+  if (etapaCotacaoEhFechada(payload.idEtapaCotacao) && !payload.dataFechamento) {
+    return 'Informe a data de fechamento para cotacoes nas etapas Fechado, Fechado sem ordem de compra, Ordem de Compra Excluida ou Recusado.';
   }
 
-  if (etapaOrcamento?.obrigarMotivoPerda && !payload.idMotivoPerda) {
-    return 'Selecione o motivo da perda para esta etapa do orcamento.';
+  if (etapaCotacao?.obrigarMotivoPerda && !payload.idMotivoPerda) {
+    return 'Selecione o motivo da perda para esta etapa da cotacao.';
   }
 
   return '';
 }
 
-async function salvarItensOrcamento(idOrcamento, itens, cliente) {
+async function salvarItensCotacao(idCotacao, itens, fornecedor) {
   for (const item of itens) {
     const produto = await obterProduto(item.idProduto);
     const resultado = await executar(
-      `INSERT INTO itemOrcamento (
-        idOrcamento,
+      `INSERT INTO itemCotacao (
+        idCotacao,
         idProduto,
         quantidade,
         valorUnitario,
@@ -438,7 +443,7 @@ async function salvarItensOrcamento(idOrcamento, itens, cliente) {
         unidadeProdutoSnapshot
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        idOrcamento,
+        idCotacao,
         item.idProduto,
         item.quantidade,
         item.valorUnitario,
@@ -452,51 +457,51 @@ async function salvarItensOrcamento(idOrcamento, itens, cliente) {
     );
 
     if (ehDataUrlImagem(item.imagem)) {
-      const caminhoImagem = salvarImagemItemOrcamento({
-        idOrcamento,
-        nomeCliente: cliente?.nomeFantasia || cliente?.razaoSocial || `cliente-${cliente?.idCliente || ''}`,
-        idItemOrcamento: resultado.id,
+      const caminhoImagem = salvarImagemItemCotacao({
+        idCotacao,
+        nomeFornecedor: fornecedor?.nomeFantasia || fornecedor?.razaoSocial || `fornecedor-${fornecedor?.idFornecedor || ''}`,
+        idItemCotacao: resultado.id,
         valorImagem: item.imagem
       });
 
       await executar(
-        'UPDATE itemOrcamento SET imagem = ? WHERE idItemOrcamento = ?',
+        'UPDATE itemCotacao SET imagem = ? WHERE idItemCotacao = ?',
         [caminhoImagem, resultado.id]
       );
     }
   }
 }
 
-async function salvarCamposOrcamento(idOrcamento, camposExtras) {
+async function salvarCamposCotacao(idCotacao, camposExtras) {
   for (const campo of camposExtras) {
     await executar(
-      `INSERT INTO valorCampoOrcamento (
-        idOrcamento,
-        idCampoOrcamento,
+      `INSERT INTO valorCampoCotacao (
+        idCotacao,
+        idCampoCotacao,
         valor
       ) VALUES (?, ?, ?)`,
-      [idOrcamento, campo.idCampoOrcamento, campo.valor]
+      [idCotacao, campo.idCampoCotacao, campo.valor]
     );
   }
 }
 
-async function obterEtapaOrcamento(idEtapaOrcamento) {
-  if (!idEtapaOrcamento) {
+async function obterEtapaCotacao(idEtapaCotacao) {
+  if (!idEtapaCotacao) {
     return null;
   }
 
   return consultarUm(
-    'SELECT * FROM etapaOrcamento WHERE idEtapaOrcamento = ?',
-    [idEtapaOrcamento]
+    'SELECT * FROM etapaCotacao WHERE idEtapaCotacao = ?',
+    [idEtapaCotacao]
   );
 }
 
-async function obterCliente(idCliente) {
-  if (!idCliente) {
+async function obterFornecedor(idFornecedor) {
+  if (!idFornecedor) {
     return null;
   }
 
-  return consultarUm('SELECT idCliente, nomeFantasia, razaoSocial FROM cliente WHERE idCliente = ?', [idCliente]);
+  return consultarUm('SELECT idFornecedor, nomeFantasia, razaoSocial FROM fornecedor WHERE idFornecedor = ?', [idFornecedor]);
 }
 
 async function obterProduto(idProduto) {
@@ -552,19 +557,19 @@ function desnormalizarCaminhoImagem(valorImagem) {
 function removerImagensItensNaoUtilizadas(imagensAtuais, imagensNovas) {
   const imagensMantidas = new Set(
     imagensNovas
-      .filter((imagem) => ehImagemItemOrcamentoLocal(desnormalizarCaminhoImagem(imagem)))
+      .filter((imagem) => ehImagemItemCotacaoLocal(desnormalizarCaminhoImagem(imagem)))
       .map((imagem) => desnormalizarCaminhoImagem(imagem))
   );
 
   imagensAtuais.forEach((imagem) => {
-    if (ehImagemItemOrcamentoLocal(imagem) && !imagensMantidas.has(imagem)) {
+    if (ehImagemItemCotacaoLocal(imagem) && !imagensMantidas.has(imagem)) {
       removerArquivoImagem(imagem);
     }
   });
 }
 
-function ehImagemItemOrcamentoLocal(valorImagem) {
-  return ehCaminhoImagemLocal(valorImagem) && String(valorImagem).startsWith('imagens/orcamentos/');
+function ehImagemItemCotacaoLocal(valorImagem) {
+  return ehCaminhoImagemLocal(valorImagem) && String(valorImagem).startsWith('imagens/cotacoes/');
 }
 
 function limparTexto(valor) {
@@ -572,16 +577,16 @@ function limparTexto(valor) {
   return texto || null;
 }
 
-function etapaOrcamentoEhFechada(idEtapaOrcamento) {
-  return IDS_ETAPAS_ORCAMENTO_FECHADAS.has(Number(idEtapaOrcamento));
+function etapaCotacaoEhFechada(idEtapaCotacao) {
+  return IDS_ETAPAS_COTACAO_FECHADAS.has(Number(idEtapaCotacao));
 }
 
-function orcamentoEhRecusado(orcamento) {
-  return Number(orcamento?.idEtapaOrcamento) === 4;
+function cotacaoEhRecusado(cotacao) {
+  return Number(cotacao?.idEtapaCotacao) === 4;
 }
 
-function orcamentoBloqueadoPorPedidoVinculado(orcamento) {
-  return Number(orcamento?.idPedidoVinculado) > 0;
+function cotacaoBloqueadoPorOrdemCompraVinculado(cotacao) {
+  return Number(cotacao?.idOrdemCompraVinculado) > 0;
 }
 
 function obterDataAtualFormatoInput() {
@@ -602,5 +607,5 @@ async function tentarRollback() {
 }
 
 module.exports = {
-  rotaOrcamentos
+  rotaCotacoes
 };

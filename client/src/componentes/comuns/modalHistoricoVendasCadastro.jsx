@@ -82,8 +82,8 @@ export function ModalHistoricoVendasCadastro({
               <tr>
                 <th className="colunaHistoricoData">Inclusao</th>
                 <th className="colunaHistoricoData">Entrega</th>
-                <th className="colunaHistoricoPedido">Pedido</th>
-                {exibirClienteNosItens ? <th className="colunaHistoricoCliente">Cliente</th> : null}
+                <th className="colunaHistoricoPedido">Ordem de Compra</th>
+                {exibirClienteNosItens ? <th className="colunaHistoricoCliente">Fornecedor</th> : null}
                 {exibirProdutoNosItens ? <th className="colunaHistoricoReferencia">Referencia</th> : null}
                 {exibirProdutoNosItens ? <th className="colunaHistoricoDescricao">Descricao</th> : null}
                 <th className="colunaHistoricoValor">VALOR UN</th>
@@ -95,7 +95,7 @@ export function ModalHistoricoVendasCadastro({
             carregando={carregando}
             mensagemErro={mensagemErro}
             temItens={contextoSalvo && itensPedidos.length > 0}
-            mensagemCarregando="Carregando itens dos pedidos..."
+            mensagemCarregando="Carregando itens das ordens de compra..."
             mensagemVazia={contextoSalvo ? mensagemVazioItens : mensagemSemContextoItens}
           >
             {itensPedidos.map((item) => (
@@ -105,7 +105,7 @@ export function ModalHistoricoVendasCadastro({
                 <td className="colunaHistoricoPedido">
                   <span className="codigoHistoricoPedido">{`#${String(item.idPedido).padStart(4, '0')}`}</span>
                 </td>
-                {exibirClienteNosItens ? <td className="colunaHistoricoCliente">{item.nomeCliente || 'Cliente nao informado'}</td> : null}
+                {exibirClienteNosItens ? <td className="colunaHistoricoCliente">{item.nomeCliente || 'Fornecedor nao informado'}</td> : null}
                 {exibirProdutoNosItens ? <td className="colunaHistoricoReferencia">{item.referenciaProduto || '-'}</td> : null}
                 {exibirProdutoNosItens ? <td className="colunaHistoricoDescricao">{item.descricaoProduto || 'Produto nao informado'}</td> : null}
                 <td className="colunaHistoricoValor">{normalizarPreco(item.valorUnitario)}</td>
@@ -114,7 +114,7 @@ export function ModalHistoricoVendasCadastro({
                 {exibirAcaoItens ? (
                   <td>
                     <div className="acoesContatoModal">
-                      <BotaoAcaoGrade icone="consultar" titulo="Consultar pedido" onClick={() => onConsultarPedido?.(item.pedido)} />
+                      <BotaoAcaoGrade icone="consultar" titulo="Consultar ordem de compra" onClick={() => onConsultarPedido?.(item.pedido)} />
                     </div>
                   </td>
                 ) : null}

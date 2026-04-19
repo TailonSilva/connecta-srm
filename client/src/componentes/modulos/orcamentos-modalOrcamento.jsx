@@ -28,7 +28,7 @@ const abasModalOrcamento = [
   { id: 'dadosGerais', label: 'Dados gerais' },
   { id: 'itens', label: 'Itens' },
   { id: 'outros', label: 'Outros' },
-  { id: 'campos', label: 'Campos do orcamento' }
+  { id: 'campos', label: 'Campos da cotacao' }
 ];
 
 const ID_ETAPA_ORCAMENTO_FECHAMENTO = 1;
@@ -399,22 +399,22 @@ export function ModalOrcamento({
     }
 
     if (!String(formularioAtual.idCliente || '').trim()) {
-      definirMensagemErro('Selecione o cliente do orcamento.');
+      definirMensagemErro('Selecione o fornecedor da cotacao.');
       return;
     }
 
     if (!String(formularioAtual.idVendedor || '').trim()) {
-      definirMensagemErro('Selecione o vendedor.');
+      definirMensagemErro('Selecione o comprador.');
       return;
     }
 
     if (formularioAtual.itens.length === 0) {
-      definirMensagemErro('Inclua ao menos um item no orcamento.');
+      definirMensagemErro('Inclua ao menos um item na cotacao.');
       return;
     }
 
     if (etapaAtualEhFechadaAtual && !String(formularioAtual.dataFechamento || '').trim()) {
-      definirMensagemErro('Informe a data de fechamento para esta etapa do orcamento.');
+      definirMensagemErro('Informe a data de fechamento para esta etapa da cotacao.');
       return;
     }
 
@@ -429,7 +429,7 @@ export function ModalOrcamento({
     try {
       await aoSalvar(formularioAtual);
     } catch (erro) {
-      definirMensagemErro(erro.message || 'Nao foi possivel salvar o orcamento.');
+      definirMensagemErro(erro.message || 'Nao foi possivel salvar a cotacao.');
       definirSalvando(false);
     }
   }
@@ -440,13 +440,13 @@ export function ModalOrcamento({
     }
 
     if (!String(formulario.idCliente || '').trim()) {
-      adicionarAvisoOrcamento('erro', 'Nao foi possivel gerar o PDF.', 'Selecione o cliente antes de exportar o PDF do orcamento.');
+      adicionarAvisoOrcamento('erro', 'Nao foi possivel gerar o PDF.', 'Selecione o fornecedor antes de exportar o PDF da cotacao.');
       definirAbaAtiva('dadosGerais');
       return;
     }
 
     if (!Array.isArray(formulario.itens) || formulario.itens.length === 0) {
-      adicionarAvisoOrcamento('erro', 'Nao foi possivel gerar o PDF.', 'Inclua ao menos um item antes de exportar o PDF do orcamento.');
+      adicionarAvisoOrcamento('erro', 'Nao foi possivel gerar o PDF.', 'Inclua ao menos um item antes de exportar o PDF da cotacao.');
       definirAbaAtiva('itens');
       return;
     }
@@ -473,13 +473,13 @@ export function ModalOrcamento({
       }
 
       if (!resultado.sucesso) {
-        adicionarAvisoOrcamento('erro', 'Nao foi possivel gerar o PDF.', resultado.mensagem || 'Nao foi possivel exportar o PDF do orcamento.');
+        adicionarAvisoOrcamento('erro', 'Nao foi possivel gerar o PDF.', resultado.mensagem || 'Nao foi possivel exportar o PDF da cotacao.');
         return;
       }
 
       adicionarAvisoOrcamento('sucesso', 'PDF gerado com sucesso.', '');
     } catch (erro) {
-      adicionarAvisoOrcamento('erro', 'Nao foi possivel gerar o PDF.', erro.message || 'Nao foi possivel exportar o PDF do orcamento.');
+      adicionarAvisoOrcamento('erro', 'Nao foi possivel gerar o PDF.', erro.message || 'Nao foi possivel exportar o PDF da cotacao.');
     } finally {
       definirGerandoPdf(false);
     }
@@ -491,13 +491,13 @@ export function ModalOrcamento({
     }
 
     if (!String(formulario.idCliente || '').trim()) {
-      adicionarAvisoOrcamento('erro', 'Nao foi possivel gerar o e-mail.', 'Selecione o cliente antes de abrir o e-mail do orcamento.');
+      adicionarAvisoOrcamento('erro', 'Nao foi possivel gerar o e-mail.', 'Selecione o fornecedor antes de abrir o e-mail da cotacao.');
       definirAbaAtiva('dadosGerais');
       return;
     }
 
     if (!Array.isArray(formulario.itens) || formulario.itens.length === 0) {
-      adicionarAvisoOrcamento('erro', 'Nao foi possivel gerar o e-mail.', 'Inclua ao menos um item antes de abrir o e-mail do orcamento.');
+      adicionarAvisoOrcamento('erro', 'Nao foi possivel gerar o e-mail.', 'Inclua ao menos um item antes de abrir o e-mail da cotacao.');
       definirAbaAtiva('itens');
       return;
     }
@@ -516,13 +516,13 @@ export function ModalOrcamento({
       });
 
       if (!resultado.sucesso) {
-        adicionarAvisoOrcamento('erro', 'Nao foi possivel gerar o e-mail.', resultado.mensagem || 'Nao foi possivel abrir o Outlook Web com o orcamento.');
+        adicionarAvisoOrcamento('erro', 'Nao foi possivel gerar o e-mail.', resultado.mensagem || 'Nao foi possivel abrir o Outlook Web com a cotacao.');
         return;
       }
 
-      adicionarAvisoOrcamento('sucesso', 'E-mail aberto com sucesso.', 'O Outlook Web foi aberto com o orçamento preenchido.');
+      adicionarAvisoOrcamento('sucesso', 'E-mail aberto com sucesso.', 'O Outlook Web foi aberto com a cotacao preenchida.');
     } catch (erro) {
-      adicionarAvisoOrcamento('erro', 'Nao foi possivel gerar o e-mail.', erro.message || 'Nao foi possivel abrir o Outlook Web com o orcamento.');
+      adicionarAvisoOrcamento('erro', 'Nao foi possivel gerar o e-mail.', erro.message || 'Nao foi possivel abrir o Outlook Web com a cotacao.');
     } finally {
       definirGerandoEmail(false);
     }
@@ -708,7 +708,7 @@ export function ModalOrcamento({
           <div className="cabecalhoModalOrcamento">
             <div>
               <h2 id="tituloModalOrcamento">
-                {somenteLeitura ? 'Consultar orcamento' : modoEdicao ? 'Editar orcamento' : 'Incluir orcamento'}
+                {somenteLeitura ? 'Consultar cotacao' : modoEdicao ? 'Editar cotacao' : 'Incluir cotacao'}
               </h2>
             </div>
             {orcamento?.idOrcamento ? <CodigoRegistro valor={orcamento.idOrcamento} /> : null}
@@ -720,7 +720,7 @@ export function ModalOrcamento({
               type="button"
               onClick={gerarPdfFormularioAtual}
               disabled={salvando || gerandoPdf}
-              title={exportacaoPdfDisponivel ? 'Gerar PDF do orcamento' : 'Abrir impressao para salvar como PDF no navegador'}
+              title={exportacaoPdfDisponivel ? 'Gerar PDF da cotacao' : 'Abrir impressao para salvar como PDF no navegador'}
             >
               {gerandoPdf ? 'Gerando PDF...' : 'Gerar PDF'}
             </Botao>
@@ -729,7 +729,7 @@ export function ModalOrcamento({
               type="button"
               onClick={gerarEmailFormularioAtual}
               disabled={salvando || gerandoEmail}
-              title="Gerar e-mail do orcamento"
+              title="Gerar e-mail da cotacao"
             >
               {gerandoEmail ? 'Gerando e-mail...' : 'Gerar e-mail'}
             </Botao>
@@ -744,7 +744,7 @@ export function ModalOrcamento({
           </div>
         </header>
 
-        <div className="abasModalCliente" role="tablist" aria-label="Secoes do orcamento">
+        <div className="abasModalCliente" role="tablist" aria-label="Secoes da cotacao">
           {abasModalOrcamento.map((aba) => (
             <button
               key={aba.id}
@@ -810,8 +810,8 @@ export function ModalOrcamento({
                       icone="pesquisa"
                       className="botaoCampoAcao"
                       somenteIcone
-                      title="Buscar cliente"
-                      aria-label="Buscar cliente"
+                      title="Buscar fornecedor"
+                      aria-label="Buscar fornecedor"
                       data-atalho-busca-id="cliente"
                       onClick={abrirModalBuscaCliente}
                     />
@@ -848,14 +848,14 @@ export function ModalOrcamento({
               <div className="linhaOrcamentoComercial">
                 {vendedorBloqueado ? (
                   <CampoFormulario
-                    label="Vendedor"
+                    label="Comprador"
                     name="nomeVendedorBloqueado"
                     value={nomeVendedorSelecionado}
                     disabled
                   />
                 ) : (
                   <CampoSelect
-                    label="Vendedor"
+                    label="Comprador"
                     name="idVendedor"
                     value={formulario.idVendedor}
                     onChange={alterarCampo}
@@ -894,7 +894,7 @@ export function ModalOrcamento({
 
               <div className="linhaOrcamentoFechamento">
                 <CampoSelect
-                  label="Etapa do orcamento"
+                  label="Etapa da cotacao"
                   name="idEtapaOrcamento"
                   value={formulario.idEtapaOrcamento}
                   onChange={alterarCampo}
@@ -919,7 +919,7 @@ export function ModalOrcamento({
             <section className="layoutModalOrcamentoAba layoutModalOrcamentoAbaItens">
               <section className="painelItensOrcamento">
                 <div className="cabecalhoItensOrcamento">
-                  <h3>Itens do orcamento</h3>
+                  <h3>Itens da cotacao</h3>
                   {!somenteLeitura ? (
                     <Botao variante="secundario" type="button" onClick={abrirNovoItem}>
                       Adicionar item
@@ -929,7 +929,7 @@ export function ModalOrcamento({
 
                 <GradePadrao
                   className="gradeContatosModal gradeItensOrcamentoRolavel"
-                  classNameTabela="tabelaContatosModal tabelaItensOrcamento"
+                  classNameTabela="tabelaContatosModal tabelaItensCotacao"
                   classNameMensagem="mensagemTabelaContatosModal"
                   cabecalho={(
                     <tr>
@@ -954,7 +954,7 @@ export function ModalOrcamento({
                       <tr key={`${item.idItemOrcamento || indice}-${indice}`}>
                         <td>
                           {imagemItem ? (
-                            <img src={imagemItem} alt={item.descricaoProdutoSnapshot || 'Item do orcamento'} className="miniaturaItemOrcamento" />
+                            <img src={imagemItem} alt={item.descricaoProdutoSnapshot || 'Item da cotacao'} className="miniaturaItemOrcamento" />
                           ) : (
                             <div className="miniaturaItemOrcamentoPlaceholder">
                               {obterIniciaisItemOrcamento(item)}
@@ -1004,7 +1004,7 @@ export function ModalOrcamento({
                 </GradePadrao>
 
               </section>
-              <div className="resumoTotalItensOrcamento resumoTotalItensOrcamentoRodape">
+              <div className="resumoTotalItensCotacao resumoTotalItensOrcamentoRodape">
                 <span className="rotuloResumoTotalItensOrcamento">Total dos itens</span>
                 <strong className="valorResumoTotalItensOrcamento">{normalizarPreco(totalOrcamento)}</strong>
               </div>
@@ -1015,12 +1015,12 @@ export function ModalOrcamento({
             <section className="layoutModalOrcamentoAba">
               <div className="linhaOrcamentoComercial">
                 <CampoFormulario
-                  label="Pedido vinculado"
+                  label="Ordem de Compra vinculado"
                   name="pedidoVinculadoOrcamento"
                   value={formulario.idPedidoVinculado
                     ? `#${String(formulario.idPedidoVinculado).padStart(4, '0')}`
                     : ''}
-                  placeholder="Sem pedido vinculado"
+                  placeholder="Sem ordem de compra vinculado"
                   disabled
                 />
                 <CampoFormulario
@@ -1057,7 +1057,7 @@ export function ModalOrcamento({
           {abaAtiva === 'campos' ? (
             <section className="layoutModalOrcamentoAba layoutModalOrcamentoCampos">
               <div className="campoFormulario campoFormularioIntegral">
-                <label htmlFor="observacaoOrcamento">Observacao do orcamento</label>
+                <label htmlFor="observacaoOrcamento">Observacao da cotacao</label>
                 <textarea
                   id="observacaoOrcamento"
                   name="observacao"
@@ -1092,7 +1092,7 @@ export function ModalOrcamento({
           ) : null}
         </div>
 
-        <MensagemErroPopup mensagem={mensagemErro} titulo="Nao foi possivel salvar o orcamento." />
+        <MensagemErroPopup mensagem={mensagemErro} titulo="Nao foi possivel salvar a cotacao." />
       </form>
 
       {confirmandoSaida ? (
@@ -1138,10 +1138,10 @@ export function ModalOrcamento({
           aberto={modalBuscaClienteAberto}
           empresa={empresa}
           clientes={clientes}
-          placeholder="Pesquisar clientes"
-          ariaLabelPesquisa="Pesquisar clientes"
-          rotuloAcaoPrimaria={aoIncluirCliente ? 'Incluir cliente' : ''}
-          tituloAcaoPrimaria={aoIncluirCliente ? 'Incluir cliente' : ''}
+          placeholder="Pesquisar fornecedores"
+          ariaLabelPesquisa="Pesquisar fornecedores"
+          rotuloAcaoPrimaria={aoIncluirCliente ? 'Incluir fornecedor' : ''}
+          tituloAcaoPrimaria={aoIncluirCliente ? 'Incluir fornecedor' : ''}
           iconeAcaoPrimaria="adicionar"
           aoAcionarPrimaria={aoIncluirCliente
             ? () => {
@@ -1157,8 +1157,8 @@ export function ModalOrcamento({
           aberto={modalBuscaContatoAberto}
           idCliente={formulario.idCliente}
           contatos={contatosDoCliente}
-          placeholder="Pesquisar contatos do cliente"
-          ariaLabelPesquisa="Pesquisar contatos do cliente"
+          placeholder="Pesquisar contatos do fornecedor"
+          ariaLabelPesquisa="Pesquisar contatos do fornecedor"
           aoCriarContato={registrarContatoCriado}
           aoSelecionar={selecionarContato}
           aoFechar={fecharModalBuscaContato}
@@ -1187,7 +1187,7 @@ export function ModalOrcamento({
 
       <ModalItemProduto
           aberto={modalItemAberto}
-          titulo={somenteLeitura ? 'Consultar item do orcamento' : 'Editar item do orcamento'}
+          titulo={somenteLeitura ? 'Consultar item da cotacao' : 'Editar item da cotacao'}
           somenteLeitura={somenteLeitura}
           itemFormulario={itemFormulario}
           produtos={produtosAtivos}
@@ -1223,7 +1223,7 @@ export function ModalOrcamento({
                     type="button"
                     onClick={async () => {
                       if (!String(formulario.idMotivoPerda || '').trim()) {
-                        definirMensagemErro('Selecione o motivo da perda para esta etapa do orcamento.');
+                        definirMensagemErro('Selecione o motivo da perda para esta etapa da cotacao.');
                         return;
                       }
 
@@ -1264,7 +1264,7 @@ export function ModalOrcamento({
               onMouseDown={(evento) => evento.stopPropagation()}
             >
               <div className="cabecalhoConfirmacaoModal">
-                <h4 id="tituloConfirmacaoFechamentoOrcamento">Fechar orcamento</h4>
+                <h4 id="tituloConfirmacaoFechamentoOrcamento">Fechar cotacao</h4>
               </div>
 
               <div className="corpoConfirmacaoModal">
@@ -1460,7 +1460,7 @@ function obterVendedorPadrao(idUsuario, usuarios = [], vendedores = [], idVended
 
 function montarRotuloCliente(cliente, empresa) {
   const codigo = formatarCodigoCliente(cliente, empresa);
-  const nome = cliente.nomeFantasia || cliente.razaoSocial || 'Cliente sem nome';
+  const nome = cliente.nomeFantasia || cliente.razaoSocial || 'Fornecedor sem nome';
   const localizacao = [cliente.cidade, cliente.estado].filter(Boolean).join('/');
 
   return localizacao ? `${codigo} - ${nome} - ${localizacao}` : `${codigo} - ${nome}`;

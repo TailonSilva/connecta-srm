@@ -723,7 +723,7 @@ export function ModalProduto({
           },
           {
             name: 'codigoPedido',
-            label: 'Pedido',
+            label: 'Ordem de Compra',
             type: 'text',
             inputProps: {
               placeholder: 'Todos'
@@ -763,7 +763,7 @@ export function ModalProduto({
           },
           {
             name: 'idVendedor',
-            label: 'Vendedor',
+            label: 'Comprador',
             options: vendedoresHistorico.map((vendedor) => ({
               valor: String(vendedor.idVendedor),
               label: vendedor.nome
@@ -867,7 +867,7 @@ function criarItensPedidosProduto(pedidos, idProduto, filtros) {
           idPedido: pedido.idPedido,
           dataInclusao: pedido.dataInclusao,
           dataEntrega: pedido.dataEntrega,
-          nomeCliente: pedido.nomeClienteSnapshot || 'Cliente nao informado',
+          nomeCliente: pedido.nomeClienteSnapshot || 'Fornecedor nao informado',
           referenciaProduto: item.referenciaProdutoSnapshot || '',
           descricaoProduto: item.descricaoProdutoSnapshot || 'Produto nao informado',
           valorUnitario: Number(item.valorUnitario) || 0,

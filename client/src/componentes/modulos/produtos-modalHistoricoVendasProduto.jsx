@@ -31,8 +31,8 @@ export function ModalHistoricoVendasProduto({
       itensPedidos={itensPedidos}
       exibirPedidos={false}
       contextoSalvo={Boolean(produto?.idProduto)}
-      mensagemSemContextoItens="Os itens dos pedidos ficarao disponiveis apos salvar o produto."
-      mensagemVazioItens="Nenhum item de pedido encontrado com os filtros informados."
+      mensagemSemContextoItens="Os itens das ordens de compra ficarao disponiveis apos salvar o produto."
+      mensagemVazioItens="Nenhum item de ordem de compra encontrado com os filtros informados."
       exibirClienteNosItens
       exibirAcaoItens
       onConsultarPedido={onConsultarPedido}

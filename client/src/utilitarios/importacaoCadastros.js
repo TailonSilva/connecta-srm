@@ -3,7 +3,7 @@ let carregadorXlsx = null;
 const configuracoesImportacao = {
   clientes: {
     tipo: 'clientes',
-    titulo: 'Importacao de clientes',
+    titulo: 'Importacao de fornecedores',
     nomeArquivo: 'modelo-importacao-clientes.xlsx',
     nomePlanilhaDados: 'Clientes',
     nomePlanilhaInstrucoes: 'Instrucoes',
@@ -17,7 +17,7 @@ const configuracoesImportacao = {
       { chave: 'inscricaoEstadual', cabecalho: 'Inscricao estadual', obrigatorio: false, tipo: 'Texto', maximoCaracteres: 20, observacao: 'Opcional.', exemplo: '123456789' },
       { chave: 'email', cabecalho: 'Email', obrigatorio: false, tipo: 'Texto', maximoCaracteres: 150, observacao: 'Opcional.', exemplo: 'contato@empresaexemplo.com.br' },
       { chave: 'telefone', cabecalho: 'Telefone', obrigatorio: false, tipo: 'Texto numerico', maximoCaracteres: 20, observacao: 'Pode ser enviado com ou sem mascara.', exemplo: '(11) 99999-9999' },
-      { chave: 'vendedor', cabecalho: 'Vendedor', obrigatorio: true, tipo: 'Texto', maximoCaracteres: 150, observacao: 'Use o nome exato de um vendedor ativo. Para Usuario padrao, se vazio, usa o vendedor vinculado ao usuario.', exemplo: 'Tailon Silva' },
+      { chave: 'vendedor', cabecalho: 'Comprador', obrigatorio: true, tipo: 'Texto', maximoCaracteres: 150, observacao: 'Use o nome exato de um comprador ativo. Para Usuario padrao, se vazio, usa o comprador vinculado ao usuario.', exemplo: 'Tailon Silva' },
       { chave: 'ramoAtividade', cabecalho: 'Ramo de atividade', obrigatorio: true, tipo: 'Texto', maximoCaracteres: 150, observacao: 'Use a descricao exata de um ramo ativo.', exemplo: 'Comercio varejista' },
       { chave: 'grupoEmpresa', cabecalho: 'Grupo de empresa', obrigatorio: false, tipo: 'Texto', maximoCaracteres: 150, observacao: 'Opcional. Use a descricao exata de um grupo ativo.', exemplo: 'Grupo Exemplo' },
       { chave: 'logradouro', cabecalho: 'Logradouro', obrigatorio: false, tipo: 'Texto', maximoCaracteres: 255, observacao: 'Opcional.', exemplo: 'Rua das Flores' },
@@ -27,7 +27,7 @@ const configuracoesImportacao = {
       { chave: 'cidade', cabecalho: 'Cidade', obrigatorio: false, tipo: 'Texto', maximoCaracteres: 100, observacao: 'Opcional.', exemplo: 'Sao Paulo' },
       { chave: 'estado', cabecalho: 'Estado', obrigatorio: false, tipo: 'Texto', maximoCaracteres: 2, observacao: 'Use a sigla da UF com 2 letras.', exemplo: 'SP' },
       { chave: 'cep', cabecalho: 'CEP', obrigatorio: false, tipo: 'Texto numerico', maximoCaracteres: 10, observacao: 'Pode ser enviado com ou sem mascara.', exemplo: '01001-000' },
-      { chave: 'observacao', cabecalho: 'Observacao', obrigatorio: false, tipo: 'Texto', maximoCaracteres: 'Livre', observacao: 'Opcional.', exemplo: 'Cliente importado da base antiga' },
+      { chave: 'observacao', cabecalho: 'Observacao', obrigatorio: false, tipo: 'Texto', maximoCaracteres: 'Livre', observacao: 'Opcional.', exemplo: 'Fornecedor importado da base antiga' },
       { chave: 'status', cabecalho: 'Status', obrigatorio: false, tipo: 'Texto', maximoCaracteres: 8, observacao: 'Aceita Ativo ou Inativo. Se vazio, assume Ativo.', exemplo: 'Ativo' }
     ]
   },

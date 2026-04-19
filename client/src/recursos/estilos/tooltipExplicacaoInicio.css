@@ -8,7 +8,7 @@
   padding: 12px 14px;
   width: max-content;
   max-width: min(360px, calc(100vw - 48px));
-  border: 1px solid rgba(23, 145, 226, 0.12);
+  border: 1px solid rgba(236, 135, 2, 0.12);
   border-radius: 14px;
   background: rgba(15, 24, 34, 0.96);
   color: rgba(255, 255, 255, 0.94);

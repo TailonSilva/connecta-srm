@@ -12,24 +12,24 @@ export function TabelaHistoricoOrcamentos({
   return (
     <GradePadrao
       className="gradeContatosModal modalHistoricoOrcamentosGrade"
-      classNameTabela="tabelaContatosModal tabelaHistoricoOrcamentos"
+      classNameTabela="tabelaContatosModal tabelaHistoricoCotacoes"
       classNameMensagem="mensagemTabelaContatosModal"
       cabecalho={(
         <tr>
           <th className="colunaHistoricoOrcamentoData">Inclusao</th>
           <th className="colunaHistoricoOrcamentoData">Fechamento</th>
           <th className="colunaHistoricoOrcamentoCodigo">Codigo</th>
-          <th className="colunaHistoricoOrcamentoCliente">Cliente</th>
+          <th className="colunaHistoricoOrcamentoCliente">Fornecedor</th>
           <th className="colunaHistoricoOrcamentoContato">Contato</th>
           <th className="colunaHistoricoOrcamentoEtapa">Etapa</th>
-          <th className="colunaHistoricoOrcamentoVendedor">Vendedor</th>
+          <th className="colunaHistoricoOrcamentoVendedor">Comprador</th>
           <th className="colunaHistoricoOrcamentoTotal">Total</th>
         </tr>
       )}
       carregando={carregando}
       mensagemErro={mensagemErro}
       temItens={contextoSalvo && orcamentos.length > 0}
-      mensagemCarregando="Carregando orcamentos..."
+      mensagemCarregando="Carreganda cotacaos..."
       mensagemVazia={contextoSalvo ? mensagemVazia : mensagemSemContexto}
     >
       {orcamentos.map((orcamento) => (

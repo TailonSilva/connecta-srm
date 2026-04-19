@@ -8,9 +8,14 @@ const {
 const { montarUrlArquivo, obterBaseUrlApi } = require('../utilitarios/urlApi');
 const { validarReferenciasAtivasDaEntidade } = require('../utilitarios/validarReferenciasAtivas');
 const {
-  sincronizarGrupoEmpresaDoCliente,
-  sincronizarGrupoEmpresaParaClientesVinculados,
-  sincronizarContatoGrupoParaClientesVinculados
+  normalizarEntradaFornecedor,
+  normalizarSaidaFornecedor,
+  normalizarListaSaidaFornecedor
+} = require('../utilitarios/compatibilidadeFornecedor');
+const {
+  sincronizarGrupoEmpresaDoFornecedor,
+  sincronizarGrupoEmpresaParaFornecedoresVinculados,
+  sincronizarContatoGrupoParaFornecedoresVinculados
 } = require('../utilitarios/sincronizarGrupoEmpresa');
 
 function montarCampos(payload, camposPermitidos) {
@@ -25,7 +30,7 @@ async function listarRegistros(entidade) {
     `SELECT * FROM ${entidade.nome} ORDER BY ${entidade.chavePrimaria} DESC`
   );
 
-  return registros.map(normalizarRegistroImagem);
+  return normalizarListaSaidaFornecedor(registros.map(normalizarRegistroImagem));
 }
 
 async function consultarRegistroPorId(entidade, id) {
@@ -34,12 +39,13 @@ async function consultarRegistroPorId(entidade, id) {
     [id]
   );
 
-  return normalizarRegistroImagem(registro);
+  return normalizarSaidaFornecedor(normalizarRegistroImagem(registro));
 }
 
 async function inserirRegistro(entidade, payload) {
-  await validarReferenciasAtivasDaEntidade(entidade.nome, payload);
-  const payloadSemImagemBase64 = prepararPayloadImagemParaPersistencia(payload);
+  const payloadNormalizado = normalizarEntradaFornecedor(payload);
+  await validarReferenciasAtivasDaEntidade(entidade.nome, payloadNormalizado);
+  const payloadSemImagemBase64 = prepararPayloadImagemParaPersistencia(payloadNormalizado);
   const campos = montarCampos(payloadSemImagemBase64, entidade.camposPermitidos);
   const nomes = campos.map(([campo]) => campo);
   const placeholders = nomes.map(() => '?').join(', ');
@@ -50,11 +56,11 @@ async function inserirRegistro(entidade, payload) {
     valores
   );
 
-  if (ehDataUrlImagem(payload.imagem)) {
+  if (ehDataUrlImagem(payloadNormalizado.imagem)) {
     const caminhoImagem = salvarImagemBase64({
       nomeEntidade: entidade.nome,
       idRegistro: resultado.id,
-      valorImagem: payload.imagem
+      valorImagem: payloadNormalizado.imagem
     });
 
     await executar(
@@ -69,15 +75,16 @@ async function inserirRegistro(entidade, payload) {
 }
 
 async function atualizarRegistro(entidade, id, payload) {
+  const payloadNormalizado = normalizarEntradaFornecedor(payload);
   const registroAtual = await consultarUm(
     `SELECT * FROM ${entidade.nome} WHERE ${entidade.chavePrimaria} = ?`,
     [id]
   );
   await validarReferenciasAtivasDaEntidade(entidade.nome, {
     ...registroAtual,
-    ...payload
+    ...payloadNormalizado
   });
-  const payloadSemImagemBase64 = prepararPayloadImagemParaPersistencia(payload);
+  const payloadSemImagemBase64 = prepararPayloadImagemParaPersistencia(payloadNormalizado);
   const campos = montarCampos(payloadSemImagemBase64, entidade.camposPermitidos);
   const declaracoes = campos.map(([campo]) => `${campo} = ?`);
   const valores = campos.map(([, valor]) => valor);
@@ -89,7 +96,7 @@ async function atualizarRegistro(entidade, id, payload) {
     );
   }
 
-  if (ehDataUrlImagem(payload.imagem)) {
+  if (ehDataUrlImagem(payloadNormalizado.imagem)) {
     if (ehCaminhoImagemLocal(registroAtual?.imagem)) {
       removerArquivoImagem(registroAtual.imagem);
     }
@@ -97,7 +104,7 @@ async function atualizarRegistro(entidade, id, payload) {
     const caminhoImagem = salvarImagemBase64({
       nomeEntidade: entidade.nome,
       idRegistro: id,
-      valorImagem: payload.imagem
+      valorImagem: payloadNormalizado.imagem
     });
 
     await executar(
@@ -106,7 +113,7 @@ async function atualizarRegistro(entidade, id, payload) {
     );
   }
 
-  if (payload.imagem === null && ehCaminhoImagemLocal(registroAtual?.imagem)) {
+  if (payloadNormalizado.imagem === null && ehCaminhoImagemLocal(registroAtual?.imagem)) {
     removerArquivoImagem(registroAtual.imagem);
   }
 
@@ -214,17 +221,17 @@ async function executarHooksPosPersistencia(entidade, registro) {
     return;
   }
 
-  if (entidade.nome === 'cliente') {
-    await sincronizarGrupoEmpresaDoCliente(registro.idCliente, registro.idGrupoEmpresa || null);
+  if (entidade.nome === 'fornecedor') {
+    await sincronizarGrupoEmpresaDoFornecedor(registro.idFornecedor, registro.idGrupoEmpresa || null);
     return;
   }
 
   if (entidade.nome === 'grupoEmpresa') {
-    await sincronizarGrupoEmpresaParaClientesVinculados(registro.idGrupoEmpresa);
+    await sincronizarGrupoEmpresaParaFornecedoresVinculados(registro.idGrupoEmpresa);
     return;
   }
 
   if (entidade.nome === 'contatoGrupoEmpresa') {
-    await sincronizarContatoGrupoParaClientesVinculados(registro.idContatoGrupoEmpresa);
+    await sincronizarContatoGrupoParaFornecedoresVinculados(registro.idContatoGrupoEmpresa);
   }
 }

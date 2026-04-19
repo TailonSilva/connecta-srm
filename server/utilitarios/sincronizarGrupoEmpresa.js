@@ -1,11 +1,11 @@
 const { consultarTodos, consultarUm, executar } = require('../configuracoes/banco');
 
-async function sincronizarGrupoEmpresaDoCliente(idCliente, idGrupoEmpresa) {
-  if (!idCliente) {
+async function sincronizarGrupoEmpresaDoFornecedor(idFornecedor, idGrupoEmpresa) {
+  if (!idFornecedor) {
     return;
   }
 
-  await removerContatosHerdadosDoCliente(idCliente);
+  await removerContatosHerdadosDoFornecedor(idFornecedor);
 
   if (!idGrupoEmpresa) {
     return;
@@ -30,11 +30,11 @@ async function sincronizarGrupoEmpresaDoCliente(idCliente, idGrupoEmpresa) {
   );
 
   for (const contatoGrupo of contatosGrupo) {
-    await sincronizarContatoGrupoParaCliente(idCliente, contatoGrupo);
+    await sincronizarContatoGrupoParaFornecedor(idFornecedor, contatoGrupo);
   }
 }
 
-async function sincronizarContatoGrupoParaClientesVinculados(idContatoGrupoEmpresa) {
+async function sincronizarContatoGrupoParaFornecedoresVinculados(idContatoGrupoEmpresa) {
   if (!idContatoGrupoEmpresa) {
     return;
   }
@@ -50,41 +50,41 @@ async function sincronizarContatoGrupoParaClientesVinculados(idContatoGrupoEmpre
     return;
   }
 
-  const clientes = await consultarTodos(
-    `SELECT idCliente
-     FROM cliente
+  const fornecedores = await consultarTodos(
+    `SELECT idFornecedor
+     FROM fornecedor
      WHERE idGrupoEmpresa = ?`,
     [contatoGrupo.idGrupoEmpresa]
   );
 
-  for (const cliente of clientes) {
-    await sincronizarContatoGrupoParaCliente(cliente.idCliente, contatoGrupo);
+  for (const fornecedor of fornecedores) {
+    await sincronizarContatoGrupoParaFornecedor(fornecedor.idFornecedor, contatoGrupo);
   }
 }
 
-async function sincronizarGrupoEmpresaParaClientesVinculados(idGrupoEmpresa) {
+async function sincronizarGrupoEmpresaParaFornecedoresVinculados(idGrupoEmpresa) {
   if (!idGrupoEmpresa) {
     return;
   }
 
-  const clientes = await consultarTodos(
-    `SELECT idCliente
-     FROM cliente
+  const fornecedores = await consultarTodos(
+    `SELECT idFornecedor
+     FROM fornecedor
      WHERE idGrupoEmpresa = ?`,
     [idGrupoEmpresa]
   );
 
-  for (const cliente of clientes) {
-    await sincronizarGrupoEmpresaDoCliente(cliente.idCliente, idGrupoEmpresa);
+  for (const fornecedor of fornecedores) {
+    await sincronizarGrupoEmpresaDoFornecedor(fornecedor.idFornecedor, idGrupoEmpresa);
   }
 }
 
-async function sincronizarContatoGrupoParaCliente(idCliente, contatoGrupo) {
+async function sincronizarContatoGrupoParaFornecedor(idFornecedor, contatoGrupo) {
   const existente = await consultarUm(
     `SELECT idContato
      FROM contato
-     WHERE idCliente = ? AND idContatoGrupoEmpresaOrigem = ?`,
-    [idCliente, contatoGrupo.idContatoGrupoEmpresa]
+     WHERE idFornecedor = ? AND idContatoGrupoEmpresaOrigem = ?`,
+    [idFornecedor, contatoGrupo.idContatoGrupoEmpresa]
   );
 
   const payload = [
@@ -97,7 +97,7 @@ async function sincronizarContatoGrupoParaCliente(idCliente, contatoGrupo) {
     contatoGrupo.principal ? 1 : 0,
     1,
     contatoGrupo.idContatoGrupoEmpresa,
-    idCliente
+    idFornecedor
   ];
 
   if (existente?.idContato) {
@@ -120,7 +120,7 @@ async function sincronizarContatoGrupoParaCliente(idCliente, contatoGrupo) {
 
   await executar(
     `INSERT INTO contato (
-      idCliente,
+      idFornecedor,
       nome,
       cargo,
       email,
@@ -132,7 +132,7 @@ async function sincronizarContatoGrupoParaCliente(idCliente, contatoGrupo) {
       idContatoGrupoEmpresaOrigem
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
-      idCliente,
+      idFornecedor,
       contatoGrupo.nome,
       contatoGrupo.cargo || null,
       contatoGrupo.email || null,
@@ -146,19 +146,19 @@ async function sincronizarContatoGrupoParaCliente(idCliente, contatoGrupo) {
   );
 }
 
-async function removerContatosHerdadosDoCliente(idCliente) {
+async function removerContatosHerdadosDoFornecedor(idFornecedor) {
   await executar(
     `UPDATE contato
      SET status = 0,
          principal = 0
-     WHERE idCliente = ? AND contatoVinculadoGrupo = 1`,
-    [idCliente]
+     WHERE idFornecedor = ? AND contatoVinculadoGrupo = 1`,
+    [idFornecedor]
   );
 }
 
 module.exports = {
-  sincronizarGrupoEmpresaDoCliente,
-  sincronizarGrupoEmpresaParaClientesVinculados,
-  sincronizarContatoGrupoParaClientesVinculados,
-  removerContatosHerdadosDoCliente
+  sincronizarGrupoEmpresaDoFornecedor,
+  sincronizarGrupoEmpresaParaFornecedoresVinculados,
+  sincronizarContatoGrupoParaFornecedoresVinculados,
+  removerContatosHerdadosDoFornecedor
 };

@@ -646,7 +646,7 @@ export function PaginaAtendimentos({ usuarioLogado }) {
         campos={[
           {
             name: 'idCliente',
-            label: 'Cliente',
+            label: 'Fornecedor',
             acaoExtra: (
               <Botao
                 variante="secundario"
@@ -655,10 +655,10 @@ export function PaginaAtendimentos({ usuarioLogado }) {
                 className="botaoCampoAcao"
                 onClick={() => definirModalBuscaClienteFiltrosAberto(true)}
                 somenteIcone
-                title="Buscar cliente"
-                aria-label="Buscar cliente"
+                title="Buscar fornecedor"
+                aria-label="Buscar fornecedor"
               >
-                Buscar cliente
+                Buscar fornecedor
               </Botao>
             ),
             options: clientes.map((cliente) => ({
@@ -678,9 +678,9 @@ export function PaginaAtendimentos({ usuarioLogado }) {
           },
           {
             name: 'idVendedorCliente',
-            label: 'Clientes do vendedor',
+            label: 'Fornecedores do comprador',
             multiple: true,
-            placeholder: 'Todos os vendedores',
+            placeholder: 'Todos os compradores',
             options: vendedores.map((vendedor) => ({
               valor: String(vendedor.idVendedor),
               label: vendedor.nome
@@ -757,8 +757,8 @@ export function PaginaAtendimentos({ usuarioLogado }) {
         aberto={modalBuscaClienteFiltrosAberto}
         empresa={empresa}
         clientes={clientes}
-        placeholder="Pesquisar cliente no filtro"
-        ariaLabelPesquisa="Pesquisar cliente no filtro"
+        placeholder="Pesquisar fornecedor no filtro"
+        ariaLabelPesquisa="Pesquisar fornecedor no filtro"
         aoSelecionar={(cliente) => {
           definirFiltrosEmEdicao((estadoAtual) => ({
             ...(estadoAtual || criarFiltrosIniciaisAtendimentos(usuarioLogado)),

@@ -2,14 +2,14 @@ const path = require('node:path');
 const fs = require('node:fs');
 const sqlite3 = require('sqlite3').verbose();
 
-const ID_ETAPA_ORCAMENTO_FECHAMENTO = 1;
-const ID_ETAPA_ORCAMENTO_FECHADO_SEM_PEDIDO = 2;
-const ID_ETAPA_ORCAMENTO_PEDIDO_EXCLUIDO = 3;
-const ID_ETAPA_ORCAMENTO_RECUSADO = 4;
+const ID_ETAPA_COTACAO_FECHAMENTO = 1;
+const ID_ETAPA_COTACAO_FECHADO_SEM_PEDIDO = 2;
+const ID_ETAPA_COTACAO_PEDIDO_EXCLUIDO = 3;
+const ID_ETAPA_COTACAO_RECUSADO = 4;
 const ID_ETAPA_PEDIDO_ENTREGUE = 5;
 const ID_TIPO_PEDIDO_VENDA = 1;
 const ID_TIPO_PEDIDO_DEVOLUCAO = 2;
-const ID_CONCEITO_CLIENTE_SEM_CONCEITO = 1;
+const ID_CONCEITO_FORNECEDOR_SEM_CONCEITO = 1;
 const ID_STATUS_VISITA_AGENDADO = 1;
 const ID_STATUS_VISITA_CONFIRMADO = 2;
 const ID_STATUS_VISITA_REALIZADO = 3;
@@ -24,11 +24,82 @@ if (!fs.existsSync(diretorioDados)) {
   fs.mkdirSync(diretorioDados, { recursive: true });
 }
 
-const caminhoBanco = path.join(diretorioDados, 'crm.sqlite');
+const caminhoBanco = path.join(diretorioDados, 'srm.sqlite');
 const banco = new sqlite3.Database(caminhoBanco);
 
 banco.serialize(() => {
-  banco.run('PRAGMA foreignKeys = ON');
+  banco.run('PRAGMA foreign_keys = OFF');
+
+  migrarNomeTabela('conceitoCliente', 'conceitoFornecedor');
+  migrarNomeTabela('cliente', 'fornecedor');
+  migrarNomeTabela('vendedor', 'comprador');
+  migrarNomeColuna('comprador', 'idVendedor', 'idComprador');
+  migrarNomeColuna('usuario', 'idVendedor', 'idComprador');
+  migrarNomeColuna('fornecedor', 'idVendedor', 'idComprador');
+  migrarNomeColuna('cotacao', 'idVendedor', 'idComprador');
+  migrarNomeColuna('ordemCompra', 'idVendedor', 'idComprador');
+  migrarNomeColuna('atendimento', 'idVendedor', 'idComprador');
+  migrarNomeColuna('ordemCompra', 'nomeVendedorSnapshot', 'nomeCompradorSnapshot');
+  migrarNomeColuna('agendamento', 'idCliente', 'idFornecedor');
+  migrarNomeColuna('tipoAgenda', 'obrigarCliente', 'obrigarFornecedor');
+  migrarNomeColuna('empresa', 'codigoPrincipalCliente', 'codigoPrincipalFornecedor');
+  migrarNomeColuna('empresa', 'colunasGridClientes', 'colunasGridFornecedores');
+  migrarNomeColuna('contato', 'idCliente', 'idFornecedor');
+  migrarNomeColuna('atendimento', 'idCliente', 'idFornecedor');
+  migrarNomeTabela('etapaOrcamento', 'etapaCotacao');
+  migrarNomeTabela('campoOrcamentoConfiguravel', 'campoCotacaoConfiguravel');
+  migrarNomeTabela('orcamento', 'cotacao');
+  migrarNomeTabela('itemOrcamento', 'itemCotacao');
+  migrarNomeTabela('valorCampoOrcamento', 'valorCampoCotacao');
+  migrarNomeColuna('cotacao', 'idCliente', 'idFornecedor');
+  migrarNomeColuna('etapaCotacao', 'idEtapaOrcamento', 'idEtapaCotacao');
+  migrarNomeColuna('campoCotacaoConfiguravel', 'idCampoOrcamento', 'idCampoCotacao');
+  migrarNomeColuna('cotacao', 'idOrcamento', 'idCotacao');
+  migrarNomeColuna('cotacao', 'idEtapaOrcamento', 'idEtapaCotacao');
+  migrarNomeColuna('itemCotacao', 'idItemOrcamento', 'idItemCotacao');
+  migrarNomeColuna('itemCotacao', 'idOrcamento', 'idCotacao');
+  migrarNomeColuna('valorCampoCotacao', 'idValorCampoOrcamento', 'idValorCampoCotacao');
+  migrarNomeColuna('valorCampoCotacao', 'idOrcamento', 'idCotacao');
+  migrarNomeColuna('valorCampoCotacao', 'idCampoOrcamento', 'idCampoCotacao');
+  migrarNomeColuna('empresa', 'diasValidadeOrcamento', 'diasValidadeCotacao');
+  migrarNomeColuna('empresa', 'etapasFiltroPadraoOrcamento', 'etapasFiltroPadraoCotacao');
+  migrarNomeColuna('empresa', 'colunasGridOrcamentos', 'colunasGridCotacoes');
+  migrarNomeColuna('empresa', 'graficosPaginaInicialOrcamentos', 'graficosPaginaInicialCotacoes');
+  migrarNomeColuna('empresa', 'corPrimariaOrcamento', 'corPrimariaCotacao');
+  migrarNomeColuna('empresa', 'corSecundariaOrcamento', 'corSecundariaCotacao');
+  migrarNomeColuna('empresa', 'corDestaqueOrcamento', 'corDestaqueCotacao');
+  migrarNomeColuna('empresa', 'destaqueItemOrcamentoPdf', 'destaqueItemCotacaoPdf');
+  migrarNomeColuna('empresa', 'assuntoEmailOrcamento', 'assuntoEmailCotacao');
+  migrarNomeColuna('empresa', 'corpoEmailOrcamento', 'corpoEmailCotacao');
+  migrarNomeColuna('empresa', 'assinaturaEmailOrcamento', 'assinaturaEmailCotacao');
+  migrarNomeTabela('tipoPedido', 'tipoOrdemCompra');
+  migrarNomeTabela('etapaPedido', 'etapaOrdemCompra');
+  migrarNomeTabela('campoPedidoConfiguravel', 'campoOrdemCompraConfiguravel');
+  migrarNomeTabela('pedido', 'ordemCompra');
+  migrarNomeTabela('itemPedido', 'itemOrdemCompra');
+  migrarNomeTabela('valorCampoPedido', 'valorCampoOrdemCompra');
+  migrarNomeColuna('ordemCompra', 'idCliente', 'idFornecedor');
+  migrarNomeColuna('ordemCompra', 'nomeClienteSnapshot', 'nomeFornecedorSnapshot');
+  migrarNomeColuna('ordemCompra', 'idOrcamento', 'idCotacao');
+  migrarNomeColuna('ordemCompra', 'codigoOrcamentoOrigem', 'codigoCotacaoOrigem');
+  migrarNomeColuna('tipoOrdemCompra', 'idTipoPedido', 'idTipoOrdemCompra');
+  migrarNomeColuna('ordemCompra', 'idPedido', 'idOrdemCompra');
+  migrarNomeColuna('ordemCompra', 'idTipoPedido', 'idTipoOrdemCompra');
+  migrarNomeColuna('ordemCompra', 'idEtapaPedido', 'idEtapaOrdemCompra');
+  migrarNomeColuna('ordemCompra', 'nomeTipoPedidoSnapshot', 'nomeTipoOrdemCompraSnapshot');
+  migrarNomeColuna('ordemCompra', 'nomeEtapaPedidoSnapshot', 'nomeEtapaOrdemCompraSnapshot');
+  migrarNomeColuna('itemOrdemCompra', 'idItemPedido', 'idItemOrdemCompra');
+  migrarNomeColuna('itemOrdemCompra', 'idPedido', 'idOrdemCompra');
+  migrarNomeColuna('campoOrdemCompraConfiguravel', 'idCampoPedido', 'idCampoOrdemCompra');
+  migrarNomeColuna('valorCampoOrdemCompra', 'idValorCampoPedido', 'idValorCampoOrdemCompra');
+  migrarNomeColuna('valorCampoOrdemCompra', 'idPedido', 'idOrdemCompra');
+  migrarNomeColuna('valorCampoOrdemCompra', 'idCampoPedido', 'idCampoOrdemCompra');
+  migrarNomeColuna('valorCampoOrdemCompra', 'idCampoOrcamento', 'idCampoCotacao');
+  migrarNomeColuna('cotacao', 'idPedidoVinculado', 'idOrdemCompraVinculado');
+  migrarNomeColuna('empresa', 'diasEntregaPedido', 'diasEntregaOrdemCompra');
+  migrarNomeColuna('empresa', 'colunasGridPedidos', 'colunasGridOrdensCompra');
+
+  banco.run('PRAGMA foreign_keys = ON');
 
   banco.run(`
     CREATE TABLE IF NOT EXISTS ramoAtividade (
@@ -39,16 +110,23 @@ banco.serialize(() => {
   `);
 
   banco.run(`
-    CREATE TABLE IF NOT EXISTS conceitoCliente (
+    CREATE TABLE IF NOT EXISTS conceitoFornecedor (
       idConceito INTEGER PRIMARY KEY AUTOINCREMENT,
       descricao VARCHAR(150) NOT NULL,
       status BOOLEAN NOT NULL DEFAULT 1
     )
   `);
 
+  executarMigracaoNome(`
+    INSERT OR IGNORE INTO conceitoFornecedor (idConceito, descricao, status)
+    SELECT idConceito, descricao, status
+    FROM conceitoCliente
+  `);
+  executarMigracaoNome('DROP TABLE IF EXISTS conceitoCliente');
+
   banco.run(`
-    CREATE TABLE IF NOT EXISTS vendedor (
-      idVendedor INTEGER PRIMARY KEY AUTOINCREMENT,
+    CREATE TABLE IF NOT EXISTS comprador (
+      idComprador INTEGER PRIMARY KEY AUTOINCREMENT,
       nome VARCHAR(150) NOT NULL,
       email VARCHAR(150) NOT NULL,
       comissaoPadrao DECIMAL(7, 2) NOT NULL DEFAULT 0,
@@ -57,10 +135,10 @@ banco.serialize(() => {
   `);
 
   banco.run(`
-    ALTER TABLE vendedor ADD COLUMN comissaoPadrao DECIMAL(7, 2) NOT NULL DEFAULT 0
+    ALTER TABLE comprador ADD COLUMN comissaoPadrao DECIMAL(7, 2) NOT NULL DEFAULT 0
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna comissaoPadrao do vendedor.', erro);
+      console.error('Nao foi possivel garantir a coluna comissaoPadrao do comprador.', erro);
     }
   });
 
@@ -170,7 +248,7 @@ banco.serialize(() => {
       horaFim VARCHAR(5) NOT NULL,
       idLocal INTEGER,
       idRecurso INTEGER,
-      idCliente INTEGER,
+      idFornecedor INTEGER,
       idContato INTEGER,
       idUsuario INTEGER NOT NULL,
       idTipoAgenda INTEGER,
@@ -179,7 +257,7 @@ banco.serialize(() => {
       status BOOLEAN NOT NULL DEFAULT 1,
       FOREIGN KEY (idLocal) REFERENCES localAgenda (idLocal),
       FOREIGN KEY (idRecurso) REFERENCES recurso (idRecurso),
-      FOREIGN KEY (idCliente) REFERENCES cliente (idCliente),
+      FOREIGN KEY (idFornecedor) REFERENCES fornecedor (idFornecedor),
       FOREIGN KEY (idContato) REFERENCES contato (idContato),
       FOREIGN KEY (idUsuario) REFERENCES usuario (idUsuario),
       FOREIGN KEY (idTipoAgenda) REFERENCES tipoAgenda (idTipoAgenda),
@@ -228,8 +306,8 @@ banco.serialize(() => {
     CREATE TABLE IF NOT EXISTS tipoAgenda (
       idTipoAgenda INTEGER PRIMARY KEY AUTOINCREMENT,
       descricao VARCHAR(100) NOT NULL,
-      cor VARCHAR(20) NOT NULL DEFAULT '#0B74D1',
-      obrigarCliente BOOLEAN NOT NULL DEFAULT 0,
+      cor VARCHAR(20) NOT NULL DEFAULT '#EC8702',
+      obrigarFornecedor BOOLEAN NOT NULL DEFAULT 0,
       obrigarLocal BOOLEAN NOT NULL DEFAULT 0,
       obrigarRecurso BOOLEAN NOT NULL DEFAULT 0,
       ordem INTEGER NOT NULL DEFAULT 0,
@@ -238,7 +316,7 @@ banco.serialize(() => {
   `);
 
   banco.run(`
-    ALTER TABLE tipoAgenda ADD COLUMN cor VARCHAR(20) NOT NULL DEFAULT '#0B74D1'
+    ALTER TABLE tipoAgenda ADD COLUMN cor VARCHAR(20) NOT NULL DEFAULT '#EC8702'
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
       console.error('Nao foi possivel garantir a coluna cor do tipo de agenda.', erro);
@@ -246,10 +324,10 @@ banco.serialize(() => {
   });
 
   banco.run(`
-    ALTER TABLE tipoAgenda ADD COLUMN obrigarCliente BOOLEAN NOT NULL DEFAULT 0
+    ALTER TABLE tipoAgenda ADD COLUMN obrigarFornecedor BOOLEAN NOT NULL DEFAULT 0
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna obrigarCliente do tipo de agenda.', erro);
+      console.error('Nao foi possivel garantir a coluna obrigarFornecedor do tipo de agenda.', erro);
     }
   });
 
@@ -331,9 +409,9 @@ banco.serialize(() => {
 
       const colunaLocal = colunasAgendamento.find((coluna) => coluna.name === 'idLocal');
       const colunaRecurso = colunasAgendamento.find((coluna) => coluna.name === 'idRecurso');
-      const colunaCliente = colunasAgendamento.find((coluna) => coluna.name === 'idCliente');
+      const colunaFornecedor = colunasAgendamento.find((coluna) => coluna.name === 'idFornecedor');
 
-      if (!colunaLocal?.notnull && !colunaRecurso?.notnull && !colunaCliente?.notnull) {
+      if (!colunaLocal?.notnull && !colunaRecurso?.notnull && !colunaFornecedor?.notnull) {
         return;
       }
 
@@ -349,7 +427,7 @@ banco.serialize(() => {
             horaFim VARCHAR(5) NOT NULL,
             idLocal INTEGER,
             idRecurso INTEGER,
-            idCliente INTEGER,
+            idFornecedor INTEGER,
             idContato INTEGER,
             idUsuario INTEGER NOT NULL,
             idTipoAgenda INTEGER,
@@ -358,7 +436,7 @@ banco.serialize(() => {
             tipo VARCHAR(100),
             FOREIGN KEY (idLocal) REFERENCES localAgenda (idLocal),
             FOREIGN KEY (idRecurso) REFERENCES recurso (idRecurso),
-            FOREIGN KEY (idCliente) REFERENCES cliente (idCliente),
+            FOREIGN KEY (idFornecedor) REFERENCES fornecedor (idFornecedor),
             FOREIGN KEY (idContato) REFERENCES contato (idContato),
             FOREIGN KEY (idUsuario) REFERENCES usuario (idUsuario),
             FOREIGN KEY (idTipoAgenda) REFERENCES tipoAgenda (idTipoAgenda),
@@ -374,7 +452,7 @@ banco.serialize(() => {
             horaFim,
             idLocal,
             idRecurso,
-            idCliente,
+            idFornecedor,
             idContato,
             idUsuario,
             idTipoAgenda,
@@ -390,7 +468,7 @@ banco.serialize(() => {
             horaFim,
             idLocal,
             idRecurso,
-            idCliente,
+            idFornecedor,
             idContato,
             idUsuario,
             idTipoAgenda,
@@ -418,8 +496,8 @@ banco.serialize(() => {
 
       const colunaLocal = colunasAgendamento.find((coluna) => coluna.name === 'idLocal');
       const colunaRecurso = colunasAgendamento.find((coluna) => coluna.name === 'idRecurso');
-      const colunaCliente = colunasAgendamento.find((coluna) => coluna.name === 'idCliente');
-      const precisaMigrar = Boolean(colunaLocal?.notnull || colunaRecurso?.notnull || colunaCliente?.notnull);
+      const colunaFornecedor = colunasAgendamento.find((coluna) => coluna.name === 'idFornecedor');
+      const precisaMigrar = Boolean(colunaLocal?.notnull || colunaRecurso?.notnull || colunaFornecedor?.notnull);
 
       if (!precisaMigrar) {
         return;
@@ -437,7 +515,7 @@ banco.serialize(() => {
             horaFim VARCHAR(5) NOT NULL,
             idLocal INTEGER,
             idRecurso INTEGER,
-            idCliente INTEGER,
+            idFornecedor INTEGER,
             idContato INTEGER,
             idUsuario INTEGER NOT NULL,
             idTipoAgenda INTEGER,
@@ -446,7 +524,7 @@ banco.serialize(() => {
             status BOOLEAN NOT NULL DEFAULT 1,
             FOREIGN KEY (idLocal) REFERENCES localAgenda (idLocal),
             FOREIGN KEY (idRecurso) REFERENCES recurso (idRecurso),
-            FOREIGN KEY (idCliente) REFERENCES cliente (idCliente),
+            FOREIGN KEY (idFornecedor) REFERENCES fornecedor (idFornecedor),
             FOREIGN KEY (idContato) REFERENCES contato (idContato),
             FOREIGN KEY (idUsuario) REFERENCES usuario (idUsuario),
             FOREIGN KEY (idTipoAgenda) REFERENCES tipoAgenda (idTipoAgenda),
@@ -462,7 +540,7 @@ banco.serialize(() => {
             horaFim,
             idLocal,
             idRecurso,
-            idCliente,
+            idFornecedor,
             idContato,
             idUsuario,
             idTipoAgenda,
@@ -478,7 +556,7 @@ banco.serialize(() => {
             horaFim,
             idLocal,
             idRecurso,
-            idCliente,
+            idFornecedor,
             idContato,
             idUsuario,
             idTipoAgenda,
@@ -503,8 +581,8 @@ banco.serialize(() => {
   `);
 
   banco.run(`
-    CREATE TABLE IF NOT EXISTS tipoPedido (
-      idTipoPedido INTEGER PRIMARY KEY AUTOINCREMENT,
+    CREATE TABLE IF NOT EXISTS tipoOrdemCompra (
+      idTipoOrdemCompra INTEGER PRIMARY KEY AUTOINCREMENT,
       descricao VARCHAR(150) NOT NULL,
       status BOOLEAN NOT NULL DEFAULT 1
     )
@@ -616,46 +694,46 @@ banco.serialize(() => {
   `);
 
   banco.run(`
-    CREATE TABLE IF NOT EXISTS etapaPedido (
+    CREATE TABLE IF NOT EXISTS etapaOrdemCompra (
       idEtapa INTEGER PRIMARY KEY AUTOINCREMENT,
       descricao VARCHAR(150) NOT NULL,
-      cor VARCHAR(20) NOT NULL DEFAULT '#0B74D1',
+      cor VARCHAR(20) NOT NULL DEFAULT '#EC8702',
       ordem INTEGER NOT NULL DEFAULT 0,
       status BOOLEAN NOT NULL DEFAULT 1
     )
   `);
 
   banco.run(`
-    ALTER TABLE etapaPedido ADD COLUMN cor VARCHAR(20) NOT NULL DEFAULT '#0B74D1'
+    ALTER TABLE etapaOrdemCompra ADD COLUMN cor VARCHAR(20) NOT NULL DEFAULT '#EC8702'
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna cor da etapa de pedido.', erro);
+      console.error('Nao foi possivel garantir a coluna cor da etapa de ordemCompra.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE etapaPedido ADD COLUMN ordem INTEGER NOT NULL DEFAULT 0
+    ALTER TABLE etapaOrdemCompra ADD COLUMN ordem INTEGER NOT NULL DEFAULT 0
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna ordem da etapa de pedido.', erro);
+      console.error('Nao foi possivel garantir a coluna ordem da etapa de ordemCompra.', erro);
     }
   });
 
   banco.run(`
-    UPDATE etapaPedido
+    UPDATE etapaOrdemCompra
     SET ordem = idEtapa
     WHERE ordem IS NULL OR ordem <= 0
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('no such column')) {
-      console.error('Nao foi possivel atualizar a ordem das etapas de pedido.', erro);
+      console.error('Nao foi possivel atualizar a ordem das etapas de ordemCompra.', erro);
     }
   });
 
   banco.run(`
-    CREATE TABLE IF NOT EXISTS etapaOrcamento (
-      idEtapaOrcamento INTEGER PRIMARY KEY AUTOINCREMENT,
+    CREATE TABLE IF NOT EXISTS etapaCotacao (
+      idEtapaCotacao INTEGER PRIMARY KEY AUTOINCREMENT,
       descricao VARCHAR(150) NOT NULL,
-      cor VARCHAR(20) NOT NULL DEFAULT '#0B74D1',
+      cor VARCHAR(20) NOT NULL DEFAULT '#EC8702',
       obrigarMotivoPerda BOOLEAN NOT NULL DEFAULT 0,
       consideraFunilVendas BOOLEAN NOT NULL DEFAULT 1,
       ordem INTEGER NOT NULL DEFAULT 0,
@@ -664,52 +742,52 @@ banco.serialize(() => {
   `);
 
   banco.run(`
-    ALTER TABLE etapaOrcamento ADD COLUMN obrigarMotivoPerda BOOLEAN NOT NULL DEFAULT 0
+    ALTER TABLE etapaCotacao ADD COLUMN obrigarMotivoPerda BOOLEAN NOT NULL DEFAULT 0
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna obrigarMotivoPerda da etapa de orcamento.', erro);
+      console.error('Nao foi possivel garantir a coluna obrigarMotivoPerda da etapa de cotacao.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE etapaOrcamento ADD COLUMN ordem INTEGER NOT NULL DEFAULT 0
+    ALTER TABLE etapaCotacao ADD COLUMN ordem INTEGER NOT NULL DEFAULT 0
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna ordem da etapa de orcamento.', erro);
+      console.error('Nao foi possivel garantir a coluna ordem da etapa de cotacao.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE etapaOrcamento ADD COLUMN consideraFunilVendas BOOLEAN NOT NULL DEFAULT 1
+    ALTER TABLE etapaCotacao ADD COLUMN consideraFunilVendas BOOLEAN NOT NULL DEFAULT 1
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna consideraFunilVendas da etapa de orcamento.', erro);
+      console.error('Nao foi possivel garantir a coluna consideraFunilVendas da etapa de cotacao.', erro);
     }
   });
 
   banco.run(`
-    UPDATE etapaOrcamento
+    UPDATE etapaCotacao
     SET consideraFunilVendas = 1
     WHERE consideraFunilVendas IS NULL
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('no such column')) {
-      console.error('Nao foi possivel atualizar o campo consideraFunilVendas das etapas de orcamento.', erro);
+      console.error('Nao foi possivel atualizar o campo consideraFunilVendas das etapas de cotacao.', erro);
     }
   });
 
   banco.run(`
-    UPDATE etapaOrcamento
-    SET ordem = idEtapaOrcamento
+    UPDATE etapaCotacao
+    SET ordem = idEtapaCotacao
     WHERE ordem IS NULL OR ordem <= 0
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('no such column')) {
-      console.error('Nao foi possivel atualizar a ordem das etapas de orcamento.', erro);
+      console.error('Nao foi possivel atualizar a ordem das etapas de cotacao.', erro);
     }
   });
 
   banco.run(`
-    CREATE TABLE IF NOT EXISTS campoOrcamentoConfiguravel (
-      idCampoOrcamento INTEGER PRIMARY KEY AUTOINCREMENT,
+    CREATE TABLE IF NOT EXISTS campoCotacaoConfiguravel (
+      idCampoCotacao INTEGER PRIMARY KEY AUTOINCREMENT,
       titulo VARCHAR(150) NOT NULL,
       descricaoPadrao TEXT,
       status BOOLEAN NOT NULL DEFAULT 1
@@ -717,8 +795,8 @@ banco.serialize(() => {
   `);
 
   banco.run(`
-    CREATE TABLE IF NOT EXISTS campoPedidoConfiguravel (
-      idCampoPedido INTEGER PRIMARY KEY AUTOINCREMENT,
+    CREATE TABLE IF NOT EXISTS campoOrdemCompraConfiguravel (
+      idCampoOrdemCompra INTEGER PRIMARY KEY AUTOINCREMENT,
       titulo VARCHAR(150) NOT NULL,
       descricaoPadrao TEXT,
       status BOOLEAN NOT NULL DEFAULT 1
@@ -726,23 +804,23 @@ banco.serialize(() => {
   `);
 
   banco.run(`
-    ALTER TABLE campoOrcamentoConfiguravel ADD COLUMN titulo VARCHAR(150)
+    ALTER TABLE campoCotacaoConfiguravel ADD COLUMN titulo VARCHAR(150)
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna titulo do campo de orcamento.', erro);
+      console.error('Nao foi possivel garantir a coluna titulo do campo de cotacao.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE campoOrcamentoConfiguravel ADD COLUMN descricaoPadrao TEXT
+    ALTER TABLE campoCotacaoConfiguravel ADD COLUMN descricaoPadrao TEXT
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna descricaoPadrao do campo de orcamento.', erro);
+      console.error('Nao foi possivel garantir a coluna descricaoPadrao do campo de cotacao.', erro);
     }
   });
 
   banco.run(`
-    UPDATE campoOrcamentoConfiguravel
+    UPDATE campoCotacaoConfiguravel
     SET
       titulo = COALESCE(NULLIF(titulo, ''), descricao),
       descricaoPadrao = COALESCE(descricaoPadrao, descricao)
@@ -752,7 +830,7 @@ banco.serialize(() => {
       erro &&
       !String(erro.message || '').includes('no such column')
     ) {
-      console.error('Nao foi possivel migrar os dados legados dos campos de orcamento.', erro);
+      console.error('Nao foi possivel migrar os dados legados dos campos de cotacao.', erro);
     }
   });
 
@@ -775,26 +853,26 @@ banco.serialize(() => {
       horaInicioSabado VARCHAR(5),
       horaFimSabado VARCHAR(5),
       exibirFunilPaginaInicial BOOLEAN NOT NULL DEFAULT 1,
-      diasValidadeOrcamento INTEGER NOT NULL DEFAULT 7,
-      diasEntregaPedido INTEGER NOT NULL DEFAULT 7,
-      codigoPrincipalCliente VARCHAR(30) NOT NULL DEFAULT 'codigo',
-      etapasFiltroPadraoOrcamento TEXT,
-      colunasGridClientes TEXT,
-      colunasGridOrcamentos TEXT,
+      diasValidadeCotacao INTEGER NOT NULL DEFAULT 7,
+      diasEntregaOrdemCompra INTEGER NOT NULL DEFAULT 7,
+      codigoPrincipalFornecedor VARCHAR(30) NOT NULL DEFAULT 'codigo',
+      etapasFiltroPadraoCotacao TEXT,
+      colunasGridFornecedores TEXT,
+      colunasGridCotacoes TEXT,
       colunasGridProdutos TEXT,
-      colunasGridPedidos TEXT,
+      colunasGridOrdensCompra TEXT,
       colunasGridAtendimentos TEXT,
-      graficosPaginaInicialOrcamentos TEXT,
+      graficosPaginaInicialCotacoes TEXT,
       graficosPaginaInicialVendas TEXT,
       graficosPaginaInicialAtendimentos TEXT,
       cardsPaginaInicial TEXT,
-      corPrimariaOrcamento VARCHAR(7) NOT NULL DEFAULT '#111827',
-      corSecundariaOrcamento VARCHAR(7) NOT NULL DEFAULT '#ef4444',
-      corDestaqueOrcamento VARCHAR(7) NOT NULL DEFAULT '#f59e0b',
-      destaqueItemOrcamentoPdf VARCHAR(20) NOT NULL DEFAULT 'descricao',
-      assuntoEmailOrcamento TEXT,
-      corpoEmailOrcamento TEXT,
-      assinaturaEmailOrcamento TEXT,
+      corPrimariaCotacao VARCHAR(7) NOT NULL DEFAULT '#111827',
+      corSecundariaCotacao VARCHAR(7) NOT NULL DEFAULT '#ef4444',
+      corDestaqueCotacao VARCHAR(7) NOT NULL DEFAULT '#f59e0b',
+      destaqueItemCotacaoPdf VARCHAR(20) NOT NULL DEFAULT 'descricao',
+      assuntoEmailCotacao TEXT,
+      corpoEmailCotacao TEXT,
+      assinaturaEmailCotacao TEXT,
       logradouro VARCHAR(255),
       numero VARCHAR(10),
       complemento VARCHAR(100),
@@ -888,50 +966,50 @@ banco.serialize(() => {
   });
 
   banco.run(`
-    ALTER TABLE empresa ADD COLUMN diasValidadeOrcamento INTEGER NOT NULL DEFAULT 7
+    ALTER TABLE empresa ADD COLUMN diasValidadeCotacao INTEGER NOT NULL DEFAULT 7
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna diasValidadeOrcamento da empresa.', erro);
+      console.error('Nao foi possivel garantir a coluna diasValidadeCotacao da empresa.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE empresa ADD COLUMN diasEntregaPedido INTEGER NOT NULL DEFAULT 7
+    ALTER TABLE empresa ADD COLUMN diasEntregaOrdemCompra INTEGER NOT NULL DEFAULT 7
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna diasEntregaPedido da empresa.', erro);
+      console.error('Nao foi possivel garantir a coluna diasEntregaOrdemCompra da empresa.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE empresa ADD COLUMN codigoPrincipalCliente VARCHAR(30) NOT NULL DEFAULT 'codigo'
+    ALTER TABLE empresa ADD COLUMN codigoPrincipalFornecedor VARCHAR(30) NOT NULL DEFAULT 'codigo'
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna codigoPrincipalCliente da empresa.', erro);
+      console.error('Nao foi possivel garantir a coluna codigoPrincipalFornecedor da empresa.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE empresa ADD COLUMN etapasFiltroPadraoOrcamento TEXT
+    ALTER TABLE empresa ADD COLUMN etapasFiltroPadraoCotacao TEXT
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna etapasFiltroPadraoOrcamento da empresa.', erro);
+      console.error('Nao foi possivel garantir a coluna etapasFiltroPadraoCotacao da empresa.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE empresa ADD COLUMN colunasGridClientes TEXT
+    ALTER TABLE empresa ADD COLUMN colunasGridFornecedores TEXT
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna colunasGridClientes da empresa.', erro);
+      console.error('Nao foi possivel garantir a coluna colunasGridFornecedores da empresa.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE empresa ADD COLUMN colunasGridOrcamentos TEXT
+    ALTER TABLE empresa ADD COLUMN colunasGridCotacoes TEXT
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna colunasGridOrcamentos da empresa.', erro);
+      console.error('Nao foi possivel garantir a coluna colunasGridCotacoes da empresa.', erro);
     }
   });
 
@@ -944,10 +1022,10 @@ banco.serialize(() => {
   });
 
   banco.run(`
-    ALTER TABLE empresa ADD COLUMN colunasGridPedidos TEXT
+    ALTER TABLE empresa ADD COLUMN colunasGridOrdensCompra TEXT
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna colunasGridPedidos da empresa.', erro);
+      console.error('Nao foi possivel garantir a coluna colunasGridOrdensCompra da empresa.', erro);
     }
   });
 
@@ -960,10 +1038,10 @@ banco.serialize(() => {
   });
 
   banco.run(`
-    ALTER TABLE empresa ADD COLUMN graficosPaginaInicialOrcamentos TEXT
+    ALTER TABLE empresa ADD COLUMN graficosPaginaInicialCotacoes TEXT
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna graficosPaginaInicialOrcamentos da empresa.', erro);
+      console.error('Nao foi possivel garantir a coluna graficosPaginaInicialCotacoes da empresa.', erro);
     }
   });
 
@@ -992,68 +1070,68 @@ banco.serialize(() => {
   });
 
   banco.run(`
-    ALTER TABLE empresa ADD COLUMN corPrimariaOrcamento VARCHAR(7) NOT NULL DEFAULT '#111827'
+    ALTER TABLE empresa ADD COLUMN corPrimariaCotacao VARCHAR(7) NOT NULL DEFAULT '#111827'
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna corPrimariaOrcamento da empresa.', erro);
+      console.error('Nao foi possivel garantir a coluna corPrimariaCotacao da empresa.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE empresa ADD COLUMN corSecundariaOrcamento VARCHAR(7) NOT NULL DEFAULT '#ef4444'
+    ALTER TABLE empresa ADD COLUMN corSecundariaCotacao VARCHAR(7) NOT NULL DEFAULT '#ef4444'
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna corSecundariaOrcamento da empresa.', erro);
+      console.error('Nao foi possivel garantir a coluna corSecundariaCotacao da empresa.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE empresa ADD COLUMN corDestaqueOrcamento VARCHAR(7) NOT NULL DEFAULT '#f59e0b'
+    ALTER TABLE empresa ADD COLUMN corDestaqueCotacao VARCHAR(7) NOT NULL DEFAULT '#f59e0b'
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna corDestaqueOrcamento da empresa.', erro);
+      console.error('Nao foi possivel garantir a coluna corDestaqueCotacao da empresa.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE empresa ADD COLUMN destaqueItemOrcamentoPdf VARCHAR(20) NOT NULL DEFAULT 'descricao'
+    ALTER TABLE empresa ADD COLUMN destaqueItemCotacaoPdf VARCHAR(20) NOT NULL DEFAULT 'descricao'
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna destaqueItemOrcamentoPdf da empresa.', erro);
+      console.error('Nao foi possivel garantir a coluna destaqueItemCotacaoPdf da empresa.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE empresa ADD COLUMN assuntoEmailOrcamento TEXT
+    ALTER TABLE empresa ADD COLUMN assuntoEmailCotacao TEXT
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna assuntoEmailOrcamento da empresa.', erro);
+      console.error('Nao foi possivel garantir a coluna assuntoEmailCotacao da empresa.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE empresa ADD COLUMN corpoEmailOrcamento TEXT
+    ALTER TABLE empresa ADD COLUMN corpoEmailCotacao TEXT
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna corpoEmailOrcamento da empresa.', erro);
+      console.error('Nao foi possivel garantir a coluna corpoEmailCotacao da empresa.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE empresa ADD COLUMN assinaturaEmailOrcamento TEXT
+    ALTER TABLE empresa ADD COLUMN assinaturaEmailCotacao TEXT
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna assinaturaEmailOrcamento da empresa.', erro);
+      console.error('Nao foi possivel garantir a coluna assinaturaEmailCotacao da empresa.', erro);
     }
   });
 
   banco.run(`
     UPDATE empresa
-    SET codigoPrincipalCliente = 'codigo'
-    WHERE codigoPrincipalCliente IS NULL OR TRIM(codigoPrincipalCliente) = ''
+    SET codigoPrincipalFornecedor = 'codigo'
+    WHERE codigoPrincipalFornecedor IS NULL OR TRIM(codigoPrincipalFornecedor) = ''
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('no such column')) {
-      console.error('Nao foi possivel normalizar o codigoPrincipalCliente da empresa.', erro);
+      console.error('Nao foi possivel normalizar o codigoPrincipalFornecedor da empresa.', erro);
     }
   });
 
@@ -1066,8 +1144,8 @@ banco.serialize(() => {
       tipo VARCHAR(30) NOT NULL,
       ativo BOOLEAN NOT NULL DEFAULT 1,
       imagem VARCHAR(255),
-      idVendedor INTEGER,
-      FOREIGN KEY (idVendedor) REFERENCES vendedor (idVendedor)
+      idComprador INTEGER,
+      FOREIGN KEY (idComprador) REFERENCES comprador (idComprador)
     )
   `);
 
@@ -1080,17 +1158,17 @@ banco.serialize(() => {
   });
 
   banco.run(`
-    ALTER TABLE usuario ADD COLUMN idVendedor INTEGER
+    ALTER TABLE usuario ADD COLUMN idComprador INTEGER
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna idVendedor do usuario.', erro);
+      console.error('Nao foi possivel garantir a coluna idComprador do usuario.', erro);
     }
   });
 
   banco.run(`
-    CREATE TABLE IF NOT EXISTS cliente (
-      idCliente INTEGER PRIMARY KEY AUTOINCREMENT,
-      idVendedor INTEGER NOT NULL,
+    CREATE TABLE IF NOT EXISTS fornecedor (
+      idFornecedor INTEGER PRIMARY KEY AUTOINCREMENT,
+      idComprador INTEGER NOT NULL,
       idConceito INTEGER NOT NULL DEFAULT 1,
       idRamo INTEGER NOT NULL,
       idGrupoEmpresa INTEGER,
@@ -1113,51 +1191,107 @@ banco.serialize(() => {
       observacao TEXT,
       imagem VARCHAR(255),
       dataCriacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (idVendedor) REFERENCES vendedor (idVendedor),
-      FOREIGN KEY (idConceito) REFERENCES conceitoCliente (idConceito),
+      FOREIGN KEY (idComprador) REFERENCES comprador (idComprador),
+      FOREIGN KEY (idConceito) REFERENCES conceitoFornecedor (idConceito),
       FOREIGN KEY (idRamo) REFERENCES ramoAtividade (idRamo),
       FOREIGN KEY (idGrupoEmpresa) REFERENCES grupoEmpresa (idGrupoEmpresa)
     )
   `);
 
   banco.run(`
-    ALTER TABLE cliente ADD COLUMN idConceito INTEGER NOT NULL DEFAULT 1
+    ALTER TABLE fornecedor ADD COLUMN idConceito INTEGER NOT NULL DEFAULT 1
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna idConceito do cliente.', erro);
+      console.error('Nao foi possivel garantir a coluna idConceito do fornecedor.', erro);
     }
   });
 
   banco.run(`
-    UPDATE cliente
+    UPDATE fornecedor
     SET idConceito = 1
     WHERE idConceito IS NULL OR CAST(idConceito AS TEXT) = ''
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('no such column')) {
-      console.error('Nao foi possivel aplicar o conceito padrao nos clientes.', erro);
+      console.error('Nao foi possivel aplicar o conceito padrao nos fornecedores.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE cliente ADD COLUMN idGrupoEmpresa INTEGER
+    ALTER TABLE fornecedor ADD COLUMN idGrupoEmpresa INTEGER
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna idGrupoEmpresa do cliente.', erro);
+      console.error('Nao foi possivel garantir a coluna idGrupoEmpresa do fornecedor.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE cliente ADD COLUMN codigoAlternativo INTEGER
+    ALTER TABLE fornecedor ADD COLUMN codigoAlternativo INTEGER
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna codigoAlternativo do cliente.', erro);
+      console.error('Nao foi possivel garantir a coluna codigoAlternativo do fornecedor.', erro);
     }
   });
+
+  executarMigracaoNome(`
+    INSERT OR IGNORE INTO fornecedor (
+      idFornecedor,
+      idComprador,
+      idConceito,
+      idRamo,
+      idGrupoEmpresa,
+      codigoAlternativo,
+      razaoSocial,
+      nomeFantasia,
+      tipo,
+      cnpj,
+      inscricaoEstadual,
+      status,
+      email,
+      telefone,
+      logradouro,
+      numero,
+      complemento,
+      bairro,
+      cidade,
+      estado,
+      cep,
+      observacao,
+      imagem,
+      dataCriacao
+    )
+    SELECT
+      idCliente,
+      idComprador,
+      idConceito,
+      idRamo,
+      idGrupoEmpresa,
+      codigoAlternativo,
+      razaoSocial,
+      nomeFantasia,
+      tipo,
+      cnpj,
+      inscricaoEstadual,
+      status,
+      email,
+      telefone,
+      logradouro,
+      numero,
+      complemento,
+      bairro,
+      cidade,
+      estado,
+      cep,
+      observacao,
+      imagem,
+      dataCriacao
+    FROM cliente
+  `);
+  executarMigracaoNome('DROP TABLE IF EXISTS cliente');
 
   banco.run(`
     CREATE TABLE IF NOT EXISTS contato (
       idContato INTEGER PRIMARY KEY AUTOINCREMENT,
-      idCliente INTEGER NOT NULL,
+      idFornecedor INTEGER NOT NULL,
       nome VARCHAR(150) NOT NULL,
       cargo VARCHAR(100),
       email VARCHAR(150),
@@ -1167,7 +1301,7 @@ banco.serialize(() => {
       principal BOOLEAN NOT NULL DEFAULT 0,
       contatoVinculadoGrupo BOOLEAN NOT NULL DEFAULT 0,
       idContatoGrupoEmpresaOrigem INTEGER,
-      FOREIGN KEY (idCliente) REFERENCES cliente (idCliente)
+      FOREIGN KEY (idFornecedor) REFERENCES fornecedor (idFornecedor)
     )
   `);
 
@@ -1191,7 +1325,7 @@ banco.serialize(() => {
     CREATE TABLE IF NOT EXISTS atendimento (
       idAtendimento INTEGER PRIMARY KEY AUTOINCREMENT,
       idAgendamento INTEGER,
-      idCliente INTEGER NOT NULL,
+      idFornecedor INTEGER NOT NULL,
       idContato INTEGER,
       idUsuario INTEGER NOT NULL,
       assunto VARCHAR(150) NOT NULL,
@@ -1205,7 +1339,7 @@ banco.serialize(() => {
       status BOOLEAN NOT NULL DEFAULT 1,
       dataCriacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (idAgendamento) REFERENCES agendamento (idAgendamento),
-      FOREIGN KEY (idCliente) REFERENCES cliente (idCliente),
+      FOREIGN KEY (idFornecedor) REFERENCES fornecedor (idFornecedor),
       FOREIGN KEY (idContato) REFERENCES contato (idContato),
       FOREIGN KEY (idUsuario) REFERENCES usuario (idUsuario),
       FOREIGN KEY (idTipoAtendimento) REFERENCES tipoAtendimento (idTipoAtendimento),
@@ -1215,158 +1349,158 @@ banco.serialize(() => {
   `);
 
   banco.run(`
-    CREATE TABLE IF NOT EXISTS orcamento (
-      idOrcamento INTEGER PRIMARY KEY AUTOINCREMENT,
-      idCliente INTEGER NOT NULL,
+    CREATE TABLE IF NOT EXISTS cotacao (
+      idCotacao INTEGER PRIMARY KEY AUTOINCREMENT,
+      idFornecedor INTEGER NOT NULL,
       idContato INTEGER,
       idUsuario INTEGER,
-      idPedidoVinculado INTEGER,
-      idVendedor INTEGER,
+      idOrdemCompraVinculado INTEGER,
+      idComprador INTEGER,
       comissao DECIMAL(7, 2) NOT NULL DEFAULT 0,
       idPrazoPagamento INTEGER,
-      idEtapaOrcamento INTEGER,
+      idEtapaCotacao INTEGER,
       idMotivoPerda INTEGER,
       dataInclusao DATE,
       dataValidade DATE,
       dataFechamento DATE,
       observacao TEXT,
       dataCriacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (idCliente) REFERENCES cliente (idCliente),
+      FOREIGN KEY (idFornecedor) REFERENCES fornecedor (idFornecedor),
       FOREIGN KEY (idContato) REFERENCES contato (idContato),
       FOREIGN KEY (idUsuario) REFERENCES usuario (idUsuario),
-      FOREIGN KEY (idPedidoVinculado) REFERENCES pedido (idPedido),
-      FOREIGN KEY (idVendedor) REFERENCES vendedor (idVendedor),
+      FOREIGN KEY (idOrdemCompraVinculado) REFERENCES ordemCompra (idOrdemCompra),
+      FOREIGN KEY (idComprador) REFERENCES comprador (idComprador),
       FOREIGN KEY (idPrazoPagamento) REFERENCES prazoPagamento (idPrazoPagamento),
-      FOREIGN KEY (idEtapaOrcamento) REFERENCES etapaOrcamento (idEtapaOrcamento),
+      FOREIGN KEY (idEtapaCotacao) REFERENCES etapaCotacao (idEtapaCotacao),
       FOREIGN KEY (idMotivoPerda) REFERENCES motivoPerda (idMotivo)
     )
   `);
 
   banco.run(`
-    ALTER TABLE orcamento ADD COLUMN idUsuario INTEGER
+    ALTER TABLE cotacao ADD COLUMN idUsuario INTEGER
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna idUsuario do orcamento.', erro);
+      console.error('Nao foi possivel garantir a coluna idUsuario da cotacao.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE orcamento ADD COLUMN idVendedor INTEGER
+    ALTER TABLE cotacao ADD COLUMN idComprador INTEGER
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna idVendedor do orcamento.', erro);
+      console.error('Nao foi possivel garantir a coluna idComprador da cotacao.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE orcamento ADD COLUMN idPedidoVinculado INTEGER
+    ALTER TABLE cotacao ADD COLUMN idOrdemCompraVinculado INTEGER
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna idPedidoVinculado do orcamento.', erro);
+      console.error('Nao foi possivel garantir a coluna idOrdemCompraVinculado da cotacao.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE orcamento ADD COLUMN comissao DECIMAL(7, 2) NOT NULL DEFAULT 0
+    ALTER TABLE cotacao ADD COLUMN comissao DECIMAL(7, 2) NOT NULL DEFAULT 0
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna comissao do orcamento.', erro);
+      console.error('Nao foi possivel garantir a coluna comissao da cotacao.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE orcamento ADD COLUMN idMotivoPerda INTEGER
+    ALTER TABLE cotacao ADD COLUMN idMotivoPerda INTEGER
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna idMotivoPerda do orcamento.', erro);
+      console.error('Nao foi possivel garantir a coluna idMotivoPerda da cotacao.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE orcamento ADD COLUMN idEtapaOrcamento INTEGER
+    ALTER TABLE cotacao ADD COLUMN idEtapaCotacao INTEGER
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna idEtapaOrcamento do orcamento.', erro);
+      console.error('Nao foi possivel garantir a coluna idEtapaCotacao da cotacao.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE orcamento ADD COLUMN dataInclusao DATE
+    ALTER TABLE cotacao ADD COLUMN dataInclusao DATE
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna dataInclusao do orcamento.', erro);
+      console.error('Nao foi possivel garantir a coluna dataInclusao da cotacao.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE orcamento ADD COLUMN dataValidade DATE
+    ALTER TABLE cotacao ADD COLUMN dataValidade DATE
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna dataValidade do orcamento.', erro);
+      console.error('Nao foi possivel garantir a coluna dataValidade da cotacao.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE orcamento ADD COLUMN dataFechamento DATE
+    ALTER TABLE cotacao ADD COLUMN dataFechamento DATE
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna dataFechamento do orcamento.', erro);
+      console.error('Nao foi possivel garantir a coluna dataFechamento da cotacao.', erro);
     }
   });
 
   banco.run(`
-    UPDATE orcamento
+    UPDATE cotacao
     SET dataInclusao = COALESCE(dataInclusao, date(dataCriacao))
     WHERE dataInclusao IS NULL
   `, (erro) => {
     if (erro) {
-      console.error('Nao foi possivel migrar a data de inclusao dos orcamentos.', erro);
+      console.error('Nao foi possivel migrar a data de inclusao dos cotacoes.', erro);
     }
   });
 
   banco.run(`
-    UPDATE orcamento
+    UPDATE cotacao
     SET dataFechamento = date('now')
-    WHERE idEtapaOrcamento IN (${ID_ETAPA_ORCAMENTO_FECHAMENTO}, ${ID_ETAPA_ORCAMENTO_FECHADO_SEM_PEDIDO}, ${ID_ETAPA_ORCAMENTO_PEDIDO_EXCLUIDO})
+    WHERE idEtapaCotacao IN (${ID_ETAPA_COTACAO_FECHAMENTO}, ${ID_ETAPA_COTACAO_FECHADO_SEM_PEDIDO}, ${ID_ETAPA_COTACAO_PEDIDO_EXCLUIDO})
       AND (dataFechamento IS NULL OR TRIM(dataFechamento) = '')
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('no such column')) {
-      console.error('Nao foi possivel migrar a data de fechamento dos orcamentos.', erro);
+      console.error('Nao foi possivel migrar a data de fechamento dos cotacoes.', erro);
     }
   });
 
   banco.run(`
-    UPDATE orcamento
+    UPDATE cotacao
     SET
-      idVendedor = COALESCE(
-        idVendedor,
+      idComprador = COALESCE(
+        idComprador,
         (
-          SELECT cliente.idVendedor
-          FROM cliente
-          WHERE cliente.idCliente = orcamento.idCliente
+          SELECT fornecedor.idComprador
+          FROM fornecedor
+          WHERE fornecedor.idFornecedor = cotacao.idFornecedor
         )
       ),
       comissao = COALESCE(
         NULLIF(comissao, ''),
         (
-          SELECT vendedor.comissaoPadrao
-          FROM vendedor
-          INNER JOIN cliente ON cliente.idVendedor = vendedor.idVendedor
-          WHERE cliente.idCliente = orcamento.idCliente
+          SELECT comprador.comissaoPadrao
+          FROM comprador
+          INNER JOIN fornecedor ON fornecedor.idComprador = comprador.idComprador
+          WHERE fornecedor.idFornecedor = cotacao.idFornecedor
         ),
         0
       )
-    WHERE idCliente IS NOT NULL
+    WHERE idFornecedor IS NOT NULL
   `, (erro) => {
     if (erro) {
-      console.error('Nao foi possivel migrar vendedor e comissao dos orcamentos.', erro);
+      console.error('Nao foi possivel migrar comprador e comissao dos cotacoes.', erro);
     }
   });
 
   banco.run(`
-    CREATE TABLE IF NOT EXISTS itemOrcamento (
-      idItemOrcamento INTEGER PRIMARY KEY AUTOINCREMENT,
-      idOrcamento INTEGER NOT NULL,
+    CREATE TABLE IF NOT EXISTS itemCotacao (
+      idItemCotacao INTEGER PRIMARY KEY AUTOINCREMENT,
+      idCotacao INTEGER NOT NULL,
       idProduto INTEGER NOT NULL,
       quantidade DECIMAL(12, 3) NOT NULL,
       valorUnitario DECIMAL(12, 2) NOT NULL,
@@ -1376,98 +1510,98 @@ banco.serialize(() => {
       referenciaProdutoSnapshot VARCHAR(120),
       descricaoProdutoSnapshot VARCHAR(255),
       unidadeProdutoSnapshot VARCHAR(60),
-      FOREIGN KEY (idOrcamento) REFERENCES orcamento (idOrcamento) ON DELETE CASCADE,
+      FOREIGN KEY (idCotacao) REFERENCES cotacao (idCotacao) ON DELETE CASCADE,
       FOREIGN KEY (idProduto) REFERENCES produto (idProduto)
     )
   `);
 
   banco.run(`
-    ALTER TABLE itemOrcamento ADD COLUMN imagem VARCHAR(255)
+    ALTER TABLE itemCotacao ADD COLUMN imagem VARCHAR(255)
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna imagem do item do orcamento.', erro);
+      console.error('Nao foi possivel garantir a coluna imagem do item da cotacao.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE itemOrcamento ADD COLUMN referenciaProdutoSnapshot VARCHAR(120)
+    ALTER TABLE itemCotacao ADD COLUMN referenciaProdutoSnapshot VARCHAR(120)
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna referenciaProdutoSnapshot do item do orcamento.', erro);
+      console.error('Nao foi possivel garantir a coluna referenciaProdutoSnapshot do item da cotacao.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE itemOrcamento ADD COLUMN descricaoProdutoSnapshot VARCHAR(255)
+    ALTER TABLE itemCotacao ADD COLUMN descricaoProdutoSnapshot VARCHAR(255)
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna descricaoProdutoSnapshot do item do orcamento.', erro);
+      console.error('Nao foi possivel garantir a coluna descricaoProdutoSnapshot do item da cotacao.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE itemOrcamento ADD COLUMN unidadeProdutoSnapshot VARCHAR(60)
+    ALTER TABLE itemCotacao ADD COLUMN unidadeProdutoSnapshot VARCHAR(60)
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna unidadeProdutoSnapshot do item do orcamento.', erro);
+      console.error('Nao foi possivel garantir a coluna unidadeProdutoSnapshot do item da cotacao.', erro);
     }
   });
 
   banco.run(`
-    CREATE TABLE IF NOT EXISTS valorCampoOrcamento (
-      idValorCampoOrcamento INTEGER PRIMARY KEY AUTOINCREMENT,
-      idOrcamento INTEGER NOT NULL,
-      idCampoOrcamento INTEGER NOT NULL,
+    CREATE TABLE IF NOT EXISTS valorCampoCotacao (
+      idValorCampoCotacao INTEGER PRIMARY KEY AUTOINCREMENT,
+      idCotacao INTEGER NOT NULL,
+      idCampoCotacao INTEGER NOT NULL,
       valor TEXT,
-      FOREIGN KEY (idOrcamento) REFERENCES orcamento (idOrcamento) ON DELETE CASCADE,
-      FOREIGN KEY (idCampoOrcamento) REFERENCES campoOrcamentoConfiguravel (idCampoOrcamento)
+      FOREIGN KEY (idCotacao) REFERENCES cotacao (idCotacao) ON DELETE CASCADE,
+      FOREIGN KEY (idCampoCotacao) REFERENCES campoCotacaoConfiguravel (idCampoCotacao)
     )
   `);
 
   banco.run(`
-    CREATE TABLE IF NOT EXISTS pedido (
-      idPedido INTEGER PRIMARY KEY AUTOINCREMENT,
-      idOrcamento INTEGER,
-      idCliente INTEGER NOT NULL,
+    CREATE TABLE IF NOT EXISTS ordemCompra (
+      idOrdemCompra INTEGER PRIMARY KEY AUTOINCREMENT,
+      idCotacao INTEGER,
+      idFornecedor INTEGER NOT NULL,
       idContato INTEGER,
       idUsuario INTEGER NOT NULL,
-      idVendedor INTEGER NOT NULL,
+      idComprador INTEGER NOT NULL,
       comissao DECIMAL(7, 2) NOT NULL DEFAULT 0,
       valorComissao DECIMAL(12, 2) NOT NULL DEFAULT 0,
       idPrazoPagamento INTEGER,
-      idTipoPedido INTEGER,
-      idEtapaPedido INTEGER,
+      idTipoOrdemCompra INTEGER,
+      idEtapaOrdemCompra INTEGER,
       idMotivoDevolucao INTEGER,
       dataInclusao DATE,
       dataEntrega DATE,
       dataValidade DATE,
       observacao TEXT,
-      codigoOrcamentoOrigem INTEGER,
-      nomeClienteSnapshot VARCHAR(255),
+      codigoCotacaoOrigem INTEGER,
+      nomeFornecedorSnapshot VARCHAR(255),
       nomeContatoSnapshot VARCHAR(255),
       nomeUsuarioSnapshot VARCHAR(150),
-      nomeVendedorSnapshot VARCHAR(150),
+      nomeCompradorSnapshot VARCHAR(150),
       nomeMetodoPagamentoSnapshot VARCHAR(150),
       nomePrazoPagamentoSnapshot VARCHAR(255),
-      nomeTipoPedidoSnapshot VARCHAR(150),
-      nomeEtapaPedidoSnapshot VARCHAR(150),
+      nomeTipoOrdemCompraSnapshot VARCHAR(150),
+      nomeEtapaOrdemCompraSnapshot VARCHAR(150),
       dataCriacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (idOrcamento) REFERENCES orcamento (idOrcamento),
-      FOREIGN KEY (idCliente) REFERENCES cliente (idCliente),
+      FOREIGN KEY (idCotacao) REFERENCES cotacao (idCotacao),
+      FOREIGN KEY (idFornecedor) REFERENCES fornecedor (idFornecedor),
       FOREIGN KEY (idContato) REFERENCES contato (idContato),
       FOREIGN KEY (idUsuario) REFERENCES usuario (idUsuario),
-      FOREIGN KEY (idVendedor) REFERENCES vendedor (idVendedor),
+      FOREIGN KEY (idComprador) REFERENCES comprador (idComprador),
       FOREIGN KEY (idPrazoPagamento) REFERENCES prazoPagamento (idPrazoPagamento),
-      FOREIGN KEY (idTipoPedido) REFERENCES tipoPedido (idTipoPedido),
-      FOREIGN KEY (idEtapaPedido) REFERENCES etapaPedido (idEtapaPedido),
+      FOREIGN KEY (idTipoOrdemCompra) REFERENCES tipoOrdemCompra (idTipoOrdemCompra),
+      FOREIGN KEY (idEtapaOrdemCompra) REFERENCES etapaOrdemCompra (idEtapaOrdemCompra),
       FOREIGN KEY (idMotivoDevolucao) REFERENCES motivoDevolucao (idMotivoDevolucao)
     )
   `);
 
   banco.run(`
-    CREATE TABLE IF NOT EXISTS itemPedido (
-      idItemPedido INTEGER PRIMARY KEY AUTOINCREMENT,
-      idPedido INTEGER NOT NULL,
+    CREATE TABLE IF NOT EXISTS itemOrdemCompra (
+      idItemOrdemCompra INTEGER PRIMARY KEY AUTOINCREMENT,
+      idOrdemCompra INTEGER NOT NULL,
       idProduto INTEGER,
       quantidade DECIMAL(12, 3) NOT NULL,
       valorUnitario DECIMAL(12, 2) NOT NULL,
@@ -1477,211 +1611,213 @@ banco.serialize(() => {
       referenciaProdutoSnapshot VARCHAR(120),
       descricaoProdutoSnapshot VARCHAR(255),
       unidadeProdutoSnapshot VARCHAR(60),
-      FOREIGN KEY (idPedido) REFERENCES pedido (idPedido) ON DELETE CASCADE,
+      FOREIGN KEY (idOrdemCompra) REFERENCES ordemCompra (idOrdemCompra) ON DELETE CASCADE,
       FOREIGN KEY (idProduto) REFERENCES produto (idProduto)
     )
   `);
 
   banco.run(`
-    CREATE TABLE IF NOT EXISTS valorCampoPedido (
-      idValorCampoPedido INTEGER PRIMARY KEY AUTOINCREMENT,
-      idPedido INTEGER NOT NULL,
-      idCampoOrcamento INTEGER,
+    CREATE TABLE IF NOT EXISTS valorCampoOrdemCompra (
+      idValorCampoOrdemCompra INTEGER PRIMARY KEY AUTOINCREMENT,
+      idOrdemCompra INTEGER NOT NULL,
+      idCampoCotacao INTEGER,
       tituloSnapshot VARCHAR(150),
       valor TEXT,
-      FOREIGN KEY (idPedido) REFERENCES pedido (idPedido) ON DELETE CASCADE,
-      FOREIGN KEY (idCampoOrcamento) REFERENCES campoOrcamentoConfiguravel (idCampoOrcamento)
+      FOREIGN KEY (idOrdemCompra) REFERENCES ordemCompra (idOrdemCompra) ON DELETE CASCADE,
+      FOREIGN KEY (idCampoCotacao) REFERENCES campoCotacaoConfiguravel (idCampoCotacao)
     )
   `);
 
   banco.run(`
-    ALTER TABLE itemPedido ADD COLUMN imagem VARCHAR(255)
+    ALTER TABLE itemOrdemCompra ADD COLUMN imagem VARCHAR(255)
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna imagem do item do pedido.', erro);
+      console.error('Nao foi possivel garantir a coluna imagem do item da ordemCompra.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE pedido ADD COLUMN dataEntrega DATE
+    ALTER TABLE ordemCompra ADD COLUMN dataEntrega DATE
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna dataEntrega do pedido.', erro);
+      console.error('Nao foi possivel garantir a coluna dataEntrega da ordemCompra.', erro);
     }
   });
 
   banco.run(`
-    UPDATE pedido
+    UPDATE ordemCompra
     SET dataEntrega = COALESCE(dataEntrega, dataValidade)
     WHERE dataEntrega IS NULL
   `, (erro) => {
     if (erro) {
-      console.error('Nao foi possivel migrar a data de entrega dos pedidos.', erro);
+      console.error('Nao foi possivel migrar a data de entrega dos ordensCompra.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE pedido ADD COLUMN idOrcamento INTEGER
+    ALTER TABLE ordemCompra ADD COLUMN idCotacao INTEGER
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna idOrcamento do pedido.', erro);
+      console.error('Nao foi possivel garantir a coluna idCotacao da ordemCompra.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE pedido ADD COLUMN codigoOrcamentoOrigem INTEGER
+    ALTER TABLE ordemCompra ADD COLUMN codigoCotacaoOrigem INTEGER
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna codigoOrcamentoOrigem do pedido.', erro);
+      console.error('Nao foi possivel garantir a coluna codigoCotacaoOrigem da ordemCompra.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE pedido ADD COLUMN nomeClienteSnapshot VARCHAR(255)
+    ALTER TABLE ordemCompra ADD COLUMN nomeFornecedorSnapshot VARCHAR(255)
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna nomeClienteSnapshot do pedido.', erro);
+      console.error('Nao foi possivel garantir a coluna nomeFornecedorSnapshot da ordemCompra.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE pedido ADD COLUMN nomeContatoSnapshot VARCHAR(255)
+    ALTER TABLE ordemCompra ADD COLUMN nomeContatoSnapshot VARCHAR(255)
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna nomeContatoSnapshot do pedido.', erro);
+      console.error('Nao foi possivel garantir a coluna nomeContatoSnapshot da ordemCompra.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE pedido ADD COLUMN nomeUsuarioSnapshot VARCHAR(150)
+    ALTER TABLE ordemCompra ADD COLUMN nomeUsuarioSnapshot VARCHAR(150)
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna nomeUsuarioSnapshot do pedido.', erro);
+      console.error('Nao foi possivel garantir a coluna nomeUsuarioSnapshot da ordemCompra.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE pedido ADD COLUMN nomeVendedorSnapshot VARCHAR(150)
+    ALTER TABLE ordemCompra ADD COLUMN nomeCompradorSnapshot VARCHAR(150)
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna nomeVendedorSnapshot do pedido.', erro);
+      console.error('Nao foi possivel garantir a coluna nomeCompradorSnapshot da ordemCompra.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE pedido ADD COLUMN nomeMetodoPagamentoSnapshot VARCHAR(150)
+    ALTER TABLE ordemCompra ADD COLUMN nomeMetodoPagamentoSnapshot VARCHAR(150)
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna nomeMetodoPagamentoSnapshot do pedido.', erro);
+      console.error('Nao foi possivel garantir a coluna nomeMetodoPagamentoSnapshot da ordemCompra.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE pedido ADD COLUMN nomePrazoPagamentoSnapshot VARCHAR(255)
+    ALTER TABLE ordemCompra ADD COLUMN nomePrazoPagamentoSnapshot VARCHAR(255)
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna nomePrazoPagamentoSnapshot do pedido.', erro);
+      console.error('Nao foi possivel garantir a coluna nomePrazoPagamentoSnapshot da ordemCompra.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE pedido ADD COLUMN idTipoPedido INTEGER
+    ALTER TABLE ordemCompra ADD COLUMN idTipoOrdemCompra INTEGER
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna idTipoPedido do pedido.', erro);
+      console.error('Nao foi possivel garantir a coluna idTipoOrdemCompra da ordemCompra.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE pedido ADD COLUMN nomeTipoPedidoSnapshot VARCHAR(150)
+    ALTER TABLE ordemCompra ADD COLUMN nomeTipoOrdemCompraSnapshot VARCHAR(150)
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna nomeTipoPedidoSnapshot do pedido.', erro);
+      console.error('Nao foi possivel garantir a coluna nomeTipoOrdemCompraSnapshot da ordemCompra.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE pedido ADD COLUMN nomeEtapaPedidoSnapshot VARCHAR(150)
+    ALTER TABLE ordemCompra ADD COLUMN nomeEtapaOrdemCompraSnapshot VARCHAR(150)
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna nomeEtapaPedidoSnapshot do pedido.', erro);
+      console.error('Nao foi possivel garantir a coluna nomeEtapaOrdemCompraSnapshot da ordemCompra.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE pedido ADD COLUMN idMotivoDevolucao INTEGER
+    ALTER TABLE ordemCompra ADD COLUMN idMotivoDevolucao INTEGER
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna idMotivoDevolucao do pedido.', erro);
+      console.error('Nao foi possivel garantir a coluna idMotivoDevolucao da ordemCompra.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE pedido ADD COLUMN valorComissao DECIMAL(12, 2) NOT NULL DEFAULT 0
+    ALTER TABLE ordemCompra ADD COLUMN valorComissao DECIMAL(12, 2) NOT NULL DEFAULT 0
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna valorComissao do pedido.', erro);
+      console.error('Nao foi possivel garantir a coluna valorComissao da ordemCompra.', erro);
     }
   });
 
   banco.run(`
-    UPDATE pedido
+    UPDATE ordemCompra
     SET valorComissao = COALESCE(
       (
         SELECT ROUND(
-          COALESCE(SUM(COALESCE(itemPedido.valorTotal, 0)), 0) * COALESCE(pedido.comissao, 0) / 100,
+          COALESCE(SUM(COALESCE(itemOrdemCompra.valorTotal, 0)), 0) * COALESCE(ordemCompra.comissao, 0) / 100,
           2
         )
-        FROM itemPedido
-        WHERE itemPedido.idPedido = pedido.idPedido
+        FROM itemOrdemCompra
+        WHERE itemOrdemCompra.idOrdemCompra = ordemCompra.idOrdemCompra
       ),
       0
     )
   `, (erro) => {
     if (erro) {
-      console.error('Nao foi possivel recalcular a coluna valorComissao dos pedidos.', erro);
+      console.error('Nao foi possivel recalcular a coluna valorComissao dos ordensCompra.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE itemPedido ADD COLUMN referenciaProdutoSnapshot VARCHAR(120)
+    ALTER TABLE itemOrdemCompra ADD COLUMN referenciaProdutoSnapshot VARCHAR(120)
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna referenciaProdutoSnapshot do item do pedido.', erro);
+      console.error('Nao foi possivel garantir a coluna referenciaProdutoSnapshot do item da ordemCompra.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE itemPedido ADD COLUMN descricaoProdutoSnapshot VARCHAR(255)
+    ALTER TABLE itemOrdemCompra ADD COLUMN descricaoProdutoSnapshot VARCHAR(255)
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna descricaoProdutoSnapshot do item do pedido.', erro);
+      console.error('Nao foi possivel garantir a coluna descricaoProdutoSnapshot do item da ordemCompra.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE itemPedido ADD COLUMN unidadeProdutoSnapshot VARCHAR(60)
+    ALTER TABLE itemOrdemCompra ADD COLUMN unidadeProdutoSnapshot VARCHAR(60)
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna unidadeProdutoSnapshot do item do pedido.', erro);
+      console.error('Nao foi possivel garantir a coluna unidadeProdutoSnapshot do item da ordemCompra.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE valorCampoPedido ADD COLUMN tituloSnapshot VARCHAR(150)
+    ALTER TABLE valorCampoOrdemCompra ADD COLUMN tituloSnapshot VARCHAR(150)
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna tituloSnapshot do valor de campo do pedido.', erro);
+      console.error('Nao foi possivel garantir a coluna tituloSnapshot do valor de campo da ordemCompra.', erro);
     }
   });
 
   banco.run(`
-    ALTER TABLE valorCampoPedido ADD COLUMN idCampoPedido INTEGER
+    ALTER TABLE valorCampoOrdemCompra ADD COLUMN idCampoOrdemCompra INTEGER
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna idCampoPedido do valor de campo do pedido.', erro);
+      console.error('Nao foi possivel garantir a coluna idCampoOrdemCompra do valor de campo da ordemCompra.', erro);
     }
   });
+
+  migrarDadosLegadosCotacao();
 
   banco.all(
     'PRAGMA table_info(atendimento)',
@@ -1694,9 +1830,9 @@ banco.serialize(() => {
       }
 
       const possuiIdUsuario = colunasAtendimento.some((coluna) => coluna.name === 'idUsuario');
-      const possuiIdVendedor = colunasAtendimento.some((coluna) => coluna.name === 'idVendedor');
+      const possuiIdComprador = colunasAtendimento.some((coluna) => coluna.name === 'idComprador');
 
-      if (possuiIdUsuario && !possuiIdVendedor) {
+      if (possuiIdUsuario && !possuiIdComprador) {
         return;
       }
 
@@ -1706,7 +1842,7 @@ banco.serialize(() => {
             (
               SELECT usuario.idUsuario
               FROM usuario
-              WHERE usuario.idVendedor = atendimento.idVendedor
+              WHERE usuario.idComprador = atendimento.idComprador
               ORDER BY usuario.idUsuario
               LIMIT 1
             ),
@@ -1716,7 +1852,7 @@ banco.serialize(() => {
             (
               SELECT usuario.idUsuario
               FROM usuario
-              WHERE usuario.idVendedor = atendimento.idVendedor
+              WHERE usuario.idComprador = atendimento.idComprador
               ORDER BY usuario.idUsuario
               LIMIT 1
             ),
@@ -1730,7 +1866,7 @@ banco.serialize(() => {
           CREATE TABLE atendimento_temp (
             idAtendimento INTEGER PRIMARY KEY AUTOINCREMENT,
             idAgendamento INTEGER,
-            idCliente INTEGER NOT NULL,
+            idFornecedor INTEGER NOT NULL,
             idContato INTEGER,
             idUsuario INTEGER NOT NULL,
             assunto VARCHAR(150) NOT NULL,
@@ -1744,7 +1880,7 @@ banco.serialize(() => {
             status BOOLEAN NOT NULL DEFAULT 1,
             dataCriacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (idAgendamento) REFERENCES agendamento (idAgendamento),
-            FOREIGN KEY (idCliente) REFERENCES cliente (idCliente),
+            FOREIGN KEY (idFornecedor) REFERENCES fornecedor (idFornecedor),
             FOREIGN KEY (idContato) REFERENCES contato (idContato),
             FOREIGN KEY (idUsuario) REFERENCES usuario (idUsuario),
             FOREIGN KEY (idTipoAtendimento) REFERENCES tipoAtendimento (idTipoAtendimento),
@@ -1756,7 +1892,7 @@ banco.serialize(() => {
           INSERT INTO atendimento_temp (
             idAtendimento,
             idAgendamento,
-            idCliente,
+            idFornecedor,
             idContato,
             idUsuario,
             assunto,
@@ -1773,7 +1909,7 @@ banco.serialize(() => {
           SELECT
             atendimento.idAtendimento,
             NULL,
-            atendimento.idCliente,
+            atendimento.idFornecedor,
             atendimento.idContato,
             ${expressaoIdUsuario},
             atendimento.assunto,
@@ -1900,40 +2036,40 @@ async function garantirRegistrosObrigatorios() {
   await removerColunaSiglaDosRecursos();
   await garantirPrazosPagamentoComDiasOpcionais();
   await garantirUsuarioAdministradorPadrao();
-  await garantirConceitosClienteObrigatorios();
-  await garantirTiposPedidoObrigatorios();
-  await garantirEtapasPedidoObrigatorias();
-  await garantirEtapasOrcamentoObrigatorias();
+  await garantirConceitosFornecedorObrigatorios();
+  await garantirTiposOrdemCompraObrigatorios();
+  await garantirEtapasOrdemCompraObrigatorias();
+  await garantirEtapasCotacaoObrigatorias();
   await garantirStatusAgendaObrigatorios();
   await garantirTiposAgendaObrigatorios();
 }
 
-async function garantirConceitosClienteObrigatorios() {
+async function garantirConceitosFornecedorObrigatorios() {
   const conceitoObrigatorio = {
-    idConceito: ID_CONCEITO_CLIENTE_SEM_CONCEITO,
+    idConceito: ID_CONCEITO_FORNECEDOR_SEM_CONCEITO,
     descricao: 'Sem Conceito',
     status: 1
   };
 
   const existente = await consultarUm(
-    'SELECT idConceito FROM conceitoCliente WHERE idConceito = ?',
+    'SELECT idConceito FROM conceitoFornecedor WHERE idConceito = ?',
     [conceitoObrigatorio.idConceito]
   );
 
   if (!existente) {
     await executar(
-      'INSERT INTO conceitoCliente (idConceito, descricao, status) VALUES (?, ?, ?)',
+      'INSERT INTO conceitoFornecedor (idConceito, descricao, status) VALUES (?, ?, ?)',
       [conceitoObrigatorio.idConceito, conceitoObrigatorio.descricao, conceitoObrigatorio.status]
     );
   } else {
     await executar(
-      'UPDATE conceitoCliente SET descricao = ?, status = ? WHERE idConceito = ?',
+      'UPDATE conceitoFornecedor SET descricao = ?, status = ? WHERE idConceito = ?',
       [conceitoObrigatorio.descricao, conceitoObrigatorio.status, conceitoObrigatorio.idConceito]
     );
   }
 
   await executar(
-    'UPDATE cliente SET idConceito = ? WHERE idConceito IS NULL OR CAST(idConceito AS TEXT) = \'\'',
+    'UPDATE fornecedor SET idConceito = ? WHERE idConceito IS NULL OR CAST(idConceito AS TEXT) = \'\'',
     [conceitoObrigatorio.idConceito]
   );
 }
@@ -2006,101 +2142,101 @@ async function garantirUsuarioAdministradorPadrao() {
   );
 }
 
-async function garantirEtapasOrcamentoObrigatorias() {
+async function garantirEtapasCotacaoObrigatorias() {
   const etapasObrigatorias = [
-    { idEtapaOrcamento: ID_ETAPA_ORCAMENTO_FECHAMENTO, descricao: 'Fechado', cor: '#A7E1B8', obrigarMotivoPerda: 0, consideraFunilVendas: 1, ordem: 1, status: 1 },
-    { idEtapaOrcamento: ID_ETAPA_ORCAMENTO_FECHADO_SEM_PEDIDO, descricao: 'Fechado sem pedido', cor: '#FDE68A', obrigarMotivoPerda: 0, consideraFunilVendas: 1, ordem: 2, status: 1 },
-    { idEtapaOrcamento: ID_ETAPA_ORCAMENTO_PEDIDO_EXCLUIDO, descricao: 'Pedido Excluido', cor: '#E5E7EB', obrigarMotivoPerda: 0, consideraFunilVendas: 0, ordem: 3, status: 1 },
-    { idEtapaOrcamento: ID_ETAPA_ORCAMENTO_RECUSADO, descricao: 'Recusado', cor: '#E5E7EB', obrigarMotivoPerda: 1, consideraFunilVendas: 0, ordem: 4, status: 1 }
+    { idEtapaCotacao: ID_ETAPA_COTACAO_FECHAMENTO, descricao: 'Fechado', cor: '#A7E1B8', obrigarMotivoPerda: 0, consideraFunilVendas: 1, ordem: 1, status: 1 },
+    { idEtapaCotacao: ID_ETAPA_COTACAO_FECHADO_SEM_PEDIDO, descricao: 'Fechado sem ordem de compra', cor: '#FDE68A', obrigarMotivoPerda: 0, consideraFunilVendas: 1, ordem: 2, status: 1 },
+    { idEtapaCotacao: ID_ETAPA_COTACAO_PEDIDO_EXCLUIDO, descricao: 'Ordem de Compra Excluida', cor: '#E5E7EB', obrigarMotivoPerda: 0, consideraFunilVendas: 0, ordem: 3, status: 1 },
+    { idEtapaCotacao: ID_ETAPA_COTACAO_RECUSADO, descricao: 'Recusado', cor: '#E5E7EB', obrigarMotivoPerda: 1, consideraFunilVendas: 0, ordem: 4, status: 1 }
   ];
 
   await executar(
-    `UPDATE etapaOrcamento
-    SET descricao = 'Pedido Excluido', cor = '#E5E7EB', obrigarMotivoPerda = 0, consideraFunilVendas = 0, ordem = 3, status = 1
-    WHERE idEtapaOrcamento = ?`,
-    [ID_ETAPA_ORCAMENTO_PEDIDO_EXCLUIDO]
+    `UPDATE etapaCotacao
+    SET descricao = 'Ordem de Compra Excluida', cor = '#E5E7EB', obrigarMotivoPerda = 0, consideraFunilVendas = 0, ordem = 3, status = 1
+    WHERE idEtapaCotacao = ?`,
+    [ID_ETAPA_COTACAO_PEDIDO_EXCLUIDO]
   );
 
   const etapaRecusadoPorDescricao = await consultarUm(
-    `SELECT idEtapaOrcamento
-    FROM etapaOrcamento
+    `SELECT idEtapaCotacao
+    FROM etapaCotacao
     WHERE LOWER(TRIM(descricao)) = 'recusado'
-    ORDER BY CASE WHEN idEtapaOrcamento = ? THEN 0 ELSE 1 END, idEtapaOrcamento
+    ORDER BY CASE WHEN idEtapaCotacao = ? THEN 0 ELSE 1 END, idEtapaCotacao
     LIMIT 1`,
-    [ID_ETAPA_ORCAMENTO_RECUSADO]
+    [ID_ETAPA_COTACAO_RECUSADO]
   );
 
-  if (etapaRecusadoPorDescricao && Number(etapaRecusadoPorDescricao.idEtapaOrcamento) !== ID_ETAPA_ORCAMENTO_RECUSADO) {
+  if (etapaRecusadoPorDescricao && Number(etapaRecusadoPorDescricao.idEtapaCotacao) !== ID_ETAPA_COTACAO_RECUSADO) {
     await executar(
-      'UPDATE orcamento SET idEtapaOrcamento = ? WHERE idEtapaOrcamento = ?',
-      [ID_ETAPA_ORCAMENTO_RECUSADO, Number(etapaRecusadoPorDescricao.idEtapaOrcamento)]
+      'UPDATE cotacao SET idEtapaCotacao = ? WHERE idEtapaCotacao = ?',
+      [ID_ETAPA_COTACAO_RECUSADO, Number(etapaRecusadoPorDescricao.idEtapaCotacao)]
     );
 
     await executar(
-      `UPDATE etapaOrcamento
+      `UPDATE etapaCotacao
       SET descricao = 'Recusado (legado)', status = 0, obrigarMotivoPerda = 0, consideraFunilVendas = 0
-      WHERE idEtapaOrcamento = ?`,
-      [Number(etapaRecusadoPorDescricao.idEtapaOrcamento)]
+      WHERE idEtapaCotacao = ?`,
+      [Number(etapaRecusadoPorDescricao.idEtapaCotacao)]
     );
   }
 
   for (const etapa of etapasObrigatorias) {
     const existente = await consultarUm(
-      'SELECT idEtapaOrcamento FROM etapaOrcamento WHERE idEtapaOrcamento = ?',
-      [etapa.idEtapaOrcamento]
+      'SELECT idEtapaCotacao FROM etapaCotacao WHERE idEtapaCotacao = ?',
+      [etapa.idEtapaCotacao]
     );
 
     if (!existente) {
       await executar(
-        'INSERT INTO etapaOrcamento (idEtapaOrcamento, descricao, cor, obrigarMotivoPerda, consideraFunilVendas, ordem, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [etapa.idEtapaOrcamento, etapa.descricao, etapa.cor, etapa.obrigarMotivoPerda, etapa.consideraFunilVendas, etapa.ordem, etapa.status]
+        'INSERT INTO etapaCotacao (idEtapaCotacao, descricao, cor, obrigarMotivoPerda, consideraFunilVendas, ordem, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [etapa.idEtapaCotacao, etapa.descricao, etapa.cor, etapa.obrigarMotivoPerda, etapa.consideraFunilVendas, etapa.ordem, etapa.status]
       );
       continue;
     }
 
     await executar(
-      'UPDATE etapaOrcamento SET descricao = ?, cor = ?, status = ?, obrigarMotivoPerda = ?, consideraFunilVendas = ?, ordem = ? WHERE idEtapaOrcamento = ?',
-      [etapa.descricao, etapa.cor, etapa.status, etapa.obrigarMotivoPerda, etapa.consideraFunilVendas, etapa.ordem, etapa.idEtapaOrcamento]
+      'UPDATE etapaCotacao SET descricao = ?, cor = ?, status = ?, obrigarMotivoPerda = ?, consideraFunilVendas = ?, ordem = ? WHERE idEtapaCotacao = ?',
+      [etapa.descricao, etapa.cor, etapa.status, etapa.obrigarMotivoPerda, etapa.consideraFunilVendas, etapa.ordem, etapa.idEtapaCotacao]
     );
   }
 
   const etapasCancelamentoLegadas = await consultarTodos(
-    `SELECT idEtapaOrcamento
-    FROM etapaOrcamento
-    WHERE idEtapaOrcamento NOT IN (?, ?)
-      AND LOWER(TRIM(descricao)) IN ('recusado', 'pedido excluido')`,
-    [ID_ETAPA_ORCAMENTO_PEDIDO_EXCLUIDO, ID_ETAPA_ORCAMENTO_RECUSADO]
+    `SELECT idEtapaCotacao
+    FROM etapaCotacao
+    WHERE idEtapaCotacao NOT IN (?, ?)
+      AND LOWER(TRIM(descricao)) IN ('recusado', 'ordem de compra excluida')`,
+    [ID_ETAPA_COTACAO_PEDIDO_EXCLUIDO, ID_ETAPA_COTACAO_RECUSADO]
   );
 
   const idsEtapasLegadas = etapasCancelamentoLegadas
-    .map((etapa) => Number(etapa.idEtapaOrcamento || 0))
+    .map((etapa) => Number(etapa.idEtapaCotacao || 0))
     .filter((idEtapa) => Number.isFinite(idEtapa) && idEtapa > 0);
 
   if (idsEtapasLegadas.length > 0) {
     const marcadores = idsEtapasLegadas.map(() => '?').join(', ');
 
     await executar(
-      `UPDATE orcamento
-      SET idEtapaOrcamento = ?
-      WHERE idEtapaOrcamento IN (${marcadores})`,
-      [ID_ETAPA_ORCAMENTO_RECUSADO, ...idsEtapasLegadas]
+      `UPDATE cotacao
+      SET idEtapaCotacao = ?
+      WHERE idEtapaCotacao IN (${marcadores})`,
+      [ID_ETAPA_COTACAO_RECUSADO, ...idsEtapasLegadas]
     );
 
     await executar(
-      `UPDATE etapaOrcamento
+      `UPDATE etapaCotacao
       SET descricao = 'Etapa de cancelamento legada', status = 0, obrigarMotivoPerda = 0, consideraFunilVendas = 0
-      WHERE idEtapaOrcamento IN (${marcadores})`,
+      WHERE idEtapaCotacao IN (${marcadores})`,
       idsEtapasLegadas
     );
   }
 
   await executar(
-    'UPDATE orcamento SET idEtapaOrcamento = ? WHERE idPedidoVinculado IS NULL AND idEtapaOrcamento = ?',
-    [ID_ETAPA_ORCAMENTO_FECHADO_SEM_PEDIDO, ID_ETAPA_ORCAMENTO_FECHAMENTO]
+    'UPDATE cotacao SET idEtapaCotacao = ? WHERE idOrdemCompraVinculado IS NULL AND idEtapaCotacao = ?',
+    [ID_ETAPA_COTACAO_FECHADO_SEM_PEDIDO, ID_ETAPA_COTACAO_FECHAMENTO]
   );
 }
 
-async function garantirEtapasPedidoObrigatorias() {
+async function garantirEtapasOrdemCompraObrigatorias() {
   const etapaObrigatoria = {
     idEtapa: ID_ETAPA_PEDIDO_ENTREGUE,
     descricao: 'Entregue',
@@ -2110,13 +2246,13 @@ async function garantirEtapasPedidoObrigatorias() {
   };
 
   const existente = await consultarUm(
-    'SELECT idEtapa FROM etapaPedido WHERE idEtapa = ?',
+    'SELECT idEtapa FROM etapaOrdemCompra WHERE idEtapa = ?',
     [etapaObrigatoria.idEtapa]
   );
 
   if (!existente) {
     await executar(
-      'INSERT INTO etapaPedido (idEtapa, descricao, cor, ordem, status) VALUES (?, ?, ?, ?, ?)',
+      'INSERT INTO etapaOrdemCompra (idEtapa, descricao, cor, ordem, status) VALUES (?, ?, ?, ?, ?)',
       [
         etapaObrigatoria.idEtapa,
         etapaObrigatoria.descricao,
@@ -2129,67 +2265,67 @@ async function garantirEtapasPedidoObrigatorias() {
   }
 
   await executar(
-    'UPDATE etapaPedido SET status = 1, cor = COALESCE(cor, ?), ordem = CASE WHEN ordem IS NULL OR ordem <= 0 THEN ? ELSE ordem END WHERE idEtapa = ?',
+    'UPDATE etapaOrdemCompra SET status = 1, cor = COALESCE(cor, ?), ordem = CASE WHEN ordem IS NULL OR ordem <= 0 THEN ? ELSE ordem END WHERE idEtapa = ?',
     [etapaObrigatoria.cor, etapaObrigatoria.ordem, etapaObrigatoria.idEtapa]
   );
 }
 
-async function garantirTiposPedidoObrigatorios() {
+async function garantirTiposOrdemCompraObrigatorios() {
   const tiposObrigatorios = [
-    { idTipoPedido: ID_TIPO_PEDIDO_VENDA, descricao: 'Venda', status: 1 },
-    { idTipoPedido: ID_TIPO_PEDIDO_DEVOLUCAO, descricao: 'Devolucao', status: 1 }
+    { idTipoOrdemCompra: ID_TIPO_PEDIDO_VENDA, descricao: 'Venda', status: 1 },
+    { idTipoOrdemCompra: ID_TIPO_PEDIDO_DEVOLUCAO, descricao: 'Devolucao', status: 1 }
   ];
 
-  for (const tipoPedido of tiposObrigatorios) {
+  for (const tipoOrdemCompra of tiposObrigatorios) {
     const existente = await consultarUm(
-      'SELECT idTipoPedido FROM tipoPedido WHERE idTipoPedido = ?',
-      [tipoPedido.idTipoPedido]
+      'SELECT idTipoOrdemCompra FROM tipoOrdemCompra WHERE idTipoOrdemCompra = ?',
+      [tipoOrdemCompra.idTipoOrdemCompra]
     );
 
     if (!existente) {
       await executar(
-        'INSERT INTO tipoPedido (idTipoPedido, descricao, status) VALUES (?, ?, ?)',
-        [tipoPedido.idTipoPedido, tipoPedido.descricao, tipoPedido.status]
+        'INSERT INTO tipoOrdemCompra (idTipoOrdemCompra, descricao, status) VALUES (?, ?, ?)',
+        [tipoOrdemCompra.idTipoOrdemCompra, tipoOrdemCompra.descricao, tipoOrdemCompra.status]
       );
       continue;
     }
 
     await executar(
-      'UPDATE tipoPedido SET descricao = ?, status = ? WHERE idTipoPedido = ?',
-      [tipoPedido.descricao, tipoPedido.status, tipoPedido.idTipoPedido]
+      'UPDATE tipoOrdemCompra SET descricao = ?, status = ? WHERE idTipoOrdemCompra = ?',
+      [tipoOrdemCompra.descricao, tipoOrdemCompra.status, tipoOrdemCompra.idTipoOrdemCompra]
     );
   }
 }
 
 async function removerColunaAbreviacaoDasEtapas() {
   await migrarTabelaSemAbreviacao(
-    'etapaPedido',
+    'etapaOrdemCompra',
     'idEtapa',
     [
       'idEtapa INTEGER PRIMARY KEY AUTOINCREMENT',
       'descricao VARCHAR(150) NOT NULL',
-      "cor VARCHAR(20) NOT NULL DEFAULT '#0B74D1'",
+      "cor VARCHAR(20) NOT NULL DEFAULT '#EC8702'",
       'ordem INTEGER NOT NULL DEFAULT 0',
       'status BOOLEAN NOT NULL DEFAULT 1'
     ],
     ['idEtapa', 'descricao', 'cor', 'ordem', 'status'],
-    'idEtapa, descricao, COALESCE(cor, "#0B74D1") AS cor, COALESCE(ordem, idEtapa) AS ordem, COALESCE(status, 1) AS status'
+    'idEtapa, descricao, COALESCE(cor, "#EC8702") AS cor, COALESCE(ordem, idEtapa) AS ordem, COALESCE(status, 1) AS status'
   );
 
   await migrarTabelaSemAbreviacao(
-    'etapaOrcamento',
-    'idEtapaOrcamento',
+    'etapaCotacao',
+    'idEtapaCotacao',
     [
-      'idEtapaOrcamento INTEGER PRIMARY KEY AUTOINCREMENT',
+      'idEtapaCotacao INTEGER PRIMARY KEY AUTOINCREMENT',
       'descricao VARCHAR(150) NOT NULL',
-      "cor VARCHAR(20) NOT NULL DEFAULT '#0B74D1'",
+      "cor VARCHAR(20) NOT NULL DEFAULT '#EC8702'",
       'obrigarMotivoPerda BOOLEAN NOT NULL DEFAULT 0',
       'consideraFunilVendas BOOLEAN NOT NULL DEFAULT 1',
       'ordem INTEGER NOT NULL DEFAULT 0',
       'status BOOLEAN NOT NULL DEFAULT 1'
     ],
-    ['idEtapaOrcamento', 'descricao', 'cor', 'obrigarMotivoPerda', 'consideraFunilVendas', 'ordem', 'status'],
-    'idEtapaOrcamento, descricao, COALESCE(cor, "#0B74D1") AS cor, COALESCE(obrigarMotivoPerda, 0) AS obrigarMotivoPerda, COALESCE(consideraFunilVendas, 1) AS consideraFunilVendas, COALESCE(ordem, idEtapaOrcamento) AS ordem, COALESCE(status, 1) AS status'
+    ['idEtapaCotacao', 'descricao', 'cor', 'obrigarMotivoPerda', 'consideraFunilVendas', 'ordem', 'status'],
+    'idEtapaCotacao, descricao, COALESCE(cor, "#EC8702") AS cor, COALESCE(obrigarMotivoPerda, 0) AS obrigarMotivoPerda, COALESCE(consideraFunilVendas, 1) AS consideraFunilVendas, COALESCE(ordem, idEtapaCotacao) AS ordem, COALESCE(status, 1) AS status'
   );
 }
 
@@ -2360,7 +2496,7 @@ async function garantirStatusAgendaObrigatorios() {
 }
 
 async function garantirLocaisAgendaObrigatorios() {
-  const locais = ['Escritorio', 'Cliente', 'Online'];
+  const locais = ['Escritorio', 'Fornecedor', 'Online'];
 
   for (const descricao of locais) {
     const existente = await consultarUm(
@@ -2493,7 +2629,7 @@ async function garantirCanaisAtendimentoObrigatorios() {
 }
 
 async function garantirOrigensAtendimentoObrigatorias() {
-  const origens = ['Cliente', 'Empresa'];
+  const origens = ['Fornecedor', 'Empresa'];
 
   for (const descricao of origens) {
     const existente = await consultarUm(
@@ -2598,35 +2734,35 @@ async function garantirPrazosPagamentoObrigatorios() {
   }
 }
 
-async function garantirCamposPedidoObrigatorios() {
+async function garantirCamposOrdemCompraObrigatorios() {
   const campos = [
     {
       titulo: 'Pagamento',
-      descricaoPadrao: 'Descreva aqui as condicoes de pagamento padrao do pedido.'
+      descricaoPadrao: 'Descreva aqui as condicoes de pagamento padrao da ordemCompra.'
     },
     {
       titulo: 'Entrega',
-      descricaoPadrao: 'Descreva aqui as condicoes de entrega, conferencia e recebimento do pedido.'
+      descricaoPadrao: 'Descreva aqui as condicoes de entrega, conferencia e recebimento da ordemCompra.'
     }
   ];
 
   for (const campo of campos) {
     const existente = await consultarUm(
-      'SELECT idCampoPedido FROM campoPedidoConfiguravel WHERE LOWER(TRIM(titulo)) = LOWER(TRIM(?))',
+      'SELECT idCampoOrdemCompra FROM campoOrdemCompraConfiguravel WHERE LOWER(TRIM(titulo)) = LOWER(TRIM(?))',
       [campo.titulo]
     );
 
     if (!existente) {
       await executar(
-        'INSERT INTO campoPedidoConfiguravel (titulo, descricaoPadrao, status) VALUES (?, ?, ?)',
+        'INSERT INTO campoOrdemCompraConfiguravel (titulo, descricaoPadrao, status) VALUES (?, ?, ?)',
         [campo.titulo, campo.descricaoPadrao, 1]
       );
       continue;
     }
 
     await executar(
-      'UPDATE campoPedidoConfiguravel SET descricaoPadrao = COALESCE(NULLIF(descricaoPadrao, \'\'), ?), status = 1 WHERE idCampoPedido = ?',
-      [campo.descricaoPadrao, existente.idCampoPedido]
+      'UPDATE campoOrdemCompraConfiguravel SET descricaoPadrao = COALESCE(NULLIF(descricaoPadrao, \'\'), ?), status = 1 WHERE idCampoOrdemCompra = ?',
+      [campo.descricaoPadrao, existente.idCampoOrdemCompra]
     );
   }
 }
@@ -2670,11 +2806,135 @@ function executar(sql, parametros = []) {
   });
 }
 
+function migrarNomeTabela(nomeAntigo, nomeNovo) {
+  banco.run(`ALTER TABLE ${nomeAntigo} RENAME TO ${nomeNovo}`, (erro) => {
+    if (erro && !erroMigracaoNomeEsperado(erro)) {
+      console.error(`Nao foi possivel migrar a tabela ${nomeAntigo} para ${nomeNovo}.`, erro);
+    }
+  });
+}
+
+function migrarNomeColuna(nomeTabela, nomeAntigo, nomeNovo) {
+  banco.run(`ALTER TABLE ${nomeTabela} RENAME COLUMN ${nomeAntigo} TO ${nomeNovo}`, (erro) => {
+    if (erro && !erroMigracaoNomeEsperado(erro)) {
+      console.error(`Nao foi possivel migrar a coluna ${nomeTabela}.${nomeAntigo} para ${nomeNovo}.`, erro);
+    }
+  });
+}
+
+function executarMigracaoNome(sql) {
+  banco.run(sql, (erro) => {
+    if (erro && !erroMigracaoNomeEsperado(erro)) {
+      console.error('Nao foi possivel executar uma migracao de nomenclatura SRM.', erro);
+    }
+  });
+}
+
+function migrarDadosLegadosCotacao() {
+  executarMigracaoNome(`
+    INSERT OR IGNORE INTO etapaCotacao (idEtapaCotacao, descricao, cor, obrigarMotivoPerda, ordem, consideraFunilVendas, status)
+    SELECT idEtapaOrcamento, descricao, cor, obrigarMotivoPerda, ordem, consideraFunilVendas, status
+    FROM etapaOrcamento
+  `);
+  executarMigracaoNome('DROP TABLE IF EXISTS etapaOrcamento');
+
+  executarMigracaoNome(`
+    INSERT OR IGNORE INTO campoCotacaoConfiguravel (idCampoCotacao, titulo, descricaoPadrao, status)
+    SELECT idCampoOrcamento, titulo, descricaoPadrao, status
+    FROM campoOrcamentoConfiguravel
+  `);
+  executarMigracaoNome('DROP TABLE IF EXISTS campoOrcamentoConfiguravel');
+
+  executarMigracaoNome(`
+    INSERT OR IGNORE INTO cotacao (
+      idCotacao,
+      idFornecedor,
+      idContato,
+      idUsuario,
+      idOrdemCompraVinculado,
+      idComprador,
+      comissao,
+      idPrazoPagamento,
+      idEtapaCotacao,
+      idMotivoPerda,
+      dataInclusao,
+      dataValidade,
+      dataFechamento,
+      observacao
+    )
+    SELECT
+      idOrcamento,
+      idFornecedor,
+      idContato,
+      idUsuario,
+      idOrdemCompraVinculado,
+      idComprador,
+      comissao,
+      idPrazoPagamento,
+      idEtapaOrcamento,
+      idMotivoPerda,
+      dataInclusao,
+      dataValidade,
+      dataFechamento,
+      observacao
+    FROM orcamento
+  `);
+  executarMigracaoNome('DROP TABLE IF EXISTS orcamento');
+
+  executarMigracaoNome(`
+    INSERT OR IGNORE INTO itemCotacao (
+      idItemCotacao,
+      idCotacao,
+      idProduto,
+      quantidade,
+      valorUnitario,
+      valorTotal,
+      imagem,
+      observacao,
+      referenciaProdutoSnapshot,
+      descricaoProdutoSnapshot,
+      unidadeProdutoSnapshot
+    )
+    SELECT
+      idItemOrcamento,
+      idOrcamento,
+      idProduto,
+      quantidade,
+      valorUnitario,
+      valorTotal,
+      imagem,
+      observacao,
+      referenciaProdutoSnapshot,
+      descricaoProdutoSnapshot,
+      unidadeProdutoSnapshot
+    FROM itemOrcamento
+  `);
+  executarMigracaoNome('DROP TABLE IF EXISTS itemOrcamento');
+
+  executarMigracaoNome(`
+    INSERT OR IGNORE INTO valorCampoCotacao (idValorCampoCotacao, idCotacao, idCampoCotacao, valor)
+    SELECT idValorCampoOrcamento, idOrcamento, idCampoOrcamento, valor
+    FROM valorCampoOrcamento
+  `);
+  executarMigracaoNome('DROP TABLE IF EXISTS valorCampoOrcamento');
+}
+
+function erroMigracaoNomeEsperado(erro) {
+  const mensagem = String(erro?.message || '').toLowerCase();
+  return (
+    mensagem.includes('no such table')
+    || mensagem.includes('no such column')
+    || mensagem.includes('already exists')
+    || mensagem.includes('already another table')
+    || mensagem.includes('duplicate column name')
+  );
+}
+
 module.exports = {
   banco,
   caminhoBanco,
-  ID_ETAPA_ORCAMENTO_PEDIDO_EXCLUIDO,
-  ID_ETAPA_ORCAMENTO_RECUSADO,
+  ID_ETAPA_COTACAO_PEDIDO_EXCLUIDO,
+  ID_ETAPA_COTACAO_RECUSADO,
   ID_ETAPA_PEDIDO_ENTREGUE,
   ID_TIPO_PEDIDO_VENDA,
   ID_TIPO_PEDIDO_DEVOLUCAO,

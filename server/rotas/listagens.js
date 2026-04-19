@@ -9,70 +9,77 @@ const {
   adicionarFiltroPeriodo,
   montarWhere
 } = require('../utilitarios/filtrosSql');
+const {
+  normalizarEntradaFornecedor,
+  normalizarListaSaidaFornecedor
+} = require('../utilitarios/compatibilidadeFornecedor');
 
 const rotaListagens = express.Router();
 
-rotaListagens.get('/clientes', async (requisicao, resposta) => {
+async function listarFornecedores(requisicao, resposta) {
   try {
     const clausulas = [];
     const parametros = [];
-    const { query } = requisicao;
+    const query = normalizarEntradaFornecedor(requisicao.query);
 
     adicionarFiltroBusca(clausulas, parametros, query.search, [
-      'CAST(cliente.idCliente AS TEXT)',
-      'CAST(cliente.codigoAlternativo AS TEXT)',
-      'cliente.nomeFantasia',
-      'cliente.razaoSocial',
-      'cliente.cnpj',
-      'cliente.cidade',
-      'cliente.estado',
-      'cliente.email',
+      'CAST(fornecedor.idFornecedor AS TEXT)',
+      'CAST(fornecedor.codigoAlternativo AS TEXT)',
+      'fornecedor.nomeFantasia',
+      'fornecedor.razaoSocial',
+      'fornecedor.cnpj',
+      'fornecedor.cidade',
+      'fornecedor.estado',
+      'fornecedor.email',
       'grupoEmpresa.descricao',
-      'conceitoCliente.descricao',
+      'conceitoFornecedor.descricao',
       'contatoPrincipal.nome',
       'contatoPrincipal.email',
-      'vendedor.nome'
+      'comprador.nome'
     ]);
-    adicionarFiltroLista(clausulas, parametros, 'cliente.estado', query.estado);
-    adicionarFiltroIgual(clausulas, parametros, 'cliente.cidade', query.cidade);
-    adicionarFiltroIgual(clausulas, parametros, 'cliente.idGrupoEmpresa', query.idGrupoEmpresa, Number);
-    adicionarFiltroLista(clausulas, parametros, 'cliente.idRamo', query.idRamo, Number);
-    adicionarFiltroLista(clausulas, parametros, 'cliente.idVendedor', query.idVendedor, Number);
-    adicionarFiltroLista(clausulas, parametros, 'cliente.tipo', query.tipo);
-    adicionarFiltroLista(clausulas, parametros, 'cliente.status', query.status, Number);
+    adicionarFiltroLista(clausulas, parametros, 'fornecedor.estado', query.estado);
+    adicionarFiltroIgual(clausulas, parametros, 'fornecedor.cidade', query.cidade);
+    adicionarFiltroIgual(clausulas, parametros, 'fornecedor.idGrupoEmpresa', query.idGrupoEmpresa, Number);
+    adicionarFiltroLista(clausulas, parametros, 'fornecedor.idRamo', query.idRamo, Number);
+    adicionarFiltroLista(clausulas, parametros, 'fornecedor.idComprador', query.idComprador, Number);
+    adicionarFiltroLista(clausulas, parametros, 'fornecedor.tipo', query.tipo);
+    adicionarFiltroLista(clausulas, parametros, 'fornecedor.status', query.status, Number);
 
     const registros = await consultarTodos(`
       SELECT
-        cliente.*,
+        fornecedor.*,
         COALESCE(grupoEmpresa.descricao, '') AS nomeGrupoEmpresa,
-        COALESCE(conceitoCliente.descricao, '') AS nomeConceito,
+        COALESCE(conceitoFornecedor.descricao, '') AS nomeConceito,
         COALESCE(ramoAtividade.descricao, '') AS nomeRamo,
-        COALESCE(vendedor.nome, '') AS nomeVendedor,
+        COALESCE(comprador.nome, '') AS nomeComprador,
         COALESCE(contatoPrincipal.nome, '') AS nomeContatoPrincipal,
         COALESCE(contatoPrincipal.email, '') AS emailContatoPrincipal
-      FROM cliente
-      LEFT JOIN grupoEmpresa ON grupoEmpresa.idGrupoEmpresa = cliente.idGrupoEmpresa
-      LEFT JOIN conceitoCliente ON conceitoCliente.idConceito = cliente.idConceito
-      LEFT JOIN ramoAtividade ON ramoAtividade.idRamo = cliente.idRamo
-      LEFT JOIN vendedor ON vendedor.idVendedor = cliente.idVendedor
+      FROM fornecedor
+      LEFT JOIN grupoEmpresa ON grupoEmpresa.idGrupoEmpresa = fornecedor.idGrupoEmpresa
+      LEFT JOIN conceitoFornecedor ON conceitoFornecedor.idConceito = fornecedor.idConceito
+      LEFT JOIN ramoAtividade ON ramoAtividade.idRamo = fornecedor.idRamo
+      LEFT JOIN comprador ON comprador.idComprador = fornecedor.idComprador
       LEFT JOIN contato AS contatoPrincipal
-        ON contatoPrincipal.idCliente = cliente.idCliente
+        ON contatoPrincipal.idFornecedor = fornecedor.idFornecedor
        AND contatoPrincipal.principal = 1
       ${montarWhere(clausulas)}
-      ORDER BY cliente.idCliente DESC
+      ORDER BY fornecedor.idFornecedor DESC
     `, parametros);
 
-    resposta.json(registros.map(normalizarRegistroImagemListagem));
+    resposta.json(normalizarListaSaidaFornecedor(registros.map(normalizarRegistroImagemListagem)));
   } catch (_erro) {
     resposta.status(500).json({ mensagem: 'Ocorreu um erro ao processar a requisicao.' });
   }
-});
+}
+
+rotaListagens.get('/fornecedores', listarFornecedores);
+rotaListagens.get('/clientes', listarFornecedores);
 
 rotaListagens.get('/produtos', async (requisicao, resposta) => {
   try {
     const clausulas = [];
     const parametros = [];
-    const { query } = requisicao;
+    const query = normalizarEntradaFornecedor(requisicao.query);
 
     adicionarFiltroBusca(clausulas, parametros, query.search, [
       'CAST(produto.idProduto AS TEXT)',
@@ -112,50 +119,50 @@ rotaListagens.get('/atendimentos', async (requisicao, resposta) => {
   try {
     const clausulas = [];
     const parametros = [];
-    const { query } = requisicao;
+    const query = normalizarEntradaFornecedor(requisicao.query);
 
     adicionarFiltroBusca(clausulas, parametros, query.search, [
       'atendimento.assunto',
       'atendimento.descricao',
-      'cliente.nomeFantasia',
-      'cliente.razaoSocial',
+      'fornecedor.nomeFantasia',
+      'fornecedor.razaoSocial',
       'contato.nome',
       'tipoAtendimento.descricao',
       'canalAtendimento.descricao',
       'origemAtendimento.descricao',
       'usuario.nome',
-      'vendedor.nome'
+      'comprador.nome'
     ]);
-    adicionarFiltroIgual(clausulas, parametros, 'atendimento.idCliente', query.idCliente, Number);
+    adicionarFiltroIgual(clausulas, parametros, 'atendimento.idFornecedor', query.idFornecedor, Number);
     adicionarFiltroLista(clausulas, parametros, 'atendimento.idUsuario', query.idUsuario, Number);
-    adicionarFiltroLista(clausulas, parametros, 'cliente.idVendedor', query.idVendedorCliente, Number);
+    adicionarFiltroLista(clausulas, parametros, 'fornecedor.idComprador', query.idCompradorFornecedor, Number);
     adicionarFiltroLista(clausulas, parametros, 'atendimento.idTipoAtendimento', query.idTipoAtendimento, Number);
     adicionarFiltroLista(clausulas, parametros, 'atendimento.idCanalAtendimento', query.idCanalAtendimento, Number);
     adicionarFiltroLista(clausulas, parametros, 'atendimento.idOrigemAtendimento', query.idOrigemAtendimento, Number);
     adicionarFiltroPeriodo(clausulas, parametros, 'atendimento.data', query.dataInicio, query.dataFim);
     adicionarFiltroPeriodo(clausulas, parametros, 'atendimento.horaInicio', query.horaInicioFiltro, query.horaFimFiltro);
 
-    if (query.escopoIdVendedor && query.escopoIdUsuario) {
-      clausulas.push('(cliente.idVendedor = ? OR atendimento.idUsuario = ?)');
-      parametros.push(Number(query.escopoIdVendedor), Number(query.escopoIdUsuario));
+    if (query.escopoIdComprador && query.escopoIdUsuario) {
+      clausulas.push('(fornecedor.idComprador = ? OR atendimento.idUsuario = ?)');
+      parametros.push(Number(query.escopoIdComprador), Number(query.escopoIdUsuario));
     }
 
     const registros = await consultarTodos(`
       SELECT
         atendimento.*,
-        COALESCE(cliente.nomeFantasia, cliente.razaoSocial, '') AS nomeCliente,
+        COALESCE(fornecedor.nomeFantasia, fornecedor.razaoSocial, '') AS nomeFornecedor,
         COALESCE(contato.nome, '') AS nomeContato,
         COALESCE(usuario.nome, '') AS nomeUsuario,
-        cliente.idVendedor AS idVendedorCliente,
-        COALESCE(vendedor.nome, '') AS nomeVendedorCliente,
+        fornecedor.idComprador AS idCompradorFornecedor,
+        COALESCE(comprador.nome, '') AS nomeCompradorFornecedor,
         COALESCE(tipoAtendimento.descricao, '') AS nomeTipoAtendimento,
         COALESCE(canalAtendimento.descricao, '') AS nomeCanalAtendimento,
         COALESCE(origemAtendimento.descricao, '') AS nomeOrigemAtendimento
       FROM atendimento
-      LEFT JOIN cliente ON cliente.idCliente = atendimento.idCliente
+      LEFT JOIN fornecedor ON fornecedor.idFornecedor = atendimento.idFornecedor
       LEFT JOIN contato ON contato.idContato = atendimento.idContato
       LEFT JOIN usuario ON usuario.idUsuario = atendimento.idUsuario
-      LEFT JOIN vendedor ON vendedor.idVendedor = cliente.idVendedor
+      LEFT JOIN comprador ON comprador.idComprador = fornecedor.idComprador
       LEFT JOIN tipoAtendimento ON tipoAtendimento.idTipoAtendimento = atendimento.idTipoAtendimento
       LEFT JOIN canalAtendimento ON canalAtendimento.idCanalAtendimento = atendimento.idCanalAtendimento
       LEFT JOIN origemAtendimento ON origemAtendimento.idOrigemAtendimento = atendimento.idOrigemAtendimento
@@ -163,7 +170,7 @@ rotaListagens.get('/atendimentos', async (requisicao, resposta) => {
       ORDER BY atendimento.idAtendimento DESC
     `, parametros);
 
-    resposta.json(registros);
+    resposta.json(normalizarListaSaidaFornecedor(registros));
   } catch (_erro) {
     resposta.status(500).json({ mensagem: 'Ocorreu um erro ao processar a requisicao.' });
   }

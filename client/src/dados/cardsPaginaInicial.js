@@ -4,16 +4,16 @@ export const TOTAL_COLUNAS_MAXIMO_CARDS_PAGINA_INICIAL = 20;
 export const cardsPaginaInicial = [
   {
     id: 'orcamentosAbertos',
-    rotulo: 'Orcamentos em aberto',
-    ajudaConfiguracao: 'Mostra quantos orcamentos estao em aberto e o valor total em negociacao.',
+    rotulo: 'Cotacoes em aberto',
+    ajudaConfiguracao: 'Mostra quantas cotacoes estao em aberto e o valor total em negociacao.',
     ordemPadrao: 1,
     spanPadrao: 2,
     visivelPadrao: true
   },
   {
     id: 'pedidosMes',
-    rotulo: 'Pedidos no mes',
-    ajudaConfiguracao: 'Mostra a quantidade de pedidos do mes corrente e o valor liquido total.',
+    rotulo: 'Ordens de Compra no mes',
+    ajudaConfiguracao: 'Mostra a quantidade de ordens de compra do mes corrente e o valor liquido total.',
     ordemPadrao: 2,
     spanPadrao: 2,
     visivelPadrao: true
@@ -21,7 +21,7 @@ export const cardsPaginaInicial = [
   {
     id: 'mediaDiasConversaoMes',
     rotulo: 'Media de dias para conversao',
-    ajudaConfiguracao: 'Mostra a media de dias entre inclusao e fechamento dos orcamentos que chegaram na etapa Fechado no mes corrente.',
+    ajudaConfiguracao: 'Mostra a media de dias entre inclusao e fechamento das cotacoes que chegaram na etapa Fechado no mes corrente.',
     ordemPadrao: 3,
     spanPadrao: 2,
     visivelPadrao: true
@@ -53,7 +53,7 @@ export const cardsPaginaInicial = [
   {
     id: 'comissaoMes',
     rotulo: 'Comissao no mes',
-    ajudaConfiguracao: 'Mostra a comissao liquida do mes corrente com base na comissao dos pedidos.',
+    ajudaConfiguracao: 'Mostra a comissao liquida do mes corrente com base na comissao das ordens de compra.',
     ordemPadrao: 7,
     spanPadrao: 2,
     visivelPadrao: true
@@ -61,7 +61,7 @@ export const cardsPaginaInicial = [
   {
     id: 'comissaoEntregueMes',
     rotulo: 'Comissao entregue no mes',
-    ajudaConfiguracao: 'Mostra a comissao liquida dos pedidos na etapa Entregue com data de entrega no mes corrente.',
+    ajudaConfiguracao: 'Mostra a comissao liquida das ordens de compra na etapa Entregue com data de entrega no mes corrente.',
     ordemPadrao: 8,
     spanPadrao: 2,
     visivelPadrao: true
@@ -69,7 +69,7 @@ export const cardsPaginaInicial = [
   {
     id: 'positivacaoMes',
     rotulo: 'Positivacao no mes',
-    ajudaConfiguracao: 'Mostra quantos clientes diferentes fizeram pedidos no mes corrente.',
+    ajudaConfiguracao: 'Mostra quantos clientes diferentes fizeram ordens de compra no mes corrente.',
     ordemPadrao: 9,
     spanPadrao: 2,
     visivelPadrao: true
@@ -93,7 +93,7 @@ export const cardsPaginaInicial = [
   {
     id: 'carteira',
     rotulo: 'Carteira',
-    ajudaConfiguracao: 'Mostra a quantidade de clientes ativos no cadastro.',
+    ajudaConfiguracao: 'Mostra a quantidade de fornecedores ativos no cadastro.',
     ordemPadrao: 12,
     spanPadrao: 2,
     visivelPadrao: true

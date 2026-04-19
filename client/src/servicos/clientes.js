@@ -19,7 +19,7 @@ export function listarContatos(parametros) {
 }
 
 export function listarVendedores(opcoes) {
-  return requisitarListaApi('/vendedores', opcoes);
+  return requisitarListaApi('/compradores', opcoes);
 }
 
 export function listarRamosAtividade(opcoes) {

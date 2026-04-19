@@ -394,7 +394,7 @@ function montarPainel(dados, usuarioLogado) {
       id: item.idAgendamento,
       assunto: item.assunto || 'Compromisso agendado',
       dataHora: formatarAgendamento(item),
-      detalhe: clientesPorId.get(String(item.idCliente)) || 'Sem cliente vinculado',
+      detalhe: clientesPorId.get(String(item.idCliente)) || 'Sem fornecedor vinculado',
       ajuda: {
         conceito: 'Compromisso futuro dentro do recorte visivel da agenda.',
         calculo: 'Entram apenas registros agendados entre hoje e os proximos 7 dias.',
@@ -520,29 +520,29 @@ function montarPainel(dados, usuarioLogado) {
     empresa: dados.empresa || null,
     resumo: usuarioLogado?.tipo === 'Usuario padrao'
       ? `${clientesVisiveis.length} clientes na sua carteira`
-      : `${clientesVisiveis.length} clientes no acompanhamento`,
+      : `${clientesVisiveis.length} fornecedores no acompanhamento`,
     indicadores: [
       {
         id: 'orcamentosAbertos',
         icone: 'orcamento',
-        titulo: 'Orcamentos em aberto',
+        titulo: 'Cotacoes em aberto',
         valor: String(orcamentosAbertos.length),
         descricao: 'Negociacoes ainda ativas no funil.',
         destaque: normalizarPreco(valorAberto),
         ajuda: {
-          composicao: 'Quantidade de orcamentos em aberto e valor total desses orcamentos.',
+          composicao: 'Quantidade de cotacoes em aberto e valor total desses orcamentos.',
           periodo: 'Posicao atual da carteira visivel na data de hoje.'
         }
       },
       {
         id: 'pedidosMes',
         icone: 'pedido',
-        titulo: 'Pedidos no mes',
+        titulo: 'Ordens de Compra no mes',
         valor: String(pedidosMes.length),
-        descricao: 'Pedidos gerados no mes atual.',
+        descricao: 'Ordens de Compra gerados no mes atual.',
         destaque: normalizarPreco(faturamentoMes),
         ajuda: {
-          composicao: 'Quantidade de pedidos e valor liquido dos itens.',
+          composicao: 'Quantidade de ordens de compra e valor liquido dos itens.',
           periodo: 'Mes corrente pela data de inclusao do pedido.'
         }
       },
@@ -555,7 +555,7 @@ function montarPainel(dados, usuarioLogado) {
         descricao: 'Tempo medio para fechar no mes atual.',
         ajuda: {
           composicao: `${orcamentosFechadosMesConversao.length} orcamentos na etapa Fechado, medindo da inclusao ate o fechamento.`,
-          periodo: 'Mes corrente pela data de fechamento do orcamento.'
+          periodo: 'Mes corrente pela data de fechamento da cotacao.'
         }
       },
       {
@@ -589,7 +589,7 @@ function montarPainel(dados, usuarioLogado) {
         valor: String(quantidadeVendidaMesBruta),
         descricao: 'Quantidade bruta de itens vendidos no mes atual.',
         ajuda: {
-          composicao: 'Soma da quantidade de itens dos pedidos do mes corrente (sem debitar devolucoes).',
+          composicao: 'Soma da quantidade de itens das ordens de compra do mes corrente (sem debitar devolucoes).',
           periodo: 'Mes corrente pela data de inclusao do pedido.'
         }
       },
@@ -598,9 +598,9 @@ function montarPainel(dados, usuarioLogado) {
         icone: 'pagamento',
         titulo: 'Comissao no mes',
         valor: normalizarPreco(comissaoMes),
-        descricao: 'Comissao liquida dos pedidos do mes atual.',
+        descricao: 'Comissao liquida das ordens de compra do mes atual.',
         ajuda: {
-          composicao: 'Soma da comissao de cada pedido (total liquido x % comissao).',
+          composicao: 'Soma da comissao de cada ordem de compra (total liquido x % comissao).',
           periodo: 'Mes corrente pela data de inclusao do pedido.'
         }
       },
@@ -609,9 +609,9 @@ function montarPainel(dados, usuarioLogado) {
         icone: 'pagamento',
         titulo: 'Comissao entregue no mes',
         valor: normalizarPreco(comissaoEntregueMes),
-        descricao: 'Comissao dos pedidos entregues no mes atual.',
+        descricao: 'Comissao das ordens de compra entregues no mes atual.',
         ajuda: {
-          composicao: 'Soma da comissao de cada pedido na etapa Entregue (total liquido x % comissao).',
+          composicao: 'Soma da comissao de cada ordem de compra na etapa Entregue (total liquido x % comissao).',
           periodo: 'Mes corrente pela data de entrega do pedido.'
         }
       },
@@ -620,7 +620,7 @@ function montarPainel(dados, usuarioLogado) {
         icone: 'clientes',
         titulo: 'Positivacao no mes',
         valor: String(positivacaoMes),
-        descricao: 'Clientes unicos que geraram pedido no mes.',
+        descricao: 'Fornecedores unicos que geraram ordem de compra no mes.',
         ajuda: {
           composicao: 'Quantidade de clientes diferentes com pelo menos um pedido.',
           periodo: 'Mes corrente pela data de inclusao do pedido.'
@@ -633,7 +633,7 @@ function montarPainel(dados, usuarioLogado) {
         valor: formatarPercentualTaxa(percentualPositivacaoCarteiraMes),
         descricao: 'Percentual da carteira ativa que comprou no mes.',
         ajuda: {
-          composicao: `${positivacaoCarteiraMes} clientes que compraram / ${clientesAtivos.length} clientes ativos da carteira.`,
+          composicao: `${positivacaoCarteiraMes} fornecedores que compraram / ${clientesAtivos.length} fornecedores ativos da carteira.`,
           periodo: 'Mes corrente pela data de inclusao do pedido.'
         }
       },
@@ -654,10 +654,10 @@ function montarPainel(dados, usuarioLogado) {
         icone: 'selo',
         titulo: 'Carteira',
         valor: String(clientesAtivos.length),
-        descricao: 'Clientes ativos em acompanhamento.',
+        descricao: 'Fornecedores ativos em acompanhamento.',
         destaque: `${clientesVisiveis.length} visiveis`,
         ajuda: {
-          composicao: 'Quantidade de clientes ativos no escopo visivel.',
+          composicao: 'Quantidade de fornecedores ativos no escopo visivel.',
           periodo: 'Base cadastral atual (sem recorte mensal).'
         }
       }
@@ -668,7 +668,7 @@ function montarPainel(dados, usuarioLogado) {
         valor: normalizarPreco(valorAberto),
         ajuda: {
           conceito: 'Volume financeiro estimado das oportunidades em aberto.',
-          calculo: 'Soma dos valores totais dos itens dos orcamentos abertos.',
+          calculo: 'Soma dos valores totais dos itens das cotacoes abertos.',
           observacao: 'Nao representa venda fechada; mostra potencial em negociacao.'
         }
       },
@@ -677,7 +677,7 @@ function montarPainel(dados, usuarioLogado) {
         valor: normalizarPreco(faturamentoMes),
         ajuda: {
           conceito: 'Valor movimentado pelos pedidos com entrega prevista no mes atual.',
-          calculo: 'Soma dos itens de todos os pedidos visiveis cuja data de entrega cai dentro do mes atual.',
+          calculo: 'Soma dos itens de todos as ordens de compra visiveis cuja data de entrega cai dentro do mes atual.',
           observacao: 'Leitura rapida da receita prevista para entrega no mes atual.'
         }
       },
@@ -686,34 +686,34 @@ function montarPainel(dados, usuarioLogado) {
         valor: normalizarPreco(ticketMedio),
         ajuda: {
           conceito: 'Valor medio por pedido com entrega prevista no mes atual.',
-          calculo: `${normalizarPreco(faturamentoMes)} dividido por ${pedidosEntregaMes.length || 0} pedidos com data de entrega no mes atual.`,
+          calculo: `${normalizarPreco(faturamentoMes)} dividido por ${pedidosEntregaMes.length || 0} ordens de compra com data de entrega no mes atual.`,
           observacao: 'Ajuda a entender se o resultado do mes atual vem de volume ou de valor medio.'
         }
       }
     ],
     faixas: [
       {
-        rotulo: 'Clientes acompanhados',
+        rotulo: 'Fornecedores acompanhados',
         valor: String(clientesVisiveis.length),
         ajuda: {
           conceito: 'Base de clientes usada na dashboard.',
           calculo: usuarioLogado?.tipo === 'Usuario padrao'
-            ? 'Clientes da carteira do vendedor do usuario logado.'
+            ? 'Fornecedores da carteira do comprador do usuario logado.'
             : 'Todos os clientes visiveis na operacao.',
           observacao: 'Esse total define o universo de acompanhamento da home.'
         }
       },
       {
-        rotulo: 'Pedidos a entregar',
+        rotulo: 'Ordens de Compra a entregar',
         valor: String(pedidosEntregaProxima),
         ajuda: {
           conceito: 'Pedidos ainda nao entregues com entrega prevista em ate 7 dias.',
-          calculo: 'Conta pedidos pendentes cuja data de entrega cai entre hoje e os proximos 7 dias.',
+          calculo: 'Conta ordens de compra pendentes cuja data de entrega cai entre hoje e os proximos 7 dias.',
           observacao: 'Bom indicador para alinhamento comercial e operacional.'
         }
       },
       {
-        rotulo: 'Orcamentos vencidos',
+        rotulo: 'Cotacoes vencidos',
         valor: String(orcamentosVencidos),
         ajuda: {
           conceito: 'Orcamentos abertos com validade anterior a hoje.',
@@ -725,7 +725,7 @@ function montarPainel(dados, usuarioLogado) {
         rotulo: 'Sem atendimento recente',
         valor: String(clientesSemAtendimento),
         ajuda: {
-          conceito: 'Clientes sem atendimento registrado nos ultimos 30 dias.',
+          conceito: 'Fornecedores sem atendimento registrado nos ultimos 30 dias.',
           calculo: 'Compara a ultima data de atendimento de cada cliente com a data atual.',
           observacao: 'Ajuda a priorizar reativacao da carteira.'
         }
@@ -750,10 +750,10 @@ function montarPainel(dados, usuarioLogado) {
     atendimentosPorTipo,
     atendimentosPorUsuario,
     alertas: montarAlertas(orcamentosVencidos, orcamentosVencendo, pedidosEntregaProxima, clientesSemAtendimento),
-    tituloRanking: usuarioLogado?.tipo === 'Usuario padrao' ? 'Clientes em destaque' : 'Vendedores em destaque',
+    tituloRanking: usuarioLogado?.tipo === 'Usuario padrao' ? 'Fornecedores em destaque' : 'Compradores em destaque',
     descricaoRanking: usuarioLogado?.tipo === 'Usuario padrao'
-      ? 'Quem mais comprou no mes pela data de entrada do pedido dentro da sua carteira.'
-      : 'Quem mais movimentou pedidos pela data de entrada no mes atual.',
+      ? 'Quem mais comprou no mes pela data de entrada da ordem de compra dentro da sua carteira.'
+      : 'Quem mais movimentou ordens de compra pela data de entrada no mes atual.',
     ranking: usuarioLogado?.tipo === 'Usuario padrao'
       ? montarRankingClientes(pedidosMes, clientesPorId)
       : montarRankingVendedores(pedidosMes, vendedoresPorId),
@@ -910,7 +910,7 @@ function criarPainelBase(usuarioLogado) {
     tag: usuarioLogado?.tipo === 'Usuario padrao' ? 'Minha carteira' : 'Visao geral',
     titulo: usuarioLogado?.tipo === 'Usuario padrao'
       ? 'Painel comercial da sua carteira'
-      : 'Dashboard comercial de orcamentos e vendas',
+      : 'Dashboard comercial de cotacoes e vendas',
     subtitulo: usuarioLogado?.tipo === 'Usuario padrao'
       ? 'Os dados exibidos aqui consideram somente seus clientes e seus registros.'
       : 'Leitura consolidada do funil, das vendas e das proximas acoes comerciais.',
@@ -918,22 +918,22 @@ function criarPainelBase(usuarioLogado) {
       {
         id: 'orcamentosAbertos',
         icone: 'orcamento',
-        titulo: 'Orcamentos em aberto',
+        titulo: 'Cotacoes em aberto',
         valor: '0',
         descricao: '',
         ajuda: {
-          composicao: 'Quantidade e valor dos orcamentos em aberto.',
+          composicao: 'Quantidade e valor das cotacoes em aberto.',
           periodo: 'Carteira visivel atual na data de hoje.'
         }
       },
       {
         id: 'pedidosMes',
         icone: 'pedido',
-        titulo: 'Pedidos no mes',
+        titulo: 'Ordens de Compra no mes',
         valor: '0',
         descricao: '',
         ajuda: {
-          composicao: 'Quantidade de pedidos e valor liquido dos itens.',
+          composicao: 'Quantidade de ordens de compra e valor liquido dos itens.',
           periodo: 'Mes corrente pela data de inclusao do pedido.'
         }
       },
@@ -945,8 +945,8 @@ function criarPainelBase(usuarioLogado) {
         valorComplemento: 'dias',
         descricao: '',
         ajuda: {
-          composicao: 'Media entre a data de inclusao e a data de fechamento dos orcamentos na etapa Fechado.',
-          periodo: 'Mes corrente pela data de fechamento do orcamento.'
+          composicao: 'Media entre a data de inclusao e a data de fechamento das cotacoes na etapa Fechado.',
+          periodo: 'Mes corrente pela data de fechamento da cotacao.'
         }
       },
       {
@@ -978,7 +978,7 @@ function criarPainelBase(usuarioLogado) {
         valor: '0',
         descricao: '',
         ajuda: {
-          composicao: 'Soma da quantidade de itens dos pedidos do mes corrente (sem debitar devolucoes).',
+          composicao: 'Soma da quantidade de itens das ordens de compra do mes corrente (sem debitar devolucoes).',
           periodo: 'Mes corrente pela data de inclusao do pedido.'
         }
       },
@@ -989,7 +989,7 @@ function criarPainelBase(usuarioLogado) {
         valor: normalizarPreco(0),
         descricao: '',
         ajuda: {
-          composicao: 'Soma da comissao de cada pedido (total liquido x % comissao).',
+          composicao: 'Soma da comissao de cada ordem de compra (total liquido x % comissao).',
           periodo: 'Mes corrente pela data de inclusao do pedido.'
         }
       },
@@ -1000,7 +1000,7 @@ function criarPainelBase(usuarioLogado) {
         valor: normalizarPreco(0),
         descricao: '',
         ajuda: {
-          composicao: 'Soma da comissao dos pedidos na etapa Entregue.',
+          composicao: 'Soma da comissao das ordens de compra na etapa Entregue.',
           periodo: 'Mes corrente pela data de entrega do pedido.'
         }
       },
@@ -1022,7 +1022,7 @@ function criarPainelBase(usuarioLogado) {
         valor: formatarPercentualTaxa(0),
         descricao: '',
         ajuda: {
-          composicao: 'Clientes da carteira ativa que compraram / total de clientes ativos da carteira.',
+          composicao: 'Fornecedores da carteira ativa que compraram / total de fornecedores ativos da carteira.',
           periodo: 'Mes corrente pela data de inclusao do pedido.'
         }
       },
@@ -1044,7 +1044,7 @@ function criarPainelBase(usuarioLogado) {
         valor: '0',
         descricao: '',
         ajuda: {
-          composicao: 'Quantidade de clientes ativos no escopo da home.',
+          composicao: 'Quantidade de fornecedores ativos no escopo da home.',
           periodo: 'Base cadastral atual.'
         }
       }
@@ -1162,7 +1162,7 @@ function montarFunil(funil) {
     percentualValor: calcularPercentualParteDoTotal(Number(item.valorTotal || 0), totalValor),
     ajuda: {
       composicao: `${item.quantidadeOrcamentos} orcamentos, ${Number(item.quantidadeItens || 0)} itens e ${normalizarPreco(item.valorTotal)} nessa etapa.`,
-      periodo: 'Posicao atual do funil de orcamentos em aberto.'
+      periodo: 'Posicao atual do funil de cotacoes em aberto.'
     }
   }));
 }
@@ -1182,7 +1182,7 @@ function montarAlertas(vencidos, vencendo, entrega, semAtendimento) {
   const maior = Math.max(vencidos, vencendo, entrega, semAtendimento, 1);
   return [
     {
-      rotulo: 'Orcamentos vencidos',
+      rotulo: 'Cotacoes vencidos',
       valor: String(vencidos),
       descricao: 'Validade expirada em negociacoes abertas.',
       percentual: Math.round((vencidos / maior) * 100),
@@ -1204,23 +1204,23 @@ function montarAlertas(vencidos, vencendo, entrega, semAtendimento) {
       }
     },
     {
-      rotulo: 'Pedidos com entrega proxima',
+      rotulo: 'Ordens de Compra com entrega proxima',
       valor: String(entrega),
-      descricao: 'Pedidos previstos para os proximos 7 dias.',
+      descricao: 'Ordens de Compra previstos para os proximos 7 dias.',
       percentual: Math.round((entrega / maior) * 100),
       ajuda: {
         conceito: 'Pedidos pendentes com entrega prevista em ate 7 dias.',
-        calculo: 'Conta pedidos nao entregues cuja data de entrega cai entre hoje e os proximos 7 dias.',
+        calculo: 'Conta ordens de compra nao entregues cuja data de entrega cai entre hoje e os proximos 7 dias.',
         observacao: 'Bom indicador para antecipar alinhamentos.'
       }
     },
     {
-      rotulo: 'Clientes sem atendimento',
+      rotulo: 'Fornecedores sem atendimento',
       valor: String(semAtendimento),
       descricao: 'Sem interacao registrada nos ultimos 30 dias.',
       percentual: Math.round((semAtendimento / maior) * 100),
       ajuda: {
-        conceito: 'Clientes sem registro recente de atendimento.',
+        conceito: 'Fornecedores sem registro recente de atendimento.',
         calculo: 'Ultimo atendimento do cliente ha mais de 30 dias, contando a partir de hoje, ou inexistente.',
         observacao: 'Ajuda a identificar carteira esfriando.'
       }
@@ -1264,7 +1264,7 @@ function montarResumoDevolucoes(pedidos, motivosDevolucao) {
     percentualValor: totalValor > 0 ? Math.round((item.valorTotal / totalValor) * 100) : 0,
     ajuda: {
       composicao: `${item.quantidade} devolucoes e ${normalizarPreco(item.valorTotal)} para o motivo ${item.descricao}.`,
-      periodo: 'Mes corrente pela data de entrada dos pedidos de devolucao.'
+      periodo: 'Mes corrente pela data de entrada das ordens de compra de devolucao.'
     }
   }));
 }
@@ -1306,7 +1306,7 @@ function montarResumoMotivosPerda(orcamentos, motivosPerda) {
     percentualValor: calcularPercentualParteDoTotal(Number(item.valorTotal || 0), totalValor),
     ajuda: {
       composicao: `${item.quantidadeOrcamentos} orcamentos recusados e ${normalizarPreco(item.valorTotal)} no motivo ${item.descricao}.`,
-      periodo: 'Mes corrente dos orcamentos recusados.'
+      periodo: 'Mes corrente das cotacoes recusados.'
     }
   }));
 }
@@ -1452,7 +1452,7 @@ function montarResumoPorCliente(pedidos, clientes, empresa) {
   (pedidos || []).forEach((pedido) => {
     const idCliente = String(pedido?.idCliente || '');
     const cliente = clientesPorId.get(idCliente);
-    const nomeFantasiaCliente = cliente?.nomeFantasia || cliente?.razaoSocial || 'Cliente sem nome';
+    const nomeFantasiaCliente = cliente?.nomeFantasia || cliente?.razaoSocial || 'Fornecedor sem nome';
     const codigoCliente = formatarCodigoCliente(cliente || { idCliente: pedido?.idCliente }, empresa);
     const descricaoCliente = `${codigoCliente} - ${nomeFantasiaCliente}`;
     const atual = resumoPorCliente.get(idCliente) || {
@@ -1611,7 +1611,7 @@ function montarResumoAtendimentosPorRelacionamento(
     percentualAtendimentos: calcularPercentualParteDoTotal(item.quantidadeAtendimentos, totalAtendimentos),
     percentualClientes: calcularPercentualParteDoTotal(item.quantidadeClientes, totalClientes),
     ajuda: {
-      composicao: `${item.quantidadeAtendimentos} atendimentos e ${item.quantidadeClientes} clientes para ${item.descricao}.`,
+      composicao: `${item.quantidadeAtendimentos} atendimentos e ${item.quantidadeClientes} fornecedores para ${item.descricao}.`,
       periodo: 'Mes corrente pela data do atendimento.'
     }
   }));
@@ -1628,8 +1628,8 @@ function montarResumoAtendimentosPorCliente(atendimentos, clientes, empresa) {
     const idCliente = String(atendimento?.idCliente || '');
     const cliente = clientesPorId.get(idCliente);
     const descricaoCliente = cliente
-      ? `${formatarCodigoCliente(cliente, empresa)} - ${cliente.nomeFantasia || cliente.razaoSocial || 'Cliente sem nome'}`
-      : 'Cliente sem nome';
+      ? `${formatarCodigoCliente(cliente, empresa)} - ${cliente.nomeFantasia || cliente.razaoSocial || 'Fornecedor sem nome'}`
+      : 'Fornecedor sem nome';
     const resumoAtual = resumoPorCliente.get(idCliente) || {
       id: idCliente || 'sem-cliente',
       descricao: descricaoCliente,
@@ -1705,7 +1705,7 @@ function montarResumoAtendimentosPorUsuario(atendimentos, usuarios) {
     percentualAtendimentos: calcularPercentualParteDoTotal(item.quantidadeAtendimentos, totalAtendimentos),
     percentualClientes: calcularPercentualParteDoTotal(item.quantidadeClientes, totalClientes),
     ajuda: {
-      composicao: `${item.quantidadeAtendimentos} atendimentos e ${item.quantidadeClientes} clientes para ${item.descricao}.`,
+      composicao: `${item.quantidadeAtendimentos} atendimentos e ${item.quantidadeClientes} fornecedores para ${item.descricao}.`,
       periodo: 'Mes corrente pela data do atendimento.'
     }
   }));
@@ -1715,7 +1715,7 @@ function montarRankingVendedores(pedidos, vendedoresPorId) {
   return montarRanking(
     pedidos,
     (item) => String(item.idVendedor || ''),
-    (chave) => vendedoresPorId.get(chave) || 'Sem vendedor'
+    (chave) => vendedoresPorId.get(chave) || 'Sem comprador'
   );
 }
 
@@ -1723,7 +1723,7 @@ function montarRankingClientes(pedidos, clientesPorId) {
   return montarRanking(
     pedidos,
     (item) => String(item.idCliente || ''),
-    (chave) => clientesPorId.get(chave) || 'Cliente sem nome'
+    (chave) => clientesPorId.get(chave) || 'Fornecedor sem nome'
   );
 }
 
@@ -1743,11 +1743,11 @@ function montarRanking(pedidos, obterChave, obterNome) {
 
   return lista.map((item) => ({
     rotulo: item.nome,
-    descricao: `${item.quantidade} pedidos`,
+    descricao: `${item.quantidade} ordens de compra`,
     valor: normalizarPreco(item.total),
     percentual: maior > 0 ? Math.max(12, Math.round((item.total / maior) * 100)) : 0,
     ajuda: {
-      composicao: `${item.quantidade} pedidos somando ${normalizarPreco(item.total)}.`,
+      composicao: `${item.quantidade} ordens de compra somando ${normalizarPreco(item.total)}.`,
       periodo: 'Mes corrente pela data de entrada do pedido.'
     }
   }));

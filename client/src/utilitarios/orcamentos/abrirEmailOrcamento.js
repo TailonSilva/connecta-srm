@@ -12,7 +12,7 @@ export async function abrirEmailOrcamento(contexto) {
   if (!url) {
     return {
       sucesso: false,
-      mensagem: 'Nao foi possivel montar o link do e-mail do orcamento.'
+      mensagem: 'Nao foi possivel montar o link do e-mail da cotacao.'
     };
   }
 
@@ -68,7 +68,7 @@ function montarDadosEmailOrcamento({
     contato_nome: contato?.nome || ''
   };
   const assunto = aplicarTagsEmail(
-    empresa?.assuntoEmailOrcamento || 'Orcamento {orcamento_codigo} - {cliente_nome}',
+    empresa?.assuntoEmailOrcamento || 'Cotacao {cotacao_codigo} - {fornecedor_nome}',
     tags
   );
   const corpoBase = aplicarTagsEmail(
@@ -116,7 +116,7 @@ function montarItensEmailOrcamento(itens) {
   }
 
   return [
-    'Itens do orcamento:',
+    'Itens da cotacao:',
     ...listaItens.map((item, indice) => {
       const referencia = String(item?.referenciaProdutoSnapshot || '').trim();
       const descricao = String(item?.descricaoProdutoSnapshot || '').trim() || 'Produto sem descricao';
@@ -130,7 +130,7 @@ function montarItensEmailOrcamento(itens) {
   ].join('\n');
 }
 
-// Os campos extras viram um bloco opcional para o template decidir se quer ou nao expor observacoes complementares do orcamento.
+// Os campos extras viram um bloco opcional para o template decidir se quer ou nao expor observacoes complementares da cotacao.
 function montarCamposExtrasEmailOrcamento(camposExtras) {
   const listaCampos = Array.isArray(camposExtras) ? camposExtras : [];
   const camposPreenchidos = listaCampos
@@ -145,7 +145,7 @@ function montarCamposExtrasEmailOrcamento(camposExtras) {
   }
 
   return [
-    'Campos adicionais do orcamento:',
+    'Campos adicionais da cotacao:',
     ...camposPreenchidos.map((campo) => `${campo.titulo}: ${campo.valor}`)
   ].join('\n');
 }

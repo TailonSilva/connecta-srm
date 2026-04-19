@@ -300,7 +300,7 @@ export function PaginaPedidos({ usuarioLogado }) {
         empresa: empresasCarregadas[0] || null
       };
     } catch (_erro) {
-      definirMensagemErro('Nao foi possivel carregar os pedidos.');
+      definirMensagemErro('Nao foi possivel carregar as ordens de compra.');
       return null;
     } finally {
       definirCarregandoContexto(false);
@@ -331,7 +331,7 @@ export function PaginaPedidos({ usuarioLogado }) {
         contextoAtual?.etapasPedido || etapasPedido
       ));
     } catch (_erro) {
-      definirMensagemErro('Nao foi possivel carregar os pedidos.');
+      definirMensagemErro('Nao foi possivel carregar as ordens de compra.');
     } finally {
       definirCarregandoGrade(false);
     }
@@ -522,16 +522,16 @@ export function PaginaPedidos({ usuarioLogado }) {
     <>
       <header className="cabecalhoPagina">
         <div>
-          <h1>Pedidos</h1>
-          <p>Acompanhe os pedidos gerados a partir das propostas comerciais do CRM.</p>
+          <h1>Ordens de Compra</h1>
+          <p>Acompanhe as ordens de compra gerados a partir das propostas comerciais do CRM.</p>
         </div>
 
         <div className="acoesCabecalhoPagina">
           <CampoPesquisa
             valor={pesquisa}
             aoAlterar={definirPesquisa}
-            placeholder="Pesquisar pedidos"
-            ariaLabel="Pesquisar pedidos"
+            placeholder="Pesquisar ordens de compra"
+            ariaLabel="Pesquisar ordens de compra"
           />
           <Botao
             variante={filtrosAtivos ? 'primario' : 'secundario'}
@@ -554,8 +554,8 @@ export function PaginaPedidos({ usuarioLogado }) {
             variante="primario"
             icone="adicionar"
             somenteIcone
-            title="Novo pedido"
-            aria-label="Novo pedido"
+            title="Nova ordem de compra"
+            aria-label="Nova ordem de compra"
             onClick={abrirNovoPedido}
           />
         </div>
@@ -569,8 +569,8 @@ export function PaginaPedidos({ usuarioLogado }) {
           carregando={carregando}
           mensagemErro={mensagemErro}
           temItens={pedidos.length > 0}
-          mensagemCarregando="Carregando pedidos..."
-          mensagemVazia="Nenhum pedido encontrado."
+          mensagemCarregando="Carregando ordens de compra..."
+          mensagemVazia="Nenhum ordem de compra encontrado."
         >
           {pedidos.map((pedido) => (
             <LinhaPedido
@@ -594,12 +594,12 @@ export function PaginaPedidos({ usuarioLogado }) {
 
       <ModalFiltros
         aberto={modalFiltrosAberto}
-        titulo="Filtros de pedidos"
+        titulo="Filtros de ordens de compra"
         filtros={filtros}
         campos={[
           {
             name: 'idCliente',
-            label: 'Cliente',
+            label: 'Fornecedor',
             options: clientes.map((cliente) => ({
               valor: String(cliente.idCliente),
               label: cliente.nomeFantasia || cliente.razaoSocial
@@ -615,9 +615,9 @@ export function PaginaPedidos({ usuarioLogado }) {
           },
           {
             name: 'idVendedor',
-            label: 'Vendedor',
+            label: 'Comprador',
             multiple: true,
-            placeholder: 'Todos os vendedores',
+            placeholder: 'Todos os compradores',
             disabled: Boolean(usuarioSomenteVendedor),
             options: vendedores.map((vendedor) => ({
               valor: String(vendedor.idVendedor),
@@ -638,7 +638,7 @@ export function PaginaPedidos({ usuarioLogado }) {
             name: 'periodosDatasPedido',
             label: 'Datas',
             type: 'date-filters-modal',
-            tituloSelecao: 'Filtros de datas do pedido',
+            tituloSelecao: 'Filtros de datas da ordem de compra',
             placeholder: 'Selecionar datas',
             periodos: [
               {
@@ -720,11 +720,11 @@ export function PaginaPedidos({ usuarioLogado }) {
             onMouseDown={(evento) => evento.stopPropagation()}
           >
             <div className="cabecalhoConfirmacaoModal">
-              <h4 id="tituloConfirmacaoExclusaoPedido">Excluir pedido</h4>
+              <h4 id="tituloConfirmacaoExclusaoPedido">Excluir ordem de compra</h4>
             </div>
 
             <div className="corpoConfirmacaoModal">
-              <p>Tem certeza que deseja excluir este pedido?</p>
+              <p>Tem certeza que deseja excluir este ordem de compra?</p>
             </div>
 
             <div className="acoesConfirmacaoModal">
@@ -745,7 +745,7 @@ export function PaginaPedidos({ usuarioLogado }) {
           definirMotivoDevolucaoEtapaRapida('');
         }}>
           <div
-            className="modalConfirmacaoAgenda modalEtapaRapidaOrcamento"
+            className="modalConfirmacaoAgenda modalEtapaRapidaCotacao"
             role="dialog"
             aria-modal="true"
             aria-labelledby="tituloMotivoDevolucaoEtapaRapida"
@@ -755,7 +755,7 @@ export function PaginaPedidos({ usuarioLogado }) {
               <h4 id="tituloMotivoDevolucaoEtapaRapida">Motivo da devolucao</h4>
             </div>
 
-            <div className="corpoConfirmacaoModal corpoModalEtapaRapidaOrcamento">
+            <div className="corpoConfirmacaoModal corpoModalEtapaRapidaCotacao">
               <p>
                 A etapa <strong>{alteracaoEtapaPendente.nomeEtapa}</strong> exige um motivo da devolucao.
               </p>
@@ -998,9 +998,9 @@ function renderizarCelulaPedido({
             style={criarEstiloEtapaPedido(pedido.corEtapaPedido)}
             value={pedido.idEtapaPedido ? String(pedido.idEtapaPedido) : ''}
             onChange={(evento) => aoAlterarEtapa(evento.target.value)}
-            aria-label={`Alterar etapa do pedido ${pedido.idPedido}`}
+            aria-label={`Alterar etapa da ordem de compra ${pedido.idPedido}`}
             disabled={!permitirAlteracaoEtapa}
-            title={!permitirAlteracaoEtapa ? 'Pedido entregue: usuario padrao consulta apenas.' : 'Alterar etapa do pedido'}
+            title={!permitirAlteracaoEtapa ? 'Ordem de Compra entregue: usuario padrao consulta apenas.' : 'Alterar etapa da ordem de compra'}
           >
             <option value="">Sem etapa</option>
             {etapasPedido.map((etapa) => (
@@ -1098,9 +1098,9 @@ function renderizarCelulaPedido({
     return (
       <CelulaLayoutPedido coluna={coluna} {...propriedadesCelula}>
         <AcoesRegistro
-          rotuloConsulta="Consultar pedido"
-          rotuloEdicao={permitirEdicao ? 'Editar pedido' : 'Pedido entregue: usuario padrao consulta apenas.'}
-          rotuloInativacao="Excluir pedido"
+          rotuloConsulta="Consultar ordem de compra"
+          rotuloEdicao={permitirEdicao ? 'Editar ordem de compra' : 'Ordem de Compra entregue: usuario padrao consulta apenas.'}
+          rotuloInativacao="Excluir ordem de compra"
           iconeInativacao="limpar"
           exibirInativacao={permitirExcluir}
           desabilitarEdicao={!permitirEdicao}
@@ -1396,7 +1396,7 @@ function normalizarNumeroDecimal(valor) {
 }
 
 function criarEstiloEtapaPedido(cor) {
-  const corBase = normalizarCorHexadecimal(cor || '#1791e2');
+  const corBase = normalizarCorHexadecimal(cor || '#EC8702');
 
   return {
     background: converterHexParaRgba(corBase, 0.22),
@@ -1406,7 +1406,7 @@ function criarEstiloEtapaPedido(cor) {
 
 function normalizarCorHexadecimal(cor) {
   const texto = String(cor || '').trim();
-  return /^#([0-9a-fA-F]{6})$/.test(texto) ? texto : '#1791e2';
+  return /^#([0-9a-fA-F]{6})$/.test(texto) ? texto : '#EC8702';
 }
 
 function escurecerCorHexadecimal(cor, intensidade = 0.2) {
