@@ -21,7 +21,7 @@
   display: grid;
   gap: 14px;
   padding: 18px;
-  border: 1px solid rgba(236, 135, 2, 0.14);
+  border: 1px solid rgba(149, 6, 244, 0.12);
   border-radius: 20px;
   background: rgba(248, 251, 254, 0.84);
 }

@@ -28,25 +28,25 @@
 .botaoPrimario {
   background: linear-gradient(135deg, var(--corPrimaria), var(--corPrimariaForte));
   color: #ffffff;
-  box-shadow: 0 12px 24px rgba(236, 135, 2, 0.24);
+  box-shadow: 0 12px 24px rgba(149, 6, 244, 0.20);
 }
 
 .botaoPrimario:hover {
   transform: translateY(-2px);
-  box-shadow: 0 16px 30px rgba(236, 135, 2, 0.3);
+  box-shadow: 0 16px 30px rgba(149, 6, 244, 0.26);
 }
 
 .botaoSecundario {
-  border: 1px solid rgba(236, 135, 2, 0.2);
+  border: 1px solid rgba(149, 6, 244, 0.18);
   background: rgba(255, 255, 255, 0.88);
   color: var(--corPrimariaForte);
 }
 
 .botaoSecundario:hover {
   transform: translateY(-2px);
-  border-color: rgba(236, 135, 2, 0.34);
+  border-color: rgba(149, 6, 244, 0.28);
   background: rgba(255, 255, 255, 1);
-  box-shadow: 0 10px 24px rgba(236, 135, 2, 0.12);
+  box-shadow: 0 10px 24px rgba(149, 6, 244, 0.16);
 }
 
 .botaoComplementar {

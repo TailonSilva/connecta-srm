@@ -1950,7 +1950,7 @@ function normalizarNumeroDecimal(valor) {
 }
 
 function criarEstiloEtapaOrcamento(cor) {
-  const corBase = normalizarCorHexadecimal(cor || '#EC8702');
+  const corBase = normalizarCorHexadecimal(cor || '#9506F4');
 
   return {
     background: converterHexParaRgba(corBase, 0.22),
@@ -2109,7 +2109,7 @@ function obterDataAtualFormatoInput() {
 
 function normalizarCorHexadecimal(cor) {
   const texto = String(cor || '').trim();
-  return /^#([0-9a-fA-F]{6})$/.test(texto) ? texto : '#EC8702';
+  return /^#([0-9a-fA-F]{6})$/.test(texto) ? texto : '#9506F4';
 }
 
 function escurecerCorHexadecimal(cor, intensidade = 0.2) {

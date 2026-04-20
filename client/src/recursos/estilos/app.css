@@ -13,7 +13,7 @@
   min-height: 100vh;
   margin-left: 248px;
   padding: 24px 28px 24px;
-  background: linear-gradient(180deg, #FFFCF8 0%, #FFF2E0 100%);
+  background: linear-gradient(180deg, #FAFAFA 0%, #F5F5F5 100%);
 }
 
 @media (max-width: 980px) {

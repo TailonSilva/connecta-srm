@@ -36,7 +36,7 @@ export function ModalManualClientes({
         },
         {
           titulo: 'Carteira comercial',
-          descricao: `${compradores.length} comprador(es) disponivel(is) para vinculacao.`,
+          descricao: `${vendedores.length} comprador(es) disponivel(is) para vinculacao.`,
           detalhe: 'Usuario padrao com comprador vinculado trabalha sobre a propria carteira.',
           icone: 'usuarios'
         },

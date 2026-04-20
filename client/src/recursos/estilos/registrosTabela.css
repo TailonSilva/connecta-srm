@@ -4,8 +4,8 @@
   height: 34px;
   padding: 0;
   border-radius: 10px;
-  border: 1px solid rgba(236, 135, 2, 0.14);
-  background: rgba(236, 135, 2, 0.06);
+  border: 1px solid rgba(149, 6, 244, 0.12);
+  background: rgba(149, 6, 244, 0.04);
   color: var(--corPrimariaForte);
   box-shadow: none;
 }
@@ -17,9 +17,9 @@
 
 .botaoAcaoGrade:hover {
   transform: translateY(-2px);
-  border-color: rgba(236, 135, 2, 0.28);
-  background: rgba(236, 135, 2, 0.12);
-  box-shadow: 0 10px 18px rgba(236, 135, 2, 0.12);
+  border-color: rgba(149, 6, 244, 0.24);
+  background: rgba(149, 6, 244, 0.10);
+  box-shadow: 0 10px 18px rgba(149, 6, 244, 0.10);
 }
 
 .botaoAcaoGrade:disabled {
@@ -42,7 +42,7 @@
   min-width: 0;
   padding: 4px 6px;
   border-radius: 12px;
-  background: rgba(236, 135, 2, 0.12);
+  background: rgba(149, 6, 244, 0.10);
   color: var(--corPrimariaForte);
   font-size: 0.68rem;
   font-weight: 600;
@@ -77,14 +77,14 @@
 .avatarClienteImagem {
   display: block;
   object-fit: cover;
-  border: 1px solid rgba(236, 135, 2, 0.14);
-  box-shadow: 0 10px 22px rgba(236, 135, 2, 0.12);
+  border: 1px solid rgba(149, 6, 244, 0.12);
+  box-shadow: 0 10px 22px rgba(149, 6, 244, 0.10);
 }
 
 .avatarClientePlaceholder {
   display: grid;
   place-items: center;
-  background: linear-gradient(135deg, rgba(236, 135, 2, 0.18), rgba(198, 111, 0, 0.3));
+  background: linear-gradient(135deg, rgba(149, 6, 244, 0.16), rgba(107, 4, 184, 0.24));
   color: var(--corPrimariaForte);
   font-size: 0.88rem;
   font-weight: 800;
@@ -101,14 +101,14 @@
 .imagemProduto {
   display: block;
   object-fit: cover;
-  border: 1px solid rgba(236, 135, 2, 0.14);
-  box-shadow: 0 10px 22px rgba(236, 135, 2, 0.12);
+  border: 1px solid rgba(149, 6, 244, 0.12);
+  box-shadow: 0 10px 22px rgba(149, 6, 244, 0.10);
 }
 
 .imagemProdutoPlaceholder {
   display: grid;
   place-items: center;
-  background: linear-gradient(135deg, rgba(236, 135, 2, 0.18), rgba(198, 111, 0, 0.3));
+  background: linear-gradient(135deg, rgba(149, 6, 244, 0.16), rgba(107, 4, 184, 0.24));
   color: var(--corPrimariaForte);
   font-size: 0.8rem;
   font-weight: 800;
@@ -198,8 +198,8 @@
 }
 
 .etiquetaPrincipal {
-  background: rgba(242, 145, 31, 0.14);
-  color: #c46a06;
+  background: rgba(184, 71, 232, 0.14);
+  color: #6B04B8;
 }
 
 .etiquetaGrupoContato {

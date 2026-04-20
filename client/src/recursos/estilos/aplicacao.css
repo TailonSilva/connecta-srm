@@ -1,19 +1,18 @@
 :root {
-  --corPrimaria: #EC8702;
-  --corPrimariaForte: #C66F00;
-  --corPrimariaSuave: #FFB347;
-  --corFundo: #FFF6EA;
+  --corPrimaria: #9506F4;
+  --corPrimariaForte: #6B04B8;
+  --corPrimariaSuave: #B847E8;
+  --corFundo: #F9F9F9;
   --corSuperficie: #ffffff;
-  --corSuperficieSuave: #F5E7D5;
-  --corBorda: #E3C9A8;
+  --corSuperficieSuave: #F5F5F5;
+  --corBorda: #E8E8E8;
   --corTexto: #3c4a57;
   --corTextoSuave: #7a8894;
-  --sombraPrincipal: 0 24px 50px rgba(126, 76, 10, 0.18);
+  --sombraPrincipal: 0 24px 50px rgba(149, 6, 244, 0.12);
   font-family: 'Segoe UI', sans-serif;
   color: var(--corTexto);
   background:
-    radial-gradient(circle at top, rgba(255, 179, 71, 0.18), transparent 28%),
-    linear-gradient(180deg, #FFFBF5 0%, #FFF3E4 100%);
+    linear-gradient(180deg, #FFFFFF 0%, #FAFAFA 100%);
 }
 
 * {

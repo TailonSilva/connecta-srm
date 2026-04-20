@@ -270,7 +270,7 @@
 }
 
 .modalManualPaginaChip.opcional {
-  background: rgba(236, 135, 2, 0.1);
+  background: rgba(149, 6, 244, 0.08);
   color: #0f6c9f;
 }
 
@@ -292,8 +292,8 @@
   gap: 10px;
   padding: 16px;
   border-radius: 18px;
-  background: rgba(255, 244, 230, 0.72);
-  color: #8f5c16;
+  background: rgba(225, 215, 243, 0.72);
+  color: #6B04B8;
 }
 
 .modalManualPaginaEstadoVazio p {

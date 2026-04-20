@@ -5,7 +5,7 @@
 
 .paginaInicioRankingItem {
   position: relative;
-  border: 1px solid rgba(236, 135, 2, 0.1);
+  border: 1px solid rgba(149, 6, 244, 0.08);
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.88);
   z-index: 1;
@@ -28,7 +28,7 @@
   width: 34px;
   height: 34px;
   border-radius: 12px;
-  background: rgba(236, 135, 2, 0.08);
+  background: rgba(149, 6, 244, 0.06);
   color: var(--corPrimariaForte);
   font-weight: 800;
 }

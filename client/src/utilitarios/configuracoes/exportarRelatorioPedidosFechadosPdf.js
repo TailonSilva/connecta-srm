@@ -86,7 +86,7 @@ function gerarHtmlRelatorioPedidosFechados({ pedidos, chips, cards, usuarioLogad
           gap: 18px;
           padding: 24px;
           border-radius: 24px;
-          background: linear-gradient(135deg, #9A5700 0%, #EC8702 100%);
+          background: linear-gradient(135deg, #6B04B8 0%, #9506F4 100%);
           color: #ffffff;
           -webkit-print-color-adjust: exact;
           print-color-adjust: exact;
@@ -163,7 +163,7 @@ function gerarHtmlRelatorioPedidosFechados({ pedidos, chips, cards, usuarioLogad
         }
         .relatorioPedidosFechadosPdfCard strong {
           font-size: 24px;
-          color: #9A5700;
+          color: #6B04B8;
         }
         .relatorioPedidosFechadosPdfTabela {
           width: 100%;
@@ -183,7 +183,7 @@ function gerarHtmlRelatorioPedidosFechados({ pedidos, chips, cards, usuarioLogad
         }
         .relatorioPedidosFechadosPdfTabela th {
           background: #eff6fb;
-          color: #9A5700;
+          color: #6B04B8;
           font-size: 11px;
           text-transform: uppercase;
           letter-spacing: 0.04em;

@@ -5,7 +5,7 @@
   width: 34px;
   height: 34px;
   border-radius: 999px;
-  border: 1px solid rgba(236, 135, 2, 0.16);
+  border: 1px solid rgba(149, 6, 244, 0.14);
   background: rgba(255, 255, 255, 0.92);
   color: var(--corPrimariaForte);
   cursor: pointer;
@@ -15,8 +15,8 @@
 
 .paginaInicioAcaoSessao:hover,
 .paginaInicioAcaoSessao:focus-visible {
-  border-color: rgba(236, 135, 2, 0.28);
-  box-shadow: 0 10px 22px rgba(236, 135, 2, 0.14);
+  border-color: rgba(149, 6, 244, 0.24);
+  box-shadow: 0 10px 22px rgba(149, 6, 244, 0.12);
   transform: translateY(-1px);
 }
 

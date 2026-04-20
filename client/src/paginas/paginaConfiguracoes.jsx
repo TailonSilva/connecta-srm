@@ -2059,7 +2059,7 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
         camposFormulario={[
           { name: 'ordem', label: 'Ordem', type: 'number', required: true, defaultValue: 1, min: 1, max: 999, step: 1, inputMode: 'numeric' },
           { name: 'descricao', label: 'Descricao', required: true },
-          { name: 'cor', label: 'Cor', type: 'color', required: true, defaultValue: '#EC8702' },
+          { name: 'cor', label: 'Cor', type: 'color', required: true, defaultValue: '#9506F4' },
           { name: 'obrigarCliente', label: 'Exigir fornecedor', type: 'checkbox', defaultValue: false },
           { name: 'obrigarLocal', label: 'Exigir local', type: 'checkbox', defaultValue: false },
           { name: 'obrigarRecurso', label: 'Exigir recurso', type: 'checkbox', defaultValue: false },
@@ -2206,7 +2206,7 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
         camposFormulario={[
           { name: 'ordem', label: 'Ordem', type: 'number', required: true, defaultValue: 1, min: 1, max: 999, step: 1, inputMode: 'numeric' },
           { name: 'descricao', label: 'Descricao', required: true },
-          { name: 'cor', label: 'Cor', type: 'color', required: true, defaultValue: '#EC8702' },
+          { name: 'cor', label: 'Cor', type: 'color', required: true, defaultValue: '#9506F4' },
           {
             name: 'status',
             label: 'Registro ativo',
@@ -2251,7 +2251,7 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
         camposFormulario={[
           { name: 'ordem', label: 'Ordem', type: 'number', required: true, defaultValue: 1, min: 1, max: 999, step: 1, inputMode: 'numeric' },
           { name: 'descricao', label: 'Descricao', required: true },
-          { name: 'cor', label: 'Cor', type: 'color', required: true, defaultValue: '#EC8702' },
+          { name: 'cor', label: 'Cor', type: 'color', required: true, defaultValue: '#9506F4' },
           { name: 'obrigarMotivoPerda', label: 'Exigir motivo da perda', type: 'checkbox', defaultValue: false },
           { name: 'consideraFunilVendas', label: 'Considera no Funil de Vendas', type: 'checkbox', defaultValue: true },
           { name: 'status', label: 'Registro ativo', type: 'checkbox', defaultValue: true }

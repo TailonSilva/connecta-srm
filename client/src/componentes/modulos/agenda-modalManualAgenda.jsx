@@ -222,7 +222,7 @@ function criarResumoObrigatoriedades(tiposAgenda) {
     .map((tipoAgenda) => ({
       id: tipoAgenda.idTipoAgenda,
       nome: tipoAgenda.descricao || 'Tipo sem descricao',
-      cor: tipoAgenda.cor || '#EC8702',
+      cor: tipoAgenda.cor || '#9506F4',
       tags: [
         { rotulo: 'Fornecedor', obrigatorio: Boolean(tipoAgenda.obrigarCliente) },
         { rotulo: 'Local', obrigatorio: Boolean(tipoAgenda.obrigarLocal) },

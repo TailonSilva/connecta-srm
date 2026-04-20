@@ -39,7 +39,7 @@
   justify-content: space-between;
   gap: 16px;
   padding: 16px 18px;
-  border: 1px solid rgba(236, 135, 2, 0.12);
+  border: 1px solid rgba(149, 6, 244, 0.10);
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.82);
 }
@@ -70,7 +70,7 @@
   height: 50px;
   flex: 0 0 auto;
   border-radius: 16px;
-  background: linear-gradient(180deg, rgba(236, 135, 2, 0.16) 0%, rgba(255, 179, 71, 0.22) 100%);
+  background: linear-gradient(180deg, rgba(149, 6, 244, 0.14) 0%, rgba(184, 71, 232, 0.20) 100%);
   color: var(--corPrimariaForte);
 }
 

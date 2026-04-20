@@ -18,7 +18,7 @@
   width: 100%;
   min-height: 46px;
   padding: 0 14px;
-  border: 1px solid rgba(236, 135, 2, 0.16);
+  border: 1px solid rgba(149, 6, 244, 0.14);
   border-radius: 14px;
   outline: none;
   background: rgba(255, 255, 255, 0.96);
@@ -31,8 +31,8 @@
 }
 
 .entradaFormulario:focus {
-  border-color: rgba(236, 135, 2, 0.4);
-  box-shadow: 0 0 0 4px rgba(236, 135, 2, 0.12);
+  border-color: rgba(149, 6, 244, 0.32);
+  box-shadow: 0 0 0 4px rgba(149, 6, 244, 0.10);
 }
 
 .entradaFormularioTextoLongo {
