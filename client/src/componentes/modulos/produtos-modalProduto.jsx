@@ -7,9 +7,9 @@ import { ModalFiltros } from '../comuns/modalFiltros';
 import { listarClientes, listarContatos, listarVendedores } from '../../servicos/clientes';
 import { listarEtapasPedidoConfiguracao, listarPrazosPagamentoConfiguracao } from '../../servicos/configuracoes';
 import { listarEmpresas } from '../../servicos/empresa';
-import { ModalPedido } from './pedidos-modalPedido';
+import { ModalOrdemCompra } from './ordensCompra-modalOrdemCompra';
 import { listarPedidos } from '../../servicos/pedidos';
-import { ModalHistoricoVendasProduto } from './produtos-modalHistoricoVendasProduto';
+import { ModalHistoricoOrdensCompraProduto } from './produtos-modalHistoricoOrdensCompraProduto';
 import { ModalGruposProduto } from './configuracoes-modalGruposProduto';
 import { ModalMarcas } from './configuracoes-modalMarcas';
 import { ModalUnidadesMedida } from './configuracoes-modalUnidadesMedida';
@@ -23,7 +23,7 @@ import { normalizarValorEntradaFormulario } from '../../utilitarios/normalizarTe
 
 const abasModalProduto = [
   { id: 'dadosGerais', label: 'Dados gerais' },
-  { id: 'vendas', label: 'Vendas', abreModal: 'vendas' }
+  { id: 'ordensCompra', label: 'Ordens de compra', abreModal: 'ordensCompra' }
 ];
 
 const estadoInicialFormulario = {
@@ -73,14 +73,14 @@ export function ModalProduto({
   const [etapasPedido, definirEtapasPedido] = useState([]);
   const [empresaPedidos, definirEmpresaPedidos] = useState(null);
   const [pedidosProduto, definirPedidosProduto] = useState([]);
-  const [carregandoPedidos, definirCarregandoPedidos] = useState(false);
-  const [mensagemErroPedidos, definirMensagemErroPedidos] = useState('');
-  const [modalHistoricoVendasAberto, definirModalHistoricoVendasAberto] = useState(false);
+  const [carregandoOrdensCompra, definirCarregandoPedidos] = useState(false);
+  const [mensagemErroOrdensCompra, definirMensagemErroOrdensCompra] = useState('');
+  const [modalHistoricoOrdensCompraAberto, definirModalHistoricoOrdensCompraAberto] = useState(false);
   const [modalFiltrosPedidosAberto, definirModalFiltrosPedidosAberto] = useState(false);
   const [pedidoSelecionado, definirPedidoSelecionado] = useState(null);
-  const [modalPedidoAberto, definirModalPedidoAberto] = useState(false);
-  const [filtrosPedidos, definirFiltrosPedidos] = useState(criarFiltrosIniciaisVendasProduto());
-  const [pesquisaRapidaVendas, definirPesquisaRapidaVendas] = useState('');
+  const [modalPedidoAberto, definirModalOrdemCompraAberto] = useState(false);
+  const [filtrosPedidos, definirFiltrosPedidos] = useState(criarFiltrosIniciaisOrdensCompraProduto());
+  const [pesquisaRapidaOrdensCompra, definirPesquisaRapidaOrdensCompra] = useState('');
   const somenteLeitura = modo === 'consulta';
   const modoInclusao = !produto;
   const gruposAtivos = gruposProduto.filter((grupo) => grupo.status !== 0);
@@ -100,12 +100,12 @@ export function ModalProduto({
     definirModalGruposProdutoAberto(false);
     definirModalMarcasAberto(false);
     definirModalUnidadesAberto(false);
-    definirModalHistoricoVendasAberto(false);
+    definirModalHistoricoOrdensCompraAberto(false);
     definirModalFiltrosPedidosAberto(false);
     definirPedidoSelecionado(null);
-    definirModalPedidoAberto(false);
-    definirFiltrosPedidos(criarFiltrosIniciaisVendasProduto());
-    definirPesquisaRapidaVendas('');
+    definirModalOrdemCompraAberto(false);
+    definirFiltrosPedidos(criarFiltrosIniciaisOrdensCompraProduto());
+    definirPesquisaRapidaOrdensCompra('');
   }, [aberto, produto]);
 
   useEffect(() => {
@@ -117,7 +117,7 @@ export function ModalProduto({
 
     async function carregarHistoricoProduto() {
       definirCarregandoPedidos(true);
-      definirMensagemErroPedidos('');
+      definirMensagemErroOrdensCompra('');
 
       try {
         const resultados = await Promise.allSettled([
@@ -173,7 +173,7 @@ export function ModalProduto({
         );
       } catch (_erro) {
         if (!cancelado) {
-          definirMensagemErroPedidos('Nao foi possivel carregar as vendas deste produto.');
+          definirMensagemErroOrdensCompra('Nao foi possivel carregar as ordens de compra deste produto.');
         }
       } finally {
         if (!cancelado) {
@@ -358,27 +358,27 @@ export function ModalProduto({
     }));
   }
 
-  function abrirModalHistoricoVendas() {
-    definirModalHistoricoVendasAberto(true);
+  function abrirModalHistoricoOrdensCompra() {
+    definirModalHistoricoOrdensCompraAberto(true);
   }
 
-  function fecharModalHistoricoVendas() {
-    definirModalHistoricoVendasAberto(false);
+  function fecharModalHistoricoOrdensCompra() {
+    definirModalHistoricoOrdensCompraAberto(false);
   }
 
   function consultarPedido(pedido) {
     definirPedidoSelecionado(pedido);
-    definirModalPedidoAberto(true);
+    definirModalOrdemCompraAberto(true);
   }
 
-  function fecharModalPedido() {
+  function fecharModalOrdemCompra() {
     definirPedidoSelecionado(null);
-    definirModalPedidoAberto(false);
+    definirModalOrdemCompraAberto(false);
   }
 
   function selecionarAbaProduto(aba) {
-    if (aba.abreModal === 'vendas') {
-      abrirModalHistoricoVendas();
+    if (aba.abreModal === 'ordensCompra') {
+      abrirModalHistoricoOrdensCompra();
       return;
     }
 
@@ -388,15 +388,15 @@ export function ModalProduto({
   const itensPedidosFiltrados = useMemo(
     () => filtrarItensPedidosDigitacaoProduto(
       criarItensPedidosProduto(pedidosProduto, produto?.idProduto, filtrosPedidos),
-      pesquisaRapidaVendas
+      pesquisaRapidaOrdensCompra
     ),
-    [pedidosProduto, produto?.idProduto, filtrosPedidos, pesquisaRapidaVendas]
+    [pedidosProduto, produto?.idProduto, filtrosPedidos, pesquisaRapidaOrdensCompra]
   );
   const produtosConsultaPedido = useMemo(
     () => (produto ? [produto] : []),
     [produto]
   );
-  const filtrosPedidosAtivos = filtrosHistoricoEstaoAtivos(filtrosPedidos, criarFiltrosIniciaisVendasProduto());
+  const filtrosOrdensCompraAtivos = filtrosHistoricoEstaoAtivos(filtrosPedidos, criarFiltrosIniciaisOrdensCompraProduto());
 
   if (!aberto) {
     return null;
@@ -439,7 +439,7 @@ export function ModalProduto({
                 className={`abaModalCliente ${abaAtiva === aba.id ? 'ativa' : ''}`}
                 aria-selected={aba.abreModal ? undefined : abaAtiva === aba.id}
                 onClick={() => selecionarAbaProduto(aba)}
-                disabled={aba.id === 'vendas' && modoInclusao}
+                disabled={aba.id === 'ordensCompra' && modoInclusao}
               >
                 {aba.label}
               </button>
@@ -651,21 +651,21 @@ export function ModalProduto({
         aoSelecionarUnidade={selecionarUnidade}
       />
 
-      <ModalHistoricoVendasProduto
-        aberto={modalHistoricoVendasAberto}
+      <ModalHistoricoOrdensCompraProduto
+        aberto={modalHistoricoOrdensCompraAberto}
         produto={produto}
-        carregando={carregandoPedidos}
-        mensagemErro={mensagemErroPedidos}
+        carregando={carregandoOrdensCompra}
+        mensagemErro={mensagemErroOrdensCompra}
         itensPedidos={itensPedidosFiltrados}
-        filtrosAtivos={filtrosPedidosAtivos}
-        valorPesquisa={pesquisaRapidaVendas}
-        onAlterarPesquisa={definirPesquisaRapidaVendas}
-        onFechar={fecharModalHistoricoVendas}
+        filtrosAtivos={filtrosOrdensCompraAtivos}
+        valorPesquisa={pesquisaRapidaOrdensCompra}
+        onAlterarPesquisa={definirPesquisaRapidaOrdensCompra}
+        onFechar={fecharModalHistoricoOrdensCompra}
         onAbrirFiltros={() => definirModalFiltrosPedidosAberto(true)}
         onConsultarPedido={consultarPedido}
       />
 
-      <ModalPedido
+      <ModalOrdemCompra
         aberto={modalPedidoAberto}
         pedido={pedidoSelecionado}
         clientes={clientesPedidos}
@@ -680,7 +680,7 @@ export function ModalProduto({
         usuarioLogado={null}
         modo="consulta"
         camadaSecundaria
-        aoFechar={fecharModalPedido}
+        aoFechar={fecharModalOrdemCompra}
         aoSalvar={async () => {}}
       />
 
@@ -775,7 +775,7 @@ export function ModalProduto({
           definirFiltrosPedidos(proximosFiltros);
           definirModalFiltrosPedidosAberto(false);
         }}
-        aoLimpar={() => definirFiltrosPedidos(criarFiltrosIniciaisVendasProduto())}
+        aoLimpar={() => definirFiltrosPedidos(criarFiltrosIniciaisOrdensCompraProduto())}
       />
     </>
   );
@@ -832,8 +832,8 @@ function obterIniciaisProduto(produto) {
   return textoBase.slice(0, 2).toUpperCase();
 }
 
-function enriquecerPedidosProduto(pedidos, idProduto, clientes, vendedores, etapasPedido) {
-  const clientesPorId = new Map((clientes || []).map((cliente) => [cliente.idCliente, cliente.nomeFantasia || cliente.razaoSocial || '']));
+function enriquecerPedidosProduto(pedidos, idProduto, fornecedores, vendedores, etapasPedido) {
+  const clientesPorId = new Map((fornecedores || []).map((cliente) => [cliente.idCliente, cliente.nomeFantasia || cliente.razaoSocial || '']));
   const vendedoresPorId = new Map((vendedores || []).map((vendedor) => [vendedor.idVendedor, vendedor.nome]));
   const etapasNormalizadas = normalizarEtapasPedidoHistorico(etapasPedido);
   const etapasPorId = new Map(etapasNormalizadas.map((etapa) => [etapa.idEtapaPedido, etapa]));
@@ -867,7 +867,7 @@ function criarItensPedidosProduto(pedidos, idProduto, filtros) {
           idPedido: pedido.idPedido,
           dataInclusao: pedido.dataInclusao,
           dataEntrega: pedido.dataEntrega,
-          nomeCliente: pedido.nomeClienteSnapshot || 'Fornecedor nao informado',
+          nomeFornecedor: pedido.nomeClienteSnapshot || 'Fornecedor nao informado',
           referenciaProduto: item.referenciaProdutoSnapshot || '',
           descricaoProduto: item.descricaoProdutoSnapshot || 'Produto nao informado',
           valorUnitario: Number(item.valorUnitario) || 0,
@@ -879,7 +879,7 @@ function criarItensPedidosProduto(pedidos, idProduto, filtros) {
   ));
 }
 
-function criarFiltrosIniciaisVendasProduto() {
+function criarFiltrosIniciaisOrdensCompraProduto() {
   return {
     dataInclusaoInicio: '',
     dataInclusaoFim: '',
@@ -979,4 +979,5 @@ function obterValorOrdemEtapaHistorico(ordem, fallback) {
 
   return Number.MAX_SAFE_INTEGER;
 }
+
 

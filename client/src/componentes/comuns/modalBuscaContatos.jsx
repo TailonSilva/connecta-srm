@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { incluirContato } from '../../servicos/clientes';
-import { ModalContatoCliente } from '../modulos/clientes-modalContatoCliente';
+import { ModalContatoFornecedor as ModalContatoCliente } from '../modulos/fornecedores-modalContatoFornecedor';
 import { ModalBuscaTabela } from './modalBuscaTabela';
 
 const estadoInicialContato = {
@@ -65,7 +65,7 @@ export function ModalBuscaContatos({
 
     const contatoCriado = await incluirContato({
       ...formularioContato,
-      idCliente: Number(idCliente),
+      idFornecedor: Number(idCliente),
       status: formularioContato.status ? 1 : 0,
       principal: formularioContato.principal ? 1 : 0
     });
@@ -74,7 +74,7 @@ export function ModalBuscaContatos({
       ...formularioContato,
       ...contatoCriado,
       idContato: contatoCriado?.idContato || contatoCriado?.id || null,
-      idCliente: Number(idCliente),
+      idFornecedor: Number(idCliente),
       status: contatoCriado?.status ?? (formularioContato.status ? 1 : 0),
       principal: contatoCriado?.principal ?? (formularioContato.principal ? 1 : 0)
     };

@@ -667,12 +667,8 @@
   grid-column: 3;
 }
 
-.gradeFormularioEtapasOrcamentoLinha .campoCheckbox-obrigarMotivoPerda {
-  grid-column: 1;
-}
-
 .gradeFormularioEtapasOrcamentoLinha .campoCheckbox-consideraFunilVendas {
-  grid-column: 2;
+  grid-column: 1;
 }
 
 .gradeFormularioEtapasOrcamentoLinha .campoCheckbox-status {
@@ -758,26 +754,6 @@
 
 .gradeFormularioStatusVisita .campoCheckboxFormulario {
   grid-column: 4;
-}
-
-.gradeFormularioMotivosDevolucao {
-  grid-template-columns: 72px 140px minmax(280px, 1fr) auto;
-  column-gap: 16px;
-  align-items: end;
-}
-
-.gradeFormularioMotivosDevolucao .campoFormulario-idMotivoDevolucao .entradaFormulario {
-  text-align: center;
-}
-
-.gradeFormularioMotivosDevolucao .campoCheckbox-status {
-  min-height: 44px;
-  padding: 0 0 10px;
-  align-self: end;
-}
-
-.gradeFormularioMotivosDevolucao .campoCheckbox-status span {
-  white-space: nowrap;
 }
 
 .modalAtualizacaoSistema {

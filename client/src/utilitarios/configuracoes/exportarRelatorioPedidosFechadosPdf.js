@@ -56,7 +56,7 @@ function gerarHtmlRelatorioPedidosFechados({ pedidos, chips, cards, usuarioLogad
     <head>
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title>Relatorio de Vendas</title>
+      <title>Relatorio de Ordens de compra</title>
       <style>
         * { box-sizing: border-box; }
         html {
@@ -209,7 +209,7 @@ function gerarHtmlRelatorioPedidosFechados({ pedidos, chips, cards, usuarioLogad
       <div class="relatorioPedidosFechadosPdf">
         <header class="relatorioPedidosFechadosPdfHero">
           <div class="relatorioPedidosFechadosPdfHeroPrincipal">
-            <h1>Relatorio de Vendas</h1>
+            <h1>Relatorio de Ordens de compra</h1>
             <div class="relatorioPedidosFechadosPdfChips">${resumoFiltros}</div>
           </div>
           <div class="relatorioPedidosFechadosPdfMeta">

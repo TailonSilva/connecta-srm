@@ -4,8 +4,8 @@ const configuracoesImportacao = {
   clientes: {
     tipo: 'clientes',
     titulo: 'Importacao de fornecedores',
-    nomeArquivo: 'modelo-importacao-clientes.xlsx',
-    nomePlanilhaDados: 'Clientes',
+    nomeArquivo: 'modelo-importacao-fornecedores.xlsx',
+    nomePlanilhaDados: 'Fornecedores',
     nomePlanilhaInstrucoes: 'Instrucoes',
     colunas: [
       { chave: 'codigo', cabecalho: 'Codigo', obrigatorio: false, tipo: 'Numero inteiro', maximoCaracteres: 10, observacao: 'Opcional. Se vazio, o CRM usa o proximo codigo livre.', exemplo: '105' },

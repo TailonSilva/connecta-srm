@@ -8,7 +8,7 @@ import { normalizarConfiguracoesColunasGridPedidos } from '../dados/colunasGridP
 import { normalizarConfiguracoesColunasGridAtendimentos } from '../dados/colunasGridAtendimentos';
 import {
   normalizarConfiguracoesGraficosPaginaInicialOrcamentos,
-  normalizarConfiguracoesGraficosPaginaInicialVendas,
+  normalizarConfiguracoesGraficosPaginaInicialOrdensCompra,
   normalizarConfiguracoesGraficosPaginaInicialAtendimentos
 } from '../dados/graficosPaginaInicial';
 import { normalizarConfiguracoesCardsPaginaInicial } from '../dados/cardsPaginaInicial';
@@ -49,7 +49,7 @@ export function criarPayloadAtualizacaoColunasGrid(chave, colunas) {
     colunasGridPedidos: normalizarConfiguracoesColunasGridPedidos,
     colunasGridAtendimentos: normalizarConfiguracoesColunasGridAtendimentos,
     graficosPaginaInicialOrcamentos: normalizarConfiguracoesGraficosPaginaInicialOrcamentos,
-    graficosPaginaInicialVendas: normalizarConfiguracoesGraficosPaginaInicialVendas,
+    graficosPaginaInicialOrdensCompra: normalizarConfiguracoesGraficosPaginaInicialOrdensCompra,
     graficosPaginaInicialAtendimentos: normalizarConfiguracoesGraficosPaginaInicialAtendimentos,
     cardsPaginaInicial: normalizarConfiguracoesCardsPaginaInicial
   };
@@ -89,7 +89,7 @@ function normalizarEmpresa(empresa) {
     colunasGridPedidos: normalizarConfiguracoesColunasGridPedidos(empresa.colunasGridPedidos),
     colunasGridAtendimentos: normalizarConfiguracoesColunasGridAtendimentos(empresa.colunasGridAtendimentos),
     graficosPaginaInicialOrcamentos: normalizarConfiguracoesGraficosPaginaInicialOrcamentos(empresa.graficosPaginaInicialOrcamentos),
-    graficosPaginaInicialVendas: normalizarConfiguracoesGraficosPaginaInicialVendas(empresa.graficosPaginaInicialVendas),
+    graficosPaginaInicialOrdensCompra: normalizarConfiguracoesGraficosPaginaInicialOrdensCompra(empresa.graficosPaginaInicialOrdensCompra),
     graficosPaginaInicialAtendimentos: normalizarConfiguracoesGraficosPaginaInicialAtendimentos(empresa.graficosPaginaInicialAtendimentos),
     cardsPaginaInicial: normalizarConfiguracoesCardsPaginaInicial(empresa.cardsPaginaInicial),
     imagem: adicionarCacheBusterImagem(empresa.imagem)

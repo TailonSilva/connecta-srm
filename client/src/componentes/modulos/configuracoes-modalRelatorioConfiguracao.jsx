@@ -22,10 +22,10 @@ import { exportarRelatorioPedidosFechadosPdf } from '../../utilitarios/configura
 
 const relatoriosConfiguracao = {
   relatorioPedidosFechados: {
-    titulo: 'Vendas',
+    titulo: 'Ordens de compra',
     subtitulo: 'Leitura baseada nas datas de inclusao e entrega das ordens de compra.',
-    tituloFiltro: 'Filtrar vendas',
-    ariaFiltro: 'Filtrar vendas'
+    tituloFiltro: 'Filtrar ordens de compra',
+    ariaFiltro: 'Filtrar ordens de compra'
   },
   relatorioPedidosEntregues: {
     titulo: 'Conversao',
@@ -35,7 +35,7 @@ const relatoriosConfiguracao = {
   },
   relatorioAtendimentos: {
     titulo: 'Atendimentos',
-    subtitulo: 'Leitura consolidada dos atendimentos comerciais com foco em cliente, canal e origem.',
+    subtitulo: 'Leitura consolidada dos atendimentos comerciais com foco em fornecedor, canal e origem.',
     tituloFiltro: 'Filtrar atendimentos',
     ariaFiltro: 'Filtrar atendimentos'
   }
@@ -53,7 +53,7 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
   const [carregandoPedidos, definirCarregandoPedidos] = useState(false);
   const [mensagemErroPedidos, definirMensagemErroPedidos] = useState('');
   const [pedidos, definirPedidos] = useState([]);
-  const [clientes, definirClientes] = useState([]);
+  const [fornecedores, definirClientes] = useState([]);
   const [vendedores, definirVendedores] = useState([]);
   const [gruposEmpresaRelatorio, definirGruposEmpresaRelatorio] = useState([]);
   const [gruposProdutoRelatorio, definirGruposProdutoRelatorio] = useState([]);
@@ -487,7 +487,7 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
 
   const chipsPedidosFechados = useMemo(
       () => montarChipsFiltrosPedidosFechados(filtrosPedidosFechados, {
-        clientes,
+        fornecedores,
         vendedores,
         etapasPedido,
         gruposEmpresa: gruposEmpresaRelatorio,
@@ -495,7 +495,7 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
         marcas: marcasRelatorio,
         tiposPedido: tiposPedidoRelatorio
       }),
-    [clientes, etapasPedido, filtrosPedidosFechados, gruposEmpresaRelatorio, gruposProdutoRelatorio, marcasRelatorio, tiposPedidoRelatorio, vendedores]
+    [fornecedores, etapasPedido, filtrosPedidosFechados, gruposEmpresaRelatorio, gruposProdutoRelatorio, marcasRelatorio, tiposPedidoRelatorio, vendedores]
   );
 
   const quantidadeTotalPedidosFechados = useMemo(
@@ -520,7 +520,7 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
 
   const chipsConversao = useMemo(
     () => montarChipsFiltrosConversao(filtrosConversao, {
-      clientes,
+      fornecedores,
       usuarios: usuariosConversao,
       vendedores,
       etapasOrcamento: etapasOrcamentoConversao,
@@ -528,7 +528,7 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
       gruposProduto: gruposProdutoRelatorio,
       marcas: marcasRelatorio
     }),
-    [clientes, etapasOrcamentoConversao, filtrosConversao, gruposEmpresaRelatorio, gruposProdutoRelatorio, marcasRelatorio, usuariosConversao, vendedores]
+    [fornecedores, etapasOrcamentoConversao, filtrosConversao, gruposEmpresaRelatorio, gruposProdutoRelatorio, marcasRelatorio, usuariosConversao, vendedores]
   );
 
   const atendimentosRelatorioFiltrados = useMemo(
@@ -548,14 +548,14 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
 
   const chipsAtendimentosRelatorio = useMemo(
     () => montarChipsFiltrosAtendimentosRelatorio(filtrosAtendimentosRelatorio, {
-      clientes,
+      fornecedores,
       usuarios: usuariosRelatorio,
       tiposAtendimento: tiposAtendimentoRelatorio,
       canaisAtendimento: canaisAtendimentoRelatorio,
       origensAtendimento: origensAtendimentoRelatorio,
       gruposEmpresa: gruposEmpresaRelatorio
     }),
-    [canaisAtendimentoRelatorio, clientes, filtrosAtendimentosRelatorio, gruposEmpresaRelatorio, origensAtendimentoRelatorio, tiposAtendimentoRelatorio, usuariosRelatorio]
+    [canaisAtendimentoRelatorio, fornecedores, filtrosAtendimentosRelatorio, gruposEmpresaRelatorio, origensAtendimentoRelatorio, tiposAtendimentoRelatorio, usuariosRelatorio]
   );
 
   async function gerarPdfRelatorioPedidosFechados() {
@@ -575,7 +575,7 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
         pedidos: pedidosFechadosFiltrados,
         filtros: filtrosPedidosFechados,
         chips: chipsPedidosFechados,
-        clientes,
+        fornecedores,
         vendedores,
         etapasPedido,
         cards: cardsPedidosFechados,
@@ -722,7 +722,7 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
           onFechar={aoFechar}
           cards={cardsPedidosFechados}
         >
-          <section className="modalRelatorioGradePainelTabela painelContatosModalCliente painelPedidosCliente modalHistoricoVendasClientePainel">
+          <section className="modalRelatorioGradePainelTabela painelContatosModalFornecedor painelPedidosFornecedor modalHistoricoOrdensCompraFornecedorPainel">
             <TabelaHistoricoPedidos
               carregando={carregandoPedidos}
               mensagemErro={mensagemErroPedidos}
@@ -739,16 +739,16 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
 
         <ModalFiltros
           aberto={modalFiltrosAberto}
-          titulo="Filtros de vendas"
+          titulo="Filtros de ordens de compra"
           filtros={rascunhoFiltrosPedidosFechados}
           campos={[
             {
               name: 'idCliente',
               label: 'Fornecedor',
               placeholder: 'Todos os fornecedores',
-              options: clientes.map((cliente) => ({
+              options: fornecedores.map((cliente) => ({
                 valor: String(cliente.idCliente),
-                label: cliente.nomeFantasia || cliente.razaoSocial || `Cliente #${cliente.idCliente}`
+                label: cliente.nomeFantasia || cliente.razaoSocial || `Fornecedor #${cliente.idCliente}`
               })),
               acaoExtra: (
                 <Botao
@@ -835,7 +835,7 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
                 name: 'periodoInclusaoPedidosFechados',
               label: 'Datas',
               type: 'date-filters-modal',
-              tituloSelecao: 'Filtro por datas de vendas',
+              tituloSelecao: 'Filtro por datas de ordens de compra',
               placeholder: 'Selecionar periodo',
               periodos: [
                 {
@@ -875,11 +875,11 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
 
         <ModalBuscaClientes
           aberto={modalBuscaClienteAberto}
-          clientes={clientes}
+          clientes={fornecedores}
           aoSelecionar={(cliente) => {
             definirRascunhoFiltrosPedidosFechados((estadoAtual) => ({
               ...estadoAtual,
-              idCliente: String(cliente.idCliente || '')
+              idFornecedor: String(cliente.idCliente || '')
             }));
             definirModalBuscaClienteAberto(false);
           }}
@@ -926,7 +926,7 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
           onFechar={aoFechar}
           cards={cardsAtendimentosRelatorio}
         >
-          <section className="modalRelatorioGradePainelTabela painelContatosModalCliente modalHistoricoAtendimentosClientePainel">
+          <section className="modalRelatorioGradePainelTabela painelContatosModalFornecedor modalHistoricoAtendimentosClientePainel">
             <TabelaHistoricoAtendimentos
               carregando={carregandoAtendimentosRelatorio}
               mensagemErro={mensagemErroAtendimentosRelatorio}
@@ -949,9 +949,9 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
               name: 'idCliente',
               label: 'Fornecedor',
               placeholder: 'Todos os fornecedores',
-              options: clientes.map((cliente) => ({
+              options: fornecedores.map((cliente) => ({
                 valor: String(cliente.idCliente),
-                label: cliente.nomeFantasia || cliente.razaoSocial || `Cliente #${cliente.idCliente}`
+                label: cliente.nomeFantasia || cliente.razaoSocial || `Fornecedor #${cliente.idCliente}`
               })),
               acaoExtra: (
                 <Botao
@@ -1060,11 +1060,11 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
 
         <ModalBuscaClientes
           aberto={modalBuscaClienteAtendimentosAberto}
-          clientes={clientes}
+          clientes={fornecedores}
           aoSelecionar={(cliente) => {
             definirRascunhoFiltrosAtendimentosRelatorio((estadoAtual) => ({
               ...estadoAtual,
-              idCliente: String(cliente.idCliente || '')
+              idFornecedor: String(cliente.idCliente || '')
             }));
             definirModalBuscaClienteAtendimentosAberto(false);
           }}
@@ -1132,9 +1132,9 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
               name: 'idCliente',
               label: 'Fornecedor',
               placeholder: 'Todos os fornecedores',
-              options: clientes.map((cliente) => ({
+              options: fornecedores.map((cliente) => ({
                 valor: String(cliente.idCliente),
-                label: cliente.nomeFantasia || cliente.razaoSocial || `Cliente #${cliente.idCliente}`
+                label: cliente.nomeFantasia || cliente.razaoSocial || `Fornecedor #${cliente.idCliente}`
               })),
               acaoExtra: (
                 <Botao
@@ -1269,11 +1269,11 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
 
         <ModalBuscaClientes
           aberto={modalBuscaClienteConversaoAberto}
-          clientes={clientes}
+          clientes={fornecedores}
           aoSelecionar={(cliente) => {
             definirRascunhoFiltrosConversao((estadoAtual) => ({
               ...estadoAtual,
-              idCliente: String(cliente.idCliente || '')
+              idFornecedor: String(cliente.idCliente || '')
             }));
             definirModalBuscaClienteConversaoAberto(false);
           }}
@@ -1308,9 +1308,9 @@ export function ModalRelatorioConfiguracao({ relatorio, usuarioLogado, aoFechar 
   );
 }
 
-function enriquecerPedidosRelatorio(pedidos, clientes = [], produtos = [], gruposEmpresa = [], gruposProduto = [], marcas = []) {
+function enriquecerPedidosRelatorio(pedidos, fornecedores = [], produtos = [], gruposEmpresa = [], gruposProduto = [], marcas = []) {
   const clientesPorId = new Map(
-    (clientes || []).map((cliente) => [
+    (fornecedores || []).map((cliente) => [
       cliente.idCliente,
       {
         idGrupoEmpresa: cliente.idGrupoEmpresa,
@@ -1546,7 +1546,7 @@ function possuiFiltrosAtivos(filtros = {}) {
 }
 
 function montarChipsFiltrosPedidosFechados(filtros, {
-  clientes,
+  fornecedores,
   vendedores,
   etapasPedido,
   gruposEmpresa,
@@ -1557,10 +1557,10 @@ function montarChipsFiltrosPedidosFechados(filtros, {
   const chips = [];
 
   if (filtros.idCliente) {
-    const cliente = clientes.find((item) => String(item.idCliente) === String(filtros.idCliente));
+    const fornecedor = fornecedores.find((item) => String(item.idCliente) === String(filtros.idCliente));
     chips.push({
       id: 'cliente',
-      rotulo: `Cliente: ${cliente?.nomeFantasia || cliente?.razaoSocial || `#${filtros.idCliente}`}`
+      rotulo: `Fornecedor: ${cliente?.nomeFantasia || cliente?.razaoSocial || `#${filtros.idCliente}`}`
     });
   }
 
@@ -1639,7 +1639,7 @@ function obterFiltrosPadraoPedidosFechados() {
   const fimMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
 
   return {
-    idCliente: '',
+    idFornecedor: '',
     idsVendedores: [],
     idsGruposEmpresa: [],
     idsGruposProduto: [],
@@ -1730,7 +1730,7 @@ function normalizarDataFiltro(valor) {
 
 function montarCardsRelatorioAtendimentos(atendimentos) {
   const totalAtendimentos = Array.isArray(atendimentos) ? atendimentos.length : 0;
-  const totalClientes = new Set(
+  const totalFornecedores = new Set(
     (Array.isArray(atendimentos) ? atendimentos : [])
       .map((atendimento) => String(atendimento.idCliente || '').trim())
       .filter(Boolean)
@@ -1745,7 +1745,7 @@ function montarCardsRelatorioAtendimentos(atendimentos) {
     },
     {
       titulo: 'Fornecedores atendidos',
-      valor: String(totalClientes)
+      valor: String(totalFornecedores)
     },
     {
       titulo: 'Canal lider',
@@ -1799,7 +1799,7 @@ function formatarPercentualResumo(valor) {
 
 function enriquecerAtendimentosRelatorio(
   atendimentos,
-  clientes,
+  fornecedores,
   contatos,
   usuarios,
   tiposAtendimento,
@@ -1808,10 +1808,10 @@ function enriquecerAtendimentosRelatorio(
   gruposEmpresa = []
 ) {
   const clientesPorId = new Map(
-    (clientes || []).map((cliente) => [
+    (fornecedores || []).map((cliente) => [
       cliente.idCliente,
       {
-        nome: cliente.nomeFantasia || cliente.razaoSocial || `Cliente #${cliente.idCliente}`,
+        nome: cliente.nomeFantasia || cliente.razaoSocial || `Fornecedor #${cliente.idCliente}`,
         idGrupoEmpresa: cliente.idGrupoEmpresa,
         nomeGrupoEmpresa: obterNomeGrupoEmpresaPorId(gruposEmpresa, cliente.idGrupoEmpresa)
       }
@@ -1836,7 +1836,7 @@ function enriquecerAtendimentosRelatorio(
   return [...(atendimentos || [])]
     .map((atendimento) => ({
       ...atendimento,
-      nomeCliente: clientesPorId.get(atendimento.idCliente)?.nome || atendimento.nomeClienteSnapshot || 'Nao informado',
+      nomeFornecedor: clientesPorId.get(atendimento.idCliente)?.nome || atendimento.nomeClienteSnapshot || 'Nao informado',
       idGrupoEmpresa: clientesPorId.get(atendimento.idCliente)?.idGrupoEmpresa || null,
       nomeGrupoEmpresa: clientesPorId.get(atendimento.idCliente)?.nomeGrupoEmpresa || 'Sem grupo',
       nomeContato: contatosPorId.get(atendimento.idContato) || atendimento.nomeContatoSnapshot || '',
@@ -1892,7 +1892,7 @@ function possuiFiltrosAtendimentosAtivos(filtros = {}) {
 }
 
 function montarChipsFiltrosAtendimentosRelatorio(filtros, {
-  clientes,
+  fornecedores,
   usuarios,
   tiposAtendimento,
   canaisAtendimento,
@@ -1902,10 +1902,10 @@ function montarChipsFiltrosAtendimentosRelatorio(filtros, {
   const chips = [];
 
   if (filtros.idCliente) {
-    const cliente = clientes.find((item) => String(item.idCliente) === String(filtros.idCliente));
+    const fornecedor = fornecedores.find((item) => String(item.idCliente) === String(filtros.idCliente));
     chips.push({
       id: 'cliente',
-      rotulo: `Cliente: ${cliente?.nomeFantasia || cliente?.razaoSocial || `#${filtros.idCliente}`}`
+      rotulo: `Fornecedor: ${cliente?.nomeFantasia || cliente?.razaoSocial || `#${filtros.idCliente}`}`
     });
   }
 
@@ -1975,7 +1975,7 @@ function obterFiltrosPadraoAtendimentos() {
   const fimMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
 
   return {
-    idCliente: '',
+    idFornecedor: '',
     idsUsuarios: [],
     idsGruposEmpresa: [],
     idsTiposAtendimento: [],
@@ -2057,7 +2057,7 @@ function montarCardsConversao(orcamentos) {
 function normalizarFiltrosConversao(filtros = {}) {
   const idCliente = normalizarIdentificadorFiltro(filtros.idCliente);
   const idUsuario = normalizarListaIdentificadoresFiltro(filtros.idUsuario);
-  const idVendedorCliente = normalizarListaIdentificadoresFiltro(filtros.idVendedorCliente);
+  const idVendedorFornecedor = normalizarListaIdentificadoresFiltro(filtros.idVendedorCliente);
   const idVendedor = normalizarListaIdentificadoresFiltro(filtros.idVendedor);
   const idsGruposEmpresa = normalizarListaIdentificadoresFiltro(filtros.idsGruposEmpresa);
   const idsGruposProduto = normalizarListaIdentificadoresFiltro(filtros.idsGruposProduto);
@@ -2104,7 +2104,7 @@ function possuiFiltrosConversaoAtivos(filtros = {}) {
 }
 
 function montarChipsFiltrosConversao(filtros, {
-  clientes,
+  fornecedores,
   usuarios,
   vendedores,
   etapasOrcamento,
@@ -2115,10 +2115,10 @@ function montarChipsFiltrosConversao(filtros, {
   const chips = [];
 
   if (filtros.idCliente) {
-    const cliente = clientes.find((item) => String(item.idCliente) === String(filtros.idCliente));
+    const fornecedor = fornecedores.find((item) => String(item.idCliente) === String(filtros.idCliente));
     chips.push({
       id: 'cliente',
-      rotulo: `Cliente: ${cliente?.nomeFantasia || cliente?.razaoSocial || `#${filtros.idCliente}`}`
+      rotulo: `Fornecedor: ${cliente?.nomeFantasia || cliente?.razaoSocial || `#${filtros.idCliente}`}`
     });
   }
 
@@ -2167,7 +2167,7 @@ function montarChipsFiltrosConversao(filtros, {
       const vendedor = vendedores.find((item) => String(item.idVendedor) === String(idVendedorCliente));
       chips.push({
         id: `vendedor-fornecedor-${idVendedorCliente}`,
-        rotulo: `Comprador do cliente: ${vendedor?.nome || `#${idVendedorCliente}`}`
+        rotulo: `Comprador do fornecedor: ${vendedor?.nome || `#${idVendedorCliente}`}`
       });
     });
   }
@@ -2215,9 +2215,9 @@ function obterFiltrosPadraoConversao() {
   const fimMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
 
   return {
-    idCliente: '',
+    idFornecedor: '',
     idUsuario: [],
-    idVendedorCliente: [],
+    idVendedorFornecedor: [],
     idVendedor: [],
     idsGruposEmpresa: [],
     idsGruposProduto: [],
@@ -2241,7 +2241,7 @@ function filtrarOrcamentosConversao(orcamentos, filtros) {
     && (
       !Array.isArray(filtros.idVendedorCliente)
       || filtros.idVendedorCliente.length === 0
-      || filtros.idVendedorCliente.map(String).includes(String(orcamento.idVendedorCliente || ''))
+      || filtros.idVendedorCliente.map(String).includes(String(orcamento.idVendedorFornecedor || ''))
     )
     && (
       !Array.isArray(filtros.idVendedor)
@@ -2275,7 +2275,7 @@ function filtrarOrcamentosConversao(orcamentos, filtros) {
 
 function enriquecerOrcamentosConversao(
   orcamentos,
-  clientes,
+  fornecedores,
   contatos,
   usuarios,
   vendedores,
@@ -2286,10 +2286,10 @@ function enriquecerOrcamentosConversao(
   marcas = []
 ) {
   const clientesPorId = new Map(
-    (clientes || []).map((cliente) => [
+    (fornecedores || []).map((cliente) => [
       cliente.idCliente,
       {
-        nome: cliente.nomeFantasia || cliente.razaoSocial || `Cliente #${cliente.idCliente}`,
+        nome: cliente.nomeFantasia || cliente.razaoSocial || `Fornecedor #${cliente.idCliente}`,
         idVendedor: cliente.idVendedor,
         idGrupoEmpresa: cliente.idGrupoEmpresa,
         nomeGrupoEmpresa: obterNomeGrupoEmpresaPorId(gruposEmpresa, cliente.idGrupoEmpresa)
@@ -2322,7 +2322,7 @@ function enriquecerOrcamentosConversao(
 
   return [...(orcamentos || [])]
     .map((orcamento) => {
-      const cliente = clientesPorId.get(orcamento.idCliente);
+      const fornecedor = clientesPorId.get(orcamento.idCliente);
       const idEtapaOrcamentoNormalizado = normalizarIdEtapaOrcamentoConversao(orcamento.idEtapaOrcamento, etapasOrcamento);
       const totalOrcamento = Array.isArray(orcamento.itens)
         ? orcamento.itens.reduce((total, item) => total + (Number(item.valorTotal) || 0), 0)
@@ -2331,11 +2331,11 @@ function enriquecerOrcamentosConversao(
       return {
         ...orcamento,
         idEtapaOrcamento: idEtapaOrcamentoNormalizado,
-        nomeCliente: cliente?.nome || 'Nao informado',
+        nomeFornecedor: cliente?.nome || 'Nao informado',
         idGrupoEmpresa: cliente?.idGrupoEmpresa || null,
         nomeGrupoEmpresa: cliente?.nomeGrupoEmpresa || 'Sem grupo',
         nomeContato: contatosPorId.get(orcamento.idContato) || '',
-        idVendedorCliente: cliente?.idVendedor || null,
+        idVendedorFornecedor: cliente?.idVendedor || null,
         nomeUsuario: usuariosPorId.get(orcamento.idUsuario) || 'Nao informado',
         nomeVendedor: vendedoresPorId.get(orcamento.idVendedor) || 'Nao informado',
         idsGruposProduto: Array.from(new Set(
@@ -2352,7 +2352,6 @@ function enriquecerOrcamentosConversao(
         )),
         nomeEtapaOrcamento: etapasPorId.get(idEtapaOrcamentoNormalizado)?.descricao || '',
         corEtapaOrcamento: etapasPorId.get(idEtapaOrcamentoNormalizado)?.cor || '',
-        obrigarMotivoPerdaEtapa: Boolean(etapasPorId.get(idEtapaOrcamentoNormalizado)?.obrigarMotivoPerda),
         totalOrcamento
       };
     })
@@ -2438,8 +2437,7 @@ function normalizarEtapasOrcamentoConversao(etapas) {
           idEtapaOrcamento: 4,
           descricao: 'Recusado',
           cor: etapa.cor || '#E5E7EB',
-          obrigarMotivoPerda: 1,
-          consideraFunilVendas: 0,
+          consideraFunilCotacoes: 0,
           ordem: 4,
           status: 1
         });
@@ -2466,4 +2464,5 @@ function etapaOrcamentoEhRecusado(etapa) {
 
   return Number(etapa?.idEtapaOrcamento) === 4 || descricao === 'recusado';
 }
+
 

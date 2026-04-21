@@ -7,9 +7,9 @@ export function SecaoAtendimentosClientesInicio({ itens, titulo = 'Atendimentos 
       <SecaoResumoRelacionamentoComModalInicio
         titulo={titulo}
         itens={itens}
-        composicao="Quantidade de atendimentos e frequencia por cliente."
+        composicao="Quantidade de atendimentos e frequencia por fornecedor."
         periodo="Mes corrente pela data do atendimento."
-        mensagemVazia="Nenhum atendimento registrado no mes atual por cliente."
+        mensagemVazia="Nenhum atendimento registrado no mes atual por fornecedor."
         modalTitulo={titulo}
         modalSubtitulo="Lista completa de atendimentos por fornecedor no mes corrente."
         colunasPainel={2}

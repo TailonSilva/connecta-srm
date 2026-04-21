@@ -3,7 +3,7 @@ import {
   normalizarPreco
 } from '../normalizarPreco';
 import { exportarPdfDesktop } from '../../servicos/desktop';
-import { gerarHtmlDocumentoOrcamentoPdf } from './gerarHtmlDocumentoOrcamentoPdf';
+import { gerarHtmlDocumentoCotacaoPdf } from './gerarHtmlDocumentoOrcamentoPdf';
 
 const estiloPadraoDocumento = {
   corPrimaria: '#111827',
@@ -12,8 +12,8 @@ const estiloPadraoDocumento = {
 };
 
 export async function exportarOrcamentoPdf(contexto) {
-  const documento = montarDocumentoOrcamentoPdf(contexto);
-  const html = gerarHtmlDocumentoOrcamentoPdf(documento);
+  const documento = montarDocumentoCotacaoPdf(contexto);
+  const html = gerarHtmlDocumentoCotacaoPdf(documento);
 
   return exportarPdfDesktop({
     html,
@@ -21,10 +21,10 @@ export async function exportarOrcamentoPdf(contexto) {
   });
 }
 
-function montarDocumentoOrcamentoPdf({
+function montarDocumentoCotacaoPdf({
   formulario,
   orcamento,
-  clientes,
+  fornecedores,
   contatos,
   usuarios,
   vendedores,
@@ -34,7 +34,7 @@ function montarDocumentoOrcamentoPdf({
   empresa,
   camposPedido
 }) {
-  const cliente = clientes.find((item) => String(item.idCliente) === String(formulario.idCliente));
+  const cliente = fornecedores.find((item) => String(item.idCliente) === String(formulario.idCliente));
   const contato = contatos.find((item) => String(item.idContato) === String(formulario.idContato));
   const usuario = usuarios.find((item) => String(item.idUsuario) === String(formulario.idUsuario));
   const vendedor = vendedores.find((item) => String(item.idVendedor) === String(formulario.idVendedor));
@@ -82,8 +82,7 @@ function montarDocumentoOrcamentoPdf({
       usuario: usuario?.nome || formulario.nomeUsuario || 'Nao informado',
       vendedor: vendedor?.nome || 'Nao informado',
       prazoPagamento: prazoPagamento?.descricaoFormatada || prazoPagamento?.descricao || 'Nao informado',
-      etapa: etapa?.descricao || 'Nao informada',
-      comissao: formatarComissao(formulario.comissao)
+      etapa: etapa?.descricao || 'Nao informada'
     },
     itens: montarItensDocumento(formulario.itens, produtos, destaqueItem),
     totais: {
@@ -180,19 +179,6 @@ function formatarDataDocumento(valor) {
   }
 
   return new Intl.DateTimeFormat('pt-BR').format(data);
-}
-
-function formatarComissao(valor) {
-  const numero = converterPrecoParaNumero(valor);
-
-  if (!numero) {
-    return '0,00%';
-  }
-
-  return `${numero.toLocaleString('pt-BR', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  })}%`;
 }
 
 function montarNomeArquivoOrcamento(idOrcamento, nomeCliente) {

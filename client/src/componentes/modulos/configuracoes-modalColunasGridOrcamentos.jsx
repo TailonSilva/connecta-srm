@@ -344,9 +344,6 @@ function obterRotuloConfiguracaoColuna(coluna) {
   if (coluna.id === 'vendedor') {
     return 'Comprador do Cotacao';
   }
-  if (coluna.id === 'comissao') {
-    return 'Comissao do Cotacao';
-  }
   if (coluna.id === 'prazoPagamento') {
     return 'Prazo de Pagamento';
   }
@@ -355,9 +352,6 @@ function obterRotuloConfiguracaoColuna(coluna) {
   }
   if (coluna.id === 'metodoPagamento') {
     return 'Metodo de Pagamento';
-  }
-  if (coluna.id === 'idMotivoPerda') {
-    return 'Motivo de Perda';
   }
   if (coluna.id === 'dataInclusao') {
     return 'Data de Inclusao';

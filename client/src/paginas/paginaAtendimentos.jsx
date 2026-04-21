@@ -35,8 +35,6 @@ import {
   listarEtapasPedidoConfiguracao,
   listarEtapasOrcamentoConfiguracao,
   listarMetodosPagamentoConfiguracao,
-  listarMotivosDevolucaoConfiguracao,
-  listarMotivosPerdaConfiguracao,
   listarPrazosPagamentoConfiguracao,
   listarTiposPedidoConfiguracao
 } from '../servicos/configuracoes';
@@ -54,7 +52,7 @@ import {
   normalizarListaFiltroPersistido,
   useFiltrosPersistidos
 } from '../hooks/useFiltrosPersistidos';
-import { ModalPedido } from '../componentes/modulos/pedidos-modalPedido';
+import { ModalOrdemCompra } from '../componentes/modulos/ordensCompra-modalOrdemCompra';
 import { ModalAtendimento } from '../componentes/modulos/atendimentos-modalAtendimento';
 import { ModalManualAtendimento } from '../componentes/modulos/atendimentos-modalManualAtendimento';
 import {
@@ -70,9 +68,9 @@ function criarFiltrosIniciaisAtendimentos(usuarioLogado) {
     : [];
 
   return {
-    idCliente: '',
+    idFornecedor: '',
     idUsuario: idUsuarioPadrao,
-    idVendedorCliente: [],
+    idVendedorFornecedor: [],
     idTipoAtendimento: [],
     idCanalAtendimento: [],
     idOrigemAtendimento: [],
@@ -85,9 +83,9 @@ function criarFiltrosIniciaisAtendimentos(usuarioLogado) {
 
 function criarFiltrosLimposAtendimentos() {
   return {
-    idCliente: '',
+    idFornecedor: '',
     idUsuario: [],
-    idVendedorCliente: [],
+    idVendedorFornecedor: [],
     idTipoAtendimento: [],
     idCanalAtendimento: [],
     idOrigemAtendimento: [],
@@ -107,7 +105,7 @@ const ID_TIPO_PEDIDO_VENDA = 1;
 export function PaginaAtendimentos({ usuarioLogado }) {
   const [pesquisa, definirPesquisa] = useState('');
   const [atendimentos, definirAtendimentos] = useState([]);
-  const [clientes, definirClientes] = useState([]);
+  const [fornecedores, definirClientes] = useState([]);
   const [contatos, definirContatos] = useState([]);
   const [usuarios, definirUsuarios] = useState([]);
   const [vendedores, definirVendedores] = useState([]);
@@ -122,8 +120,6 @@ export function PaginaAtendimentos({ usuarioLogado }) {
   const [etapasOrcamento, definirEtapasOrcamento] = useState([]);
   const [etapasPedido, definirEtapasPedido] = useState([]);
   const [tiposPedido, definirTiposPedido] = useState([]);
-  const [motivosDevolucao, definirMotivosDevolucao] = useState([]);
-  const [motivosPerda, definirMotivosPerda] = useState([]);
   const [produtos, definirProdutos] = useState([]);
   const [camposOrcamento, definirCamposOrcamento] = useState([]);
   const [camposPedido, definirCamposPedido] = useState([]);
@@ -136,7 +132,7 @@ export function PaginaAtendimentos({ usuarioLogado }) {
   const [modalColunasGridAberto, definirModalColunasGridAberto] = useState(false);
   const [modalBuscaClienteFiltrosAberto, definirModalBuscaClienteFiltrosAberto] = useState(false);
   const [filtrosEmEdicao, definirFiltrosEmEdicao] = useState(null);
-  const [modalPedidoAberto, definirModalPedidoAberto] = useState(false);
+  const [modalPedidoAberto, definirModalOrdemCompraAberto] = useState(false);
   const [atendimentoSelecionado, definirAtendimentoSelecionado] = useState(null);
   const [dadosIniciaisPedido, definirDadosIniciaisPedido] = useState(null);
   const [orcamentoPedidoEmCriacao, definirOrcamentoPedidoEmCriacao] = useState(null);
@@ -215,8 +211,6 @@ export function PaginaAtendimentos({ usuarioLogado }) {
         listarEtapasOrcamentoConfiguracao(),
         listarEtapasPedidoConfiguracao(),
         listarTiposPedidoConfiguracao(),
-        listarMotivosDevolucaoConfiguracao(),
-        listarMotivosPerdaConfiguracao(),
         listarProdutos(),
         listarCamposOrcamentoConfiguracao(),
         listarCamposPedidoConfiguracao(),
@@ -239,8 +233,6 @@ export function PaginaAtendimentos({ usuarioLogado }) {
         etapasOrcamentoResultado,
         etapasPedidoResultado,
         tiposPedidoResultado,
-        motivosDevolucaoResultado,
-        motivosPerdaResultado,
         produtosResultado,
         camposOrcamentoResultado,
         camposPedidoResultado,
@@ -262,8 +254,6 @@ export function PaginaAtendimentos({ usuarioLogado }) {
       const etapasOrcamentoCarregadas = etapasOrcamentoResultado.status === 'fulfilled' ? etapasOrcamentoResultado.value : [];
       const etapasPedidoCarregadas = etapasPedidoResultado.status === 'fulfilled' ? etapasPedidoResultado.value : [];
       const tiposPedidoCarregados = tiposPedidoResultado.status === 'fulfilled' ? tiposPedidoResultado.value : [];
-      const motivosDevolucaoCarregados = motivosDevolucaoResultado.status === 'fulfilled' ? motivosDevolucaoResultado.value : [];
-      const motivosPerdaCarregados = motivosPerdaResultado.status === 'fulfilled' ? motivosPerdaResultado.value : [];
       const produtosCarregados = produtosResultado.status === 'fulfilled' ? produtosResultado.value : [];
       const camposOrcamentoCarregados = camposOrcamentoResultado.status === 'fulfilled' ? camposOrcamentoResultado.value : [];
       const camposPedidoCarregados = camposPedidoResultado.status === 'fulfilled' ? camposPedidoResultado.value : [];
@@ -303,8 +293,6 @@ export function PaginaAtendimentos({ usuarioLogado }) {
         idEtapaPedido: etapa.idEtapaPedido ?? etapa.idEtapa
       })));
       definirTiposPedido(tiposPedidoCarregados);
-      definirMotivosDevolucao(motivosDevolucaoCarregados);
-      definirMotivosPerda(motivosPerdaCarregados);
       definirProdutos(produtosCarregados.filter((produto) => produto.status !== 0));
       definirCamposOrcamento(camposOrcamentoCarregados);
       definirCamposPedido(camposPedidoCarregados);
@@ -447,7 +435,7 @@ export function PaginaAtendimentos({ usuarioLogado }) {
     return null;
   }
 
-  async function atualizarStatusOrcamentoPeloAtendimento({ idOrcamento, idEtapaOrcamento, idMotivoPerda }) {
+  async function atualizarStatusOrcamentoPeloAtendimento({ idOrcamento, idEtapaOrcamento }) {
     const orcamentoAtual = orcamentos.find((item) => item.idOrcamento === idOrcamento);
 
     if (!orcamentoAtual || !idEtapaOrcamento || String(orcamentoAtual.idEtapaOrcamento) === String(idEtapaOrcamento)) {
@@ -459,8 +447,7 @@ export function PaginaAtendimentos({ usuarioLogado }) {
       normalizarPayloadOrcamento(
         {
           ...orcamentoAtual,
-          idEtapaOrcamento,
-          idMotivoPerda: idMotivoPerda === undefined ? orcamentoAtual.idMotivoPerda : idMotivoPerda
+          idEtapaOrcamento
         },
         usuarioLogado
       )
@@ -473,10 +460,10 @@ export function PaginaAtendimentos({ usuarioLogado }) {
   function abrirPedidoPeloAtendimento(dadosPedido, contexto = null) {
     definirOrcamentoPedidoEmCriacao(contexto);
     definirDadosIniciaisPedido(dadosPedido);
-    definirModalPedidoAberto(true);
+    definirModalOrdemCompraAberto(true);
   }
 
-  async function fecharModalPedido() {
+  async function fecharModalOrdemCompra() {
     if (orcamentoPedidoEmCriacao?.idOrcamento) {
       const etapaFechadoSemPedido = obterEtapaFechadoSemPedido(etapasOrcamento);
 
@@ -492,7 +479,7 @@ export function PaginaAtendimentos({ usuarioLogado }) {
       }
     }
 
-    definirModalPedidoAberto(false);
+    definirModalOrdemCompraAberto(false);
     definirDadosIniciaisPedido(null);
     definirOrcamentoPedidoEmCriacao(null);
   }
@@ -500,7 +487,7 @@ export function PaginaAtendimentos({ usuarioLogado }) {
   async function salvarPedidoPeloAtendimento(dadosPedido) {
     await incluirPedido(normalizarPayloadPedido(dadosPedido));
     await recarregarPagina();
-    definirModalPedidoAberto(false);
+    definirModalOrdemCompraAberto(false);
     definirDadosIniciaisPedido(null);
     definirOrcamentoPedidoEmCriacao(null);
     definirEtapaOrcamentoAtualizadaExternamente(null);
@@ -550,7 +537,7 @@ export function PaginaAtendimentos({ usuarioLogado }) {
     definirFiltrosEmEdicao({
       ...filtros,
       idUsuario: Array.isArray(filtros.idUsuario) ? [...filtros.idUsuario] : [],
-      idVendedorCliente: Array.isArray(filtros.idVendedorCliente) ? [...filtros.idVendedorCliente] : [],
+      idVendedorFornecedor: Array.isArray(filtros.idVendedorFornecedor) ? [...filtros.idVendedorFornecedor] : [],
       idTipoAtendimento: Array.isArray(filtros.idTipoAtendimento) ? [...filtros.idTipoAtendimento] : [],
       idCanalAtendimento: Array.isArray(filtros.idCanalAtendimento) ? [...filtros.idCanalAtendimento] : [],
       idOrigemAtendimento: Array.isArray(filtros.idOrigemAtendimento) ? [...filtros.idOrigemAtendimento] : []
@@ -645,7 +632,7 @@ export function PaginaAtendimentos({ usuarioLogado }) {
         filtros={filtrosEmEdicao || filtros}
         campos={[
           {
-            name: 'idCliente',
+            name: 'idFornecedor',
             label: 'Fornecedor',
             acaoExtra: (
               <Botao
@@ -661,7 +648,7 @@ export function PaginaAtendimentos({ usuarioLogado }) {
                 Buscar fornecedor
               </Botao>
             ),
-            options: clientes.map((cliente) => ({
+            options: fornecedores.map((cliente) => ({
               valor: String(cliente.idCliente),
               label: cliente.nomeFantasia || cliente.razaoSocial
             }))
@@ -677,7 +664,7 @@ export function PaginaAtendimentos({ usuarioLogado }) {
             }))
           },
           {
-            name: 'idVendedorCliente',
+            name: 'idVendedorFornecedor',
             label: 'Fornecedores do comprador',
             multiple: true,
             placeholder: 'Todos os compradores',
@@ -756,13 +743,13 @@ export function PaginaAtendimentos({ usuarioLogado }) {
       <ModalBuscaClientes
         aberto={modalBuscaClienteFiltrosAberto}
         empresa={empresa}
-        clientes={clientes}
+        clientes={fornecedores}
         placeholder="Pesquisar fornecedor no filtro"
         ariaLabelPesquisa="Pesquisar fornecedor no filtro"
         aoSelecionar={(cliente) => {
           definirFiltrosEmEdicao((estadoAtual) => ({
             ...(estadoAtual || criarFiltrosIniciaisAtendimentos(usuarioLogado)),
-            idCliente: String(cliente.idCliente || '')
+            idFornecedor: String(cliente.idCliente || '')
           }));
           definirModalBuscaClienteFiltrosAberto(false);
         }}
@@ -790,7 +777,7 @@ export function PaginaAtendimentos({ usuarioLogado }) {
       <ModalAtendimento
         aberto={modalAberto}
         atendimento={atendimentoSelecionado}
-        clientes={clientes}
+        clientes={fornecedores}
         contatos={contatos}
         usuarioLogado={usuarioLogado}
         vendedores={vendedores}
@@ -805,15 +792,14 @@ export function PaginaAtendimentos({ usuarioLogado }) {
         aoIncluirCliente={incluirClientePeloAtendimento}
         aoIncluirOrcamento={incluirOrcamentoPeloAtendimento}
         aoAtualizarOrcamento={atualizarOrcamentoPeloAtendimento}
-        dadosOrcamento={montarDadosIniciaisOrcamentoPeloAtendimento(atendimentoSelecionado, clientes, vendedores, usuarioLogado)}
-        clientesOrcamento={clientes}
+        dadosOrcamento={montarDadosIniciaisOrcamentoPeloAtendimento(atendimentoSelecionado, fornecedores, vendedores, usuarioLogado)}
+        clientesOrcamento={fornecedores}
         contatosOrcamento={contatos}
         usuariosOrcamento={usuarios}
         vendedoresOrcamento={vendedores}
         metodosPagamento={metodosPagamento}
         prazosPagamento={prazosPagamento}
         etapasOrcamento={etapasOrcamento}
-        motivosPerda={motivosPerda}
         orcamentos={orcamentos}
         produtos={produtos}
         camposOrcamento={camposOrcamento}
@@ -831,11 +817,11 @@ export function PaginaAtendimentos({ usuarioLogado }) {
         aoExcluir={excluirRegistroAtendimento}
       />
 
-      <ModalPedido
+      <ModalOrdemCompra
         aberto={modalPedidoAberto}
         pedido={null}
         dadosIniciais={dadosIniciaisPedido}
-        clientes={clientes}
+        clientes={fornecedores}
         contatos={contatos}
         usuarios={usuarios}
         vendedores={vendedores}
@@ -844,7 +830,6 @@ export function PaginaAtendimentos({ usuarioLogado }) {
         metodosPagamento={metodosPagamento}
         prazosPagamento={prazosPagamento}
         tiposPedido={tiposPedido}
-        motivosDevolucao={motivosDevolucao}
         etapasPedido={etapasPedido}
         produtos={produtos}
         camposPedido={camposPedido}
@@ -855,7 +840,7 @@ export function PaginaAtendimentos({ usuarioLogado }) {
         camadaSecundaria={modalAberto}
         somenteConsultaPrazos={usuarioSomenteConsultaConfiguracao}
         aoIncluirCliente={incluirClientePeloAtendimento}
-        aoFechar={fecharModalPedido}
+        aoFechar={fecharModalOrdemCompra}
         aoSalvar={salvarPedidoPeloAtendimento}
         aoSalvarPrazoPagamento={salvarPrazoPagamentoPeloAtendimento}
         aoInativarPrazoPagamento={inativarPrazoPagamentoPeloAtendimento}
@@ -1049,7 +1034,7 @@ function normalizarFiltrosAtendimentos(filtros, filtrosPadrao) {
   return {
     ...filtrosNormalizados,
     idUsuario: normalizarListaFiltroPersistido(filtrosNormalizados.idUsuario),
-    idVendedorCliente: normalizarListaFiltroPersistido(filtrosNormalizados.idVendedorCliente),
+    idVendedorFornecedor: normalizarListaFiltroPersistido(filtros.idVendedorFornecedor || filtros.idVendedorCliente),
     idTipoAtendimento: normalizarListaFiltroPersistido(filtrosNormalizados.idTipoAtendimento),
     idCanalAtendimento: normalizarListaFiltroPersistido(filtrosNormalizados.idCanalAtendimento),
     idOrigemAtendimento: normalizarListaFiltroPersistido(filtrosNormalizados.idOrigemAtendimento),
@@ -1060,7 +1045,7 @@ function normalizarFiltrosAtendimentos(filtros, filtrosPadrao) {
 
 function enriquecerAtendimentos(
   atendimentos,
-  clientes,
+  fornecedores,
   contatos,
   usuarios,
   vendedores,
@@ -1068,7 +1053,7 @@ function enriquecerAtendimentos(
   origensAtendimento
 ) {
   const clientesPorId = new Map(
-    clientes.map((cliente) => [
+    fornecedores.map((cliente) => [
       cliente.idCliente,
       {
         nome: cliente.nomeFantasia || cliente.razaoSocial,
@@ -1094,11 +1079,11 @@ function enriquecerAtendimentos(
 
   return atendimentos.map((atendimento) => ({
     ...atendimento,
-    nomeCliente: obterValorGrid(clientesPorId.get(atendimento.idCliente)?.nome),
-    idVendedorCliente: clientesPorId.get(atendimento.idCliente)?.idVendedor || null,
+    nomeFornecedor: obterValorGrid(clientesPorId.get(atendimento.idCliente)?.nome),
+    idVendedorFornecedor: clientesPorId.get(atendimento.idCliente)?.idVendedor || null,
     nomeContato: obterValorGrid(contatosPorId.get(atendimento.idContato)),
     nomeUsuario: obterValorGrid(usuariosPorId.get(atendimento.idUsuario)),
-    nomeVendedorCliente: obterValorGrid(vendedoresPorId.get(clientesPorId.get(atendimento.idCliente)?.idVendedor)),
+    nomeVendedorFornecedor: obterValorGrid(vendedoresPorId.get(clientesPorId.get(atendimento.idCliente)?.idVendedor)),
     nomeCanalAtendimento: obterValorGrid(canaisPorId.get(atendimento.idCanalAtendimento)),
     nomeOrigemAtendimento: obterValorGrid(origensPorId.get(atendimento.idOrigemAtendimento))
   }));
@@ -1106,7 +1091,7 @@ function enriquecerAtendimentos(
 
 function normalizarPayloadAtendimento(dadosAtendimento) {
   return {
-    idCliente: Number(dadosAtendimento.idCliente),
+    idFornecedor: Number(dadosAtendimento.idCliente),
     idContato: dadosAtendimento.idContato ? Number(dadosAtendimento.idContato) : null,
     idUsuario: Number(dadosAtendimento.idUsuario),
     idTipoAtendimento: Number(dadosAtendimento.idTipoAtendimento),
@@ -1125,7 +1110,7 @@ function limparTextoOpcional(valor) {
   return texto || null;
 }
 
-async function salvarContatosClienteAtendimento(idCliente, contatos) {
+async function salvarContatosClienteAtendimento(idFornecedor, contatos) {
   const contatosNormalizados = normalizarContatosClienteAtendimento(contatos, idCliente);
 
   for (const contato of contatosNormalizados) {
@@ -1257,22 +1242,21 @@ function obterHoraAtualFormatoInput() {
   return `${horas}:${minutos}`;
 }
 
-function montarDadosIniciaisOrcamentoPeloAtendimento(atendimento, clientes, vendedores, usuarioLogado) {
+function montarDadosIniciaisOrcamentoPeloAtendimento(atendimento, fornecedores, vendedores, usuarioLogado) {
   const vendedor = vendedores.find((item) => String(item.idVendedor) === String(usuarioLogado?.idVendedor || ''));
 
   return {
-    idCliente: atendimento?.idCliente || '',
+    idFornecedor: atendimento?.idCliente || '',
     idContato: atendimento?.idContato || '',
     idUsuario: atendimento?.idUsuario || usuarioLogado?.idUsuario || '',
     nomeUsuario: atendimento?.nomeUsuario || usuarioLogado?.nome || '',
     idVendedor: usuarioLogado?.idVendedor || '',
-    comissao: vendedor?.comissaoPadrao ?? 0,
     observacao: atendimento?.descricao || ''
   };
 }
 
-function enriquecerOrcamentosAtendimento(orcamentos, clientes, contatos, usuarios, vendedores, prazosPagamento, etapasOrcamento, produtos) {
-  const clientesPorId = new Map(clientes.map((cliente) => [cliente.idCliente, cliente]));
+function enriquecerOrcamentosAtendimento(orcamentos, fornecedores, contatos, usuarios, vendedores, prazosPagamento, etapasOrcamento, produtos) {
+  const clientesPorId = new Map(fornecedores.map((cliente) => [cliente.idCliente, cliente]));
   const contatosPorId = new Map(contatos.map((contato) => [contato.idContato, contato.nome]));
   const usuariosPorId = new Map(usuarios.map((usuario) => [usuario.idUsuario, usuario.nome]));
   const vendedoresPorId = new Map(vendedores.map((vendedor) => [vendedor.idVendedor, vendedor.nome]));
@@ -1285,7 +1269,7 @@ function enriquecerOrcamentosAtendimento(orcamentos, clientes, contatos, usuario
 
     return {
       ...orcamento,
-      nomeCliente: obterValorGrid(cliente?.nomeFantasia || cliente?.razaoSocial),
+      nomeFornecedor: obterValorGrid(cliente?.nomeFantasia || cliente?.razaoSocial),
       nomeContato: obterValorGrid(contatosPorId.get(orcamento.idContato)),
       nomeUsuario: obterValorGrid(usuariosPorId.get(orcamento.idUsuario)),
       nomeVendedor: obterValorGrid(vendedoresPorId.get(orcamento.idVendedor)),
@@ -1327,14 +1311,12 @@ function obterEtapaFechadoSemPedido(etapasOrcamento) {
 
 function normalizarPayloadOrcamento(dadosOrcamento, usuarioLogado) {
   return {
-    idCliente: Number(dadosOrcamento.idCliente),
+    idFornecedor: Number(dadosOrcamento.idCliente),
     idContato: dadosOrcamento.idContato ? Number(dadosOrcamento.idContato) : null,
     idUsuario: Number(dadosOrcamento.idUsuario || usuarioLogado.idUsuario),
     idVendedor: Number(dadosOrcamento.idVendedor),
-    comissao: normalizarNumeroDecimal(dadosOrcamento.comissao),
     idPrazoPagamento: dadosOrcamento.idPrazoPagamento ? Number(dadosOrcamento.idPrazoPagamento) : null,
     idEtapaOrcamento: dadosOrcamento.idEtapaOrcamento ? Number(dadosOrcamento.idEtapaOrcamento) : null,
-    idMotivoPerda: dadosOrcamento.idMotivoPerda ? Number(dadosOrcamento.idMotivoPerda) : null,
     dataInclusao: limparTextoOpcional(dadosOrcamento.dataInclusao),
     dataValidade: limparTextoOpcional(dadosOrcamento.dataValidade),
     observacao: limparTextoOpcional(dadosOrcamento.observacao),
@@ -1414,15 +1396,13 @@ function normalizarNumeroDecimal(valor) {
 function normalizarPayloadPedido(dadosPedido) {
   return {
     idOrcamento: dadosPedido.idOrcamento ? Number(dadosPedido.idOrcamento) : null,
-    idCliente: dadosPedido.idCliente ? Number(dadosPedido.idCliente) : null,
+    idFornecedor: dadosPedido.idCliente ? Number(dadosPedido.idCliente) : null,
     idContato: dadosPedido.idContato ? Number(dadosPedido.idContato) : null,
     idUsuario: dadosPedido.idUsuario ? Number(dadosPedido.idUsuario) : null,
       idVendedor: dadosPedido.idVendedor ? Number(dadosPedido.idVendedor) : null,
       idPrazoPagamento: dadosPedido.idPrazoPagamento ? Number(dadosPedido.idPrazoPagamento) : null,
       idTipoPedido: dadosPedido.idTipoPedido ? Number(dadosPedido.idTipoPedido) : null,
       idEtapaPedido: dadosPedido.idEtapaPedido ? Number(dadosPedido.idEtapaPedido) : null,
-      idMotivoDevolucao: dadosPedido.idMotivoDevolucao ? Number(dadosPedido.idMotivoDevolucao) : null,
-    comissao: normalizarNumeroDecimal(dadosPedido.comissao),
     dataInclusao: limparTextoOpcional(dadosPedido.dataInclusao),
     dataEntrega: limparTextoOpcional(dadosPedido.dataEntrega),
     observacao: limparTextoOpcional(dadosPedido.observacao),
@@ -1455,7 +1435,7 @@ function normalizarPayloadPedido(dadosPedido) {
 }
 
 function enriquecerOrcamentoParaPedido(orcamento, contexto) {
-  const cliente = contexto.clientes.find((item) => String(item.idCliente) === String(orcamento.idCliente));
+  const cliente = contexto.fornecedores.find((item) => String(item.idCliente) === String(orcamento.idCliente));
   const contato = contexto.contatos.find((item) => String(item.idContato) === String(orcamento.idContato));
   const usuario = contexto.usuarios.find((item) => String(item.idUsuario) === String(orcamento.idUsuario));
   const vendedor = contexto.vendedores.find((item) => String(item.idVendedor) === String(orcamento.idVendedor));
@@ -1463,7 +1443,7 @@ function enriquecerOrcamentoParaPedido(orcamento, contexto) {
 
   return {
     ...orcamento,
-    nomeCliente: orcamento.nomeCliente || cliente?.nomeFantasia || cliente?.razaoSocial || '',
+    nomeFornecedor: orcamento.nomeCliente || cliente?.nomeFantasia || cliente?.razaoSocial || '',
     nomeContato: orcamento.nomeContato || contato?.nome || '',
     nomeUsuario: orcamento.nomeUsuario || usuario?.nome || '',
     nomeVendedor: orcamento.nomeVendedor || vendedor?.nome || '',
@@ -1486,13 +1466,12 @@ function montarDadosIniciaisPedidoAPartirDoOrcamento(orcamento) {
   return {
     idOrcamento: orcamento.idOrcamento,
     codigoOrcamentoOrigem: orcamento.idOrcamento,
-    idCliente: orcamento.idCliente,
+    idFornecedor: orcamento.idCliente,
     idContato: orcamento.idContato,
     idUsuario: orcamento.idUsuario,
     idVendedor: orcamento.idVendedor,
     idPrazoPagamento: orcamento.idPrazoPagamento,
     idTipoPedido: ID_TIPO_PEDIDO_VENDA,
-    comissao: orcamento.comissao,
     dataInclusao: obterDataAtualFormatoInput(),
     nomeClienteSnapshot: orcamento.nomeCliente || '',
     nomeContatoSnapshot: orcamento.nomeContato || '',
@@ -1500,7 +1479,7 @@ function montarDadosIniciaisPedidoAPartirDoOrcamento(orcamento) {
     nomeVendedorSnapshot: orcamento.nomeVendedor || '',
     nomeMetodoPagamentoSnapshot: orcamento.nomeMetodoPagamento || '',
     nomePrazoPagamentoSnapshot: orcamento.nomePrazoPagamento || '',
-    nomeTipoPedidoSnapshot: 'Venda',
+    nomeTipoPedidoSnapshot: 'Ordem de compra',
     observacao: orcamento.observacao || '',
     itens: Array.isArray(orcamento.itens) ? orcamento.itens.map((item) => ({
       idProduto: item.idProduto,
@@ -1515,5 +1494,6 @@ function montarDadosIniciaisPedidoAPartirDoOrcamento(orcamento) {
     })) : []
   };
 }
+
 
 

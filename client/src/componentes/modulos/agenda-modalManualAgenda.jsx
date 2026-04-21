@@ -95,7 +95,7 @@ export function ModalManualAgenda({
     },
     {
       titulo: 'Acompanhar detalhes',
-      descricao: 'Passe o mouse sobre o card para ver cliente, contato, local, usuarios e demais dados sem abrir modal.',
+      descricao: 'Passe o mouse sobre o card para ver fornecedor, contato, local, usuarios e demais dados sem abrir modal.',
       icone: 'consultar'
     },
     {
@@ -135,7 +135,7 @@ export function ModalManualAgenda({
     {
       titulo: 'Foco e atalho',
       descricao: 'Ao abrir um modal da agenda, o foco vai para o primeiro campo editavel; em confirmacoes, a acao principal fica pronta para teclado.',
-      detalhe: '`PageDown` prioriza Salvar e, quando nao houver salvamento disponivel, aciona Adicionar, Incluir ou Novo no contexto atual; `F8` abre a busca de Cliente ou Contato quando o foco estiver nesses campos.',
+      detalhe: '`PageDown` prioriza Salvar e, quando nao houver salvamento disponivel, aciona Adicionar, Incluir ou Novo no contexto atual; `F8` abre a busca de Fornecedor ou Contato quando o foco estiver nesses campos.',
       icone: 'manual'
     }
   ];
@@ -163,12 +163,12 @@ export function ModalManualAgenda({
           itens: [
             'Assunto, dia, horario de inicio, horario de fim, tipo e status sao obrigatorios em qualquer agendamento.',
             'Contato do fornecedor depende do fornecedor escolhido e fica bloqueado ate haver fornecedor selecionado.',
-            'Cliente e contato usam os mesmos modais reutilizaveis de busca do fluxo comercial.',
-            'Quando o foco estiver em Cliente ou Contato do cliente, `F8` abre a busca correspondente sem precisar clicar no botao lateral.',
-            'Ao confirmar a busca de cliente ou contato, o foco retorna para o campo preenchido no agendamento.',
-            'Local, cliente e recurso podem se tornar obrigatorios conforme a configuracao do tipo de agenda.',
+            'Fornecedor e contato usam os mesmos modais reutilizaveis de busca do fluxo comercial.',
+            'Quando o foco estiver em Fornecedor ou Contato do fornecedor, `F8` abre a busca correspondente sem precisar clicar no botao lateral.',
+            'Ao confirmar a busca de fornecedor ou contato, o foco retorna para o campo preenchido no agendamento.',
+            'Local, fornecedor e recurso podem se tornar obrigatorios conforme a configuracao do tipo de agenda.',
             'Usuarios e recursos aceitam selecao multipla dentro de submodais do proprio formulario.',
-            'Somente registros ativos aparecem nas listas de tipos, status, locais, clientes, contatos, usuarios e recursos.'
+            'Somente registros ativos aparecem nas listas de tipos, status, locais, fornecedores, contatos, usuarios e recursos.'
           ]
         }
       ]}

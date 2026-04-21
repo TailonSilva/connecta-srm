@@ -430,9 +430,6 @@ function obterRotuloConfiguracaoColuna(coluna) {
     return 'Data de Validade';
   }
 
-  if (coluna.id === 'comissao') {
-    return 'Comissao da Ordem de Compra';
-  }
 
   if (coluna.id === 'observacao') {
     return 'Observacao da Ordem de Compra';

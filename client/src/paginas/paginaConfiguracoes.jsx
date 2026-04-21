@@ -15,8 +15,6 @@ import {
   atualizarLocalAgenda,
   atualizarMarca,
   atualizarMetodoPagamento,
-  atualizarMotivoDevolucao,
-  atualizarMotivoPerda,
   atualizarOrigemAtendimento,
   atualizarPrazoPagamento,
   atualizarTipoAtendimento,
@@ -40,8 +38,6 @@ import {
   incluirLocalAgenda,
   incluirMarca,
   incluirMetodoPagamento,
-  incluirMotivoDevolucao,
-  incluirMotivoPerda,
   incluirOrigemAtendimento,
   incluirPrazoPagamento,
   incluirTipoAtendimento,
@@ -65,8 +61,6 @@ import {
   listarLocaisAgendaConfiguracao,
   listarMarcasConfiguracao,
   listarMetodosPagamentoConfiguracao,
-  listarMotivosDevolucaoConfiguracao,
-  listarMotivosPerdaConfiguracao,
   obterConfiguracaoAtualizacaoSistema,
   listarOrigensAtendimentoConfiguracao,
   listarPrazosPagamentoConfiguracao,
@@ -94,13 +88,13 @@ import { normalizarConfiguracoesColunasGridAtendimentos } from '../dados/colunas
 import {
   normalizarConfiguracoesGraficosPaginaInicialOrcamentos,
   normalizarConfiguracoesGraficosPaginaInicialAtendimentos,
-  normalizarConfiguracoesGraficosPaginaInicialVendas,
+  normalizarConfiguracoesGraficosPaginaInicialOrdensCompra,
   reordenarConfiguracoesGraficosPaginaInicialAtendimentos,
   reordenarConfiguracoesGraficosPaginaInicialOrcamentos,
-  reordenarConfiguracoesGraficosPaginaInicialVendas,
+  reordenarConfiguracoesGraficosPaginaInicialOrdensCompra,
   reposicionarConfiguracaoGraficosPaginaInicialAtendimentos,
   reposicionarConfiguracaoGraficosPaginaInicialOrcamentos,
-  reposicionarConfiguracaoGraficosPaginaInicialVendas,
+  reposicionarConfiguracaoGraficosPaginaInicialOrdensCompra,
   TOTAL_COLUNAS_GRAFICOS_PAGINA_INICIAL
 } from '../dados/graficosPaginaInicial';
 import {
@@ -234,16 +228,6 @@ const atalhosConfiguracao = [
     icone: 'cadastro'
   },
   {
-    id: 'motivosPerda',
-    titulo: 'Motivos da perda',
-    icone: 'cadastro'
-  },
-  {
-    id: 'motivosDevolucao',
-    titulo: 'Motivos da devolucao',
-    icone: 'cadastro'
-  },
-  {
     id: 'orcamentos',
     titulo: 'Campos da cotacao',
     icone: 'orcamento'
@@ -285,7 +269,7 @@ const atalhosConfiguracao = [
   },
   {
     id: 'relatorioPedidosFechados',
-    titulo: 'Vendas',
+    titulo: 'Ordens de compra',
     icone: 'pedido'
   },
   {
@@ -423,8 +407,6 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
   const [origensAtendimento, definirOrigensAtendimento] = useState([]);
   const [tiposAtendimento, definirTiposAtendimento] = useState([]);
   const [statusVisita, definirStatusVisita] = useState([]);
-  const [motivosPerda, definirMotivosPerda] = useState([]);
-  const [motivosDevolucao, definirMotivosDevolucao] = useState([]);
   const [etapasPedido, definirEtapasPedido] = useState([]);
   const [etapasOrcamento, definirEtapasOrcamento] = useState([]);
   const [camposOrcamento, definirCamposOrcamento] = useState([]);
@@ -643,14 +625,14 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
     definirModalGraficosPaginaInicialAberto(null);
   }
 
-  async function salvarGraficosPaginaInicialVendas(graficos) {
+  async function salvarGraficosPaginaInicialOrdensCompra(graficos) {
     if (!empresa?.idEmpresa) {
       throw new Error('Cadastre a empresa antes de configurar os graficos da pagina inicial.');
     }
 
     const payload = normalizarPayloadEmpresa({
       ...empresa,
-      graficosPaginaInicialVendas: graficos
+      graficosPaginaInicialOrdensCompra: graficos
     });
 
     await atualizarEmpresa(empresa.idEmpresa, payload);
@@ -735,8 +717,6 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
       listarOrigensAtendimentoConfiguracao({ incluirInativos: true }),
       listarTiposAtendimentoConfiguracao({ incluirInativos: true }),
         listarStatusVisitaConfiguracao({ incluirInativos: true }),
-        listarMotivosDevolucaoConfiguracao({ incluirInativos: true }),
-        listarMotivosPerdaConfiguracao({ incluirInativos: true }),
         listarEtapasPedidoConfiguracao({ incluirInativos: true }),
         listarEtapasOrcamentoConfiguracao({ incluirInativos: true }),
         listarCamposOrcamentoConfiguracao({ incluirInativos: true }),
@@ -763,13 +743,11 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
     definirOrigensAtendimento(obterResultadoLista(resultados[16]));
     definirTiposAtendimento(obterResultadoLista(resultados[17]));
     definirStatusVisita(ordenarRegistrosPorOrdem(obterResultadoLista(resultados[18]), 'idStatusVisita'));
-    definirMotivosDevolucao(obterResultadoLista(resultados[19]));
-    definirMotivosPerda(obterResultadoLista(resultados[20]));
-    definirEtapasPedido(ordenarRegistrosPorOrdem(obterResultadoLista(resultados[21]), 'idEtapa'));
-    definirEtapasOrcamento(ordenarRegistrosPorOrdem(obterResultadoLista(resultados[22]), 'idEtapaOrcamento'));
-    definirCamposOrcamento(obterResultadoLista(resultados[23]));
-    definirCamposPedido(obterResultadoLista(resultados[24]));
-    definirTamanhos(obterResultadoLista(resultados[25]));
+    definirEtapasPedido(ordenarRegistrosPorOrdem(obterResultadoLista(resultados[19]), 'idEtapa'));
+    definirEtapasOrcamento(ordenarRegistrosPorOrdem(obterResultadoLista(resultados[20]), 'idEtapaOrcamento'));
+    definirCamposOrcamento(obterResultadoLista(resultados[21]));
+    definirCamposPedido(obterResultadoLista(resultados[22]));
+    definirTamanhos(obterResultadoLista(resultados[23]));
   }
 
   async function salvarUsuario(dadosUsuario) {
@@ -912,7 +890,6 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
     const payload = {
       nome: dadosVendedor.nome.trim(),
       email: dadosVendedor.email.trim(),
-      comissaoPadrao: normalizarNumeroDecimal(dadosVendedor.comissaoPadrao),
       status: dadosVendedor.status ? 1 : 0
     };
 
@@ -977,37 +954,6 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
       await atualizarTipoPedido(dadosTipoPedido.idTipoPedido, payload);
     } else {
       await incluirTipoPedido(payload);
-    }
-
-    await carregarCadastrosConfiguracao();
-  }
-
-  async function salvarMotivoPerda(dadosMotivo) {
-    const payload = {
-      descricao: dadosMotivo.descricao.trim(),
-      status: dadosMotivo.status ? 1 : 0
-    };
-
-    if (dadosMotivo.idMotivo) {
-      await atualizarMotivoPerda(dadosMotivo.idMotivo, payload);
-    } else {
-      await incluirMotivoPerda(payload);
-    }
-
-    await carregarCadastrosConfiguracao();
-  }
-
-  async function salvarMotivoDevolucao(dadosMotivo) {
-    const payload = {
-      abreviacao: String(dadosMotivo.abreviacao || '').trim(),
-      descricao: dadosMotivo.descricao.trim(),
-      status: dadosMotivo.status ? 1 : 0
-    };
-
-    if (dadosMotivo.idMotivoDevolucao) {
-      await atualizarMotivoDevolucao(dadosMotivo.idMotivoDevolucao, payload);
-    } else {
-      await incluirMotivoDevolucao(payload);
     }
 
     await carregarCadastrosConfiguracao();
@@ -1079,7 +1025,7 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
       descricao: dadosTipoAgenda.descricao.trim(),
       cor: dadosTipoAgenda.cor.trim(),
       ordem: normalizarOrdemCadastro(dadosTipoAgenda.ordem),
-      obrigarCliente: dadosTipoAgenda.obrigarCliente ? 1 : 0,
+      obrigarFornecedor: dadosTipoAgenda.obrigarFornecedor ? 1 : 0,
       obrigarLocal: dadosTipoAgenda.obrigarLocal ? 1 : 0,
       obrigarRecurso: dadosTipoAgenda.obrigarRecurso ? 1 : 0,
       status: dadosTipoAgenda.status ? 1 : 0
@@ -1178,8 +1124,7 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
       descricao: dadosEtapa.descricao.trim(),
       cor: dadosEtapa.cor.trim(),
       ordem: normalizarOrdemCadastro(dadosEtapa.ordem),
-      obrigarMotivoPerda: dadosEtapa.obrigarMotivoPerda ? 1 : 0,
-      consideraFunilVendas: dadosEtapa.consideraFunilVendas ? 1 : 0,
+      consideraFunilCotacoes: dadosEtapa.consideraFunilCotacoes ? 1 : 0,
       status: dadosEtapa.status ? 1 : 0
     };
 
@@ -1284,16 +1229,6 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
 
   async function inativarTipoPedido(registro) {
     await atualizarTipoPedido(registro.idTipoPedido, { status: 0 });
-    await carregarCadastrosConfiguracao();
-  }
-
-  async function inativarMotivoPerda(registro) {
-    await atualizarMotivoPerda(registro.idMotivo, { status: 0 });
-    await carregarCadastrosConfiguracao();
-  }
-
-  async function inativarMotivoDevolucao(registro) {
-    await atualizarMotivoDevolucao(registro.idMotivoDevolucao, { status: 0 });
     await carregarCadastrosConfiguracao();
   }
 
@@ -1423,8 +1358,6 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
       'etapasOrcamento',
       'marcas',
       'metodosPagamento',
-      'motivosDevolucao',
-      'motivosPerda',
       'locaisAgenda',
       'orcamentos',
       'pedidos',
@@ -1635,7 +1568,7 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
                           </span>
                         </span>
                         <span className="conteudoCartaoConfiguracao">
-                          <strong>Graficos Vendas</strong>
+                          <strong>Graficos Ordens de compra</strong>
                         </span>
                       </button>
 
@@ -1713,17 +1646,17 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
       />
       <ModalGraficosPaginaInicial
         aberto={modalGraficosPaginaInicialAberto === 'vendas'}
-        titulo="Graficos Vendas"
+        titulo="Graficos Ordens de compra"
         empresa={empresa}
-        configuracoesAtuais={empresa?.graficosPaginaInicialVendas}
-        normalizarConfiguracoes={normalizarConfiguracoesGraficosPaginaInicialVendas}
-        reordenarConfiguracoes={reordenarConfiguracoesGraficosPaginaInicialVendas}
-        reposicionarConfiguracao={reposicionarConfiguracaoGraficosPaginaInicialVendas}
+        configuracoesAtuais={empresa?.graficosPaginaInicialOrdensCompra}
+        normalizarConfiguracoes={normalizarConfiguracoesGraficosPaginaInicialOrdensCompra}
+        reordenarConfiguracoes={reordenarConfiguracoesGraficosPaginaInicialOrdensCompra}
+        reposicionarConfiguracao={reposicionarConfiguracaoGraficosPaginaInicialOrdensCompra}
         totalColunas={TOTAL_COLUNAS_GRAFICOS_PAGINA_INICIAL}
         somenteConsulta={usuarioSomenteConsulta}
         camadaSecundaria={modalEmpresaAberto}
         aoFechar={() => definirModalGraficosPaginaInicialAberto(null)}
-        aoSalvar={salvarGraficosPaginaInicialVendas}
+        aoSalvar={salvarGraficosPaginaInicialOrdensCompra}
       />
       <ModalGraficosPaginaInicial
         aberto={modalGraficosPaginaInicialAberto === 'atendimentos'}
@@ -1902,13 +1835,11 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
         somenteConsulta={usuarioSomenteConsulta}
         colunas={[
           { key: 'nome', label: 'Nome' },
-          { key: 'email', label: 'E-mail' },
-          { key: 'comissaoPadrao', label: 'Comissao', render: (registro) => formatarPercentual(registro.comissaoPadrao) }
+          { key: 'email', label: 'E-mail' }
         ]}
         camposFormulario={[
           { name: 'nome', label: 'Nome', required: true },
           { name: 'email', label: 'E-mail', type: 'email', required: true },
-          { name: 'comissaoPadrao', label: 'Comissao padrao (%)', type: 'number', defaultValue: '0' },
           { name: 'status', label: 'Registro ativo', type: 'checkbox', defaultValue: true }
         ]}
         aoFechar={fecharCadastroConfiguracao}
@@ -2149,47 +2080,6 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
         podeInativarRegistro={(registro) => !statusVisitaEhCritico(registro)}
       />
       <ModalCadastroConfiguracao
-        aberto={cadastroConfiguracaoAberto === 'motivosDevolucao'}
-        titulo="Motivos da devolucao"
-        rotuloIncluir="Incluir motivo"
-        registros={motivosDevolucao}
-        chavePrimaria="idMotivoDevolucao"
-        classeFormulario="gradeFormularioMotivosDevolucao"
-        somenteConsulta={usuarioSomenteConsulta}
-        colunas={[
-          { key: 'idMotivoDevolucao', label: 'Codigo' },
-          { key: 'abreviacao', label: 'Abreviacao' },
-          { key: 'descricao', label: 'Descricao' }
-        ]}
-        camposFormulario={[
-          { name: 'idMotivoDevolucao', label: 'Codigo', type: 'number', disabled: true },
-          { name: 'abreviacao', label: 'Abreviacao', required: true },
-          { name: 'descricao', label: 'Descricao', required: true },
-          { name: 'status', label: 'Registro ativo', type: 'checkbox', defaultValue: true }
-        ]}
-        aoFechar={fecharCadastroConfiguracao}
-        aoSalvar={salvarMotivoDevolucao}
-        aoInativar={inativarMotivoDevolucao}
-      />
-      <ModalCadastroConfiguracao
-        aberto={cadastroConfiguracaoAberto === 'motivosPerda'}
-        titulo="Motivos da perda"
-        rotuloIncluir="Incluir motivo"
-        registros={motivosPerda}
-        chavePrimaria="idMotivo"
-        somenteConsulta={usuarioSomenteConsulta}
-        colunas={[
-          { key: 'descricao', label: 'Descricao' }
-        ]}
-        camposFormulario={[
-          { name: 'descricao', label: 'Descricao', required: true },
-          { name: 'status', label: 'Registro ativo', type: 'checkbox', defaultValue: true }
-        ]}
-        aoFechar={fecharCadastroConfiguracao}
-        aoSalvar={salvarMotivoPerda}
-        aoInativar={inativarMotivoPerda}
-      />
-      <ModalCadastroConfiguracao
         aberto={cadastroConfiguracaoAberto === 'etapasPedido'}
         titulo="Etapas da ordem de compra"
         rotuloIncluir="Incluir etapa"
@@ -2238,22 +2128,16 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
           { key: 'descricao', label: 'Descricao' },
           { key: 'cor', label: 'Cor', render: renderizarCorConfiguracao },
           {
-            key: 'obrigarMotivoPerda',
-            label: 'Motivo da perda',
-            render: (registro) => registro.obrigarMotivoPerda ? 'Obrigatorio' : 'Opcional'
-          },
-          {
-            key: 'consideraFunilVendas',
-            label: 'Funil de vendas',
-            render: (registro) => registro.consideraFunilVendas ? 'Considera' : 'Nao considera'
+            key: 'consideraFunilCotacoes',
+            label: 'Funil de ordens de compra',
+            render: (registro) => registro.consideraFunilCotacoes ? 'Considera' : 'Nao considera'
           }
         ]}
         camposFormulario={[
           { name: 'ordem', label: 'Ordem', type: 'number', required: true, defaultValue: 1, min: 1, max: 999, step: 1, inputMode: 'numeric' },
           { name: 'descricao', label: 'Descricao', required: true },
           { name: 'cor', label: 'Cor', type: 'color', required: true, defaultValue: '#9506F4' },
-          { name: 'obrigarMotivoPerda', label: 'Exigir motivo da perda', type: 'checkbox', defaultValue: false },
-          { name: 'consideraFunilVendas', label: 'Considera no Funil de Vendas', type: 'checkbox', defaultValue: true },
+          { name: 'consideraFunilCotacoes', label: 'Considera no Funil de Cotacoes', type: 'checkbox', defaultValue: true },
           { name: 'status', label: 'Registro ativo', type: 'checkbox', defaultValue: true }
         ]}
         aoFechar={fecharCadastroConfiguracao}
@@ -2326,7 +2210,7 @@ function normalizarPayloadEmpresa(dadosEmpresa) {
     exibirFunilPaginaInicial: dadosEmpresa.exibirFunilPaginaInicial ? 1 : 0,
     diasValidadeOrcamento: normalizarNumeroInteiro(dadosEmpresa.diasValidadeOrcamento, 7),
     diasEntregaPedido: normalizarNumeroInteiro(dadosEmpresa.diasEntregaPedido, 7),
-    codigoPrincipalCliente: String(dadosEmpresa.codigoPrincipalCliente || '').trim() === 'codigoAlternativo'
+    codigoPrincipalFornecedor: String(dadosEmpresa.codigoPrincipalFornecedor || '').trim() === 'codigoAlternativo'
       ? 'codigoAlternativo'
       : 'codigo',
     etapasFiltroPadraoOrcamento: JSON.stringify(
@@ -2394,8 +2278,8 @@ function normalizarPayloadEmpresa(dadosEmpresa) {
         span: grafico.span
       }))
     ),
-    graficosPaginaInicialVendas: JSON.stringify(
-      normalizarConfiguracoesGraficosPaginaInicialVendas(dadosEmpresa.graficosPaginaInicialVendas).map((grafico) => ({
+    graficosPaginaInicialOrdensCompra: JSON.stringify(
+      normalizarConfiguracoesGraficosPaginaInicialOrdensCompra(dadosEmpresa.graficosPaginaInicialOrdensCompra).map((grafico) => ({
         id: grafico.id,
         base: grafico.base,
         rotulo: grafico.rotulo,
@@ -2556,14 +2440,6 @@ function normalizarNumeroDecimal(valor) {
 
   const numero = Number(texto);
   return Number.isNaN(numero) ? 0 : numero;
-}
-
-function formatarPercentual(valor) {
-  const numero = normalizarNumeroDecimal(valor);
-  return `${numero.toLocaleString('pt-BR', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  })}%`;
 }
 
 function enriquecerPrazosPagamento(prazosPagamento, metodosPagamento) {

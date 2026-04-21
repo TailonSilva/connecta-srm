@@ -30,6 +30,7 @@ const paresAliasCotacao = [
   ['etapasFiltroPadraoOrcamento', 'etapasFiltroPadraoCotacao'],
   ['colunasGridOrcamentos', 'colunasGridCotacoes'],
   ['graficosPaginaInicialOrcamentos', 'graficosPaginaInicialCotacoes'],
+  ['consideraFunilVendas', 'consideraFunilCotacoes'],
   ['corPrimariaOrcamento', 'corPrimariaCotacao'],
   ['corSecundariaOrcamento', 'corSecundariaCotacao'],
   ['corDestaqueOrcamento', 'corDestaqueCotacao'],
@@ -51,7 +52,8 @@ const paresAliasOrdemCompra = [
   ['nomeTipoPedidoSnapshot', 'nomeTipoOrdemCompraSnapshot'],
   ['nomeEtapaPedidoSnapshot', 'nomeEtapaOrdemCompraSnapshot'],
   ['diasEntregaPedido', 'diasEntregaOrdemCompra'],
-  ['colunasGridPedidos', 'colunasGridOrdensCompra']
+  ['colunasGridPedidos', 'colunasGridOrdensCompra'],
+  ['graficosPaginaInicialVendas', 'graficosPaginaInicialOrdensCompra']
 ];
 
 const paresAlias = [

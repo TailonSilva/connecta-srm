@@ -4,7 +4,7 @@ import { MensagemErroPopup } from '../comuns/mensagemErroPopup';
 import { CampoSelecaoMultiplaModal } from '../comuns/campoSelecaoMultiplaModal';
 import { ModalBuscaClientes } from '../comuns/modalBuscaClientes';
 import { ModalBuscaContatos } from '../comuns/modalBuscaContatos';
-import { ModalCliente } from './clientes-modalCliente';
+import { ModalFornecedor as ModalCliente } from './fornecedores-modalFornecedor';
 import { formatarCodigoCliente } from '../../utilitarios/codigoCliente';
 import { formatarNomeContato } from '../../utilitarios/formatarNomeContato';
 import { normalizarValorEntradaFormulario } from '../../utilitarios/normalizarTextoFormulario';
@@ -17,7 +17,7 @@ const estadoInicialFormulario = {
   idTipoAgenda: '',
   horaInicio: '',
   horaFim: '',
-  idCliente: '',
+  idFornecedor: '',
   idContato: '',
   idLocal: '',
   idsRecursos: [],
@@ -29,16 +29,17 @@ const estadoInicialFormulario = {
 export function ModalAgendamento({
   aberto,
   dadosIniciais,
-  locais,
-  recursos,
-  clientes,
-  contatos,
-  usuarios,
+  locais = [],
+  recursos = [],
+  fornecedores,
+  clientes = [],
+  contatos = [],
+  usuarios = [],
   vendedores = [],
   ramosAtividade = [],
   conceitosCliente = [],
-  tiposAgenda,
-  statusVisita,
+  tiposAgenda = [],
+  statusVisita = [],
   empresa = null,
   usuarioLogado,
   idVendedorBloqueado = null,
@@ -58,9 +59,10 @@ export function ModalAgendamento({
   const [modalBuscaContatoAberto, definirModalBuscaContatoAberto] = useState(false);
   const referenciaCampoCliente = useRef(null);
   const referenciaCampoContato = useRef(null);
+  const listaFornecedores = Array.isArray(fornecedores) ? fornecedores : clientes;
   const locaisAtivos = locais.filter((local) => registroEstaAtivo(local.status));
   const recursosAtivos = recursos.filter((recurso) => registroEstaAtivo(recurso.status));
-  const clientesAtivos = clientes.filter((cliente) => registroEstaAtivo(cliente.status));
+  const clientesAtivos = listaFornecedores.filter((cliente) => registroEstaAtivo(cliente.status));
   const contatosAtivos = contatos.filter((contato) => registroEstaAtivo(contato.status));
   const usuariosAtivos = usuarios.filter((usuario) => registroEstaAtivo(usuario.ativo));
   const tiposAgendaAtivos = tiposAgenda.filter((tipoAgenda) => registroEstaAtivo(tipoAgenda.status));
@@ -135,7 +137,7 @@ export function ModalAgendamento({
   const contatosDoCliente = contatosAtivos.filter(
     (contato) => String(contato.idCliente) === String(formulario.idCliente)
   );
-  const proximoCodigoCliente = obterProximoCodigoCliente(clientes);
+  const proximoCodigoCliente = obterProximoCodigoCliente(listaFornecedores);
   const recursosSelecionados = recursosAtivos.filter((recurso) => (
     formulario.idsRecursos.includes(String(recurso.idRecurso))
   ));
@@ -174,12 +176,12 @@ export function ModalAgendamento({
     ];
 
     if (clienteObrigatorio) {
-      camposObrigatorios.push(['idCliente', 'Selecione o cliente.']);
-      camposObrigatorios.push(['idContato', 'Selecione o contato do cliente.']);
+      camposObrigatorios.push(['idCliente', 'Selecione o fornecedor.']);
+      camposObrigatorios.push(['idContato', 'Selecione o contato do fornecedor.']);
     }
 
     if (formulario.idCliente && !clienteObrigatorio) {
-      camposObrigatorios.push(['idContato', 'Selecione o contato do cliente.']);
+      camposObrigatorios.push(['idContato', 'Selecione o contato do fornecedor.']);
     }
 
     if (localObrigatorio) {
@@ -322,7 +324,7 @@ export function ModalAgendamento({
 
     definirFormulario((estadoAtual) => ({
       ...estadoAtual,
-      idCliente: String(cliente.idCliente),
+      idFornecedor: String(cliente.idCliente),
       idContato: ''
     }));
     fecharModalBuscaCliente();
@@ -433,7 +435,7 @@ export function ModalAgendamento({
             <CampoFormulario label="Horario de fim" name="horaFim" type="time" value={formulario.horaFim} onChange={alterarCampo} required />
             <CampoSelect
               className="campoAgendamentoMetade"
-              label="Cliente"
+              label="Fornecedor"
               name="idCliente"
               data-atalho-busca-id="cliente"
               referenciaCampo={referenciaCampoCliente}
@@ -708,7 +710,7 @@ function criarFormularioInicial(dadosIniciais, usuarioLogado, statusAtivos) {
     ...estadoInicialFormulario,
     ...dadosIniciais,
     idTipoAgenda: normalizarValorFormularioAgendamento(dadosIniciais?.idTipoAgenda),
-    idCliente: normalizarValorFormularioAgendamento(dadosIniciais?.idCliente),
+    idFornecedor: normalizarValorFormularioAgendamento(dadosIniciais?.idCliente),
     idContato: normalizarValorFormularioAgendamento(dadosIniciais?.idContato),
     idLocal: normalizarValorFormularioAgendamento(dadosIniciais?.idLocal),
     idStatusVisita,

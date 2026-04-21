@@ -2,7 +2,6 @@ const express = require('express');
 const {
   ID_ETAPA_COTACAO_PEDIDO_EXCLUIDO,
   ID_ETAPA_PEDIDO_ENTREGUE,
-  ID_TIPO_PEDIDO_DEVOLUCAO,
   consultarTodos,
   consultarUm,
   executar
@@ -114,12 +113,9 @@ rotaOrdensCompra.post('/', async (requisicao, resposta) => {
         idContato,
         idUsuario,
         idComprador,
-        comissao,
-        valorComissao,
         idPrazoPagamento,
         idTipoOrdemCompra,
         idEtapaOrdemCompra,
-        idMotivoDevolucao,
         dataInclusao,
         dataEntrega,
         dataValidade,
@@ -133,19 +129,16 @@ rotaOrdensCompra.post('/', async (requisicao, resposta) => {
         nomePrazoPagamentoSnapshot,
         nomeTipoOrdemCompraSnapshot,
         nomeEtapaOrdemCompraSnapshot
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         payload.idCotacao,
         payload.idFornecedor,
         payload.idContato,
         payload.idUsuario,
         payload.idComprador,
-        payload.comissao,
-        payload.valorComissao,
         payload.idPrazoPagamento,
         payload.idTipoOrdemCompra,
         payload.idEtapaOrdemCompra,
-        payload.idMotivoDevolucao,
         payload.dataInclusao,
         payload.dataEntrega,
         payload.dataValidade,
@@ -214,12 +207,9 @@ rotaOrdensCompra.put('/:id', async (requisicao, resposta) => {
         idContato = ?,
         idUsuario = ?,
         idComprador = ?,
-        comissao = ?,
-        valorComissao = ?,
         idPrazoPagamento = ?,
         idTipoOrdemCompra = ?,
         idEtapaOrdemCompra = ?,
-        idMotivoDevolucao = ?,
         dataInclusao = ?,
         dataEntrega = ?,
         dataValidade = ?,
@@ -240,12 +230,9 @@ rotaOrdensCompra.put('/:id', async (requisicao, resposta) => {
         payload.idContato,
         payload.idUsuario,
         payload.idComprador,
-        payload.comissao,
-        payload.valorComissao,
         payload.idPrazoPagamento,
         payload.idTipoOrdemCompra,
         payload.idEtapaOrdemCompra,
-        payload.idMotivoDevolucao,
         payload.dataInclusao,
         payload.dataEntrega,
         payload.dataValidade,
@@ -354,12 +341,9 @@ function normalizarPayloadOrdemCompra(payload = {}) {
     idContato: payload.idContato ? Number(payload.idContato) : null,
     idUsuario: payload.idUsuario ? Number(payload.idUsuario) : null,
     idComprador: payload.idComprador ? Number(payload.idComprador) : null,
-    comissao: normalizarNumeroDecimal(payload.comissao, 0),
-    valorComissao: normalizarNumeroDecimal(payload.valorComissao, 0),
     idPrazoPagamento: payload.idPrazoPagamento ? Number(payload.idPrazoPagamento) : null,
     idTipoOrdemCompra: payload.idTipoOrdemCompra ? Number(payload.idTipoOrdemCompra) : null,
     idEtapaOrdemCompra: payload.idEtapaOrdemCompra ? Number(payload.idEtapaOrdemCompra) : null,
-    idMotivoDevolucao: payload.idMotivoDevolucao ? Number(payload.idMotivoDevolucao) : null,
     dataInclusao: limparTexto(payload.dataInclusao),
     dataEntrega: limparTexto(payload.dataEntrega || payload.dataValidade),
     dataValidade: limparTexto(payload.dataValidade),
@@ -382,15 +366,8 @@ function aplicarAutomacoesOrdemCompra(payload, ordemCompraAtual = null) {
   const proximoPayload = {
     ...payload
   };
-  const ordemCompraEhDevolucao = Number(proximoPayload.idTipoOrdemCompra) === ID_TIPO_PEDIDO_DEVOLUCAO;
   const entrouNaEtapaEntregue = !etapaOrdemCompraEhEntregue(ordemCompraAtual?.idEtapaOrdemCompra)
     && etapaOrdemCompraEhEntregue(proximoPayload.idEtapaOrdemCompra);
-
-  if (ordemCompraEhDevolucao) {
-    proximoPayload.idEtapaOrdemCompra = ID_ETAPA_PEDIDO_ENTREGUE;
-  } else {
-    proximoPayload.idMotivoDevolucao = null;
-  }
 
   if (entrouNaEtapaEntregue && (!proximoPayload.dataEntrega || proximoPayload.dataEntrega === limparTexto(ordemCompraAtual?.dataEntrega))) {
     proximoPayload.dataEntrega = obterDataAtualFormatoInput();
@@ -399,9 +376,6 @@ function aplicarAutomacoesOrdemCompra(payload, ordemCompraAtual = null) {
   if (etapaOrdemCompraEhEntregue(proximoPayload.idEtapaOrdemCompra) && !proximoPayload.dataEntrega) {
     proximoPayload.dataEntrega = obterDataAtualFormatoInput();
   }
-
-  proximoPayload.itens = normalizarSinalItensOrdemCompra(proximoPayload.itens, proximoPayload.idTipoOrdemCompra);
-  proximoPayload.valorComissao = calcularValorComissaoOrdemCompra(proximoPayload.comissao, proximoPayload.itens);
 
   return proximoPayload;
 }
@@ -424,38 +398,6 @@ function normalizarItensOrdemCompra(itens) {
       unidadeProdutoSnapshot: limparTexto(item.unidadeProdutoSnapshot)
     }))
     .filter((item) => item.quantidade && item.valorUnitario !== null);
-}
-
-function normalizarSinalItensOrdemCompra(itens, idTipoOrdemCompra) {
-  if (!Array.isArray(itens)) {
-    return [];
-  }
-
-  const ehDevolucao = Number(idTipoOrdemCompra) === ID_TIPO_PEDIDO_DEVOLUCAO;
-  const multiplicador = ehDevolucao ? -1 : 1;
-
-  return itens.map((item) => {
-    const quantidadeBase = Math.abs(Number(item?.quantidade || 0));
-    const valorUnitarioBase = item?.valorUnitario === null || item?.valorUnitario === undefined
-      ? null
-      : Math.abs(Number(item.valorUnitario));
-
-    if (!quantidadeBase || valorUnitarioBase === null || Number.isNaN(valorUnitarioBase)) {
-      return item;
-    }
-
-    const quantidade = Number((quantidadeBase * multiplicador).toFixed(3));
-    const valorUnitario = Number((valorUnitarioBase * multiplicador).toFixed(2));
-    const valorTotalBase = quantidadeBase * valorUnitarioBase;
-    const valorTotal = Number(((ehDevolucao ? -1 : 1) * valorTotalBase).toFixed(2));
-
-    return {
-      ...item,
-      quantidade,
-      valorUnitario,
-      valorTotal
-    };
-  });
 }
 
 function normalizarCamposOrdemCompra(camposExtras) {
@@ -498,14 +440,6 @@ function validarPayloadOrdemCompra(payload) {
     return 'Inclua ao menos um item na ordemCompra.';
   }
 
-  if (
-    Number(payload.idTipoOrdemCompra) === ID_TIPO_PEDIDO_DEVOLUCAO
-    && Number(payload.idEtapaOrdemCompra) === ID_ETAPA_PEDIDO_ENTREGUE
-    && !payload.idMotivoDevolucao
-  ) {
-    return 'Selecione o motivo da devolucao.';
-  }
-
   return '';
 }
 
@@ -518,7 +452,6 @@ async function montarSnapshotsOrdemCompra(payload) {
     prazo,
     tipoOrdemCompra,
     etapaOrdemCompra,
-    motivoDevolucao,
     cotacao
   ] = await Promise.all([
     obterFornecedor(payload.idFornecedor),
@@ -528,7 +461,6 @@ async function montarSnapshotsOrdemCompra(payload) {
     obterPrazoPagamento(payload.idPrazoPagamento),
     obterTipoOrdemCompra(payload.idTipoOrdemCompra),
     obterEtapaOrdemCompra(payload.idEtapaOrdemCompra),
-    obterMotivoDevolucao(payload.idMotivoDevolucao),
     obterCotacao(payload.idCotacao)
   ]);
 
@@ -733,22 +665,6 @@ async function obterTipoOrdemCompra(idTipoOrdemCompra) {
   );
 }
 
-async function obterMotivoDevolucao(idMotivoDevolucao) {
-  if (!idMotivoDevolucao) {
-    return null;
-  }
-
-  return consultarUm(
-    `SELECT
-      idMotivoDevolucao,
-      abreviacao,
-      descricao
-    FROM motivoDevolucao
-    WHERE idMotivoDevolucao = ?`,
-    [idMotivoDevolucao]
-  );
-}
-
 async function obterCotacao(idCotacao) {
   if (!idCotacao) {
     return null;
@@ -872,15 +788,6 @@ function normalizarNumeroDecimal(valor, fallback = 0) {
 
   const numero = Number(valor);
   return Number.isFinite(numero) ? numero : fallback;
-}
-
-function calcularValorComissaoOrdemCompra(comissao, itens) {
-  const percentual = normalizarNumeroDecimal(comissao, 0);
-  const valorTotalLiquido = Array.isArray(itens)
-    ? itens.reduce((acumulado, item) => acumulado + normalizarNumeroDecimal(item?.valorTotal, 0), 0)
-    : 0;
-
-  return Number(((valorTotalLiquido * percentual) / 100).toFixed(2));
 }
 
 async function tentarRollback() {

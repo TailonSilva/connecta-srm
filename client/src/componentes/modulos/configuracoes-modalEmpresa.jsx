@@ -34,14 +34,14 @@ const estadoInicialFormulario = {
   exibirFunilPaginaInicial: true,
   diasValidadeOrcamento: '7',
   diasEntregaPedido: '7',
-  codigoPrincipalCliente: 'codigo',
+  codigoPrincipalFornecedor: 'codigo',
   etapasFiltroPadraoOrcamento: [],
   corPrimariaOrcamento: '#111827',
   corSecundariaOrcamento: '#ef4444',
   corDestaqueOrcamento: '#f59e0b',
   destaqueItemOrcamentoPdf: 'descricao',
-  assuntoEmailOrcamento: 'Cotacao {cotacao_codigo} - {fornecedor_nome}',
-  corpoEmailOrcamento: 'Olá {cliente_nome},\n\nSegue o orçamento {orcamento_codigo} com validade até {orcamento_validade}.\n\n{orcamento_itens}\n\nTotal do orçamento: {orcamento_total}\n\nFico à disposição para qualquer ajuste.\n\nAtenciosamente,',
+  assuntoEmailOrcamento: 'Cotacao {cotacao_codigo} - {cliente_nome}',
+  corpoEmailOrcamento: 'Olá {cliente_nome},\n\nSegue a cotacao {orcamento_codigo} com validade até {orcamento_validade}.\n\n{orcamento_itens}\n\nTotal da cotacao: {orcamento_total}\n\nFico à disposição para qualquer ajuste.\n\nAtenciosamente,',
   assinaturaEmailOrcamento: '{vendedor_nome}\n{empresa_nome}',
   logradouro: '',
   numero: '',
@@ -460,7 +460,7 @@ export function ModalEmpresa({
               <div className="campoFormularioIntegral painelOpcaoEmpresaPaginaInicial">
                 <strong>Tags disponiveis</strong>
                 <p className="descricaoOpcaoEmpresaPaginaInicial">
-                  Use estas tags para montar o texto dinamicamente: <code>{'{empresa_nome}'}</code>, <code>{'{fornecedor_codigo}'}</code>, <code>{'{fornecedor_codigo_principal}'}</code>, <code>{'{fornecedor_codigo_alternativo}'}</code>, <code>{'{fornecedor_nome}'}</code>, <code>{'{fornecedor_fantasia}'}</code>, <code>{'{fornecedor_cidade}'}</code>, <code>{'{fornecedor_uf}'}</code>, <code>{'{cotacao_codigo}'}</code>, <code>{'{cotacao_data}'}</code>, <code>{'{cotacao_validade}'}</code>, <code>{'{cotacao_total}'}</code>, <code>{'{cotacao_observacao}'}</code>, <code>{'{cotacao_campos_extras}'}</code>, <code>{'{cotacao_itens}'}</code>, <code>{'{vendedor_nome}'}</code> e <code>{'{contato_nome}'}</code>.
+                  Use estas tags para montar o texto dinamicamente: <code>{'{empresa_nome}'}</code>, <code>{'{cliente_codigo}'}</code>, <code>{'{cliente_codigo_principal}'}</code>, <code>{'{cliente_codigo_alternativo}'}</code>, <code>{'{cliente_nome}'}</code>, <code>{'{cliente_fantasia}'}</code>, <code>{'{cliente_cidade}'}</code>, <code>{'{cliente_uf}'}</code>, <code>{'{cotacao_codigo}'}</code>, <code>{'{cotacao_data}'}</code>, <code>{'{cotacao_validade}'}</code>, <code>{'{cotacao_total}'}</code>, <code>{'{cotacao_observacao}'}</code>, <code>{'{cotacao_campos_extras}'}</code>, <code>{'{cotacao_itens}'}</code>, <code>{'{vendedor_nome}'}</code> e <code>{'{contato_nome}'}</code>.
                 </p>
                 <p className="descricaoOpcaoEmpresaPaginaInicial">
                   A tag <code>{'{cotacao_itens}'}</code> ja traz cada item com referencia, descricao, quantidade, valor unitario e valor total em linhas separadas.
@@ -572,7 +572,7 @@ function criarFormularioEmpresa(empresa) {
       : Boolean(empresa.exibirFunilPaginaInicial),
     diasValidadeOrcamento: String(empresa.diasValidadeOrcamento ?? 7),
     diasEntregaPedido: String(empresa.diasEntregaPedido ?? 7),
-    codigoPrincipalCliente: normalizarCodigoPrincipalCliente(empresa.codigoPrincipalCliente),
+    codigoPrincipalFornecedor: normalizarCodigoPrincipalCliente(empresa.codigoPrincipalCliente),
     etapasFiltroPadraoOrcamento: normalizarListaEmpresa(empresa.etapasFiltroPadraoOrcamento),
     corPrimariaOrcamento: empresa.corPrimariaOrcamento || '#111827',
     corSecundariaOrcamento: empresa.corSecundariaOrcamento || '#ef4444',

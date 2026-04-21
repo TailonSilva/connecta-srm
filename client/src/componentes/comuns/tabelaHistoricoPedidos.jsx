@@ -1,7 +1,7 @@
 import { BotaoAcaoGrade } from './botaoAcaoGrade';
 import { GradePadrao } from './gradePadrao';
 import { normalizarPreco } from '../../utilitarios/normalizarPreco';
-import '../../recursos/estilos/modalHistoricoVendasCliente.css';
+import '../../recursos/estilos/modalHistoricoOrdensCompraFornecedor.css';
 
 export function TabelaHistoricoPedidos({
   carregando,
@@ -17,7 +17,7 @@ export function TabelaHistoricoPedidos({
 }) {
   return (
     <GradePadrao
-      className="gradeContatosModal gradePedidosCliente modalHistoricoVendasClienteGrade"
+      className="gradeContatosModal gradePedidosCliente modalHistoricoOrdensCompraFornecedorGrade"
       classNameTabela="tabelaContatosModal tabelaPedidosCliente"
       classNameMensagem="mensagemTabelaContatosModal"
       cabecalho={(

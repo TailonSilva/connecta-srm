@@ -3,15 +3,15 @@ import { Botao } from '../comuns/botao';
 import { MensagemErroPopup } from '../comuns/mensagemErroPopup';
 import { ModalBuscaClientes } from '../comuns/modalBuscaClientes';
 import { ModalBuscaContatos } from '../comuns/modalBuscaContatos';
-import { ModalCliente } from './clientes-modalCliente';
-import { ModalOrcamento } from './orcamentos-modalOrcamento';
+import { ModalFornecedor as ModalCliente } from './fornecedores-modalFornecedor';
+import { ModalCotacao } from './cotacoes-modalCotacao';
 import { formatarCodigoCliente } from '../../utilitarios/codigoCliente';
 import { formatarNomeContato } from '../../utilitarios/formatarNomeContato';
 import { normalizarValorEntradaFormulario } from '../../utilitarios/normalizarTextoFormulario';
 import { obterEtapasOrcamentoParaInputManual } from '../../utilitarios/etapasOrcamento';
 
 const estadoInicialFormulario = {
-  idCliente: '',
+  idFornecedor: '',
   idContato: '',
   idOrcamento: '',
   idEtapaOrcamento: '',
@@ -34,6 +34,7 @@ const ID_TIPO_PEDIDO_VENDA = 1;
 export function ModalAtendimento({
   aberto,
   atendimento,
+  fornecedores,
   clientes = [],
   contatos = [],
   usuarioLogado,
@@ -59,7 +60,6 @@ export function ModalAtendimento({
   metodosPagamento = [],
   prazosPagamento = [],
   etapasOrcamento = [],
-  motivosPerda = [],
   orcamentos = [],
   produtos = [],
   camposOrcamento = [],
@@ -85,16 +85,15 @@ export function ModalAtendimento({
   const referenciaCampoCliente = useRef(null);
   const referenciaCampoContato = useRef(null);
   const [contatosCriadosLocalmente, definirContatosCriadosLocalmente] = useState([]);
-  const [modalOrcamentoAberto, definirModalOrcamentoAberto] = useState(false);
-  const [modoModalOrcamento, definirModoModalOrcamento] = useState('novo');
+  const [modalOrcamentoAberto, definirModalCotacaoAberto] = useState(false);
+  const [modoModalCotacao, definirModoModalCotacao] = useState('novo');
   const [orcamentoSelecionado, definirOrcamentoSelecionado] = useState(null);
-  const [modalMotivoPerdaAberto, definirModalMotivoPerdaAberto] = useState(false);
-  const [motivoPerdaPendente, definirMotivoPerdaPendente] = useState('');
   const [confirmandoPedidoOrcamento, definirConfirmandoPedidoOrcamento] = useState(null);
   const somenteLeitura = modo === 'consulta';
   const modoInclusao = modo === 'novo';
   const modoEdicao = modo === 'edicao';
-  const clientesAtivos = clientes.filter((cliente) => cliente.status !== 0);
+  const listaFornecedores = Array.isArray(fornecedores) ? fornecedores : clientes;
+  const clientesAtivos = listaFornecedores.filter((cliente) => cliente.status !== 0);
   const contatosAtivos = contatos.filter((contato) => contato.status !== 0);
   const tiposAtendimentoAtivos = tiposAtendimento.filter((tipoAtendimento) => tipoAtendimento.status !== 0);
   const canaisAtivos = canaisAtendimento.filter((canal) => canal.status !== 0);
@@ -122,11 +121,9 @@ export function ModalAtendimento({
     definirModalBuscaClienteAberto(false);
     definirModalBuscaContatoAberto(false);
     definirContatosCriadosLocalmente([]);
-    definirModalOrcamentoAberto(false);
-    definirModoModalOrcamento('novo');
+    definirModalCotacaoAberto(false);
+    definirModoModalCotacao('novo');
     definirOrcamentoSelecionado(null);
-    definirModalMotivoPerdaAberto(false);
-    definirMotivoPerdaPendente('');
     definirConfirmandoPedidoOrcamento(null);
   }, [aberto, atendimento, usuarioLogado]);
 
@@ -160,10 +157,6 @@ export function ModalAtendimento({
           return;
         }
 
-        if (modalMotivoPerdaAberto) {
-          definirModalMotivoPerdaAberto(false);
-          return;
-        }
 
         if (confirmandoPedidoOrcamento) {
           definirConfirmandoPedidoOrcamento(null);
@@ -199,7 +192,7 @@ export function ModalAtendimento({
     return () => {
       window.removeEventListener('keydown', tratarTecla);
     };
-  }, [aberto, aoFechar, confirmandoExclusao, confirmandoPedidoOrcamento, confirmandoSaida, salvando, modalBuscaClienteAberto, modalBuscaContatoAberto, modalClienteAberto, modalMotivoPerdaAberto, modalOrcamentoAberto]);
+  }, [aberto, aoFechar, confirmandoExclusao, confirmandoPedidoOrcamento, confirmandoSaida, salvando, modalBuscaClienteAberto, modalBuscaContatoAberto, modalClienteAberto, modalOrcamentoAberto]);
 
   if (!aberto) {
     return null;
@@ -210,9 +203,8 @@ export function ModalAtendimento({
     contatosCriadosLocalmente,
     formulario.idCliente
   );
-  const proximoCodigoCliente = obterProximoCodigoCliente(clientes);
-  const motivosPerdaAtivos = motivosPerda.filter((motivo) => motivo.status !== 0);
-  const orcamentosAbertosDoCliente = orcamentos.filter(
+  const proximoCodigoCliente = obterProximoCodigoCliente(listaFornecedores);
+  const orcamentosAbertosDoFornecedor = orcamentos.filter(
     (orcamento) => String(orcamento.idCliente) === String(formulario.idCliente)
   );
   const orcamentoSelecionadoFormulario = orcamentos.find(
@@ -240,7 +232,7 @@ export function ModalAtendimento({
       };
 
       if (name === 'idOrcamento') {
-        const orcamento = orcamentosAbertosDoCliente.find((item) => String(item.idOrcamento) === String(value));
+        const orcamento = orcamentosAbertosDoFornecedor.find((item) => String(item.idOrcamento) === String(value));
         proximoEstado.idEtapaOrcamento = orcamento?.idEtapaOrcamento ? String(orcamento.idEtapaOrcamento) : '';
       }
 
@@ -297,7 +289,7 @@ export function ModalAtendimento({
     }
 
     const camposObrigatorios = [
-      ['idCliente', 'Selecione o cliente.'],
+      ['idCliente', 'Selecione o fornecedor.'],
       ['idTipoAtendimento', 'Selecione o tipo de atendimento.'],
       ['assunto', 'Informe o assunto do atendimento.'],
       ['data', 'Informe a data do atendimento.'],
@@ -319,24 +311,7 @@ export function ModalAtendimento({
     await executarSalvamentoAtendimento();
   }
 
-  async function executarSalvamentoAtendimento(idMotivoPerdaInformado = null) {
-    const etapaSelecionada = etapasOrcamento.find(
-      (etapa) => String(etapa.idEtapaOrcamento || '') === String(formulario.idEtapaOrcamento || '')
-    );
-    const motivoJaVinculadoAoOrcamento = String(orcamentoSelecionadoFormulario?.idMotivoPerda || '').trim();
-    const motivoSelecionado = String(idMotivoPerdaInformado || '').trim() || motivoJaVinculadoAoOrcamento;
-
-    if (
-      formulario.idOrcamento
-      && formulario.idEtapaOrcamento
-      && etapaSelecionada?.obrigarMotivoPerda
-      && !motivoSelecionado
-    ) {
-      definirMotivoPerdaPendente('');
-      definirModalMotivoPerdaAberto(true);
-      return;
-    }
-
+  async function executarSalvamentoAtendimento() {
     definirSalvando(true);
     definirMensagemErro('');
 
@@ -344,10 +319,7 @@ export function ModalAtendimento({
       if (formulario.idOrcamento && formulario.idEtapaOrcamento && aoAtualizarStatusOrcamento) {
         await aoAtualizarStatusOrcamento({
           idOrcamento: Number(formulario.idOrcamento),
-          idEtapaOrcamento: Number(formulario.idEtapaOrcamento),
-          idMotivoPerda: etapaSelecionada?.obrigarMotivoPerda && motivoSelecionado
-            ? Number(motivoSelecionado)
-            : undefined
+          idEtapaOrcamento: Number(formulario.idEtapaOrcamento)
         });
       }
 
@@ -356,16 +328,6 @@ export function ModalAtendimento({
       definirMensagemErro(erro.message || 'Nao foi possivel salvar o atendimento.');
       definirSalvando(false);
     }
-  }
-
-  async function confirmarMotivoPerdaAoSalvar() {
-    if (!String(motivoPerdaPendente || '').trim()) {
-      definirMensagemErro('Selecione o motivo da perda para continuar.');
-      return;
-    }
-
-    definirModalMotivoPerdaAberto(false);
-    await executarSalvamentoAtendimento(motivoPerdaPendente);
   }
 
   function fecharAoClicarNoFundo(evento) {
@@ -471,7 +433,7 @@ export function ModalAtendimento({
 
     definirFormulario((estadoAtual) => ({
       ...estadoAtual,
-      idCliente: String(cliente.idCliente),
+      idFornecedor: String(cliente.idCliente),
       idContato: '',
       idOrcamento: '',
       idEtapaOrcamento: ''
@@ -517,9 +479,9 @@ export function ModalAtendimento({
       return;
     }
 
-    definirModoModalOrcamento('novo');
+    definirModoModalCotacao('novo');
     definirOrcamentoSelecionado(null);
-    definirModalOrcamentoAberto(true);
+    definirModalCotacaoAberto(true);
   }
 
   function abrirModalConsultaOrcamento() {
@@ -527,9 +489,9 @@ export function ModalAtendimento({
       return;
     }
 
-    definirModoModalOrcamento('consulta');
+    definirModoModalCotacao('consulta');
     definirOrcamentoSelecionado(orcamentoSelecionadoFormulario);
-    definirModalOrcamentoAberto(true);
+    definirModalCotacaoAberto(true);
   }
 
   function abrirModalEdicaoOrcamento() {
@@ -537,19 +499,19 @@ export function ModalAtendimento({
       return;
     }
 
-    definirModoModalOrcamento('edicao');
+    definirModoModalCotacao('edicao');
     definirOrcamentoSelecionado(orcamentoSelecionadoFormulario);
-    definirModalOrcamentoAberto(true);
+    definirModalCotacaoAberto(true);
   }
 
   function fecharModalNovoOrcamento() {
-    definirModalOrcamentoAberto(false);
-    definirModoModalOrcamento('novo');
+    definirModalCotacaoAberto(false);
+    definirModoModalCotacao('novo');
     definirOrcamentoSelecionado(null);
   }
 
   async function salvarNovoOrcamento(dadosNovoOrcamento) {
-    const orcamentoBase = modoModalOrcamento === 'novo' ? null : orcamentoSelecionado;
+    const orcamentoBase = modoModalCotacao === 'novo' ? null : orcamentoSelecionado;
     const precisaConfirmarPedido = precisaPerguntarGeracaoPedido(
       orcamentoBase,
       dadosNovoOrcamento.idEtapaOrcamento,
@@ -569,7 +531,7 @@ export function ModalAtendimento({
   }
 
   async function persistirOrcamentoSemPedido(dadosNovoOrcamento) {
-    const orcamentoSalvo = modoModalOrcamento === 'novo'
+    const orcamentoSalvo = modoModalCotacao === 'novo'
       ? await aoIncluirOrcamento(dadosNovoOrcamento)
       : await aoAtualizarOrcamento(dadosNovoOrcamento);
 
@@ -666,7 +628,7 @@ export function ModalAtendimento({
       return;
     }
 
-    const orcamentoSalvo = modoModalOrcamento === 'novo'
+    const orcamentoSalvo = modoModalCotacao === 'novo'
       ? await aoIncluirOrcamento(confirmacao.dadosOrcamento)
       : await aoAtualizarOrcamento(confirmacao.dadosOrcamento);
 
@@ -816,7 +778,7 @@ export function ModalAtendimento({
               />
               <div className="linhaClienteContatoAtendimento">
                 <CampoSelect
-                  label="Cliente"
+                  label="Fornecedor"
                   name="idCliente"
                   data-atalho-busca-id="cliente"
                   referenciaCampo={referenciaCampoCliente}
@@ -879,7 +841,7 @@ export function ModalAtendimento({
                   name="idOrcamento"
                   value={formulario.idOrcamento}
                   onChange={alterarCampo}
-                  options={orcamentosAbertosDoCliente.map((orcamento) => ({
+                  options={orcamentosAbertosDoFornecedor.map((orcamento) => ({
                     valor: String(orcamento.idOrcamento),
                     label: montarRotuloOrcamento(orcamento)
                   }))}
@@ -1016,70 +978,6 @@ export function ModalAtendimento({
           </div>
         ) : null}
 
-        {modalMotivoPerdaAberto ? (
-          <div
-            className="camadaConfirmacaoModal"
-            role="presentation"
-            onMouseDown={() => {
-              if (!salvando) {
-                definirModalMotivoPerdaAberto(false);
-              }
-            }}
-          >
-            <div
-              className="modalConfirmacaoAgenda modalEtapaRapidaCotacao"
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="tituloMotivoPerdaAtendimento"
-              onMouseDown={(evento) => evento.stopPropagation()}
-            >
-              <div className="cabecalhoConfirmacaoModal">
-                <h4 id="tituloMotivoPerdaAtendimento">Motivo da perda</h4>
-              </div>
-
-              <div className="corpoConfirmacaoModal corpoModalEtapaRapidaCotacao">
-                <p>Essa etapa exige um motivo da perda para atualizar o orcamento vinculado.</p>
-                <div className="campoFormulario campoFormularioIntegral">
-                  <label htmlFor="motivoPerdaAtendimento">Selecione o motivo</label>
-                  <select
-                    id="motivoPerdaAtendimento"
-                    className="entradaFormulario"
-                    value={motivoPerdaPendente}
-                    onChange={(evento) => definirMotivoPerdaPendente(evento.target.value)}
-                    disabled={salvando}
-                  >
-                    <option value="">Selecione</option>
-                    {motivosPerdaAtivos.map((motivo) => (
-                      <option key={motivo.idMotivo} value={motivo.idMotivo}>
-                        {motivo.descricao}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="acoesConfirmacaoModal">
-                <Botao
-                  variante="secundario"
-                  type="button"
-                  onClick={() => definirModalMotivoPerdaAberto(false)}
-                  disabled={salvando}
-                >
-                  Cancelar
-                </Botao>
-                <Botao
-                  variante="primario"
-                  type="button"
-                  onClick={confirmarMotivoPerdaAoSalvar}
-                  disabled={salvando}
-                >
-                  Confirmar
-                </Botao>
-              </div>
-            </div>
-          </div>
-        ) : null}
-
         {confirmandoSaida ? (
           <div className="camadaConfirmacaoModal" role="presentation" onMouseDown={fecharConfirmacaoSaida}>
             <div
@@ -1169,7 +1067,7 @@ export function ModalAtendimento({
     <ModalBuscaClientes
       aberto={modalBuscaClienteAberto}
       empresa={empresa}
-      clientes={clientes}
+      clientes={clientesAtivos}
       placeholder="Pesquisar fornecedor no grid"
       ariaLabelPesquisa="Pesquisar fornecedor no grid"
       rotuloAcaoPrimaria="Incluir fornecedor"
@@ -1194,9 +1092,9 @@ export function ModalAtendimento({
       aoFechar={fecharModalBuscaContato}
     />
 
-    <ModalOrcamento
+    <ModalCotacao
       aberto={modalOrcamentoAberto}
-      orcamento={modoModalOrcamento === 'novo' ? (dadosOrcamentoAtendimento || dadosOrcamento) : orcamentoSelecionado}
+      orcamento={modoModalCotacao === 'novo' ? (dadosOrcamentoAtendimento || dadosOrcamento) : orcamentoSelecionado}
       clientes={clientesOrcamento}
       contatos={contatosOrcamento}
       usuarios={usuariosOrcamento}
@@ -1205,13 +1103,12 @@ export function ModalAtendimento({
       metodosPagamento={metodosPagamento}
       prazosPagamento={prazosPagamento}
       etapasOrcamento={etapasOrcamento}
-      motivosPerda={motivosPerda}
       produtos={produtos}
       camposOrcamento={camposOrcamento}
       camposPedido={camposPedido}
       empresa={empresa}
       usuarioLogado={usuarioLogado}
-      modo={modoModalOrcamento}
+      modo={modoModalCotacao}
       idVendedorBloqueado={idVendedorBloqueado}
       somenteConsultaPrazos={somenteConsultaPrazos}
       aoIncluirCliente={aoIncluirCliente}
@@ -1268,7 +1165,7 @@ function criarFormularioInicial(atendimento, usuarioLogado) {
     data: atendimento?.data || dataPadrao,
     horaInicio: atendimento?.horaInicio || horaPadrao,
     horaFim: atendimento?.horaFim || '',
-    idCliente: normalizarValorFormulario(atendimento?.idCliente),
+    idFornecedor: normalizarValorFormulario(atendimento?.idCliente),
     idContato: normalizarValorFormulario(atendimento?.idContato),
     idOrcamento: '',
     idEtapaOrcamento: '',
@@ -1360,16 +1257,15 @@ function obterHoraAtualFormatoInput() {
   return `${horas}:${minutos}`;
 }
 
-function montarDadosOrcamentoAPartirDoAtendimentoAtual(formulario, clientes, vendedores, usuarioLogado) {
+function montarDadosOrcamentoAPartirDoAtendimentoAtual(formulario, fornecedores, vendedores, usuarioLogado) {
   const vendedor = vendedores.find((item) => String(item.idVendedor) === String(usuarioLogado?.idVendedor || ''));
 
   return {
-    idCliente: formulario?.idCliente || '',
+    idFornecedor: formulario?.idCliente || '',
     idContato: formulario?.idContato || '',
     idUsuario: formulario?.idUsuario || usuarioLogado?.idUsuario || '',
     nomeUsuario: formulario?.nomeUsuario || usuarioLogado?.nome || '',
     idVendedor: usuarioLogado?.idVendedor || '',
-    comissao: vendedor?.comissaoPadrao ?? 0,
     observacao: formulario?.descricao || ''
   };
 }
@@ -1460,21 +1356,20 @@ function montarDadosIniciaisPedidoAPartirDoOrcamento(orcamento) {
   return {
     idOrcamento: orcamento.idOrcamento,
     codigoOrcamentoOrigem: orcamento.idOrcamento,
-    idCliente: orcamento.idCliente,
+    idFornecedor: orcamento.idCliente,
     idContato: orcamento.idContato,
     idUsuario: orcamento.idUsuario,
     idVendedor: orcamento.idVendedor,
     idPrazoPagamento: orcamento.idPrazoPagamento,
     idTipoPedido: ID_TIPO_PEDIDO_VENDA,
-    comissao: orcamento.comissao,
     dataInclusao: obterDataAtualFormatoInput(),
-    nomeClienteSnapshot: orcamento.nomeCliente || '',
+    nomeClienteSnapshot: orcamento.nomeFornecedor || '',
     nomeContatoSnapshot: orcamento.nomeContato || '',
     nomeUsuarioSnapshot: orcamento.nomeUsuario || '',
     nomeVendedorSnapshot: orcamento.nomeVendedor || '',
     nomeMetodoPagamentoSnapshot: orcamento.nomeMetodoPagamento || '',
     nomePrazoPagamentoSnapshot: orcamento.nomePrazoPagamento || '',
-    nomeTipoPedidoSnapshot: 'Venda',
+    nomeTipoPedidoSnapshot: 'Ordem de compra',
     observacao: orcamento.observacao || '',
     itens: Array.isArray(orcamento.itens) ? orcamento.itens.map((item) => ({
       idProduto: item.idProduto,
@@ -1489,4 +1384,5 @@ function montarDadosIniciaisPedidoAPartirDoOrcamento(orcamento) {
     })) : []
   };
 }
+
 

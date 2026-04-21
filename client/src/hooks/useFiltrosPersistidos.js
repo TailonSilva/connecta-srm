@@ -40,13 +40,45 @@ function combinarComPadrao(filtros, filtrosPadrao) {
   return Object.keys(filtrosPadrao || {}).reduce((resultado, chaveAtual) => {
     // `hasOwnProperty` diferencia ausencia de chave de um valor valido falsy persistido.
     const possuiValorPersistido = filtros && Object.prototype.hasOwnProperty.call(filtros, chaveAtual);
+    const valorAlias = possuiValorPersistido ? undefined : obterValorAliasPersistido(filtros, chaveAtual);
 
     resultado[chaveAtual] = possuiValorPersistido
       ? filtros[chaveAtual]
+      : valorAlias !== undefined
+        ? valorAlias
       : copiarValor(filtrosPadrao[chaveAtual]);
 
     return resultado;
   }, {});
+}
+
+function obterValorAliasPersistido(filtros, chaveAtual) {
+  if (!filtros || typeof filtros !== 'object') {
+    return undefined;
+  }
+
+  const aliases = {
+    idFornecedor: ['idCliente'],
+    idComprador: ['idVendedor'],
+    idCompradorFornecedor: ['idVendedorFornecedor', 'idVendedorCliente'],
+    idVendedorFornecedor: ['idCompradorFornecedor', 'idVendedorCliente'],
+    idEtapaCotacao: ['idEtapaOrcamento'],
+    idsEtapaCotacao: ['idsEtapaOrcamento'],
+    idsEtapaOrcamento: ['idsEtapaCotacao'],
+    idCotacao: ['idOrcamento'],
+    idOrdemCompra: ['idPedido'],
+    idEtapaOrdemCompra: ['idEtapaPedido'],
+    idsEtapaOrdemCompra: ['idsEtapaPedido'],
+    idEtapaPedido: ['idEtapaOrdemCompra']
+  };
+
+  for (const alias of aliases[chaveAtual] || []) {
+    if (Object.prototype.hasOwnProperty.call(filtros, alias)) {
+      return filtros[alias];
+    }
+  }
+
+  return undefined;
 }
 
 // Esta etapa aplica a combinacao com o padrao e, se houver, uma normalizacao customizada do modulo consumidor.

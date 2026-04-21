@@ -34,13 +34,13 @@ export async function abrirEmailOrcamento(contexto) {
 function montarDadosEmailOrcamento({
   formulario,
   orcamento,
-  clientes,
+  fornecedores,
   contatos,
   usuarios,
   vendedores,
   empresa
 }) {
-  const cliente = clientes.find((item) => String(item.idCliente) === String(formulario.idCliente));
+  const cliente = fornecedores.find((item) => String(item.idCliente) === String(formulario.idCliente));
   const contato = contatos.find((item) => String(item.idContato) === String(formulario.idContato));
   const usuario = usuarios.find((item) => String(item.idUsuario) === String(formulario.idUsuario));
   const vendedor = vendedores.find((item) => String(item.idVendedor) === String(formulario.idVendedor));
@@ -68,7 +68,7 @@ function montarDadosEmailOrcamento({
     contato_nome: contato?.nome || ''
   };
   const assunto = aplicarTagsEmail(
-    empresa?.assuntoEmailOrcamento || 'Cotacao {cotacao_codigo} - {fornecedor_nome}',
+    empresa?.assuntoEmailOrcamento || 'Cotacao {cotacao_codigo} - {cliente_nome}',
     tags
   );
   const corpoBase = aplicarTagsEmail(
@@ -178,7 +178,7 @@ function montarCodigoOrcamento(idOrcamento) {
 }
 
 // O código do produto segue o mesmo formato curto já usado no restante do fluxo comercial.
-// O codigo de cadastro exposto na tag segue o id interno do cliente, sem depender da configuracao de codigo principal da empresa.
+// O codigo de cadastro exposto na tag segue o id interno do fornecedor, sem depender da configuracao de codigo principal da empresa.
 function montarCodigoClienteCadastro(cliente) {
   if (!cliente?.idCliente) {
     return '';

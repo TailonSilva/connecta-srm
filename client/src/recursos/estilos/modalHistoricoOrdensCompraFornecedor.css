@@ -1,0 +1,102 @@
+.modalCliente.modalHistoricoOrdensCompraCadastro {
+  width: min(1720px, calc(100vw - 24px));
+  max-width: calc(100vw - 24px);
+}
+
+.modalHistoricoOrdensCompraFornecedorPainel {
+  height: 100%;
+  width: 100%;
+}
+
+.modalHistoricoOrdensCompraFornecedorGrade {
+  height: 100%;
+  width: 100%;
+  max-height: none;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.modalCliente.modalHistoricoOrdensCompraCadastro .tabelaContatosModal {
+  min-width: 0;
+  table-layout: auto;
+}
+
+.modalCliente.modalHistoricoOrdensCompraCadastro .tabelaContatosModal th,
+.modalCliente.modalHistoricoOrdensCompraCadastro .tabelaContatosModal td {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.modalCliente.modalHistoricoOrdensCompraCadastro .colunaHistoricoData {
+  width: 108px;
+  white-space: nowrap;
+}
+
+.modalCliente.modalHistoricoOrdensCompraCadastro .colunaHistoricoPedido {
+  width: 88px;
+  white-space: nowrap;
+}
+
+.modalCliente.modalHistoricoOrdensCompraCadastro .codigoHistoricoPedido {
+  display: inline;
+  min-width: 0;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font-size: inherit;
+  font-weight: 400;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.modalCliente.modalHistoricoOrdensCompraCadastro .colunaHistoricoCliente {
+  width: auto;
+}
+
+.modalCliente.modalHistoricoOrdensCompraCadastro .colunaHistoricoEtapa {
+  width: 168px;
+}
+
+.modalCliente.modalHistoricoOrdensCompraCadastro .colunaHistoricoVendedor {
+  width: 160px;
+}
+
+.modalCliente.modalHistoricoOrdensCompraCadastro .colunaHistoricoPrazoPagamento {
+  width: auto;
+  white-space: normal;
+}
+
+.modalCliente.modalHistoricoOrdensCompraCadastro .colunaHistoricoReferencia {
+  width: 150px;
+  white-space: nowrap;
+}
+
+.modalCliente.modalHistoricoOrdensCompraCadastro .colunaHistoricoDescricao {
+  width: auto;
+  min-width: 0;
+  white-space: normal;
+}
+
+.modalCliente.modalHistoricoOrdensCompraCadastro .colunaHistoricoValor,
+.modalCliente.modalHistoricoOrdensCompraCadastro .colunaHistoricoValorTotal {
+  width: 118px;
+  white-space: nowrap;
+}
+
+.modalCliente.modalHistoricoOrdensCompraCadastro .colunaHistoricoQuantidade {
+  width: 92px;
+  white-space: nowrap;
+}
+
+.modalCliente.modalHistoricoOrdensCompraCadastro .tabelaPedidosCliente th.cabecalhoAcoesContato,
+.modalCliente.modalHistoricoOrdensCompraCadastro .tabelaItensPedidosCliente th.cabecalhoAcoesContato {
+  width: 84px;
+}
+
+@media (max-width: 640px) {
+  .modalCliente.modalHistoricoOrdensCompraCadastro {
+    width: min(100%, calc(100vw - 12px));
+  }
+}

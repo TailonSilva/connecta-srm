@@ -18,7 +18,7 @@ const entidades = [
     rota: '/api/compradores',
     chavePrimaria: 'idComprador',
     camposObrigatorios: ['nome', 'email'],
-    camposPermitidos: ['nome', 'email', 'comissaoPadrao', 'status']
+    camposPermitidos: ['nome', 'email', 'status']
   },
   {
     nome: 'grupoProduto',
@@ -203,20 +203,6 @@ const entidades = [
     ]
   },
   {
-    nome: 'motivoPerda',
-    rota: '/api/motivosPerda',
-    chavePrimaria: 'idMotivo',
-    camposObrigatorios: ['descricao'],
-    camposPermitidos: ['descricao', 'status']
-  },
-  {
-    nome: 'motivoDevolucao',
-    rota: '/api/motivosDevolucao',
-    chavePrimaria: 'idMotivoDevolucao',
-    camposObrigatorios: ['abreviacao', 'descricao'],
-    camposPermitidos: ['abreviacao', 'descricao', 'status']
-  },
-  {
     nome: 'etapaOrdemCompra',
     rota: '/api/etapasOrdemCompra',
     chavePrimaria: 'idEtapa',
@@ -228,7 +214,7 @@ const entidades = [
     rota: '/api/etapasCotacao',
     chavePrimaria: 'idEtapaCotacao',
     camposObrigatorios: ['descricao', 'cor'],
-    camposPermitidos: ['descricao', 'cor', 'ordem', 'obrigarMotivoPerda', 'consideraFunilVendas', 'status']
+    camposPermitidos: ['descricao', 'cor', 'ordem', 'consideraFunilCotacoes', 'status']
   },
   {
     nome: 'campoCotacaoConfiguravel',
@@ -276,7 +262,7 @@ const entidades = [
       'colunasGridOrdensCompra',
       'colunasGridAtendimentos',
       'graficosPaginaInicialCotacoes',
-      'graficosPaginaInicialVendas',
+      'graficosPaginaInicialOrdensCompra',
       'graficosPaginaInicialAtendimentos',
       'cardsPaginaInicial',
       'corPrimariaCotacao',
@@ -421,10 +407,8 @@ const entidades = [
       'idUsuario',
       'idOrdemCompraVinculado',
       'idComprador',
-      'comissao',
       'idPrazoPagamento',
       'idEtapaCotacao',
-      'idMotivoPerda',
       'observacao'
     ]
   },
@@ -464,12 +448,9 @@ const entidades = [
       'idContato',
       'idUsuario',
       'idComprador',
-      'comissao',
-      'valorComissao',
       'idPrazoPagamento',
       'idTipoOrdemCompra',
       'idEtapaOrdemCompra',
-      'idMotivoDevolucao',
       'dataInclusao',
       'dataEntrega',
       'dataValidade',

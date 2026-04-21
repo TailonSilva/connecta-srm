@@ -183,7 +183,7 @@ export function ModalColunasGridClientes({
         }))
       });
     } catch (erro) {
-      definirMensagemErro(erro.message || 'Nao foi possivel salvar as colunas do grid de clientes.');
+      definirMensagemErro(erro.message || 'Nao foi possivel salvar as colunas do grid de fornecedores.');
       definirSalvando(false);
     }
   }

@@ -1,11 +1,11 @@
 import { PaginaAgenda } from '../../paginas/paginaAgenda';
 import { PaginaAtendimentos } from '../../paginas/paginaAtendimentos';
-import { PaginaClientes } from '../../paginas/paginaClientes';
+import { PaginaFornecedores } from '../../paginas/paginaFornecedores';
 import { PaginaConfiguracoes } from '../../paginas/paginaConfiguracoes';
 import { PaginaInicio } from '../../paginas/paginaInicio';
-import { PaginaOrcamentos } from '../../paginas/paginaOrcamentos';
+import { PaginaCotacoes } from '../../paginas/paginaCotacoes';
 import { PaginaPadrao } from '../../paginas/paginaPadrao';
-import { PaginaPedidos } from '../../paginas/paginaPedidos';
+import { PaginaOrdensCompra } from '../../paginas/paginaOrdensCompra';
 import { PaginaProdutos } from '../../paginas/paginaProdutos';
 
 // Renderiza o conteudo central do painel com base no `id` da pagina atualmente selecionada.
@@ -15,7 +15,7 @@ export function ConteudoPainel({ paginaSelecionada, usuarioLogado }) {
   }
 
   if (paginaSelecionada.id === 'clientes') {
-    return <PaginaClientes usuarioLogado={usuarioLogado} />;
+    return <PaginaFornecedores usuarioLogado={usuarioLogado} />;
   }
 
   if (paginaSelecionada.id === 'agenda') {
@@ -31,11 +31,11 @@ export function ConteudoPainel({ paginaSelecionada, usuarioLogado }) {
   }
 
   if (paginaSelecionada.id === 'orcamentos') {
-    return <PaginaOrcamentos usuarioLogado={usuarioLogado} />;
+    return <PaginaCotacoes usuarioLogado={usuarioLogado} />;
   }
 
   if (paginaSelecionada.id === 'pedidos') {
-    return <PaginaPedidos usuarioLogado={usuarioLogado} />;
+    return <PaginaOrdensCompra usuarioLogado={usuarioLogado} />;
   }
 
   if (paginaSelecionada.id === 'configuracoes') {

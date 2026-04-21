@@ -45,24 +45,8 @@ export const cardsPaginaInicial = [
   {
     id: 'quantidadeVendidaMes',
     rotulo: 'Quantidade vendida no mes',
-    ajudaConfiguracao: 'Mostra a quantidade bruta de itens vendidos no mes corrente, sem debitar devolucoes.',
+    ajudaConfiguracao: 'Mostra a quantidade bruta de itens vendidos no mes corrente.',
     ordemPadrao: 6,
-    spanPadrao: 2,
-    visivelPadrao: true
-  },
-  {
-    id: 'comissaoMes',
-    rotulo: 'Comissao no mes',
-    ajudaConfiguracao: 'Mostra a comissao liquida do mes corrente com base na comissao das ordens de compra.',
-    ordemPadrao: 7,
-    spanPadrao: 2,
-    visivelPadrao: true
-  },
-  {
-    id: 'comissaoEntregueMes',
-    rotulo: 'Comissao entregue no mes',
-    ajudaConfiguracao: 'Mostra a comissao liquida das ordens de compra na etapa Entregue com data de entrega no mes corrente.',
-    ordemPadrao: 8,
     spanPadrao: 2,
     visivelPadrao: true
   },

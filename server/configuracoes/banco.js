@@ -8,7 +8,6 @@ const ID_ETAPA_COTACAO_PEDIDO_EXCLUIDO = 3;
 const ID_ETAPA_COTACAO_RECUSADO = 4;
 const ID_ETAPA_PEDIDO_ENTREGUE = 5;
 const ID_TIPO_PEDIDO_VENDA = 1;
-const ID_TIPO_PEDIDO_DEVOLUCAO = 2;
 const ID_CONCEITO_FORNECEDOR_SEM_CONCEITO = 1;
 const ID_STATUS_VISITA_AGENDADO = 1;
 const ID_STATUS_VISITA_CONFIRMADO = 2;
@@ -65,6 +64,8 @@ banco.serialize(() => {
   migrarNomeColuna('empresa', 'etapasFiltroPadraoOrcamento', 'etapasFiltroPadraoCotacao');
   migrarNomeColuna('empresa', 'colunasGridOrcamentos', 'colunasGridCotacoes');
   migrarNomeColuna('empresa', 'graficosPaginaInicialOrcamentos', 'graficosPaginaInicialCotacoes');
+  migrarNomeColuna('empresa', 'graficosPaginaInicialVendas', 'graficosPaginaInicialOrdensCompra');
+  migrarNomeColuna('etapaCotacao', 'consideraFunilVendas', 'consideraFunilCotacoes');
   migrarNomeColuna('empresa', 'corPrimariaOrcamento', 'corPrimariaCotacao');
   migrarNomeColuna('empresa', 'corSecundariaOrcamento', 'corSecundariaCotacao');
   migrarNomeColuna('empresa', 'corDestaqueOrcamento', 'corDestaqueCotacao');
@@ -129,18 +130,10 @@ banco.serialize(() => {
       idComprador INTEGER PRIMARY KEY AUTOINCREMENT,
       nome VARCHAR(150) NOT NULL,
       email VARCHAR(150) NOT NULL,
-      comissaoPadrao DECIMAL(7, 2) NOT NULL DEFAULT 0,
       status BOOLEAN NOT NULL DEFAULT 1
     )
   `);
 
-  banco.run(`
-    ALTER TABLE comprador ADD COLUMN comissaoPadrao DECIMAL(7, 2) NOT NULL DEFAULT 0
-  `, (erro) => {
-    if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna comissaoPadrao do comprador.', erro);
-    }
-  });
 
   banco.run(`
     CREATE TABLE IF NOT EXISTS grupoProduto (
@@ -664,34 +657,6 @@ banco.serialize(() => {
     }
   });
 
-  banco.run(`
-    ALTER TABLE motivoEncerramento RENAME TO motivoPerda
-  `, (erro) => {
-    if (
-      erro &&
-      !String(erro.message || '').includes('no such table') &&
-      !String(erro.message || '').includes('another table or index with this name')
-    ) {
-      console.error('Nao foi possivel renomear a tabela motivoEncerramento para motivoPerda.', erro);
-    }
-  });
-
-  banco.run(`
-    CREATE TABLE IF NOT EXISTS motivoPerda (
-      idMotivo INTEGER PRIMARY KEY AUTOINCREMENT,
-      descricao VARCHAR(150) NOT NULL,
-      status BOOLEAN NOT NULL DEFAULT 1
-    )
-  `);
-
-  banco.run(`
-    CREATE TABLE IF NOT EXISTS motivoDevolucao (
-      idMotivoDevolucao INTEGER PRIMARY KEY AUTOINCREMENT,
-      abreviacao VARCHAR(30) NOT NULL,
-      descricao VARCHAR(150) NOT NULL,
-      status BOOLEAN NOT NULL DEFAULT 1
-    )
-  `);
 
   banco.run(`
     CREATE TABLE IF NOT EXISTS etapaOrdemCompra (
@@ -734,20 +699,12 @@ banco.serialize(() => {
       idEtapaCotacao INTEGER PRIMARY KEY AUTOINCREMENT,
       descricao VARCHAR(150) NOT NULL,
       cor VARCHAR(20) NOT NULL DEFAULT '#EC8702',
-      obrigarMotivoPerda BOOLEAN NOT NULL DEFAULT 0,
-      consideraFunilVendas BOOLEAN NOT NULL DEFAULT 1,
+      consideraFunilCotacoes BOOLEAN NOT NULL DEFAULT 1,
       ordem INTEGER NOT NULL DEFAULT 0,
       status BOOLEAN NOT NULL DEFAULT 1
     )
   `);
 
-  banco.run(`
-    ALTER TABLE etapaCotacao ADD COLUMN obrigarMotivoPerda BOOLEAN NOT NULL DEFAULT 0
-  `, (erro) => {
-    if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna obrigarMotivoPerda da etapa de cotacao.', erro);
-    }
-  });
 
   banco.run(`
     ALTER TABLE etapaCotacao ADD COLUMN ordem INTEGER NOT NULL DEFAULT 0
@@ -758,20 +715,20 @@ banco.serialize(() => {
   });
 
   banco.run(`
-    ALTER TABLE etapaCotacao ADD COLUMN consideraFunilVendas BOOLEAN NOT NULL DEFAULT 1
+    ALTER TABLE etapaCotacao ADD COLUMN consideraFunilCotacoes BOOLEAN NOT NULL DEFAULT 1
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna consideraFunilVendas da etapa de cotacao.', erro);
+      console.error('Nao foi possivel garantir a coluna consideraFunilCotacoes da etapa de cotacao.', erro);
     }
   });
 
   banco.run(`
     UPDATE etapaCotacao
-    SET consideraFunilVendas = 1
-    WHERE consideraFunilVendas IS NULL
+    SET consideraFunilCotacoes = 1
+    WHERE consideraFunilCotacoes IS NULL
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('no such column')) {
-      console.error('Nao foi possivel atualizar o campo consideraFunilVendas das etapas de cotacao.', erro);
+      console.error('Nao foi possivel atualizar o campo consideraFunilCotacoes das etapas de cotacao.', erro);
     }
   });
 
@@ -863,7 +820,7 @@ banco.serialize(() => {
       colunasGridOrdensCompra TEXT,
       colunasGridAtendimentos TEXT,
       graficosPaginaInicialCotacoes TEXT,
-      graficosPaginaInicialVendas TEXT,
+      graficosPaginaInicialOrdensCompra TEXT,
       graficosPaginaInicialAtendimentos TEXT,
       cardsPaginaInicial TEXT,
       corPrimariaCotacao VARCHAR(7) NOT NULL DEFAULT '#111827',
@@ -1046,10 +1003,10 @@ banco.serialize(() => {
   });
 
   banco.run(`
-    ALTER TABLE empresa ADD COLUMN graficosPaginaInicialVendas TEXT
+    ALTER TABLE empresa ADD COLUMN graficosPaginaInicialOrdensCompra TEXT
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna graficosPaginaInicialVendas da empresa.', erro);
+      console.error('Nao foi possivel garantir a coluna graficosPaginaInicialOrdensCompra da empresa.', erro);
     }
   });
 
@@ -1356,10 +1313,8 @@ banco.serialize(() => {
       idUsuario INTEGER,
       idOrdemCompraVinculado INTEGER,
       idComprador INTEGER,
-      comissao DECIMAL(7, 2) NOT NULL DEFAULT 0,
       idPrazoPagamento INTEGER,
       idEtapaCotacao INTEGER,
-      idMotivoPerda INTEGER,
       dataInclusao DATE,
       dataValidade DATE,
       dataFechamento DATE,
@@ -1371,8 +1326,7 @@ banco.serialize(() => {
       FOREIGN KEY (idOrdemCompraVinculado) REFERENCES ordemCompra (idOrdemCompra),
       FOREIGN KEY (idComprador) REFERENCES comprador (idComprador),
       FOREIGN KEY (idPrazoPagamento) REFERENCES prazoPagamento (idPrazoPagamento),
-      FOREIGN KEY (idEtapaCotacao) REFERENCES etapaCotacao (idEtapaCotacao),
-      FOREIGN KEY (idMotivoPerda) REFERENCES motivoPerda (idMotivo)
+      FOREIGN KEY (idEtapaCotacao) REFERENCES etapaCotacao (idEtapaCotacao)
     )
   `);
 
@@ -1400,21 +1354,7 @@ banco.serialize(() => {
     }
   });
 
-  banco.run(`
-    ALTER TABLE cotacao ADD COLUMN comissao DECIMAL(7, 2) NOT NULL DEFAULT 0
-  `, (erro) => {
-    if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna comissao da cotacao.', erro);
-    }
-  });
 
-  banco.run(`
-    ALTER TABLE cotacao ADD COLUMN idMotivoPerda INTEGER
-  `, (erro) => {
-    if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna idMotivoPerda da cotacao.', erro);
-    }
-  });
 
   banco.run(`
     ALTER TABLE cotacao ADD COLUMN idEtapaCotacao INTEGER
@@ -1479,21 +1419,11 @@ banco.serialize(() => {
           FROM fornecedor
           WHERE fornecedor.idFornecedor = cotacao.idFornecedor
         )
-      ),
-      comissao = COALESCE(
-        NULLIF(comissao, ''),
-        (
-          SELECT comprador.comissaoPadrao
-          FROM comprador
-          INNER JOIN fornecedor ON fornecedor.idComprador = comprador.idComprador
-          WHERE fornecedor.idFornecedor = cotacao.idFornecedor
-        ),
-        0
       )
     WHERE idFornecedor IS NOT NULL
   `, (erro) => {
     if (erro) {
-      console.error('Nao foi possivel migrar comprador e comissao dos cotacoes.', erro);
+      console.error('Nao foi possivel migrar comprador dos cotacoes.', erro);
     }
   });
 
@@ -1566,12 +1496,9 @@ banco.serialize(() => {
       idContato INTEGER,
       idUsuario INTEGER NOT NULL,
       idComprador INTEGER NOT NULL,
-      comissao DECIMAL(7, 2) NOT NULL DEFAULT 0,
-      valorComissao DECIMAL(12, 2) NOT NULL DEFAULT 0,
       idPrazoPagamento INTEGER,
       idTipoOrdemCompra INTEGER,
       idEtapaOrdemCompra INTEGER,
-      idMotivoDevolucao INTEGER,
       dataInclusao DATE,
       dataEntrega DATE,
       dataValidade DATE,
@@ -1593,8 +1520,7 @@ banco.serialize(() => {
       FOREIGN KEY (idComprador) REFERENCES comprador (idComprador),
       FOREIGN KEY (idPrazoPagamento) REFERENCES prazoPagamento (idPrazoPagamento),
       FOREIGN KEY (idTipoOrdemCompra) REFERENCES tipoOrdemCompra (idTipoOrdemCompra),
-      FOREIGN KEY (idEtapaOrdemCompra) REFERENCES etapaOrdemCompra (idEtapaOrdemCompra),
-      FOREIGN KEY (idMotivoDevolucao) REFERENCES motivoDevolucao (idMotivoDevolucao)
+      FOREIGN KEY (idEtapaOrdemCompra) REFERENCES etapaOrdemCompra (idEtapaOrdemCompra)
     )
   `);
 
@@ -1742,40 +1668,7 @@ banco.serialize(() => {
     }
   });
 
-  banco.run(`
-    ALTER TABLE ordemCompra ADD COLUMN idMotivoDevolucao INTEGER
-  `, (erro) => {
-    if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna idMotivoDevolucao da ordemCompra.', erro);
-    }
-  });
 
-  banco.run(`
-    ALTER TABLE ordemCompra ADD COLUMN valorComissao DECIMAL(12, 2) NOT NULL DEFAULT 0
-  `, (erro) => {
-    if (erro && !String(erro.message || '').includes('duplicate column name')) {
-      console.error('Nao foi possivel garantir a coluna valorComissao da ordemCompra.', erro);
-    }
-  });
-
-  banco.run(`
-    UPDATE ordemCompra
-    SET valorComissao = COALESCE(
-      (
-        SELECT ROUND(
-          COALESCE(SUM(COALESCE(itemOrdemCompra.valorTotal, 0)), 0) * COALESCE(ordemCompra.comissao, 0) / 100,
-          2
-        )
-        FROM itemOrdemCompra
-        WHERE itemOrdemCompra.idOrdemCompra = ordemCompra.idOrdemCompra
-      ),
-      0
-    )
-  `, (erro) => {
-    if (erro) {
-      console.error('Nao foi possivel recalcular a coluna valorComissao dos ordensCompra.', erro);
-    }
-  });
 
   banco.run(`
     ALTER TABLE itemOrdemCompra ADD COLUMN referenciaProdutoSnapshot VARCHAR(120)
@@ -2144,15 +2037,15 @@ async function garantirUsuarioAdministradorPadrao() {
 
 async function garantirEtapasCotacaoObrigatorias() {
   const etapasObrigatorias = [
-    { idEtapaCotacao: ID_ETAPA_COTACAO_FECHAMENTO, descricao: 'Fechado', cor: '#A7E1B8', obrigarMotivoPerda: 0, consideraFunilVendas: 1, ordem: 1, status: 1 },
-    { idEtapaCotacao: ID_ETAPA_COTACAO_FECHADO_SEM_PEDIDO, descricao: 'Fechado sem ordem de compra', cor: '#FDE68A', obrigarMotivoPerda: 0, consideraFunilVendas: 1, ordem: 2, status: 1 },
-    { idEtapaCotacao: ID_ETAPA_COTACAO_PEDIDO_EXCLUIDO, descricao: 'Ordem de Compra Excluida', cor: '#E5E7EB', obrigarMotivoPerda: 0, consideraFunilVendas: 0, ordem: 3, status: 1 },
-    { idEtapaCotacao: ID_ETAPA_COTACAO_RECUSADO, descricao: 'Recusado', cor: '#E5E7EB', obrigarMotivoPerda: 1, consideraFunilVendas: 0, ordem: 4, status: 1 }
+    { idEtapaCotacao: ID_ETAPA_COTACAO_FECHAMENTO, descricao: 'Fechado', cor: '#A7E1B8', consideraFunilCotacoes: 1, ordem: 1, status: 1 },
+    { idEtapaCotacao: ID_ETAPA_COTACAO_FECHADO_SEM_PEDIDO, descricao: 'Fechado sem ordem de compra', cor: '#FDE68A', consideraFunilCotacoes: 1, ordem: 2, status: 1 },
+    { idEtapaCotacao: ID_ETAPA_COTACAO_PEDIDO_EXCLUIDO, descricao: 'Ordem de Compra Excluida', cor: '#E5E7EB', consideraFunilCotacoes: 0, ordem: 3, status: 1 },
+    { idEtapaCotacao: ID_ETAPA_COTACAO_RECUSADO, descricao: 'Recusado', cor: '#E5E7EB', consideraFunilCotacoes: 0, ordem: 4, status: 1 }
   ];
 
   await executar(
     `UPDATE etapaCotacao
-    SET descricao = 'Ordem de Compra Excluida', cor = '#E5E7EB', obrigarMotivoPerda = 0, consideraFunilVendas = 0, ordem = 3, status = 1
+    SET descricao = 'Ordem de Compra Excluida', cor = '#E5E7EB', consideraFunilCotacoes = 0, ordem = 3, status = 1
     WHERE idEtapaCotacao = ?`,
     [ID_ETAPA_COTACAO_PEDIDO_EXCLUIDO]
   );
@@ -2174,7 +2067,7 @@ async function garantirEtapasCotacaoObrigatorias() {
 
     await executar(
       `UPDATE etapaCotacao
-      SET descricao = 'Recusado (legado)', status = 0, obrigarMotivoPerda = 0, consideraFunilVendas = 0
+      SET descricao = 'Recusado (legado)', status = 0, consideraFunilCotacoes = 0
       WHERE idEtapaCotacao = ?`,
       [Number(etapaRecusadoPorDescricao.idEtapaCotacao)]
     );
@@ -2188,15 +2081,15 @@ async function garantirEtapasCotacaoObrigatorias() {
 
     if (!existente) {
       await executar(
-        'INSERT INTO etapaCotacao (idEtapaCotacao, descricao, cor, obrigarMotivoPerda, consideraFunilVendas, ordem, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [etapa.idEtapaCotacao, etapa.descricao, etapa.cor, etapa.obrigarMotivoPerda, etapa.consideraFunilVendas, etapa.ordem, etapa.status]
+        'INSERT INTO etapaCotacao (idEtapaCotacao, descricao, cor, consideraFunilCotacoes, ordem, status) VALUES (?, ?, ?, ?, ?, ?)' ,
+        [etapa.idEtapaCotacao, etapa.descricao, etapa.cor, etapa.consideraFunilCotacoes, etapa.ordem, etapa.status]
       );
       continue;
     }
 
     await executar(
-      'UPDATE etapaCotacao SET descricao = ?, cor = ?, status = ?, obrigarMotivoPerda = ?, consideraFunilVendas = ?, ordem = ? WHERE idEtapaCotacao = ?',
-      [etapa.descricao, etapa.cor, etapa.status, etapa.obrigarMotivoPerda, etapa.consideraFunilVendas, etapa.ordem, etapa.idEtapaCotacao]
+      'UPDATE etapaCotacao SET descricao = ?, cor = ?, status = ?, consideraFunilCotacoes = ?, ordem = ? WHERE idEtapaCotacao = ?',
+      [etapa.descricao, etapa.cor, etapa.status, etapa.consideraFunilCotacoes, etapa.ordem, etapa.idEtapaCotacao]
     );
   }
 
@@ -2224,7 +2117,7 @@ async function garantirEtapasCotacaoObrigatorias() {
 
     await executar(
       `UPDATE etapaCotacao
-      SET descricao = 'Etapa de cancelamento legada', status = 0, obrigarMotivoPerda = 0, consideraFunilVendas = 0
+      SET descricao = 'Etapa de cancelamento legada', status = 0, consideraFunilCotacoes = 0
       WHERE idEtapaCotacao IN (${marcadores})`,
       idsEtapasLegadas
     );
@@ -2272,8 +2165,7 @@ async function garantirEtapasOrdemCompraObrigatorias() {
 
 async function garantirTiposOrdemCompraObrigatorios() {
   const tiposObrigatorios = [
-    { idTipoOrdemCompra: ID_TIPO_PEDIDO_VENDA, descricao: 'Venda', status: 1 },
-    { idTipoOrdemCompra: ID_TIPO_PEDIDO_DEVOLUCAO, descricao: 'Devolucao', status: 1 }
+    { idTipoOrdemCompra: ID_TIPO_PEDIDO_VENDA, descricao: 'Ordem de compra', status: 1 }
   ];
 
   for (const tipoOrdemCompra of tiposObrigatorios) {
@@ -2319,13 +2211,12 @@ async function removerColunaAbreviacaoDasEtapas() {
       'idEtapaCotacao INTEGER PRIMARY KEY AUTOINCREMENT',
       'descricao VARCHAR(150) NOT NULL',
       "cor VARCHAR(20) NOT NULL DEFAULT '#EC8702'",
-      'obrigarMotivoPerda BOOLEAN NOT NULL DEFAULT 0',
-      'consideraFunilVendas BOOLEAN NOT NULL DEFAULT 1',
+      'consideraFunilCotacoes BOOLEAN NOT NULL DEFAULT 1',
       'ordem INTEGER NOT NULL DEFAULT 0',
       'status BOOLEAN NOT NULL DEFAULT 1'
     ],
-    ['idEtapaCotacao', 'descricao', 'cor', 'obrigarMotivoPerda', 'consideraFunilVendas', 'ordem', 'status'],
-    'idEtapaCotacao, descricao, COALESCE(cor, "#EC8702") AS cor, COALESCE(obrigarMotivoPerda, 0) AS obrigarMotivoPerda, COALESCE(consideraFunilVendas, 1) AS consideraFunilVendas, COALESCE(ordem, idEtapaCotacao) AS ordem, COALESCE(status, 1) AS status'
+    ['idEtapaCotacao', 'descricao', 'cor', 'consideraFunilCotacoes', 'ordem', 'status'],
+    'idEtapaCotacao, descricao, COALESCE(cor, "#EC8702") AS cor, COALESCE(consideraFunilCotacoes, 1) AS consideraFunilCotacoes, COALESCE(ordem, idEtapaCotacao) AS ordem, COALESCE(status, 1) AS status'
   );
 }
 
@@ -2832,8 +2723,8 @@ function executarMigracaoNome(sql) {
 
 function migrarDadosLegadosCotacao() {
   executarMigracaoNome(`
-    INSERT OR IGNORE INTO etapaCotacao (idEtapaCotacao, descricao, cor, obrigarMotivoPerda, ordem, consideraFunilVendas, status)
-    SELECT idEtapaOrcamento, descricao, cor, obrigarMotivoPerda, ordem, consideraFunilVendas, status
+    INSERT OR IGNORE INTO etapaCotacao (idEtapaCotacao, descricao, cor, ordem, consideraFunilCotacoes, status)
+    SELECT idEtapaOrcamento, descricao, cor, ordem, consideraFunilCotacoes, status
     FROM etapaOrcamento
   `);
   executarMigracaoNome('DROP TABLE IF EXISTS etapaOrcamento');
@@ -2853,10 +2744,8 @@ function migrarDadosLegadosCotacao() {
       idUsuario,
       idOrdemCompraVinculado,
       idComprador,
-      comissao,
       idPrazoPagamento,
       idEtapaCotacao,
-      idMotivoPerda,
       dataInclusao,
       dataValidade,
       dataFechamento,
@@ -2869,10 +2758,8 @@ function migrarDadosLegadosCotacao() {
       idUsuario,
       idOrdemCompraVinculado,
       idComprador,
-      comissao,
       idPrazoPagamento,
       idEtapaOrcamento,
-      idMotivoPerda,
       dataInclusao,
       dataValidade,
       dataFechamento,
@@ -2937,7 +2824,6 @@ module.exports = {
   ID_ETAPA_COTACAO_RECUSADO,
   ID_ETAPA_PEDIDO_ENTREGUE,
   ID_TIPO_PEDIDO_VENDA,
-  ID_TIPO_PEDIDO_DEVOLUCAO,
   consultarUm,
   consultarTodos,
   executar

@@ -168,11 +168,11 @@
   background: linear-gradient(90deg, rgba(122, 203, 255, 0.7) 0%, var(--corPrimaria) 55%, var(--corPrimariaForte) 100%);
 }
 
-.paginaInicioGraficoBarraTrilhaDevolucao {
+.paginaInicioGraficoBarraTrilhaNegativo {
   background: rgba(214, 69, 32, 0.12);
 }
 
-.paginaInicioGraficoBarraTrilhaDevolucao span {
+.paginaInicioGraficoBarraTrilhaNegativo span {
   background: linear-gradient(90deg, #f6c28b 0%, #f59e0b 45%, #d64520 100%);
 }
 

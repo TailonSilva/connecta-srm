@@ -182,7 +182,7 @@ function focarPrimeiroCampoAbaAtiva(modal) {
 
 // Localiza o bloco visivel da aba ativa para que os atalhos de navegacao foquem a secao correta, e nao o cabecalho do modal.
 function encontrarContainerAbaAtiva(modal) {
-  const corpoAbas = Array.from(modal.querySelectorAll('.corpoModalCliente, .corpoModalOrcamentoAbas')).find(elementoEstaVisivel);
+  const corpoAbas = Array.from(modal.querySelectorAll('.corpoModalCliente, .corpoModalCotacaoAbas')).find(elementoEstaVisivel);
 
   if (!(corpoAbas instanceof HTMLElement)) {
     return modal;

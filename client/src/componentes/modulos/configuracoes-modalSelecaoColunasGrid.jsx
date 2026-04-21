@@ -13,7 +13,7 @@ const opcoesColunasGrid = [
   {
     id: 'clientes',
     titulo: 'Fornecedores',
-    descricao: 'Configurar a grade principal dos clientes.',
+    descricao: 'Configurar a grade principal dos fornecedores.',
     icone: 'clientes',
     disponivel: true
   },

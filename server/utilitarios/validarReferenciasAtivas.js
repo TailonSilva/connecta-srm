@@ -203,40 +203,6 @@ const validacoesPorEntidade = {
       mensagem: 'Selecione uma etapa de cotacao ativa.'
     },
     {
-      campo: 'idMotivoPerda',
-      tabela: 'motivoPerda',
-      chavePrimaria: 'idMotivo',
-      colunaAtiva: 'status',
-      mensagem: 'Selecione um motivo da perda ativo.'
-    }
-  ],
-  itemCotacao: [
-    {
-      campo: 'idProduto',
-      tabela: 'produto',
-      chavePrimaria: 'idProduto',
-      colunaAtiva: 'status',
-      mensagem: 'Selecione um produto ativo.'
-    }
-  ],
-  valorCampoCotacao: [
-    {
-      campo: 'idCampoCotacao',
-      tabela: 'campoCotacaoConfiguravel',
-      chavePrimaria: 'idCampoCotacao',
-      colunaAtiva: 'status',
-      mensagem: 'Selecione um campo da cotacao ativo.'
-    }
-  ],
-  ordemCompra: [
-    {
-      campo: 'idFornecedor',
-      tabela: 'fornecedor',
-      chavePrimaria: 'idFornecedor',
-      colunaAtiva: 'status',
-      mensagem: 'Selecione um fornecedor ativo.'
-    },
-    {
       campo: 'idContato',
       tabela: 'contato',
       chavePrimaria: 'idContato',
@@ -270,13 +236,6 @@ const validacoesPorEntidade = {
       chavePrimaria: 'idTipoOrdemCompra',
       colunaAtiva: 'status',
       mensagem: 'Selecione um tipo de ordem de compra ativa.'
-    },
-    {
-      campo: 'idMotivoDevolucao',
-      tabela: 'motivoDevolucao',
-      chavePrimaria: 'idMotivoDevolucao',
-      colunaAtiva: 'status',
-      mensagem: 'Selecione um motivo da devolucao ativo.'
     },
     {
       campo: 'idEtapaOrdemCompra',

@@ -39,7 +39,6 @@ rotaCotacoes.get('/', async (requisicao, resposta) => {
       'prazoPagamento.descricao',
       'metodoPagamento.descricao',
       'etapaCotacao.descricao',
-      'motivoPerda.descricao',
       'cotacao.observacao',
       'CAST(cotacao.idCotacao AS TEXT)'
     ]);
@@ -68,7 +67,6 @@ rotaCotacoes.get('/', async (requisicao, resposta) => {
       LEFT JOIN prazoPagamento ON prazoPagamento.idPrazoPagamento = cotacao.idPrazoPagamento
       LEFT JOIN metodoPagamento ON metodoPagamento.idMetodoPagamento = prazoPagamento.idMetodoPagamento
       LEFT JOIN etapaCotacao ON etapaCotacao.idEtapaCotacao = cotacao.idEtapaCotacao
-      LEFT JOIN motivoPerda ON motivoPerda.idMotivo = cotacao.idMotivoPerda
       ${montarWhere(clausulas)}
       ORDER BY cotacao.idCotacao DESC
     `, parametros);
@@ -119,24 +117,20 @@ rotaCotacoes.post('/', async (requisicao, resposta) => {
         idContato,
         idUsuario,
         idComprador,
-        comissao,
         idPrazoPagamento,
         idEtapaCotacao,
-        idMotivoPerda,
         dataInclusao,
         dataValidade,
         dataFechamento,
         observacao
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         payload.idFornecedor,
         payload.idContato,
         payload.idUsuario,
         payload.idComprador,
-        payload.comissao,
         payload.idPrazoPagamento,
         payload.idEtapaCotacao,
-        payload.idMotivoPerda,
         payload.dataInclusao,
         payload.dataValidade,
         payload.dataFechamento,
@@ -211,10 +205,8 @@ rotaCotacoes.put('/:id', async (requisicao, resposta) => {
         idContato = ?,
         idUsuario = ?,
         idComprador = ?,
-        comissao = ?,
         idPrazoPagamento = ?,
         idEtapaCotacao = ?,
-        idMotivoPerda = ?,
         dataInclusao = ?,
         dataValidade = ?,
         dataFechamento = ?,
@@ -225,10 +217,8 @@ rotaCotacoes.put('/:id', async (requisicao, resposta) => {
         payload.idContato,
         payload.idUsuario,
         payload.idComprador,
-        payload.comissao,
         payload.idPrazoPagamento,
         payload.idEtapaCotacao,
-        payload.idMotivoPerda,
         payload.dataInclusao,
         payload.dataValidade,
         payload.dataFechamento,
@@ -330,12 +320,8 @@ function normalizarPayloadCotacao(payload) {
     idContato: payload.idContato ? Number(payload.idContato) : null,
     idUsuario: payload.idUsuario ? Number(payload.idUsuario) : null,
     idComprador: payload.idComprador ? Number(payload.idComprador) : null,
-    comissao: payload.comissao === '' || payload.comissao === null || payload.comissao === undefined
-      ? 0
-      : Number(payload.comissao),
     idPrazoPagamento: payload.idPrazoPagamento ? Number(payload.idPrazoPagamento) : null,
     idEtapaCotacao: payload.idEtapaCotacao ? Number(payload.idEtapaCotacao) : null,
-    idMotivoPerda: payload.idMotivoPerda ? Number(payload.idMotivoPerda) : null,
     dataInclusao: limparTexto(payload.dataInclusao),
     dataValidade: limparTexto(payload.dataValidade),
     dataFechamento: limparTexto(payload.dataFechamento),
@@ -419,9 +405,6 @@ function validarPayloadCotacao(payload, etapaCotacao) {
     return 'Informe a data de fechamento para cotacoes nas etapas Fechado, Fechado sem ordem de compra, Ordem de Compra Excluida ou Recusado.';
   }
 
-  if (etapaCotacao?.obrigarMotivoPerda && !payload.idMotivoPerda) {
-    return 'Selecione o motivo da perda para esta etapa da cotacao.';
-  }
 
   return '';
 }

@@ -150,15 +150,6 @@ export const colunasGridPedidos = [
     visivelPadrao: false
   },
   {
-    id: 'comissao',
-    rotulo: 'Comissao',
-    classe: 'colunaGradeValor',
-    obrigatoria: false,
-    ordemPadrao: 16,
-    spanPadrao: 2,
-    visivelPadrao: false
-  },
-  {
     id: 'prazoPagamento',
     rotulo: 'Prazo de Pagamento',
     classe: 'colunaGradeTexto',

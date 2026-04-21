@@ -1,11 +1,11 @@
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import estilosDocumentoOrcamentoPdf from '../../recursos/estilos/documentoOrcamentoPdf.css?inline';
-import { DocumentoOrcamentoPdf } from '../../componentes/orcamentos/documentoOrcamentoPdf';
+import estilosDocumentoCotacaoPdf from '../../recursos/estilos/documentoOrcamentoPdf.css?inline';
+import { DocumentoCotacaoPdf } from '../../componentes/cotacoes/documentoCotacaoPdf';
 
-export function gerarHtmlDocumentoOrcamentoPdf(documento) {
+export function gerarHtmlDocumentoCotacaoPdf(documento) {
   const markup = renderToStaticMarkup(
-    createElement(DocumentoOrcamentoPdf, { documento })
+    createElement(DocumentoCotacaoPdf, { documento })
   );
 
   return [
@@ -15,7 +15,7 @@ export function gerarHtmlDocumentoOrcamentoPdf(documento) {
     '<meta charset="utf-8" />',
     '<meta name="viewport" content="width=device-width, initial-scale=1" />',
     '<title>Orcamento</title>',
-    `<style>${estilosDocumentoOrcamentoPdf}</style>`,
+    `<style>${estilosDocumentoCotacaoPdf}</style>`,
     '</head>',
     '<body>',
     markup,

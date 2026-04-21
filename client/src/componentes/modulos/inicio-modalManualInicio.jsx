@@ -13,9 +13,9 @@ export function ModalManualInicio({
       descricao="Resumo da estrutura atual da home comercial."
       eyebrow="Dashboard"
       heroTitulo="Leitura comercial por abas"
-      heroDescricao="A pagina inicial separa `Orcamentos`, `Vendas` e `Atendimentos` em abas e usa secoes compactas com leitura visual padronizada."
+      heroDescricao="A pagina inicial separa `Orcamentos`, `Ordens de compra` e `Atendimentos` em abas e usa secoes compactas com leitura visual padronizada."
       painelHeroi={[
-        { valor: '3 abas', rotulo: 'Cotacoes, Vendas e Atendimentos' },
+        { valor: '3 abas', rotulo: 'Cotacoes, Ordens de compra e Atendimentos' },
         { valor: 'Top 5', rotulo: 'Itens exibidos por grafico' },
         { valor: 'Modal completo', rotulo: 'Lista total por sessao' }
       ]}
@@ -23,7 +23,7 @@ export function ModalManualInicio({
         {
           titulo: 'Indicadores iniciais',
           descricao: 'A home abre com cards compactos de leitura rapida.',
-          detalhe: 'Hoje incluem Cotacoes em aberto, Ordens de Compra no mes, Media de dias para conversao, Atendimentos no mes, Prospeccao no mes, Comissao no mes, Comissao entregue no mes, Positivacao no mes, % Positivacao da carteira, Catalogo e Carteira.',
+          detalhe: 'Hoje incluem Cotacoes em aberto, Ordens de Compra no mes, Media de dias para conversao, Atendimentos no mes, Prospeccao no mes, Positivacao no mes, % Positivacao da carteira, Catalogo e Carteira.',
           icone: 'inicio'
         },
         {
@@ -33,9 +33,9 @@ export function ModalManualInicio({
           icone: 'orcamento'
         },
         {
-          titulo: 'Aba Vendas',
-          descricao: 'Reune devolucoes, vendas por grupo, marca, UF, cliente, conceito, produto e ranking.',
-          detalhe: 'As leituras usam ordens de compra do mes corrente conforme a regra definida em cada sessao, incluindo a nova visao por conceito de cliente.',
+          titulo: 'Aba Ordens de compra',
+          descricao: 'Reune ordens de compra por grupo, marca, UF, cliente, conceito, produto e ranking.',
+          detalhe: 'As leituras usam ordens de compra do mes corrente conforme a regra definida em cada sessao, incluindo a nova visao por conceito de fornecedor.',
           icone: 'pedido'
         },
         {
@@ -69,7 +69,7 @@ export function ModalManualInicio({
         },
         {
           titulo: 'Alternar contexto',
-          descricao: 'As abas separam a leitura de Orcamentos e Vendas sem misturar funil com analise comercial.',
+          descricao: 'As abas separam a leitura de Orcamentos e Ordens de compra sem misturar funil com analise comercial.',
           icone: 'configuracoes'
         }
       ]}
@@ -79,7 +79,7 @@ export function ModalManualInicio({
           titulo: 'Padrao atual dos graficos',
           itens: [
             'Graficos compactos da home usam o padrao `maximo de 5 itens + modal com lista completa`.',
-            'A sessao de vendas por conceito de cliente segue exatamente o mesmo padrao visual e operacional dos demais graficos de vendas.',
+            'A sessao de ordens de compra por conceito de fornecedor segue exatamente o mesmo padrao visual e operacional dos demais graficos de ordens de compra.',
             'Todo novo card ou grafico criado para a home deve entrar tambem na lista de configuracao da empresa (aba Pagina inicial).',
             'Cards e graficos usam tooltip padrao curto no icone de Informacao, com duas linhas: Composicao e Periodo.',
             'As secoes de resumo por relacionamento ocupam 2 colunas no grid principal da home.',

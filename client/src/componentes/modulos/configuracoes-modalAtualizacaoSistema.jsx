@@ -214,7 +214,7 @@ export function ModalAtualizacaoSistema({
           <div>
             <h2 id="tituloModalAtualizacaoSistema">Atualizacao do sistema</h2>
             <p className="textoAuxiliarAtualizacaoSistema">
-              Informe o link do repositorio ou da pagina de releases no GitHub. A atualizacao agora acontece somente por acao manual do cliente.
+              Informe o link do repositorio ou da pagina de releases no GitHub. A atualizacao agora acontece somente por acao manual do fornecedor.
             </p>
           </div>
 

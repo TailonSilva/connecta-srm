@@ -11,7 +11,7 @@ import './recursos/estilos/modalManualPagina.css';
 import './recursos/estilos/campoImagemPadrao.css';
 import './recursos/estilos/paginaAgenda.css';
 import './recursos/estilos/paginaConfiguracoes.css';
-import './recursos/estilos/paginaClientes.css';
+import './recursos/estilos/paginaFornecedores.css';
 import './recursos/estilos/paginaProdutos.css';
 import './recursos/estilos/paginaAtendimentos.css';
 import './recursos/estilos/paginaOrcamentos.css';

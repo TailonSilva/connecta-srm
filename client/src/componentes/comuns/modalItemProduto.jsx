@@ -60,7 +60,7 @@ export function ModalItemProduto({
               onChange={(imagem) => onAlterarImagem(imagem || '')}
             />
 
-            <div className="colunaPrincipalModalOrcamento">
+            <div className="colunaPrincipalModalCotacao">
               {somenteLeitura ? (
                 <CampoFormulario
                   label="Produto"

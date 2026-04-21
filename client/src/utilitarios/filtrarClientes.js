@@ -9,10 +9,10 @@ function normalizarTexto(valor) {
     .trim();
 }
 
-export function filtrarClientes(clientes, pesquisa, filtros = {}) {
+export function filtrarClientes(fornecedores, pesquisa, filtros = {}) {
   const termo = normalizarTexto(pesquisa);
 
-  return clientes.filter((cliente) => {
+  return fornecedores.filter((cliente) => {
     const passouFiltros = (
       listaIncluiValorFiltro(filtros.estado, cliente.estado, normalizarTexto) &&
       (!filtros.cidade || normalizarTexto(cliente.cidade) === normalizarTexto(filtros.cidade)) &&

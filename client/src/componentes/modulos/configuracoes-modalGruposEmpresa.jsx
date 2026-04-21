@@ -5,7 +5,7 @@ import { BotaoAcaoGrade } from '../comuns/botaoAcaoGrade';
 import { GradePadrao } from '../comuns/gradePadrao';
 import { normalizarTelefone } from '../../utilitarios/normalizarTelefone';
 import { normalizarValorEntradaFormulario } from '../../utilitarios/normalizarTextoFormulario';
-import { ModalContatoCliente } from './clientes-modalContatoCliente';
+import { ModalContatoFornecedor as ModalContatoCliente } from './fornecedores-modalContatoFornecedor';
 import { ModalCadastroConfiguracao } from './configuracoes-modalCadastroConfiguracao';
 
 const estadoInicialGrupoEmpresa = {

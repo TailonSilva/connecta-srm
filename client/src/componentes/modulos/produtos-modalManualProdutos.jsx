@@ -73,8 +73,8 @@ export function ModalManualProdutos({
           icone: 'editar'
         },
         {
-          titulo: 'Abrir vendas do produto',
-          descricao: 'Dentro do modal do produto, a aba Vendas abre o mesmo historico amplo reutilizavel do cliente, mas filtrado automaticamente para esse produto e exibindo apenas os itens das ordens de compra, com busca por digitacao no cabecalho e filtros para prazo, referencia e descricao.',
+          titulo: 'Abrir ordens de compra do produto',
+          descricao: 'Dentro do modal do produto, a aba Ordens de compra abre o mesmo historico amplo reutilizavel do fornecedor, mas filtrado automaticamente para esse produto e exibindo apenas os itens das ordens de compra, com busca por digitacao no cabecalho e filtros para prazo, referencia e descricao.',
           icone: 'pedido'
         },
         {
@@ -98,7 +98,7 @@ export function ModalManualProdutos({
             'Imagem e um campo opcional, com recorte proprio para thumbnail final em 320 x 320 px, e valores vazios sao normalizados para null.',
             'Grupo, marca e unidade podem ser cadastrados no fluxo sem sair do modal, se houver permissao.',
             'Nas abas do modal do produto, `Alt + Seta para a esquerda` volta para a aba anterior e `Alt + Seta para a direita` avanca para a proxima, reposicionando o foco no primeiro campo da nova aba.',
-            'A aba Vendas do modal do produto abre um historico amplo filtrado pelo produto atual e mostra apenas os itens das ordens de compra, com colunas separadas para data de inclusao e data de entrega.',
+            'A aba Ordens de compra do modal do produto abre um historico amplo filtrado pelo produto atual e mostra apenas os itens das ordens de compra, com colunas separadas para data de inclusao e data de entrega.',
             'A importacao por planilha usa um modelo com aba de instrucoes, incluindo obrigatoriedades, tipo de dado e limite de caracteres por coluna.',
             'Quando uma linha falha na importacao, o retorno agora diferencia melhor preco invalido ou negativo, status incorreto e referencias auxiliares inativas ou inexistentes.',
             'Se grupo, marca ou unidade nao forem resolvidos durante a importacao, o modal exibe um grid de pendencias para escolher um cadastro existente e reenviar apenas essas linhas.'

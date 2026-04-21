@@ -7,7 +7,7 @@ export function criarResumoFunilVendas(etapasOrcamento, orcamentos) {
     ? [...etapasOrcamento]
       .filter((etapa) => (
         registroEstaAtivo(etapa?.status)
-        && registroEstaAtivo(etapa?.consideraFunilVendas)
+        && registroEstaAtivo(etapa?.consideraFunilCotacoes)
         && !IDS_ETAPAS_ORCAMENTO_OBRIGATORIAS.has(Number(etapa?.idEtapaOrcamento))
       ))
       .sort((primeira, segunda) => {

@@ -31,12 +31,18 @@ Hoje o projeto ja atende um cenario real de desktop comercial, com login, contro
 - O backend passa a usar `fornecedor` como contrato técnico principal, incluindo tabela `fornecedor`, tabela `conceitoFornecedor`, campos como `idFornecedor`, `nomeFornecedorSnapshot`, `codigoPrincipalFornecedor`, `colunasGridFornecedores`, rotas `/api/fornecedores`, `/api/conceitosFornecedor`, `/api/listagens/fornecedores` e importação `/api/importacao/fornecedores`
 - O startup do banco migra automaticamente nomes legados como `cliente`, `conceitoCliente`, `idCliente`, `nomeClienteSnapshot`, `codigoPrincipalCliente`, `colunasGridClientes` e `obrigarCliente` para a nomenclatura de fornecedor
 - Por compatibilidade temporária, o backend ainda aceita aliases antigos em payloads e query strings, além de manter rotas legadas `/api/clientes`, `/api/conceitosCliente`, `/api/listagens/clientes` e `/api/importacao/clientes`
-- O frontend ainda preserva nomes técnicos legados em arquivos, componentes, hooks e campos internos, como `clientes-modalCliente.jsx`, `ModalBuscaClientes`, `codigoCliente.js` e `idCliente`; esses nomes devem ser migrados aos poucos em etapas próprias
+- O frontend ja migrou os nomes dos JSX principais de fornecedores, incluindo `paginaFornecedores.jsx`, `fornecedores-modalFornecedor.jsx`, `fornecedores-listaFornecedores.jsx`, `fornecedores-corpoFornecedores.jsx`, `fornecedores-cabecalhoFornecedores.jsx` e `fornecedores-modalManualFornecedores.jsx`
+- O CSS raiz da pagina tambem acompanha o dominio atual em `paginaFornecedores.css`
+- Nomes internos legados como `ModalBuscaClientes`, `codigoCliente.js`, props `clientes`, campos `idCliente` e alguns helpers com sufixo `Cliente` seguem por compatibilidade tecnica e devem aceitar alias de fornecedor quando usados em modais compartilhados
 - O conceito de negócio `Orcamento` passa a ser exibido ao usuário como `Cotacao`
 - O backend passa a usar `cotacao` como contrato técnico principal, incluindo tabelas `cotacao`, `itemCotacao`, `valorCampoCotacao`, `etapaCotacao`, `campoCotacaoConfiguravel`, campos como `idCotacao`, `idEtapaCotacao`, `idCampoCotacao`, `codigoCotacaoOrigem`, rotas `/api/cotacoes`, `/api/etapasCotacao`, `/api/camposCotacao`, `/api/itensCotacao` e `/api/valoresCamposCotacao`
 - O startup do banco migra automaticamente nomes legados como `orcamento`, `itemOrcamento`, `valorCampoOrcamento`, `etapaOrcamento`, `campoOrcamentoConfiguravel`, `idOrcamento`, `idEtapaOrcamento`, `idCampoOrcamento`, `codigoOrcamentoOrigem`, `diasValidadeOrcamento`, `colunasGridOrcamentos` e campos de layout/e-mail para a nomenclatura de cotação
 - Por compatibilidade temporária, o backend ainda aceita aliases antigos e mantém rotas legadas `/api/orcamentos`, `/api/etapasOrcamento`, `/api/camposOrcamento`, `/api/itensOrcamento` e `/api/valoresCamposOrcamento`
-- O frontend ainda preserva nomes técnicos legados ligados a `orcamento`, como `paginaOrcamentos.jsx`, `orcamentos-modalOrcamento.jsx`, `DocumentoOrcamentoPdf` e `idOrcamento`; esses nomes devem ser migrados aos poucos em etapas próprias
+- O frontend ja migrou os nomes dos JSX principais de cotacao e ordem de compra, como `paginaCotacoes.jsx`, `cotacoes-modalCotacao.jsx`, `paginaOrdensCompra.jsx`, `ordensCompra-modalOrdemCompra.jsx` e `documentoCotacaoPdf.jsx`; nomes internos legados como `idOrcamento`, `idPedido`, `tipoPedido`, `etapaPedido` e alguns servicos/utilitarios antigos seguem por compatibilidade e devem ser migrados em etapas proprias
+- Na interface, o usuario deve ver `Cotacao` no lugar de `Orcamento` e `Ordem de compra` no lugar de `Pedido` ou `Venda`
+- Os conceitos de `Devolucao`, `Motivo da perda` e `Comissao` foram removidos do escopo funcional atual; devem ser citados apenas como legado removido e nao devem voltar para telas, modais, relatorios, cards ou seeds
+- Modais operacionais renomeados para fornecedores, cotacoes e ordens de compra devem manter as classes estruturais base (`modalCliente`, `cabecalhoModalCliente`, `abasModalCliente`, `abaModalCliente`, `corpoModalCliente`) enquanto o CSS base legado ainda for compartilhado
+- Modais que recebem lista de fornecedores devem aceitar temporariamente tanto `fornecedores` quanto `clientes` para evitar quebra nos fluxos compartilhados de busca, atendimento, agenda, cotacao, ordem de compra, produto e relatorios
 
 ## Estrutura principal
 
@@ -44,7 +50,7 @@ Hoje o projeto ja atende um cenario real de desktop comercial, com login, contro
 - `client/src/componentes/`: componentes reutilizaveis da interface
 - `client/src/componentes/modulos/`: componentes ligados a dominios especificos do sistema, nomeados com prefixo explicito do modulo
 - `client/src/dados/`: catalogos e definicoes estaticas do frontend mantidos em `.js`, sem misturar com regras utilitarias
-- `client/src/idex.html`: pagina estatica de vendas em arquivo unico para apresentacao comercial da ferramenta
+- `client/src/idex.html`: pagina estatica de ordens de compra em arquivo unico para apresentacao comercial da ferramenta
 - `client/src/paginas/`: apenas os componentes-raiz que renderizam cada pagina do sistema
 - `client/src/servicos/`: comunicacao com a API
 - `client/src/hooks/`: hooks reutilizaveis para regras globais e comportamentos compartilhados do frontend
@@ -70,7 +76,7 @@ Hoje o projeto ja atende um cenario real de desktop comercial, com login, contro
 - A partir de agora, tudo que for `componente` deve viver em `client/src/componentes/`, tudo que for `hook` em `client/src/hooks/`, tudo que for `utilitario` em `client/src/utilitarios/` e tudo que for `dado` em `client/src/dados/`
 - A pasta `client/src/paginas/` deve conter apenas os componentes-raiz `paginaX.jsx`; modais, listas, cabecalhos, secoes, cards e demais blocos de tela deixam de morar em subpastas de pagina
 - Componentes ligados a um dominio especifico, mas que nao sao pagina-raiz nem componente comum, devem ficar em `client/src/componentes/modulos/`
-- Componentes de `modulos` devem usar prefixo explicito do dominio no nome do arquivo, como `clientes-modalCliente.jsx`, `ordens de compra-modalOrdem de Compra.jsx` e `inicio-secaoRankingInicio.jsx`
+- Componentes de `modulos` devem usar prefixo explicito do dominio no nome do arquivo, como `fornecedores-modalFornecedor.jsx`, `cotacoes-modalCotacao.jsx`, `ordensCompra-modalOrdemCompra.jsx` e `inicio-secaoRankingInicio.jsx`
 - Quando um arquivo nascer por causa de uma pagina especifica, ele ainda deve ficar na pasta global da sua categoria, preferencialmente seguindo o prefixo do dominio para manter rastreabilidade sem voltar a criar ilhas locais dentro de `paginas`
 - Estruturas antigas desse tipo dentro de paginas passam a ser consideradas legado e devem ser migradas aos poucos sempre que o modulo receber manutencao relevante
 - Componentes devem focar em interface e composicao visual, evitando acumular regra transversal quando ela puder ser reutilizada em outra camada
@@ -174,12 +180,12 @@ Padroes aplicados recentemente:
 - Quando a busca de contatos for aberta com um fornecedor ja definido, o proprio modal permite incluir um novo contato e devolve esse contato ja selecionado no formulario atual
 - O cadastro de fornecedor reaproveita o mesmo fluxo de `Ramo de Atividade` usado em configuracoes
 - O cadastro de fornecedor agora tambem usa a tabela auxiliar `Conceitos de fornecedor`, mantida em `Configuracoes`, com valor padrao obrigatorio `Sem Conceito`
-- A aba `Vendas` da pagina inicial agora pode exibir a sessao `Vendas do mes por conceito de fornecedor`, seguindo o mesmo padrao de top 5 na home e modal com a lista completa
-- No modal de fornecedor, as abas `Atendimento` e `Vendas` possuem grade propria com botao de filtro; os filtros de data abrem por padrao no mes corrente e o ultimo filtro aplicado fica salvo entre aberturas do modal, independentemente do fornecedor aberto
+- A aba `Ordens de compra` da pagina inicial agora pode exibir a sessao `Ordens de compra do mes por conceito de fornecedor`, seguindo o mesmo padrao de top 5 na home e modal com a lista completa
+- No modal de fornecedor, as abas `Atendimento` e `Ordens de compra` possuem grade propria com botao de filtro; os filtros de data abrem por padrao no mes corrente e o ultimo filtro aplicado fica salvo entre aberturas do modal, independentemente do fornecedor aberto
 - O cadastro de produto reaproveita os mesmos fluxos de configuracao para `Grupo de Produto`, `Marca` e `Unidade`
 - Modais com abas usam cabecalho e faixa de abas fixos, com rolagem apenas no corpo
 - Modais empilhados possuem camadas de z-index separadas para evitar abertura por tras do modal pai
-- O relatorio de Conversao exibe cards de cotacoes gerados, fechados, conversao, cancelados, % perca e em aberto; cancelados e % perca usam a etapa obrigatoria `Recusado`, enquanto `Ordem de Compra Excluido` fica separado como etapa tecnica obrigatoria para cotacoes cuja ordem de compra vinculado foi removido
+- O relatorio de Conversao exibe cards de cotacoes geradas, fechadas, conversao, recusadas e em aberto; recusadas usam a etapa obrigatoria `Recusado`, enquanto `Ordem de Compra Excluida` fica separada como etapa tecnica obrigatoria para cotacoes cuja ordem de compra vinculada foi removida
 
 Utilitarios importantes:
 
@@ -191,7 +197,7 @@ Utilitarios importantes:
 ## Modulos implementados
 
 ### Login e sessao
-- Tela de login com a marca `Connecta CRM`
+- Tela de login com a marca `Connecta SRM`
 - Logo personalizada na tela inicial
 - Validacao de `usuario` e `senha` via API local
 - Sessao mantida apenas durante a janela atual do app; ao fechar e abrir novamente, o usuario precisa autenticar de novo
@@ -199,15 +205,14 @@ Utilitarios importantes:
 
 ### Pagina inicial
 
-- A pagina inicial usa abas `Cotacoes`, `Vendas` e `Atendimentos` para separar funil, analise comercial e relacionamento
-- A configuracao da empresa agora possui a aba `Pagina inicial`, com botoes `Graficos Cotacoes`, `Graficos Vendas` e `Graficos Atendimentos`
+- A pagina inicial usa abas `Cotacoes`, `Ordens de compra` e `Atendimentos` para separar funil, analise comercial e relacionamento
+- A configuracao da empresa agora possui a aba `Pagina inicial`, com botoes `Graficos Cotacoes`, `Graficos Ordens de compra` e `Graficos Atendimentos`
 - A mesma aba agora tambem possui o bloco `Cards resumo`, usado para configurar os cards que aparecem no topo das duas abas da home
 - Cada aba da home pode ser configurada por lista, com `visivel`, `ordem`, `colunas` e `rotulo`, usando malha de `10 colunas`
 - Os `Cards resumo` usam `visivel`, `ordem`, `colunas` e `rotulo`, e a composicao precisa caber em no maximo duas linhas de `10 colunas` cada
 - A ordem das sessoes da home segue leitura visual: de cima para baixo e da esquerda para a direita
 - Regra obrigatoria: sempre que um novo card ou uma nova sessao de grafico for criado na pagina inicial, ele tambem deve ser incluido na configuracao da empresa (aba `Pagina inicial`) para permitir controle de exibicao, ordem, largura e rotulo
-- Os cards iniciais atuais mostram `Cotacoes em aberto`, `Ordens de Compra no mes`, `Media de dias para conversao`, `Atendimentos no mes`, `Prospeccao no mes`, `Comissao no mes`, `Comissao entregue no mes`, `Positivacao no mes`, `% Positivacao da carteira`, `Catalogo` e `Carteira`
-- O card `Comissao entregue no mes` considera apenas ordens de compra na etapa obrigatoria `Entregue` validada por ID e usa a data de entrega como periodo
+- Os cards iniciais atuais mostram `Cotacoes em aberto`, `Ordens de Compra no mes`, `Media de dias para conversao`, `Atendimentos no mes`, `Prospeccao no mes`, `Positivacao no mes`, `% Positivacao da carteira`, `Catalogo` e `Carteira`
 - Todo card da home deve ter tooltip no icone de `Informacao`
 - O texto do tooltip de card deve ser simples e direto, sempre com `composicao do valor` e `periodo considerado`, no mesmo padrao dos tooltips dos graficos
 - Padrao de conteudo dos tooltips de card: no maximo duas linhas curtas (`Composicao` e `Periodo`), sem textos longos
@@ -216,12 +221,11 @@ Utilitarios importantes:
 - Os icones de `Informacao` de cards e graficos usam tooltip padrao curto com apenas `Composicao` e `Periodo`
 - O icone lateral ao lado do `Informacao` abre o modal com a lista completa quando houver mais de 5 resultados
 - As secoes graficas compactas da home ocupam `2 colunas` no grid principal, salvo quando uma sessao explicitar outro span
-- A aba `Cotacoes` concentra `Funil de cotacoes`, `Cotacoes em aberto por grupo de produtos`, `Cotacoes em aberto por marca`, `Cotacoes em aberto por produto` e `Motivos de perda do mes`
+- A aba `Cotacoes` concentra `Funil de cotacoes`, `Cotacoes em aberto por grupo de produtos`, `Cotacoes em aberto por marca` e `Cotacoes em aberto por produto`
 - A sessao `Cotacoes em aberto por grupo de produtos` e componente reutilizavel proprio e aparece na configuracao da empresa em `Pagina inicial > Graficos Cotacoes`
-- A aba `Vendas` concentra `Devolucoes do mes`, `Vendas do mes por grupo de produtos`, `Vendas do mes por marca`, `Vendas do mes por UF`, `Vendas do mes por fornecedor`, `Vendas do mes por produto` e `Compradores/Fornecedores em destaque`
+- A aba `Ordens de compra` concentra `Ordens de compra do mes por grupo de produtos`, `Ordens de compra do mes por marca`, `Ordens de compra do mes por UF`, `Ordens de compra do mes por fornecedor`, `Ordens de compra do mes por produto` e `Compradores/Fornecedores em destaque`
 - A aba `Atendimentos` concentra `Atendimentos do mes por canal`, `Atendimentos do mes por origem`, `Atendimentos do mes por fornecedor`, `Atendimentos do mes por tipo` e `Atendimentos do mes por usuario`
 - O card `Prospeccao no mes` soma apenas atendimentos classificados com o tipo `Prospeccao`, identificado pela descricao do tipo cadastrada na configuracao
-- `Devolucoes do mes` usa valores convertidos para positivo apenas para leitura do grafico
 - O texto do tooltip de card e grafico deve ser simples e direto, com no maximo duas linhas curtas (`Composicao` e `Periodo`)
 - Para `Usuario padrao`, toda a aba da home (`cards` e `graficos`) usa apenas registros de `cotacoes` e `ordens de compra` do comprador vinculado ao usuario (`idComprador`)
 - Para `Administrador` e `Gestor`, a home mantem leitura consolidada da operacao sem recorte por comprador
@@ -281,18 +285,18 @@ Observacao:
 - Manual visual da pagina de fornecedores acessado por `F1`, com fluxo do cadastro, carteira e filtros persistidos
 - Modal em abas para incluir, editar e consultar
 - Abas principais do cadastro: `Dados gerais`, `Endereco`, `Observacoes` e `Contato`
-- Os antigos grids de `Atendimento` e `Vendas` agora abrem em modais amplos separados, quase em tela cheia, para facilitar leitura operacional
+- Os antigos grids de `Atendimento` e `Ordens de compra` agora abrem em modais amplos separados, quase em tela cheia, para facilitar leitura operacional
 - No historico de `Atendimentos`, a grade mostra `Data`, `Inicio`, `Fim`, `Assunto`, `Contato`, `Canal`, `Usuario` e `Acoes`
 - O historico de `Atendimentos` tambem oferece busca por digitacao no cabecalho e filtros por `Data e horario`, um ou mais `Usuarios` e um ou mais `Canais`
-- Dentro do modal amplo de `Vendas`, continuam duas visoes: `Ordens de Compra` e `Itens da ordem de compra`, agora no mesmo componente reutilizavel usado tambem em produtos
-- O grid de `Ordens de Compra` da aba Vendas nao exibe mais o nome do contato
+- Dentro do modal amplo de `Ordens de compra`, continuam duas visoes: `Ordens de Compra` e `Itens da ordem de compra`, agora no mesmo componente reutilizavel usado tambem em produtos
+- O grid de `Ordens de Compra` da aba Ordens de compra nao exibe mais o nome do contato
 - O grid de `Ordens de Compra` mostra `Inclusao`, `Entrega`, `Ordem de Compra`, `Fornecedor` quando aplicavel, `Etapa`, `Comprador`, `Prazo de pagamento`, `Total` e `Acoes`
 - Os grids de `Ordens de Compra` e `Itens da ordem de compra` mostram colunas separadas de `Inclusao` e `Entrega`, e o filtro desse historico tambem separa os dois periodos
 - O grid de `Itens da ordem de compra` mostra `Inclusao`, `Entrega`, `Ordem de Compra`, `Referencia`, `Descricao`, `VALOR UN`, `QTD` e `Valor total`
-- O historico de `Vendas` tambem oferece busca por digitacao no cabecalho e filtros por `Datas`, um ou mais `Ordens de Compra`, um ou mais `Compradores`, uma ou mais `Etapas` e `Produto` via modal de busca em grade; as opcoes de ordem de compra consideram apenas ordens de compra do fornecedor consultado
+- O historico de `Ordens de compra` tambem oferece busca por digitacao no cabecalho e filtros por `Datas`, um ou mais `Ordens de Compra`, um ou mais `Compradores`, uma ou mais `Etapas` e `Produto` via modal de busca em grade; as opcoes de ordem de compra consideram apenas ordens de compra do fornecedor consultado
 - Thumbnail com codigo do fornecedor
 - O cadastro de fornecedor aceita um `Codigo alternativo` numerico e opcional
-- A empresa pode definir se o CRM exibe como principal o codigo padrao do fornecedor ou o `Codigo alternativo`; quando o alternativo estiver vazio, o sistema volta automaticamente ao codigo padrao
+- A empresa pode definir se o SRM exibe como principal o codigo padrao do fornecedor ou o `Codigo alternativo`; quando o alternativo estiver vazio, o sistema volta automaticamente ao codigo padrao
 - O botao de importacao de fornecedores abre um modal com download de modelo em planilha; apos importar, o sistema informa as linhas rejeitadas e o motivo de cada uma
 - Quando uma linha de fornecedores falha por comprador, ramo de atividade ou grupo de empresa nao encontrado/inativo, o modal de importacao passa a exibir um grid de pendencias para escolher um registro existente e reprocessar apenas essas linhas
 - A importacao de fornecedores valida com mensagens especificas campos como CNPJ/CPF, codigo numerico, comprador, ramo, grupo, UF, CEP, email e status antes de inserir cada linha
@@ -328,7 +332,7 @@ Filtros de fornecedores:
 - Manual visual da pagina de produtos acessado por `F1`, com regras de catalogo, classificacoes auxiliares e permissoes do perfil
 - Modal no mesmo padrao visual de fornecedores
 - Modos incluir, editar e consultar
-- No modal do produto, a aba `Vendas` abre o mesmo historico amplo reutilizavel do fornecedor, filtrado automaticamente pelo produto selecionado e exibindo apenas itens das ordens de compra
+- No modal do produto, a aba `Ordens de compra` abre o mesmo historico amplo reutilizavel do fornecedor, filtrado automaticamente pelo produto selecionado e exibindo apenas itens das ordens de compra
 - Nesse historico do produto, os filtros consideram separadamente `Data de inclusao` e `Data de entrega`
 - Codigo automatico ao incluir
 - Upload de imagem no padrao reutilizavel do projeto, com recorte final em 320 x 320 px para a foto principal do produto
@@ -421,8 +425,8 @@ Filtros da agenda:
 ### Cotacoes
 
 - Pagina propria de cotacoes
-- Manual visual da pagina de cotacoes acessado por `F1`, com fluxo do funil, fechamento, motivos de perda e ordem de compra derivado
-- Modal em abas com `Dados gerais`, `Itens` e `Campos da cotacao`
+- Manual visual da pagina de cotacoes acessado por `F1`, com fluxo do funil, fechamento e ordem de compra derivado
+- Modal em abas com `Dados gerais`, `Itens`, `Outros` e `Campos da cotacao`
 - A inclusao e edicao de itens na cotacao seguem o mesmo padrao da ordem de compra, preservando snapshots de descricao, referencia, unidade e imagem no proprio item
 - Ordens de Compra e cotacoes agora reutilizam o mesmo modal de item de produto, inclusive com o preview grande da imagem
 - A logica de estado e manipulacao desses itens tambem foi centralizada em um hook compartilhado para reduzir duplicacao entre fluxos comerciais
@@ -433,18 +437,17 @@ Filtros da agenda:
 - Quando o modal tiver abas, `Alt + Seta para a esquerda` e `Alt + Seta para a direita` alternam a secao ativa e reposicionam o foco no primeiro campo da nova aba
 - Itens com selecao direta de produto no proprio modal, com atalho de busca para abrir o grid de produtos sem sair do item
 - Controle de etapa da cotacao
-- Ao entrar nas etapas `Fechado`, `Fechado sem ordem de compra`, `Ordem de Compra Excluido` ou `Recusado`, a cotacao passa a registrar `Data de fechamento` em campo proprio
-- A `Data de fechamento` e obrigatoria nas etapas `Fechado`, `Fechado sem ordem de compra`, `Ordem de Compra Excluido` e `Recusado`
-- As etapas `Fechado sem ordem de compra` e `Ordem de Compra Excluido` sao etapas tecnicas de uso automatico e nao aparecem nos selects manuais do usuario
-- Motivo da perda obrigatorio quando a etapa exigir
+- Ao entrar nas etapas `Fechado`, `Fechado sem ordem de compra`, `Ordem de Compra Excluida` ou `Recusado`, a cotacao passa a registrar `Data de fechamento` em campo proprio
+- A `Data de fechamento` e obrigatoria nas etapas `Fechado`, `Fechado sem ordem de compra`, `Ordem de Compra Excluida` e `Recusado`
+- As etapas `Fechado sem ordem de compra` e `Ordem de Compra Excluida` sao etapas tecnicas de uso automatico e nao aparecem nos selects manuais do usuario
 - Integracao com abertura de ordem de compra ao fechar a cotacao
 - A troca rapida da etapa para `Fechado` no grid tambem oferece a geracao imediata da ordem de compra
 - Quando a troca para uma etapa final acontece pelo grid, a `Data de fechamento` usa automaticamente a data atual
 - Dentro do modal da cotacao, a `Data de fechamento` pode ser ajustada manualmente antes de salvar
 - O filtro da pagina de cotacoes tem um botao unico de `Datas` que abre um modal com os intervalos de `Data de inclusao` e `Data de fechamento`
 - Cotacoes na etapa `Recusado` ficam somente para consulta por qualquer usuario
-- Cotacoes com `ordem de compra vinculado` tambem ficam somente para consulta por qualquer usuario
-- A edicao da cotacao volta a ser permitida apenas quando a ordem de compra vinculado e excluido, levando o registro para a etapa tecnica `Ordem de Compra Excluido`
+- Cotacoes com `ordem de compra vinculada` tambem ficam somente para consulta por qualquer usuario
+- A edicao da cotacao volta a ser permitida apenas quando a ordem de compra vinculada e excluida, levando o registro para a etapa tecnica `Ordem de Compra Excluida`
 - Modais de confirmacao do fluxo comercial abrem como sobreposicao fixa acima da pagina, inclusive no lancamento de ordem de compra a partir do grid
 - Os modais de cotacao abrem com foco no primeiro campo editavel; modais de confirmacao priorizam `Sim` ou `Confirmar`
 - O atalho `PageDown` prioriza `Salvar` no modal de cotacao; se nao houver salvamento disponivel no contexto atual, aciona `Adicionar`, `Incluir` ou `Novo`
@@ -458,9 +461,8 @@ Filtros da agenda:
 - As observacoes do PDF incluem a observacao principal da cotacao, os campos extras preenchidos na cotacao e os textos padrao ativos configurados em `Campos da ordem de compra`
 - O layout do PDF da cotacao foi separado em componente proprio para facilitar ajustes ou reversao da feature sem afetar o formulario principal
 - O modal de cotacao em modo de inclusao pede confirmacao antes de fechar por `Cancelar`, `Escape` ou clique fora, inclusive quando aberto a partir do atendimento
-- Em novos cotacoes, o comprador e a comissao inicial passam a vir do comprador vinculado ao usuario do registro; trocar o fornecedor nao sobrescreve mais esses campos automaticamente
-- A aba `Outros` da cotacao agora concentra `Ordem de Compra vinculado`, `% de comissao`, `Total comissao` calculado sobre o total liquido dos itens e `Motivo da perda`
-- O campo `Total comissao` da cotacao e recalculado em tempo real conforme itens, valores ou percentual de comissao forem alterados no modal
+- Em novas cotacoes, o comprador inicial passa a vir do comprador vinculado ao usuario do registro; trocar o fornecedor nao sobrescreve mais esse campo automaticamente
+- A aba `Outros` da cotacao agora concentra `Ordem de Compra vinculada`
 
 ### Ordens de Compra
 
@@ -472,35 +474,28 @@ Filtros da agenda:
 - Ao confirmar a busca de fornecedor ou contato, o foco retorna para o campo preenchido no modal principal
 - Quando o modal tiver abas, `Alt + Seta para a esquerda` e `Alt + Seta para a direita` alternam a secao ativa e reposicionam o foco no primeiro campo da nova aba
 - O modal da ordem de compra agora possui o campo `Tipo de ordem de compra`, alimentado por uma tabela auxiliar propria em `Configuracoes`
-- A tabela `Tipos de ordem de compra` nasce com `Venda` e `Devolucao` como registros obrigatorios do sistema, protegidos contra inativacao e exclusao
-- Quando o `Tipo de ordem de compra` for `Devolucao`, o sistema ajusta automaticamente o valor unitario dos itens para negativo e recalcula o total da ordem de compra com valor negativo
-- Em ordens de compra do tipo `Devolucao`, a quantidade dos itens tambem fica negativa e a etapa da ordem de compra passa a ser travada automaticamente em `Entregue`
-- Quando um ordem de compra de `Devolucao` estiver em `Entregue`, o sistema exige um `Motivo da devolucao` em modal externo, vindo da tabela auxiliar de configuracao e validado sempre por `id`
-- A mesma exigencia do `Motivo da devolucao` tambem vale para a troca rapida de etapa direto no grid de ordens de compra
-- O modal de `Ordens de Compra` agora possui a aba `Outros`, que concentra `Cotacao vinculado` e o campo visual do motivo, trazendo o valor preenchido quando existir ou vazio quando ainda nao houver motivo
-- A aba `Outros` da ordem de compra tambem concentra `% de comissao` e `Valor da comissao`, mantendo o percentual editavel no propria ordem de compra e o valor calculado sobre o total liquido dos itens
-- Em novas ordens de compra, o comprador e a comissao inicial passam a vir do comprador vinculado ao usuario do registro; trocar o fornecedor nao sobrescreve mais esses campos automaticamente
-- O backend persiste `ordem de compra.valorComissao` automaticamente em inclusao e edicao, calculando `total liquido dos itens x comissao (%)`; ordens de compra de devolucao debitam esse total por manterem valores negativos
-- A pagina inicial agora exibe a secao `Devolucoes do mes`, agrupando ordens de compra do tipo `Devolucao` por `Motivo da devolucao`, com quantidade por motivo e valor total convertido para positivo apenas para leitura do grafico
-- A pagina inicial agora exibe tambem `Vendas do mes por grupo de produtos`, com quantidade total dos itens vendidos, quantidade de ordens de compra e valor total por grupo nas ordens de compra com data de entrada no mes corrente
-- A pagina inicial agora exibe tambem `Vendas do mes por marca`, com quantidade total dos itens vendidos, quantidade de ordens de compra e valor total por marca nas ordens de compra com data de entrada no mes corrente
-- O cabecalho da pagina inicial agora possui as abas `Cotacoes` e `Vendas`, separando os graficos comerciais por contexto sem misturar funil com analise de vendas
+- A tabela `Tipos de ordem de compra` permanece como cadastro auxiliar tecnico do fluxo; nomes exibidos ao usuario devem seguir a linguagem de ordem de compra
+- O modal de `Ordens de Compra` possui a aba `Outros`, que concentra a `Cotacao vinculada` e informacoes complementares sem reintroduzir conceitos comerciais removidos
+- Em novas ordens de compra, o comprador inicial passa a vir do comprador vinculado ao usuario do registro; trocar o fornecedor nao sobrescreve mais esse campo automaticamente
+- A pagina inicial agora exibe tambem `Ordens de compra do mes por grupo de produtos`, com quantidade total dos itens vendidos, quantidade de ordens de compra e valor total por grupo nas ordens de compra com data de entrada no mes corrente
+- A pagina inicial agora exibe tambem `Ordens de compra do mes por marca`, com quantidade total dos itens vendidos, quantidade de ordens de compra e valor total por marca nas ordens de compra com data de entrada no mes corrente
+- O cabecalho da pagina inicial agora possui as abas `Cotacoes` e `Ordens de compra`, separando os graficos comerciais por contexto sem misturar funil com analise de ordens de compra
 - O modal de filtros da pagina de ordens de compra permite selecionar multiplas etapas ao mesmo tempo e salva esse recorte por usuario
 - A etapa da ordem de compra pode ser alterada direto no grid, no mesmo padrao visual adotado em Cotacoes
 - O filtro da pagina de ordens de compra tem um botao unico de `Datas` que abre um modal com os intervalos de `Data de inclusao` e `Data de entrega`
 - Os modais de ordem de compra abrem com foco no primeiro campo editavel; modais de confirmacao priorizam `Sim` ou `Confirmar`
 - O atalho `PageDown` prioriza `Salvar` no modal de ordem de compra; se nao houver salvamento disponivel no contexto atual, aciona `Adicionar`, `Incluir` ou `Novo`
-- Ao mover um ordem de compra para a etapa `Entregue`, a `Data de entrega` passa automaticamente para a data atual; dentro do modal, essa data ainda pode ser ajustada antes de salvar
-- Quando um ordem de compra chega em `Entregue`, o perfil `Usuario padrao` passa a consultar o registro sem edicao nem nova troca de etapa
-- O modal de ordem de compra aberto a partir do fechamento de um cotacao permite fechar direto pelo botao, clique fora ou `Escape`, devolvendo o fluxo aa cotacao
+- Ao mover uma ordem de compra para a etapa `Entregue`, a `Data de entrega` passa automaticamente para a data atual; dentro do modal, essa data ainda pode ser ajustada antes de salvar
+- Quando uma ordem de compra chega em `Entregue`, o perfil `Usuario padrao` passa a consultar o registro sem edicao nem nova troca de etapa
+- O modal de ordem de compra aberto a partir do fechamento de uma cotacao permite fechar direto pelo botao, clique fora ou `Escape`, devolvendo o fluxo a cotacao
 - Campos extras configuraveis
 - Itens com snapshots de produto para preservar historico comercial
-- O item da ordem de compra herda a imagem da cotacao e, quando o usuario substituir essa imagem no propria ordem de compra, ela passa a ser exclusiva daquele item com recorte em 1024 x 1024 px
+- O item da ordem de compra herda a imagem da cotacao e, quando o usuario substituir essa imagem na propria ordem de compra, ela passa a ser exclusiva daquele item com recorte em 1024 x 1024 px
 - Data de entrega baseada nas configuracoes da empresa
 
 ### Configuracoes
 
-- Manual visual da pagina de configuracoes acessado por `F1`, com organizacao das secoes, permissoes e impacto dos cadastros no restante do CRM
+- Manual visual da pagina de configuracoes acessado por `F1`, com organizacao das secoes, permissoes e impacto dos cadastros no restante do SRM
 - Sempre que uma regra, fluxo, validacao ou configuracao relevante de qualquer pagina mudar, o respectivo manual visual tambem deve ser atualizado para continuar refletindo o comportamento real da tela
 - Refatoracoes internas sem impacto de uso nao exigem ajuste de manual visual, mas continuam exigindo atualizacao do README quando mudarem arquitetura, convencoes ou componentes-base reutilizaveis
 
@@ -518,9 +513,7 @@ A tela de configuracoes usa cards grandes e modais padrao. Hoje ela cobre:
 - `Unidades`
 - `Metodos de pagamento`
 - `Tipos de ordem de compra`
-- `Motivos da devolucao`
 - `Prazos de pagamento`
-- `Motivo da perda`
 - `Etapas da ordem de compra`
 - `Etapas da cotacao`
 - `Tamanhos`
@@ -534,9 +527,9 @@ A tela de configuracoes usa cards grandes e modais padrao. Hoje ela cobre:
 - `Tipos de agenda`
 - `Status da visita`
 - `Atualizacao do sistema`
-- secao inicial de `Relatorios`, com atalhos para `Vendas`, `Conversao` e `Atendimentos`
+- secao inicial de `Relatorios`, com atalhos para `Ordens de compra`, `Conversao` e `Atendimentos`
 - os relatorios seguem o mesmo padrao visual: modal amplo, cards de resumo no topo, grade principal e botao de filtro no cabecalho
-- `Vendas` ja esta funcional e lista ordens de compra pelas datas de `Inclusao` e `Entrega`, com cards de consolidado, chips de filtros ativos, botao de exportacao em PDF e grade de ordens de compra sem botoes de acao
+- `Ordens de compra` ja esta funcional e lista ordens de compra pelas datas de `Inclusao` e `Entrega`, com cards de consolidado, chips de filtros ativos, botao de exportacao em PDF e grade de ordens de compra sem botoes de acao
 - `Conversao` ja esta funcional e lista cotacoes em grade propria mais simples, com colunas separadas de inclusao, fechamento, fornecedor e contato, cards de gerados, fechados, conversao e abertos, filtros por fornecedor, usuario, compradores, etapas, grupo de empresa, grupo de produto, marca e datas, alem de exportacao em PDF
 - `Atendimentos` ja esta funcional e reaproveita a grade do historico por fornecedor com a coluna de `Fornecedor` adicionada, alem de cards com total atendido, fornecedores distintos, canal lider, origem lider, filtro no cabecalho e exportacao em PDF
 - A secao `Atendimentos` tambem possui atalho para configurar por empresa quais colunas persistidas do cadastro aparecem na grade principal da pagina operacional
@@ -549,12 +542,12 @@ Regras importantes:
 - O card de `Atualizacao do sistema` fica apenas na aba `Gerais`
 - O card de `Atualizacao do sistema` fica visivel para todos os perfis, mas permanece desabilitado apenas para `Usuario padrao`; `Administrador` e `Gestor` podem abrir o modal
 - A secao inicial de `Relatorios` fica visivel na pagina de `Configuracoes`, mas seus atalhos permanecem desabilitados para `Usuario padrao`
-- O relatorio `Vendas` usa filtros por `Fornecedor`, um ou mais `Compradores`, uma ou mais `Etapas`, `Grupo de empresa`, `Grupo de produto`, `Marca`, `Data de inclusao` e `Data de entrega`; o filtro de fornecedor tambem oferece botao de busca em grade para agilizar a selecao, e o periodo padrao do filtro ja abre no mes corrente
-- O cabecalho do relatorio `Vendas` exibe chips com os filtros ativos ao lado do botao de filtro e um botao dedicado para gerar o PDF do relatorio
-- O PDF do relatorio `Vendas` preserva as cores do cabecalho na impressao e organiza `Gerado em` e `Usuario` em uma coluna alinhada a direita no topo
-- O resumo do relatorio `Vendas` consolida `Ordens de Compra no recorte`, `Valor total`, `Quantidade` somando unidades dos itens e `Positivacao` por fornecedores distintos
-- O relatorio `Vendas` reaproveita a mesma grade base de ordens de compra usada no historico comercial, mas sem acoes de linha
-- O relatorio `Conversao` usa uma grade simples de cotacoes sem acoes de linha, com colunas separadas de `Inclusao`, `Fechamento`, `Fornecedor` e `Contato`, filtros por `Fornecedor`, `Usuario`, `Compradores`, `Etapas`, `Grupo de empresa`, `Grupo de produto`, `Marca` e datas, e considera como fechados os cotacoes em etapas de fechamento, fechado sem ordem de compra e recusado para calcular a conversao
+- O relatorio `Ordens de compra` usa filtros por `Fornecedor`, um ou mais `Compradores`, uma ou mais `Etapas`, `Grupo de empresa`, `Grupo de produto`, `Marca`, `Data de inclusao` e `Data de entrega`; o filtro de fornecedor tambem oferece botao de busca em grade para agilizar a selecao, e o periodo padrao do filtro ja abre no mes corrente
+- O cabecalho do relatorio `Ordens de compra` exibe chips com os filtros ativos ao lado do botao de filtro e um botao dedicado para gerar o PDF do relatorio
+- O PDF do relatorio `Ordens de compra` preserva as cores do cabecalho na impressao e organiza `Gerado em` e `Usuario` em uma coluna alinhada a direita no topo
+- O resumo do relatorio `Ordens de compra` consolida `Ordens de Compra no recorte`, `Valor total`, `Quantidade` somando unidades dos itens e `Positivacao` por fornecedores distintos
+- O relatorio `Ordens de compra` reaproveita a mesma grade base de ordens de compra usada no historico comercial, mas sem acoes de linha
+- O relatorio `Conversao` usa uma grade simples de cotacoes sem acoes de linha, com colunas separadas de `Inclusao`, `Fechamento`, `Fornecedor` e `Contato`, filtros por `Fornecedor`, `Usuario`, `Compradores`, `Etapas`, `Grupo de empresa`, `Grupo de produto`, `Marca` e datas, e considera como fechadas as cotacoes em etapas de fechamento, fechado sem ordem de compra e recusado para calcular a conversao
 - O resumo do relatorio `Conversao` destaca `Cotacoes gerados`, `Cotacoes fechados`, `Conversao` e `Cotacoes em aberto`
 - O relatorio `Atendimentos` reaproveita a grade base do historico de atendimentos do fornecedor, adicionando a coluna `Fornecedor` e removendo as acoes de linha no contexto gerencial
 - O resumo do relatorio `Atendimentos` destaca `Total de atendimentos`, `Fornecedores atendidos`, `Canal lider` e `Origem lider` a partir da distribuicao atual carregada
@@ -562,11 +555,11 @@ Regras importantes:
 - `Ramos de atividade` e `Grupos de empresa` tambem ficam liberados para `Usuario padrao` na propria pagina de `Configuracoes`, no mesmo modelo operacional ja adotado dentro do cadastro de fornecedores
 - O modal de atualizacao permite salvar o link do repositorio GitHub usado para leitura das releases
 - `Etapas da ordem de compra` e `Etapas da cotacao` agora possuem campo `Ordem`; os selects desses status respeitam essa ordem crescente nos formularios
-- O campo `Abreviacao` foi removido das etapas de ordem de compra e cotacao; as regras e exibicao passam a considerar `Descricao`, `Cor`, `Ordem`, `Status` e, para etapas de cotacao, `Considera no Funil de Vendas`
+- O campo `Abreviacao` foi removido das etapas de ordem de compra e cotacao; as regras e exibicao passam a considerar `Descricao`, `Cor`, `Ordem`, `Status` e, para etapas de cotacao, `Considera no Funil de Cotacoes`
 - A logica operacional de ordens de compra valida a etapa critica `Entregue` por `idEtapa` fixo (`5`), sem depender da descricao cadastrada
 - A etapa critica de ordem de compra usada pela logica do sistema nao pode ser inativada nem excluida (bloqueio no backend e no modal de Configuracoes)
 - Etapas obrigatorias de cotacao nao podem ser inativadas nem excluidas (regra aplicada no backend e refletida no modal de Configuracoes)
-- Regras obrigatorias das etapas de cotacao sao avaliadas por `idEtapaCotacao` fixo (`1` Fechado, `2` Fechado sem ordem de compra, `3` Ordem de Compra Excluido, `4` Recusado)
+- Regras obrigatorias das etapas de cotacao sao avaliadas por `idEtapaCotacao` fixo (`1` Fechado, `2` Fechado sem ordem de compra, `3` Ordem de Compra Excluida, `4` Recusado)
 - A data de fechamento da cotacao tambem segue a validacao por `idEtapaCotacao` fixo (`1`, `2` e `3`), sem depender da descricao da etapa
 - Regras criticas de `Status da visita` sao avaliadas por `idStatusVisita` fixo (`1` Agendado, `2` Confirmado, `3` Realizado, `4` Cancelado, `5` Nao compareceu)
 - Status criticos da agenda podem ser editados, mas nao podem ser inativados nem excluidos (bloqueio no modal de Configuracoes e no backend)
@@ -597,12 +590,12 @@ O cadastro de empresa tem modal proprio com abas:
   - carteira aberta em valor
   - ordens de compra no recorte
   - ticket medio
-  - vendas em valores
+  - ordens de compra em valores
   - itens vendidos
   - taxa de fechamento
 - `Nome fantasia`
 - Quando a logo da empresa e atualizada em Configuracoes, a barra lateral e os pontos que recarregam os dados da empresa passam a refletir a nova imagem sem exigir reinicio do aplicativo
-- Os mesmos filtros da pagina inicial tambem sao aplicados aos cards de vendas, usando ordens de compra como base para valor total e quantidade total vendida
+- Os mesmos filtros da pagina inicial tambem sao aplicados aos cards de ordens de compra, usando ordens de compra como base para valor total e quantidade total vendida
 - `Documento`
 - O dashboard inclui grafico diario de tendencia para `Atendimentos`, `Cotacoes` e `Ordens de Compra` nos ultimos 7 dias do recorte
 - O dashboard inclui rankings de `Compradores`, `Produtos`, `Grupos de produto` e `Marcas` com barras comparativas
@@ -667,7 +660,7 @@ Regra importante:
 ### Regras gerais
 
 - Banco utilizado: `SQLite`
-- Em build desktop, o banco principal fica na pasta persistente do usuario em `AppData/Roaming/Connecta CRM/data`
+- Em build desktop, o banco principal fica na pasta persistente do usuario em `AppData/Roaming/Connecta SRM/data`
 - Chaves primarias usam inteiros autoincrementais
 - Campos booleanos usam `0` e `1`
 - O projeto faz migracoes simples no startup com `ALTER TABLE` e recriacao de tabelas quando necessario
@@ -703,19 +696,18 @@ Cadastros comerciais e de processo:
 - `cotacao`
 - `itemCotacao`
 - `valorCampoCotacao`
-- `ordem de compra`
-- `itemOrdem de Compra`
-- `valorCampoOrdem de Compra`
+- `ordemCompra`
+- `itemOrdemCompra`
+- `valorCampoOrdemCompra`
 
 Cadastros de configuracao comercial:
 
 - `metodoPagamento`
 - `prazoPagamento`
-- `motivoPerda`
-- `etapaOrdem de Compra`
+- `etapaOrdemCompra`
 - `etapaCotacao`
 - `campoCotacaoConfiguravel`
-- `campoOrdem de CompraConfiguravel`
+- `campoOrdemCompraConfiguravel`
 
 Cadastros da agenda:
 
@@ -761,13 +753,11 @@ Rotas CRUD atualmente expostas:
 - `/api/origensAtendimento`
 - `/api/metodosPagamento`
 - `/api/prazosPagamento`
-- `/api/tiposOrdem de Compra`
-- `/api/motivosDevolucao`
-- `/api/motivosPerda`
-- `/api/etapasOrdem de Compra`
+- `/api/tiposPedido` (rota compativel atual para tipos de ordem de compra)
+- `/api/etapasPedido` (rota compativel atual para etapas de ordem de compra)
 - `/api/etapasCotacao`
 - `/api/camposCotacao`
-- `/api/camposOrdem de Compra`
+- `/api/camposPedido` (rota compativel atual para campos de ordem de compra)
 - `/api/empresas`
 - `/api/usuarios`
 - `/api/fornecedores`
@@ -779,16 +769,16 @@ Rotas CRUD atualmente expostas:
 - `/api/listagens/atendimentos`: listagem enxuta para o grid principal, com busca textual, filtros e recorte por carteira quando aplicavel
 - `/api/itensCotacao`
 - `/api/valoresCamposCotacao`
-- `/api/itensOrdem de Compra`
-- `/api/valoresCamposOrdem de Compra`
+- `/api/itensPedido` (rota compativel atual para itens de ordem de compra)
+- `/api/valoresCamposPedido` (rota compativel atual para valores de campos de ordem de compra)
 
 ### Rotas customizadas
 
 - `POST /api/auth/login`: autenticacao
 - `/api/agendamentos`: CRUD customizado para agendamento, com suporte a multiplos recursos e multiplos usuarios
 - `/api/cotacoes`: fluxo customizado de cotacoes com itens e campos extras
-- `/api/ordens de compra`: fluxo customizado de ordens de compra com itens e campos extras
-- `GET /api/cotacoes` e `GET /api/ordens de compra` aceitam os filtros das paginas principais para reduzir carga no frontend e retornar apenas o recorte solicitado
+- `/api/ordensCompra`: fluxo customizado de ordens de compra com itens e campos extras
+- `GET /api/cotacoes` e `GET /api/ordensCompra` aceitam os filtros das paginas principais para reduzir carga no frontend e retornar apenas o recorte solicitado
 - `GET /api/atualizacaoSistema`: leitura da configuracao de update
 - `PUT /api/atualizacaoSistema`: persistencia da configuracao de update
 - `/api/arquivos/imagens`: entrega de imagens locais do sistema
@@ -816,7 +806,7 @@ Depois do reset, a base fica somente com os registros obrigatorios:
 - etapas obrigatorias da cotacao:
   `1 Fechado`
   `2 Fechado sem ordem de compra`
-  `3 Ordem de Compra Excluido`
+  `3 Ordem de Compra Excluida`
   `4 Recusado`
 
 ## Como rodar
@@ -835,7 +825,7 @@ Depois do reset, a base fica somente com os registros obrigatorios:
 Observacoes do ambiente local:
 
 - Em desenvolvimento, o backend local usa a porta `3101`
-- Em desenvolvimento, o banco usado pelo projeto deve ser `data/crm.sqlite` dentro deste repositorio
+- Em desenvolvimento, o banco usado pelo projeto deve ser `data/srm.sqlite` dentro deste repositorio
 - Essa separacao evita conflito com uma versao instalada do app no mesmo computador, que continua usando a propria pasta de dados
 - O frontend web em desenvolvimento aponta para `http://127.0.0.1:3101/api`
 - A `Content-Security-Policy` definida em `client/index.html` precisa permitir `connect-src` para `http://127.0.0.1:3101` e `http://localhost:3101`; sem isso, o navegador bloqueia a API local antes mesmo de a requisicao chegar ao backend
@@ -883,13 +873,13 @@ Comportamento esperado:
 
 Arquivos gerados em release:
 
-- `Connecta-CRM-Setup-x.y.z.exe`
-- `Connecta-CRM-Setup-x.y.z.exe.blockmap`
+- `Connecta-SRM-Setup-x.y.z.exe`
+- `Connecta-SRM-Setup-x.y.z.exe.blockmap`
 - `latest.yml`
 
 ## Atualizacao automatica via GitHub Releases
 
-O projeto esta preparado para buscar atualizacoes publicadas no repositorio `TailonSilva/connecta-crm` usando `electron-updater`.
+O projeto esta preparado para buscar atualizacoes publicadas no repositorio `TailonSilva/connecta-srm` usando `electron-updater`.
 
 Como funciona:
 
@@ -898,7 +888,7 @@ Como funciona:
 - Antes de iniciar a atualizacao manual, o modal oferece um botao para gerar e salvar um backup do banco de dados
 - Se existir versao mais nova no `GitHub Releases`, o download acontece em segundo plano somente apos a acao manual do usuario
 - Quando o download termina, o usuario recebe um aviso para reiniciar e concluir a instalacao
-- Antes de instalar a atualizacao, o app cria um backup de seguranca dos dados em `AppData/Roaming/Connecta CRM/backups`
+- Antes de instalar a atualizacao, o app cria um backup de seguranca dos dados em `AppData/Roaming/Connecta SRM/backups`
 
 Mensagens visuais ja tratadas no modal:
 
@@ -969,6 +959,7 @@ Paginas hoje presentes no painel:
 
 ## Identidade visual aplicada
 
-- Logo do login atualizada para a marca `Connecta CRM`
+- Logo do login atualizada para a marca `Connecta SRM`
 - Icone do aplicativo Electron configurado a partir do arquivo de marca em `build/icon.png`
 - Instalador e executavel usando o nome visual da marca
+

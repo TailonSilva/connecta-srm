@@ -371,54 +371,6 @@ export function atualizarPrazoPagamento(idPrazoPagamento, payload) {
   });
 }
 
-export function listarMotivosPerdaConfiguracao(opcoes) {
-  return listarCadastroConfiguracao('/motivosPerda', opcoes);
-}
-
-export function listarMotivosDevolucaoConfiguracao(opcoes) {
-  return listarCadastroConfiguracao('/motivosDevolucao', opcoes);
-}
-
-export function incluirMotivoPerda(payload) {
-  return requisitarApi('/motivosPerda', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(payload)
-  });
-}
-
-export function atualizarMotivoPerda(idMotivo, payload) {
-  return requisitarApi(`/motivosPerda/${idMotivo}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(payload)
-  });
-}
-
-export function incluirMotivoDevolucao(payload) {
-  return requisitarApi('/motivosDevolucao', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(payload)
-  });
-}
-
-export function atualizarMotivoDevolucao(idMotivoDevolucao, payload) {
-  return requisitarApi(`/motivosDevolucao/${idMotivoDevolucao}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(payload)
-  });
-}
-
 export function listarEtapasPedidoConfiguracao(opcoes) {
   return listarCadastroConfiguracao('/etapasPedido', opcoes);
 }

@@ -142,15 +142,6 @@ export const colunasGridOrcamentos = [
     visivelPadrao: true
   },
   {
-    id: 'comissao',
-    rotulo: 'Comissao',
-    classe: 'colunaGradeValor',
-    obrigatoria: false,
-    ordemPadrao: 15,
-    spanPadrao: 2,
-    visivelPadrao: false
-  },
-  {
     id: 'prazoPagamento',
     rotulo: 'Prazo de Pagamento',
     classe: 'colunaGradeTexto',
@@ -174,15 +165,6 @@ export const colunasGridOrcamentos = [
     classe: 'colunaGradeTexto',
     obrigatoria: false,
     ordemPadrao: 18,
-    spanPadrao: 3,
-    visivelPadrao: false
-  },
-  {
-    id: 'idMotivoPerda',
-    rotulo: 'Motivo de Perda',
-    classe: 'colunaGradeTexto',
-    obrigatoria: false,
-    ordemPadrao: 19,
     spanPadrao: 3,
     visivelPadrao: false
   },
