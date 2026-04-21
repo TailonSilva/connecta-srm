@@ -1,7 +1,7 @@
 const express = require('express');
 const {
-  ID_ETAPA_PEDIDO_ENTREGUE,
-  ID_TIPO_PEDIDO_VENDA
+  ID_ETAPA_ORDEM_COMPRA_ENTREGUE,
+  ID_TIPO_ORDEM_COMPRA_PADRAO
 } = require('../configuracoes/banco');
 const {
   listarRegistros,
@@ -29,10 +29,10 @@ function validarCamposObrigatorios(entidade, corpo) {
 }
 
 const etapasCriticasProtegidas = {
-  etapaOrdemCompra: new Set([ID_ETAPA_PEDIDO_ENTREGUE]),
+  etapaOrdemCompra: new Set([ID_ETAPA_ORDEM_COMPRA_ENTREGUE]),
   etapaCotacao: new Set([1, 2, 3, 4]),
   statusVisita: new Set([1, 2, 3, 4, 5]),
-  tipoOrdemCompra: new Set([ID_TIPO_PEDIDO_VENDA])
+  tipoOrdemCompra: new Set([ID_TIPO_ORDEM_COMPRA_PADRAO])
 };
 
 function registroEhRegraCritica(entidade, registro) {

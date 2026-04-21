@@ -212,7 +212,7 @@ async function importarProdutos(linhas) {
     const idGrupo = referenciaGrupo.id;
     const idMarca = referenciaMarca.id;
     const idUnidade = referenciaUnidade.id;
-    const preco = normalizarDecimal(linha.preco);
+    const custo = normalizarDecimal(linha.custo);
     const statusNormalizado = normalizarStatusTexto(linha.status);
 
     validarObrigatorioTexto(linha.referencia, 'Referencia', erros);
@@ -220,7 +220,7 @@ async function importarProdutos(linhas) {
     validarReferenciaObrigatoria(referenciaGrupo, 'grupoProduto', 'Grupo de produto', 'Use a descricao exata de um grupo ativo.', erros, pendenciasReferencias);
     validarReferenciaObrigatoria(referenciaMarca, 'marca', 'Marca', 'Use a descricao exata de uma marca ativa.', erros, pendenciasReferencias);
     validarReferenciaObrigatoria(referenciaUnidade, 'unidadeMedida', 'Unidade de medida', 'Use a descricao exata de uma unidade ativa.', erros, pendenciasReferencias);
-    validarObrigatorioTexto(linha.preco, 'Preco', erros);
+    validarObrigatorioTexto(linha.custo, 'Custo', erros);
     validarTamanho(linha.referencia, 100, 'Referencia', erros);
     validarTamanho(linha.descricao, 255, 'Descricao', erros);
     validarStatusImportado(statusNormalizado, 'Status', erros);
@@ -233,10 +233,10 @@ async function importarProdutos(linhas) {
       erros.push('O Codigo informado ja esta em uso.');
     }
 
-    if (preco === null || Number.isNaN(preco)) {
-      erros.push('Preco invalido. Informe um numero decimal valido.');
-    } else if (preco < 0) {
-      erros.push('Preco nao pode ser negativo.');
+    if (custo === null || Number.isNaN(custo)) {
+      erros.push('Custo invalido. Informe um numero decimal valido.');
+    } else if (custo < 0) {
+      erros.push('Custo nao pode ser negativo.');
     }
 
     if (erros.length > 0) {
@@ -258,7 +258,7 @@ async function importarProdutos(linhas) {
       idGrupo: Number(idGrupo),
       idMarca: Number(idMarca),
       idUnidade: Number(idUnidade),
-      preco,
+      custo,
       status: statusNormalizado,
       imagem: null
     };

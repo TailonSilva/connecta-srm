@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 // Este prefixo padroniza as chaves no `localStorage` e evita colisao com outras informacoes persistidas do sistema.
-const PREFIXO_STORAGE_FILTROS = 'crm.filtros';
+const PREFIXO_STORAGE_FILTROS = 'srm.filtros';
 
 // Esta funcao centraliza a obtencao do `localStorage` e protege cenarios em que `window` nao existe ou o acesso falha.
 function obterStorageLocal() {
@@ -58,18 +58,18 @@ function obterValorAliasPersistido(filtros, chaveAtual) {
   }
 
   const aliases = {
-    idFornecedor: ['idCliente'],
-    idComprador: ['idVendedor'],
-    idCompradorFornecedor: ['idVendedorFornecedor', 'idVendedorCliente'],
-    idVendedorFornecedor: ['idCompradorFornecedor', 'idVendedorCliente'],
-    idEtapaCotacao: ['idEtapaOrcamento'],
-    idsEtapaCotacao: ['idsEtapaOrcamento'],
-    idsEtapaOrcamento: ['idsEtapaCotacao'],
-    idCotacao: ['idOrcamento'],
-    idOrdemCompra: ['idPedido'],
-    idEtapaOrdemCompra: ['idEtapaPedido'],
-    idsEtapaOrdemCompra: ['idsEtapaPedido'],
-    idEtapaPedido: ['idEtapaOrdemCompra']
+    idFornecedor: ['idFornecedor'],
+    idComprador: ['idComprador'],
+    idCompradorFornecedor: ['idCompradorFornecedor', 'idCompradorFornecedor'],
+    idCompradorFornecedor: ['idCompradorFornecedor', 'idCompradorFornecedor'],
+    idEtapaCotacao: ['idEtapaCotacao'],
+    idsEtapaCotacao: ['idsEtapaCotacao'],
+    idsEtapaCotacao: ['idsEtapaCotacao'],
+    idCotacao: ['idCotacao'],
+    idOrdemCompra: ['idOrdemCompra'],
+    idEtapaOrdemCompra: ['idEtapaOrdemCompra'],
+    idsEtapaOrdemCompra: ['idsEtapaOrdemCompra'],
+    idEtapaOrdemCompra: ['idEtapaOrdemCompra']
   };
 
   for (const alias of aliases[chaveAtual] || []) {

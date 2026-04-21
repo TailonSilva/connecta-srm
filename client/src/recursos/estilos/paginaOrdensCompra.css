@@ -1,0 +1,29 @@
+.cabecalhoGradeOrdensCompra th:nth-child(1),
+.linhaOrdemCompra td:nth-child(1) {
+  width: 88px;
+}
+
+.cabecalhoGradeOrdensCompra th:nth-child(2),
+.linhaOrdemCompra td:nth-child(2) {
+  width: 40%;
+}
+
+.cabecalhoGradeOrdensCompra th:nth-child(3),
+.linhaOrdemCompra td:nth-child(3) {
+  width: 19%;
+}
+
+.cabecalhoGradeOrdensCompra th:nth-child(4),
+.linhaOrdemCompra td:nth-child(4) {
+  width: 15%;
+}
+
+.cabecalhoGradeOrdensCompra th:nth-child(5),
+.linhaOrdemCompra td:nth-child(5) {
+  width: 12%;
+}
+
+.cabecalhoGradeOrdensCompra th:nth-child(6),
+.linhaOrdemCompra td:nth-child(6) {
+  width: 124px;
+}

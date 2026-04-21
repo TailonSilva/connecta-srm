@@ -8,7 +8,7 @@ export function CabecalhoFornecedores({
   aoAbrirFiltros,
   aoAbrirConfiguracaoGrid,
   aoAbrirImportacao,
-  aoNovoCliente,
+  aoNovoFornecedor,
   filtrosAtivos = false,
   configuracaoGridBloqueada = false
 }) {
@@ -16,7 +16,7 @@ export function CabecalhoFornecedores({
     <header className="cabecalhoPagina">
       <div>
         <h1>Fornecedores</h1>
-        <p>Gerencie o cadastro e a consulta dos fornecedores do CRM.</p>
+        <p>Gerencie o cadastro e a consulta dos fornecedores do SRM.</p>
       </div>
 
       <div className="acoesCabecalhoPagina">
@@ -50,7 +50,7 @@ export function CabecalhoFornecedores({
           somenteIcone
           title="Novo fornecedor"
           aria-label="Novo fornecedor"
-          onClick={aoNovoCliente}
+          onClick={aoNovoFornecedor}
         />
       </div>
     </header>

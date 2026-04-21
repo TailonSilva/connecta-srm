@@ -8,7 +8,7 @@ export function ModalManualAtendimento({
   tiposAtendimento = [],
   canaisAtendimento = [],
   origensAtendimento = [],
-  orcamentos = [],
+  cotacoes = [],
   filtros = {},
   usuarioLogado
 }) {
@@ -27,7 +27,7 @@ export function ModalManualAtendimento({
     {
       titulo: 'Origem do fluxo',
       descricao: 'Um atendimento pode nascer direto da pagina, do cadastro do fornecedor ou de uma agenda concluida.',
-      detalhe: `${orcamentos.length} orcamento(s) aberto(s) disponivel(is) para vinculo`,
+      detalhe: `${cotacoes.length} cotacao(s) aberto(s) disponivel(is) para vinculo`,
       icone: 'cadastro'
     },
     {
@@ -49,18 +49,18 @@ export function ModalManualAtendimento({
   const cardsFluxo = [
     {
       titulo: 'Lancar atendimento',
-      descricao: 'Use o botao Novo atendimento para abrir o formulario comercial e preencher cliente, assunto, data e horario.',
+      descricao: 'Use o botao Novo atendimento para abrir o formulario comercial e preencher fornecedor, assunto, data e horario.',
       icone: 'adicionar'
     },
     {
       titulo: 'Vincular cotacao',
       descricao: 'Dentro do atendimento e possivel criar, consultar, editar e acompanhar o status da cotacao sem sair do fluxo.',
-      icone: 'orcamento'
+      icone: 'cotacao'
     },
     {
       titulo: 'Fechar em ordem de compra',
-      descricao: 'Quando o orcamento vai para fechamento, o sistema pode perguntar se deve abrir um ordem de compra imediatamente.',
-      icone: 'pedido'
+      descricao: 'Quando o cotacao vai para fechamento, o sistema pode perguntar se deve abrir um ordem de compra imediatamente.',
+      icone: 'ordemCompra'
     },
     {
       titulo: 'Consultar historico',
@@ -109,11 +109,11 @@ export function ModalManualAtendimento({
       titulo="Manual de Atendimentos"
       descricao="Guia visual com fluxo comercial, validacoes, permissoes e atalhos reais da pagina."
       eyebrow="Fluxo comercial"
-      heroTitulo="Como a pagina de Atendimentos opera no Connecta CRM"
-      heroDescricao="A tela de Atendimentos concentra o registro operacional do relacionamento com o cliente, permitindo vincular contato, classificar tipo, canal e origem, abrir orcamento e evoluir para ordem de compra sem quebrar o contexto do atendimento."
+      heroTitulo="Como a pagina de Atendimentos opera no Connecta SRM"
+      heroDescricao="A tela de Atendimentos concentra o registro operacional do relacionamento com o fornecedor, permitindo vincular contato, classificar tipo, canal e origem, abrir cotacao e evoluir para ordem de compra sem quebrar o contexto do atendimento."
       painelHeroi={[
         { valor: atendimentos.length, rotulo: 'Atendimentos visiveis na grade' },
-        { valor: orcamentos.length, rotulo: 'Cotacoes abertos disponiveis' },
+        { valor: cotacoes.length, rotulo: 'Cotacoes abertos disponiveis' },
         { valor: tiposAtendimento.length + canaisAtendimento.length + origensAtendimento.length, rotulo: 'Classificacoes comerciais carregadas' }
       ]}
       cardsResumo={cardsResumo}
@@ -124,13 +124,13 @@ export function ModalManualAtendimento({
           titulo: 'O que e obrigatorio e o que depende do contexto',
           itens: [
             'Fornecedor, tipo de atendimento, assunto, data e horario de inicio sao obrigatorios para salvar o atendimento.',
-            'Contato depende do fornecedor escolhido e so lista contatos ativos daquele cliente.',
+            'Contato depende do fornecedor escolhido e so lista contatos ativos daquele fornecedor.',
             'A busca de fornecedores tambem permite incluir um novo fornecedor sem sair do fluxo.',
             'Quando o foco estiver em Fornecedor ou Contato, `F8` abre a busca correspondente sem depender do mouse.',
             'Ao abrir a busca de contatos com um fornecedor ja definido, o proprio modal permite cadastrar um novo contato e devolver esse contato ja selecionado no atendimento.',
             'Ao confirmar a busca de fornecedor ou contato, o foco retorna para o campo preenchido no atendimento.',
-            'Orcamento so pode ser vinculado ou criado quando ja existe fornecedor definido no formulario.',
-            'Tipo de atendimento, canal e origem classificam o relacionamento comercial dentro do CRM.',
+            'Cotacao so pode ser vinculado ou criado quando ja existe fornecedor definido no formulario.',
+            'Tipo de atendimento, canal e origem classificam o relacionamento comercial dentro do SRM.',
             'O usuario do registro e preenchido automaticamente conforme a sessao atual.'
           ]
         },

@@ -5,6 +5,7 @@ import {
   atualizarProduto,
   importarProdutosPlanilha,
   incluirProduto,
+  incluirProdutoFornecedor,
   listarGruposProduto,
   listarMarcas,
   listarProdutos,
@@ -207,15 +208,33 @@ export function PaginaProdutos({ usuarioLogado }) {
       idProduto: produtoSelecionado?.idProduto || proximoCodigoProduto
     });
 
+    let produtoSalvo = null;
+
     if (modoModalProduto === 'edicao' && produtoSelecionado?.idProduto) {
-      await atualizarProduto(produtoSelecionado.idProduto, payload);
+      produtoSalvo = await atualizarProduto(produtoSelecionado.idProduto, payload);
     } else {
-      await incluirProduto(payload);
+      produtoSalvo = await incluirProduto(payload);
+      await salvarFornecedoresPadraoProduto(produtoSalvo?.idProduto || payload.idProduto, dadosProduto.fornecedoresPadrao);
     }
 
     await recarregarGradeProdutos();
     await carregarProximoCodigoProduto();
     fecharModalProduto();
+  }
+
+  async function salvarFornecedoresPadraoProduto(idProduto, fornecedoresPadrao = []) {
+    if (!idProduto || !Array.isArray(fornecedoresPadrao) || fornecedoresPadrao.length === 0) {
+      return;
+    }
+
+    for (const fornecedorProduto of fornecedoresPadrao) {
+      await incluirProdutoFornecedor({
+        idProduto: Number(idProduto),
+        idFornecedor: Number(fornecedorProduto.idFornecedor),
+        codigoFornecedor: String(fornecedorProduto.codigoFornecedor || '').trim(),
+        unidadeFornecedor: String(fornecedorProduto.unidadeFornecedor || '').trim()
+      });
+    }
   }
 
   async function importarProdutos(linhas) {
@@ -570,7 +589,7 @@ function normalizarPayloadProduto(dadosProduto) {
     idGrupo: Number(dadosProduto.idGrupo),
     idMarca: Number(dadosProduto.idMarca),
     idUnidade: Number(dadosProduto.idUnidade),
-    preco: converterPrecoParaNumero(dadosProduto.preco) || 0,
+    custo: converterPrecoParaNumero(dadosProduto.custo) || 0,
     imagem: limparTextoOpcional(dadosProduto.imagem),
     status: dadosProduto.status ? 1 : 0
   };

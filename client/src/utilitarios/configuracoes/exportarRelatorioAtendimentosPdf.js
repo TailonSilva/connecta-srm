@@ -41,7 +41,7 @@ function gerarHtmlRelatorioAtendimentos({ atendimentos, chips, cards, usuarioLog
       <td>${escapeHtml(formatarData(atendimento.data))}</td>
       <td>${escapeHtml(atendimento.horaInicio || '--:--')}</td>
       <td>${escapeHtml(atendimento.horaFim || '--:--')}</td>
-      <td>${escapeHtml(atendimento.nomeCliente || 'Fornecedor nao informado')}</td>
+      <td>${escapeHtml(atendimento.nomeFornecedor || 'Fornecedor nao informado')}</td>
       <td>${escapeHtml(atendimento.assunto || 'Sem assunto')}</td>
       <td>${escapeHtml(atendimento.nomeContato || 'Contato nao informado')}</td>
       <td>${escapeHtml(atendimento.nomeCanalAtendimento || 'Nao informado')}</td>
@@ -243,7 +243,7 @@ function gerarHtmlRelatorioAtendimentos({ atendimentos, chips, cards, usuarioLog
 
         <footer class="relatorioAtendimentosPdfRodape">
           <span>Total de atendimentos: ${escapeHtml(String((atendimentos || []).length))}</span>
-          <span>Connecta CRM</span>
+          <span>Connecta SRM</span>
         </footer>
       </div>
     </body>

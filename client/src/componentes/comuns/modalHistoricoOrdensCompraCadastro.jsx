@@ -1,7 +1,7 @@
 import { BotaoAcaoGrade } from './botaoAcaoGrade';
 import { GradePadrao } from './gradePadrao';
 import { ModalHistoricoGrade } from './modalHistoricoGrade';
-import { TabelaHistoricoPedidos } from './tabelaHistoricoPedidos';
+import { TabelaHistoricoOrdensCompra } from './tabelaHistoricoOrdensCompra';
 import { normalizarPreco } from '../../utilitarios/normalizarPreco';
 import '../../recursos/estilos/modalHistoricoOrdensCompraFornecedor.css';
 
@@ -23,23 +23,23 @@ export function ModalHistoricoOrdensCompraCadastro({
   abasNoCabecalho = false,
   carregando,
   mensagemErro,
-  pedidos = [],
-  itensPedidos = [],
-  exibirPedidos = true,
+  ordensCompra = [],
+  itensOrdensCompra = [],
+  exibirOrdensCompra = true,
   contextoSalvo = true,
-  mensagemSemContextoPedidos,
+  mensagemSemContextoOrdensCompra,
   mensagemSemContextoItens,
-  mensagemVazioPedidos,
+  mensagemVazioOrdensCompra,
   mensagemVazioItens,
-  exibirClienteNosPedidos = false,
-  exibirClienteNosItens = false,
+  exibirFornecedorNosOrdensCompra = false,
+  exibirFornecedorNosItens = false,
   exibirProdutoNosItens = false,
-  exibirAcoesPedidos = true,
+  exibirAcoesOrdensCompra = true,
   exibirAcaoItens = false,
-  onConsultarPedido
+  onConsultarOrdemCompra
 }) {
-  const exibirAbas = exibirPedidos && Array.isArray(abas) && abas.length > 0;
-  const exibindoPedidos = exibirPedidos && (!exibirAbas || abaAtiva === 'pedidos');
+  const exibirAbas = exibirOrdensCompra && Array.isArray(abas) && abas.length > 0;
+  const exibindoOrdensCompra = exibirOrdensCompra && (!exibirAbas || abaAtiva === 'ordensCompra');
 
   return (
     <ModalHistoricoGrade
@@ -60,30 +60,30 @@ export function ModalHistoricoOrdensCompraCadastro({
       onSelecionarAba={onSelecionarAba}
       abasNoCabecalho={exibirAbas && abasNoCabecalho}
     >
-      <section className="painelContatosModalCliente painelPedidosCliente modalHistoricoOrdensCompraFornecedorPainel">
-        {exibindoPedidos ? (
-          <TabelaHistoricoPedidos
+      <section className="painelContatosModalFornecedor painelOrdensCompraFornecedor modalHistoricoOrdensCompraFornecedorPainel">
+        {exibindoOrdensCompra ? (
+          <TabelaHistoricoOrdensCompra
             carregando={carregando}
             mensagemErro={mensagemErro}
-            pedidos={pedidos}
+            ordensCompra={ordensCompra}
             contextoSalvo={contextoSalvo}
-            mensagemSemContexto={mensagemSemContextoPedidos}
-            mensagemVazia={mensagemVazioPedidos}
-            exibirCliente={exibirClienteNosPedidos}
-            exibirAcoes={exibirAcoesPedidos}
-            onConsultarPedido={onConsultarPedido}
+            mensagemSemContexto={mensagemSemContextoOrdensCompra}
+            mensagemVazia={mensagemVazioOrdensCompra}
+            exibirFornecedor={exibirFornecedorNosOrdensCompra}
+            exibirAcoes={exibirAcoesOrdensCompra}
+            onConsultarOrdemCompra={onConsultarOrdemCompra}
           />
         ) : (
           <GradePadrao
-            className="gradeContatosModal gradePedidosCliente modalHistoricoOrdensCompraFornecedorGrade"
-            classNameTabela="tabelaContatosModal tabelaItensPedidosCliente"
+            className="gradeContatosModal gradeOrdensCompraFornecedor modalHistoricoOrdensCompraFornecedorGrade"
+            classNameTabela="tabelaContatosModal tabelaItensOrdensCompraFornecedor"
             classNameMensagem="mensagemTabelaContatosModal"
             cabecalho={(
               <tr>
                 <th className="colunaHistoricoData">Inclusao</th>
                 <th className="colunaHistoricoData">Entrega</th>
-                <th className="colunaHistoricoPedido">Ordem de Compra</th>
-                {exibirClienteNosItens ? <th className="colunaHistoricoCliente">Fornecedor</th> : null}
+                <th className="colunaHistoricoOrdemCompra">Ordem de Compra</th>
+                {exibirFornecedorNosItens ? <th className="colunaHistoricoFornecedor">Fornecedor</th> : null}
                 {exibirProdutoNosItens ? <th className="colunaHistoricoReferencia">Referencia</th> : null}
                 {exibirProdutoNosItens ? <th className="colunaHistoricoDescricao">Descricao</th> : null}
                 <th className="colunaHistoricoValor">VALOR UN</th>
@@ -94,18 +94,18 @@ export function ModalHistoricoOrdensCompraCadastro({
             )}
             carregando={carregando}
             mensagemErro={mensagemErro}
-            temItens={contextoSalvo && itensPedidos.length > 0}
+            temItens={contextoSalvo && itensOrdensCompra.length > 0}
             mensagemCarregando="Carregando itens das ordens de compra..."
             mensagemVazia={contextoSalvo ? mensagemVazioItens : mensagemSemContextoItens}
           >
-            {itensPedidos.map((item) => (
+            {itensOrdensCompra.map((item) => (
               <tr key={item.chave}>
-                <td className="colunaHistoricoData">{formatarDataHistoricoVenda(item.dataInclusao)}</td>
-                <td className="colunaHistoricoData">{formatarDataHistoricoVenda(item.dataEntrega)}</td>
-                <td className="colunaHistoricoPedido">
-                  <span className="codigoHistoricoPedido">{`#${String(item.idPedido).padStart(4, '0')}`}</span>
+                <td className="colunaHistoricoData">{formatarDataHistoricoOrdemCompra(item.dataInclusao)}</td>
+                <td className="colunaHistoricoData">{formatarDataHistoricoOrdemCompra(item.dataEntrega)}</td>
+                <td className="colunaHistoricoOrdemCompra">
+                  <span className="codigoHistoricoOrdemCompra">{`#${String(item.idOrdemCompra).padStart(4, '0')}`}</span>
                 </td>
-                {exibirClienteNosItens ? <td className="colunaHistoricoCliente">{item.nomeCliente || 'Fornecedor nao informado'}</td> : null}
+                {exibirFornecedorNosItens ? <td className="colunaHistoricoFornecedor">{item.nomeFornecedor || 'Fornecedor nao informado'}</td> : null}
                 {exibirProdutoNosItens ? <td className="colunaHistoricoReferencia">{item.referenciaProduto || '-'}</td> : null}
                 {exibirProdutoNosItens ? <td className="colunaHistoricoDescricao">{item.descricaoProduto || 'Produto nao informado'}</td> : null}
                 <td className="colunaHistoricoValor">{normalizarPreco(item.valorUnitario)}</td>
@@ -114,7 +114,7 @@ export function ModalHistoricoOrdensCompraCadastro({
                 {exibirAcaoItens ? (
                   <td>
                     <div className="acoesContatoModal">
-                      <BotaoAcaoGrade icone="consultar" titulo="Consultar ordem de compra" onClick={() => onConsultarPedido?.(item.pedido)} />
+                      <BotaoAcaoGrade icone="consultar" titulo="Consultar ordem de compra" onClick={() => onConsultarOrdemCompra?.(item.ordemCompra)} />
                     </div>
                   </td>
                 ) : null}
@@ -127,7 +127,7 @@ export function ModalHistoricoOrdensCompraCadastro({
   );
 }
 
-function formatarDataHistoricoVenda(data) {
+function formatarDataHistoricoOrdemCompra(data) {
   if (!data) {
     return 'Nao informada';
   }

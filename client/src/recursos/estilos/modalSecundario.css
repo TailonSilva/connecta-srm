@@ -14,7 +14,7 @@
   z-index: 60;
 }
 
-.modalContatoCliente {
+.modalContatoFornecedor {
   width: min(860px, 100%);
   max-height: calc(100vh - 56px);
   border: 1px solid rgba(149, 6, 244, 0.12);
@@ -169,7 +169,7 @@
   text-overflow: ellipsis;
 }
 
-.painelContatosModalCliente {
+.painelContatosModalFornecedor {
   display: grid;
   gap: 16px;
   padding: 20px;
@@ -202,13 +202,13 @@
   background: #ffffff;
 }
 
-.painelContatosModalCliente .gradeContatosModal {
+.painelContatosModalFornecedor .gradeContatosModal {
   height: auto;
   max-height: none;
   min-height: 0;
 }
 
-.painelContatosModalCliente .gradeContatosModal .corpoGradePadrao {
+.painelContatosModalFornecedor .gradeContatosModal .corpoGradePadrao {
   overflow-y: visible;
 }
 
@@ -333,12 +333,12 @@
   text-align: center;
 }
 
-.modalBuscaClienteAtendimento {
+.modalBuscaFornecedorAtendimento {
   width: min(1140px, 100%);
   height: min(720px, calc(100vh - 56px));
 }
 
-.corpoModalBuscaClienteAtendimento {
+.corpoModalBuscaFornecedorAtendimento {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   gap: 16px;
@@ -346,58 +346,58 @@
   min-height: 0;
 }
 
-.gradeBuscaClienteAtendimento {
+.gradeBuscaFornecedorAtendimento {
   min-height: 0;
   overflow: auto;
 }
 
-.tabelaBuscaClienteAtendimento th:nth-child(1),
-.tabelaBuscaClienteAtendimento td:nth-child(1) {
+.tabelaBuscaFornecedorAtendimento th:nth-child(1),
+.tabelaBuscaFornecedorAtendimento td:nth-child(1) {
   width: 88px;
   white-space: nowrap;
 }
 
-.tabelaBuscaClienteAtendimento th:nth-child(2),
-.tabelaBuscaClienteAtendimento td:nth-child(2) {
+.tabelaBuscaFornecedorAtendimento th:nth-child(2),
+.tabelaBuscaFornecedorAtendimento td:nth-child(2) {
   width: 24%;
 }
 
-.tabelaBuscaClienteAtendimento th:nth-child(3),
-.tabelaBuscaClienteAtendimento td:nth-child(3) {
+.tabelaBuscaFornecedorAtendimento th:nth-child(3),
+.tabelaBuscaFornecedorAtendimento td:nth-child(3) {
   width: auto;
 }
 
-.tabelaBuscaClienteAtendimento th:nth-child(4),
-.tabelaBuscaClienteAtendimento td:nth-child(4) {
+.tabelaBuscaFornecedorAtendimento th:nth-child(4),
+.tabelaBuscaFornecedorAtendimento td:nth-child(4) {
   width: 18%;
 }
 
-.tabelaBuscaClienteAtendimento th:nth-child(5),
-.tabelaBuscaClienteAtendimento td:nth-child(5) {
+.tabelaBuscaFornecedorAtendimento th:nth-child(5),
+.tabelaBuscaFornecedorAtendimento td:nth-child(5) {
   width: 72px;
   white-space: nowrap;
 }
 
-.tabelaBuscaClienteAtendimento th:nth-child(6),
-.tabelaBuscaClienteAtendimento td:nth-child(6) {
+.tabelaBuscaFornecedorAtendimento th:nth-child(6),
+.tabelaBuscaFornecedorAtendimento td:nth-child(6) {
   width: 18%;
 }
 
-.tabelaBuscaClienteAtendimento tbody tr {
+.tabelaBuscaFornecedorAtendimento tbody tr {
   cursor: pointer;
   transition: background-color 160ms ease, box-shadow 160ms ease;
 }
 
-.tabelaBuscaClienteAtendimento tbody tr:hover {
+.tabelaBuscaFornecedorAtendimento tbody tr:hover {
   background: rgba(149, 6, 244, 0.04);
 }
 
-.tabelaBuscaClienteAtendimento tbody tr.linhaBuscaClienteAtiva {
+.tabelaBuscaFornecedorAtendimento tbody tr.linhaBuscaFornecedorAtiva {
   background: rgba(149, 6, 244, 0.08);
   box-shadow: inset 3px 0 0 var(--corPrimaria);
 }
 
-.painelAtendimentosCliente {
+.painelAtendimentosFornecedor {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   flex: 1 1 auto;
@@ -406,7 +406,7 @@
   gap: 14px;
 }
 
-.painelPedidosCliente {
+.painelOrdensCompraFornecedor {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   flex: 1 1 auto;
@@ -424,14 +424,14 @@
   flex-wrap: wrap;
 }
 
-.abasSecundariasModalCliente {
+.abasSecundariasModalFornecedor {
   display: flex;
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
 }
 
-.abaSecundariaModalCliente {
+.abaSecundariaModalFornecedor {
   min-height: 40px;
   padding: 0 18px;
   border: 1px solid rgba(149, 6, 244, 0.12);
@@ -444,120 +444,120 @@
   transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
 }
 
-.abaSecundariaModalCliente:hover {
+.abaSecundariaModalFornecedor:hover {
   border-color: rgba(149, 6, 244, 0.24);
   background: linear-gradient(180deg, #f0f0f0 0%, #e8e8e8 100%);
 }
 
-.abaSecundariaModalCliente.ativa {
+.abaSecundariaModalFornecedor.ativa {
   border-color: transparent;
   background: linear-gradient(180deg, color-mix(in srgb, var(--corPrimaria) 88%, white), var(--corPrimariaForte));
   color: #ffffff;
   box-shadow: 0 10px 20px rgba(149, 6, 244, 0.2);
 }
 
-.subtituloGradeAtendimentoCliente {
+.subtituloGradeAtendimentoFornecedor {
   margin: 4px 0 0;
   color: var(--corTextoSuave);
   font-size: 0.84rem;
 }
 
-.gradeAtendimentosCliente {
+.gradeAtendimentosFornecedor {
   min-height: 0;
   max-height: 420px;
   overflow-x: hidden;
   overflow-y: auto;
 }
 
-.gradePedidosCliente {
+.gradeOrdensCompraFornecedor {
   min-height: 0;
   max-height: 420px;
   overflow-x: hidden;
   overflow-y: auto;
 }
 
-.tabelaAtendimentosCliente th:nth-child(1),
-.tabelaAtendimentosCliente td:nth-child(1) {
+.tabelaAtendimentosFornecedor th:nth-child(1),
+.tabelaAtendimentosFornecedor td:nth-child(1) {
   width: 112px;
 }
 
-.tabelaAtendimentosCliente th:nth-child(2),
-.tabelaAtendimentosCliente td:nth-child(2) {
+.tabelaAtendimentosFornecedor th:nth-child(2),
+.tabelaAtendimentosFornecedor td:nth-child(2) {
   width: auto;
 }
 
-.tabelaAtendimentosCliente th:nth-child(3),
-.tabelaAtendimentosCliente td:nth-child(3) {
+.tabelaAtendimentosFornecedor th:nth-child(3),
+.tabelaAtendimentosFornecedor td:nth-child(3) {
   width: 140px;
 }
 
-.tabelaAtendimentosCliente th:nth-child(4),
-.tabelaAtendimentosCliente td:nth-child(4) {
+.tabelaAtendimentosFornecedor th:nth-child(4),
+.tabelaAtendimentosFornecedor td:nth-child(4) {
   width: 160px;
 }
 
-.tabelaAtendimentosCliente th:nth-child(5),
-.tabelaAtendimentosCliente td:nth-child(5) {
+.tabelaAtendimentosFornecedor th:nth-child(5),
+.tabelaAtendimentosFornecedor td:nth-child(5) {
   width: 112px;
 }
 
-.tabelaPedidosCliente th:nth-child(1),
-.tabelaPedidosCliente td:nth-child(1) {
+.tabelaOrdensCompraFornecedor th:nth-child(1),
+.tabelaOrdensCompraFornecedor td:nth-child(1) {
   width: 112px;
 }
 
-.tabelaPedidosCliente th:nth-child(2),
-.tabelaPedidosCliente td:nth-child(2) {
+.tabelaOrdensCompraFornecedor th:nth-child(2),
+.tabelaOrdensCompraFornecedor td:nth-child(2) {
   width: auto;
 }
 
-.tabelaPedidosCliente th:nth-child(3),
-.tabelaPedidosCliente td:nth-child(3) {
+.tabelaOrdensCompraFornecedor th:nth-child(3),
+.tabelaOrdensCompraFornecedor td:nth-child(3) {
   width: 160px;
 }
 
-.tabelaPedidosCliente th:nth-child(4),
-.tabelaPedidosCliente td:nth-child(4) {
+.tabelaOrdensCompraFornecedor th:nth-child(4),
+.tabelaOrdensCompraFornecedor td:nth-child(4) {
   width: 160px;
 }
 
-.tabelaPedidosCliente th:nth-child(5),
-.tabelaPedidosCliente td:nth-child(5) {
+.tabelaOrdensCompraFornecedor th:nth-child(5),
+.tabelaOrdensCompraFornecedor td:nth-child(5) {
   width: 130px;
 }
 
-.tabelaPedidosCliente th:nth-child(6),
-.tabelaPedidosCliente td:nth-child(6) {
+.tabelaOrdensCompraFornecedor th:nth-child(6),
+.tabelaOrdensCompraFornecedor td:nth-child(6) {
   width: 112px;
 }
 
-.tabelaItensPedidosCliente th:nth-child(1),
-.tabelaItensPedidosCliente td:nth-child(1) {
+.tabelaItensOrdensCompraFornecedor th:nth-child(1),
+.tabelaItensOrdensCompraFornecedor td:nth-child(1) {
   width: 112px;
 }
 
-.tabelaItensPedidosCliente th:nth-child(2),
-.tabelaItensPedidosCliente td:nth-child(2) {
+.tabelaItensOrdensCompraFornecedor th:nth-child(2),
+.tabelaItensOrdensCompraFornecedor td:nth-child(2) {
   width: 112px;
 }
 
-.tabelaItensPedidosCliente th:nth-child(3),
-.tabelaItensPedidosCliente td:nth-child(3) {
+.tabelaItensOrdensCompraFornecedor th:nth-child(3),
+.tabelaItensOrdensCompraFornecedor td:nth-child(3) {
   width: auto;
 }
 
-.tabelaItensPedidosCliente th:nth-child(4),
-.tabelaItensPedidosCliente td:nth-child(4) {
+.tabelaItensOrdensCompraFornecedor th:nth-child(4),
+.tabelaItensOrdensCompraFornecedor td:nth-child(4) {
   width: 120px;
 }
 
-.tabelaItensPedidosCliente th:nth-child(5),
-.tabelaItensPedidosCliente td:nth-child(5) {
+.tabelaItensOrdensCompraFornecedor th:nth-child(5),
+.tabelaItensOrdensCompraFornecedor td:nth-child(5) {
   width: 110px;
 }
 
-.tabelaItensPedidosCliente th:nth-child(6),
-.tabelaItensPedidosCliente td:nth-child(6) {
+.tabelaItensOrdensCompraFornecedor th:nth-child(6),
+.tabelaItensOrdensCompraFornecedor td:nth-child(6) {
   width: 130px;
 }
 
@@ -574,7 +574,7 @@
     justify-content: stretch;
   }
 
-  .abasSecundariasModalCliente {
+  .abasSecundariasModalFornecedor {
     display: grid;
     grid-template-columns: 1fr;
     flex: 1 1 auto;

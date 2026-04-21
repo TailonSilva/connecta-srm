@@ -74,7 +74,7 @@ export function CampoSelecaoMultiplaModal({
       {aberto ? (
         <div className="camadaModalContato" role="presentation" onMouseDown={fecharModal}>
           <div
-            className="modalContatoCliente modalSelecaoMultipla"
+            className="modalContatoFornecedor modalSelecaoMultipla"
             role="dialog"
             aria-modal="true"
             aria-label={titulo}

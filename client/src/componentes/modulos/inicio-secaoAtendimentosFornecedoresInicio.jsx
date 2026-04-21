@@ -1,0 +1,25 @@
+import '../../recursos/estilos/secaoAtendimentosFornecedoresInicio.css';
+import { SecaoResumoRelacionamentoComModalInicio } from './inicio-secaoResumoRelacionamentoComModalInicio';
+
+export function SecaoAtendimentosFornecedoresInicio({ itens, titulo = 'Atendimentos do mes por fornecedor' }) {
+  return (
+    <div className="secaoAtendimentosFornecedoresInicioEscopo">
+      <SecaoResumoRelacionamentoComModalInicio
+        titulo={titulo}
+        itens={itens}
+        composicao="Quantidade de atendimentos e frequencia por fornecedor."
+        periodo="Mes corrente pela data do atendimento."
+        mensagemVazia="Nenhum atendimento registrado no mes atual por fornecedor."
+        modalTitulo={titulo}
+        modalSubtitulo="Lista completa de atendimentos por fornecedor no mes corrente."
+        colunasPainel={2}
+        obterValorTexto={(item) => `${item.quantidadeAtendimentos} atend.`}
+        obterValorPercentual={(item) => item.percentualAtendimentos}
+        obterQuantidadeTexto={(item) => `${item.quantidadeUsuarios} usuarios`}
+        obterQuantidadePercentual={(item) => item.percentualUsuarios}
+        ariaAcao="Abrir lista completa de atendimentos por fornecedor no mes"
+      />
+    </div>
+  );
+}
+

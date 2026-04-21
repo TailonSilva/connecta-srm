@@ -1,8 +1,8 @@
-export function ContatoPrincipalFornecedor({ cliente }) {
+export function ContatoPrincipalFornecedor({ fornecedor }) {
   return (
     <div className="celulaContatoPrincipal">
-      <strong>{cliente.nomeContatoPrincipal || 'Nao informado'}</strong>
-      <span>{cliente.emailContatoPrincipal || 'E-mail nao informado'}</span>
+      <strong>{fornecedor.nomeContatoPrincipal || 'Nao informado'}</strong>
+      <span>{fornecedor.emailContatoPrincipal || 'E-mail nao informado'}</span>
     </div>
   );
 }

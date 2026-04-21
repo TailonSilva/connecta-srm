@@ -3,8 +3,8 @@ import { ModalManualPagina } from '../comuns/modalManualPagina';
 export function ModalManualOrdensCompra({
   aberto,
   aoFechar,
-  pedidos = [],
-  etapasPedido = [],
+  ordensCompra = [],
+  etapasOrdemCompra = [],
   prazosPagamento = [],
   filtros = {},
   usuarioLogado
@@ -24,23 +24,23 @@ export function ModalManualOrdensCompra({
       titulo="Manual de Ordens de Compra"
       descricao="Guia visual do acompanhamento de ordens de compra, etapas comerciais, pagamento e regras de permissao da tela."
       eyebrow="Execucao comercial"
-      heroTitulo="Como a pagina de Ordens de Compra acompanha o fechamento do CRM"
+      heroTitulo="Como a pagina de Ordens de Compra acompanha o fechamento do SRM"
       heroDescricao="A pagina de Ordens de Compra acompanha os registros gerados a partir das propostas fechadas ou criados diretamente na tela. Ela concentra etapa da ordem de compra, pagamento, itens e consulta operacional da execucao comercial."
       painelHeroi={[
-        { valor: pedidos.length, rotulo: 'Ordens de Compra na grade atual' },
-        { valor: etapasPedido.length, rotulo: 'Etapas de ordem de compra' },
+        { valor: ordensCompra.length, rotulo: 'Ordens de Compra na grade atual' },
+        { valor: etapasOrdemCompra.length, rotulo: 'Etapas de ordem de compra' },
         { valor: prazosPagamento.length, rotulo: 'Prazos de pagamento carregados' }
       ]}
       cardsResumo={[
         {
           titulo: 'Grade operacional',
-          descricao: `${pedidos.length} ordem de compra(s) aparecem no recorte atual.`,
+          descricao: `${ordensCompra.length} ordem de compra(s) aparecem no recorte atual.`,
           detalhe: 'Para Usuario padrao, a listagem considera apenas as ordens de compra em que ele proprio e o comprador do registro.',
-          icone: 'pedido'
+          icone: 'ordemCompra'
         },
         {
           titulo: 'Etapas do processo',
-          descricao: `${etapasPedido.length} etapa(s) configurada(s) organizam o andamento do pedido.`,
+          descricao: `${etapasOrdemCompra.length} etapa(s) configurada(s) organizam o andamento do ordemCompra.`,
           detalhe: 'As etapas sao mantidas na pagina de Configuracoes.',
           icone: 'cadastro'
         },
@@ -48,11 +48,11 @@ export function ModalManualOrdensCompra({
           titulo: 'Classificacao da ordem de compra',
           descricao: 'O ordem de compra agora pode receber um Tipo de ordem de compra definido em tabela auxiliar propria.',
           detalhe: 'O tipo classifica o registro sem alterar automaticamente quantidade, valores ou etapa.',
-          icone: 'pedido'
+          icone: 'ordemCompra'
         },
         {
           titulo: 'Pagamento',
-          descricao: `${prazosPagamento.length} prazo(s) de pagamento podem ser usados no modal do pedido.`,
+          descricao: `${prazosPagamento.length} prazo(s) de pagamento podem ser usados no modal do ordemCompra.`,
           detalhe: 'Os prazos podem existir sem dias e manter apenas o metodo, conforme a configuracao atual.',
           icone: 'pagamento'
         },
@@ -68,12 +68,12 @@ export function ModalManualOrdensCompra({
       cardsFluxo={[
         {
           titulo: 'Criar ordem de compra',
-          descricao: 'O ordem de compra pode nascer diretamente pela tela ou a partir do fechamento de um orcamento.',
+          descricao: 'O ordem de compra pode nascer diretamente pela tela ou a partir do fechamento de um cotacao.',
           icone: 'adicionar'
         },
         {
           titulo: 'Consultar e editar',
-          descricao: 'A grade permite consultar o registro e, quando permitido pelo perfil e pela etapa, seguir em edicao mantendo o contexto comercial do pedido.',
+          descricao: 'A grade permite consultar o registro e, quando permitido pelo perfil e pela etapa, seguir em edicao mantendo o contexto comercial do ordemCompra.',
           icone: 'consultar'
         },
         {
@@ -83,7 +83,7 @@ export function ModalManualOrdensCompra({
         },
         {
           titulo: 'Excluir com confirmacao',
-          descricao: 'Quando o perfil permite, a tela exige confirmacao antes de excluir um pedido.',
+          descricao: 'Quando o perfil permite, a tela exige confirmacao antes de excluir um ordemCompra.',
           icone: 'confirmar'
         }
       ]}
@@ -93,14 +93,14 @@ export function ModalManualOrdensCompra({
           titulo: 'O que o modal concentra',
           itens: [
             'Fornecedor, contato, usuario do registro e comprador compoem a base comercial da ordem de compra, com atalhos de busca para fornecedor e contato no modo de inclusao.',
-            'Na busca de fornecedores da ordem de compra, Usuario padrao tambem pode selecionar fornecedores vinculados a outros compradores para abrir um novo pedido.',
+            'Na busca de fornecedores da ordem de compra, Usuario padrao tambem pode selecionar fornecedores vinculados a outros compradores para abrir um novo ordemCompra.',
             'Selecionar ou trocar o fornecedor nao puxa mais o comprador do cadastro do fornecedor; o comprador inicial da ordem de compra sempre segue o usuario do registro e so muda quando o proprio campo Comprador for alterado no modal.',
             'A busca de fornecedores tambem permite incluir um novo fornecedor sem sair do fluxo.',
-            'Ao abrir a busca de contatos com um fornecedor ja definido, o proprio modal permite cadastrar um novo contato e devolver esse contato ja selecionado no pedido.',
+            'Ao abrir a busca de contatos com um fornecedor ja definido, o proprio modal permite cadastrar um novo contato e devolver esse contato ja selecionado no ordemCompra.',
             'Quando o foco estiver em Fornecedor ou Contato, `F8` abre a busca correspondente sem depender do clique no botao lateral.',
-            'Ao confirmar a busca de fornecedor ou contato, o foco retorna para o campo preenchido no pedido.',
+            'Ao confirmar a busca de fornecedor ou contato, o foco retorna para o campo preenchido no ordemCompra.',
             'O campo Tipo de ordem de compra usa uma tabela auxiliar propria para classificar o registro sem depender da etapa comercial.',
-            'A aba Outros concentra o Orcamento vinculado e os dados complementares da ordem de compra.',
+            'A aba Outros concentra o Cotacao vinculado e os dados complementares da ordem de compra.',
             'Itens, valores e pagamento sao herdados do fluxo comercial e podem ser ajustados no modal.',
             'Dentro do item, `F8` tambem abre a busca de Produto quando o foco estiver no campo correspondente.',
             'A imagem do item pode herdar o que veio da cotacao; quando o usuario trocar essa imagem na ordem de compra, ela passa a ser exclusiva daquele item e e recortada em 1024 x 1024 px.',
@@ -137,7 +137,7 @@ export function ModalManualOrdensCompra({
           descricao: usuarioLogado?.tipo === 'Usuario padrao'
             ? 'Usuario padrao nao pode excluir ordens de compra diretamente pela grade.'
             : 'Perfis com permissao podem excluir ordens de compra mediante confirmacao explicita.',
-          detalhe: 'A regra segue a politica operacional do CRM.',
+          detalhe: 'A regra segue a politica operacional do SRM.',
           icone: 'usuarios'
         },
         {
@@ -148,7 +148,7 @@ export function ModalManualOrdensCompra({
         },
         {
           titulo: 'Prazos coerentes com o sistema',
-          descricao: 'Os atalhos de prazo de pagamento dentro da ordem de compra respeitam o mesmo modelo de permissao adotado em Atendimentos e Orcamentos.',
+          descricao: 'Os atalhos de prazo de pagamento dentro da ordem de compra respeitam o mesmo modelo de permissao adotado em Atendimentos e Cotacoes.',
           detalhe: 'Isso evita diferenca de comportamento entre modais comerciais.',
           icone: 'configuracoes'
         },
@@ -164,7 +164,7 @@ export function ModalManualOrdensCompra({
             ? 'Quando a ordem de compra chega em Entregue, o perfil Usuario padrao passa a consultar o registro sem edicao.'
             : 'A etapa Entregue bloqueia a edicao apenas para Usuario padrao; perfis administrativos seguem com gestao completa.',
           detalhe: 'A validacao do status operacional usa o identificador fixo da etapa do sistema.',
-          icone: 'pedido'
+          icone: 'ordemCompra'
         }
       ]}
     />

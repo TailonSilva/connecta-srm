@@ -85,7 +85,7 @@ rotaListagens.get('/produtos', async (requisicao, resposta) => {
       'CAST(produto.idProduto AS TEXT)',
       'produto.referencia',
       'produto.descricao',
-      'CAST(produto.preco AS TEXT)',
+      'CAST(produto.custo AS TEXT)',
       'grupoProduto.descricao',
       'marca.descricao',
       'unidadeMedida.descricao'

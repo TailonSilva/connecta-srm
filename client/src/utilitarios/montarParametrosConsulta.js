@@ -25,16 +25,16 @@ export function montarParametrosConsulta(parametros = {}) {
 function normalizarAliasesConsulta(parametros = {}) {
   const normalizado = { ...parametros };
   const aliases = [
-    ['idCliente', 'idFornecedor'],
-    ['idVendedor', 'idComprador'],
-    ['idVendedorCliente', 'idCompradorFornecedor'],
-    ['idVendedorFornecedor', 'idCompradorFornecedor'],
-    ['idEtapaOrcamento', 'idEtapaCotacao'],
-    ['idsEtapaOrcamento', 'idsEtapaCotacao'],
-    ['idOrcamento', 'idCotacao'],
-    ['idPedido', 'idOrdemCompra'],
-    ['idEtapaPedido', 'idEtapaOrdemCompra'],
-    ['idsEtapaPedido', 'idsEtapaOrdemCompra']
+    ['idFornecedor', 'idFornecedor'],
+    ['idComprador', 'idComprador'],
+    ['idCompradorFornecedor', 'idCompradorFornecedor'],
+    ['idCompradorFornecedor', 'idCompradorFornecedor'],
+    ['idEtapaCotacao', 'idEtapaCotacao'],
+    ['idsEtapaCotacao', 'idsEtapaCotacao'],
+    ['idCotacao', 'idCotacao'],
+    ['idOrdemCompra', 'idOrdemCompra'],
+    ['idEtapaOrdemCompra', 'idEtapaOrdemCompra'],
+    ['idsEtapaOrdemCompra', 'idsEtapaOrdemCompra']
   ];
 
   for (const [legado, atual] of aliases) {

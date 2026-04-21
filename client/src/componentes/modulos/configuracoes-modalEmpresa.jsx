@@ -11,7 +11,7 @@ const abasModalEmpresa = [
   { id: 'paginaInicial', label: 'Pagina inicial' },
   { id: 'endereco', label: 'Endereco' },
   { id: 'agenda', label: 'Agenda' },
-  { id: 'orcamentosPedidos', label: 'Cotacoes/Ordens de Compra' },
+  { id: 'cotacoesOrdensCompra', label: 'Cotacoes/Ordens de Compra' },
   { id: 'email', label: 'E-mail' }
 ];
 
@@ -32,17 +32,17 @@ const estadoInicialFormulario = {
   horaInicioSabado: '08:00',
   horaFimSabado: '12:00',
   exibirFunilPaginaInicial: true,
-  diasValidadeOrcamento: '7',
-  diasEntregaPedido: '7',
+  diasValidadeCotacao: '7',
+  diasEntregaOrdemCompra: '7',
   codigoPrincipalFornecedor: 'codigo',
-  etapasFiltroPadraoOrcamento: [],
-  corPrimariaOrcamento: '#111827',
-  corSecundariaOrcamento: '#ef4444',
-  corDestaqueOrcamento: '#f59e0b',
-  destaqueItemOrcamentoPdf: 'descricao',
-  assuntoEmailOrcamento: 'Cotacao {cotacao_codigo} - {cliente_nome}',
-  corpoEmailOrcamento: 'Olá {cliente_nome},\n\nSegue a cotacao {orcamento_codigo} com validade até {orcamento_validade}.\n\n{orcamento_itens}\n\nTotal da cotacao: {orcamento_total}\n\nFico à disposição para qualquer ajuste.\n\nAtenciosamente,',
-  assinaturaEmailOrcamento: '{vendedor_nome}\n{empresa_nome}',
+  etapasFiltroPadraoCotacao: [],
+  corPrimariaCotacao: '#111827',
+  corSecundariaCotacao: '#ef4444',
+  corDestaqueCotacao: '#f59e0b',
+  destaqueItemCotacaoPdf: 'descricao',
+  assuntoEmailCotacao: 'Cotacao {cotacao_codigo} - {fornecedor_nome}',
+  corpoEmailCotacao: 'Olá {fornecedor_nome},\n\nSegue a cotacao {cotacao_codigo} com validade até {cotacao_validade}.\n\n{cotacao_itens}\n\nTotal da cotacao: {cotacao_total}\n\nFico à disposição para qualquer ajuste.\n\nAtenciosamente,',
+  assinaturaEmailCotacao: '{comprador_nome}\n{empresa_nome}',
   logradouro: '',
   numero: '',
   complemento: '',
@@ -56,7 +56,7 @@ const estadoInicialFormulario = {
 export function ModalEmpresa({
   aberto,
   empresa,
-  etapasOrcamento = [],
+  etapasCotacao = [],
   modo = 'edicao',
   aoFechar,
   aoSalvar
@@ -69,20 +69,20 @@ export function ModalEmpresa({
   const somenteLeitura = modo === 'consulta';
   const tipoPessoaFisica = formulario.tipo === 'Pessoa fisica';
   const rotuloDocumento = tipoPessoaFisica ? 'CPF' : 'CNPJ';
-  const etapasOrcamentoAtivasOrdenadas = useMemo(
-    () => [...etapasOrcamento]
+  const etapasCotacaoAtivasOrdenadas = useMemo(
+    () => [...etapasCotacao]
       .filter((etapa) => etapa.status !== 0)
       .sort((etapaA, etapaB) => {
-        const ordemA = Number(etapaA?.ordem || etapaA?.idEtapaOrcamento || 0);
-        const ordemB = Number(etapaB?.ordem || etapaB?.idEtapaOrcamento || 0);
+        const ordemA = Number(etapaA?.ordem || etapaA?.idEtapaCotacao || 0);
+        const ordemB = Number(etapaB?.ordem || etapaB?.idEtapaCotacao || 0);
 
         if (ordemA !== ordemB) {
           return ordemA - ordemB;
         }
 
-        return Number(etapaA?.idEtapaOrcamento || 0) - Number(etapaB?.idEtapaOrcamento || 0);
+        return Number(etapaA?.idEtapaCotacao || 0) - Number(etapaB?.idEtapaCotacao || 0);
       }),
-    [etapasOrcamento]
+    [etapasCotacao]
   );
 
   useEffect(() => {
@@ -244,19 +244,19 @@ export function ModalEmpresa({
   return (
     <div className="camadaModal" role="presentation" onMouseDown={fecharAoClicarNoFundo}>
       <form
-        className="modalCliente"
+        className="modalFornecedor"
         role="dialog"
         aria-modal="true"
         aria-labelledby="tituloModalEmpresa"
         onMouseDown={(evento) => evento.stopPropagation()}
         onSubmit={submeterFormulario}
       >
-        <header className="cabecalhoModalCliente">
+        <header className="cabecalhoModalFornecedor">
           <h2 id="tituloModalEmpresa">
             {empresa ? 'Cadastro da empresa' : 'Incluir empresa'}
           </h2>
 
-          <div className="acoesCabecalhoModalCliente">
+          <div className="acoesCabecalhoModalFornecedor">
             <Botao
               variante="secundario"
               type="button"
@@ -285,13 +285,13 @@ export function ModalEmpresa({
           </div>
         </header>
 
-        <div className="abasModalCliente" role="tablist" aria-label="Secoes do cadastro da empresa">
+        <div className="abasModalFornecedor" role="tablist" aria-label="Secoes do cadastro da empresa">
           {abasModalEmpresa.map((aba) => (
             <button
               key={aba.id}
               type="button"
               role="tab"
-              className={`abaModalCliente ${abaAtiva === aba.id ? 'ativa' : ''}`}
+              className={`abaModalFornecedor ${abaAtiva === aba.id ? 'ativa' : ''}`}
               aria-selected={abaAtiva === aba.id}
               onClick={() => definirAbaAtiva(aba.id)}
             >
@@ -300,9 +300,9 @@ export function ModalEmpresa({
           ))}
         </div>
 
-        <div className="corpoModalCliente">
+        <div className="corpoModalFornecedor">
           {abaAtiva === 'dadosGerais' ? (
-            <section className="painelDadosGeraisCliente">
+            <section className="painelDadosGeraisFornecedor">
               <CampoImagemPadrao
                 valor={formulario.imagem}
                 alt={`Imagem de ${formulario.nomeFantasia || formulario.razaoSocial || 'empresa'}`}
@@ -314,7 +314,7 @@ export function ModalEmpresa({
                 }))}
               />
 
-              <div className="gradeCamposModalCliente">
+              <div className="gradeCamposModalFornecedor">
                 <CampoFormulario label="Razao social" name="razaoSocial" value={formulario.razaoSocial} onChange={alterarCampo} disabled={somenteLeitura} required />
                 <CampoFormulario label="Nome fantasia" name="nomeFantasia" value={formulario.nomeFantasia} onChange={alterarCampo} disabled={somenteLeitura} required />
                 <CampoFormulario label="Slogan" name="slogan" value={formulario.slogan} onChange={alterarCampo} disabled={somenteLeitura} />
@@ -328,7 +328,7 @@ export function ModalEmpresa({
           ) : null}
 
           {abaAtiva === 'paginaInicial' ? (
-            <section className="gradeCamposModalCliente">
+            <section className="gradeCamposModalFornecedor">
               <div className="campoFormularioIntegral painelOpcaoEmpresaPaginaInicial">
                 <label className="campoCheckboxFormulario" htmlFor="exibirFunilPaginaInicialEmpresa">
                   <input
@@ -339,18 +339,18 @@ export function ModalEmpresa({
                     onChange={alterarCampo}
                     disabled={somenteLeitura}
                   />
-                  <span>Exibir funil de vendas na pagina inicial</span>
+                  <span>Exibir funil de ordensCompra na pagina inicial</span>
                 </label>
                 <p className="descricaoOpcaoEmpresaPaginaInicial">
-                  Quando habilitado, a pagina inicial mostra as etapas de orcamento marcadas para funil,
-                  com quantidade de orcamentos e valor total em cada etapa.
+                  Quando habilitado, a pagina inicial mostra as etapas de cotacao marcadas para funil,
+                  com quantidade de cotacoes e valor total em cada etapa.
                 </p>
               </div>
             </section>
           ) : null}
 
           {abaAtiva === 'endereco' ? (
-            <section className="gradeCamposModalCliente">
+            <section className="gradeCamposModalFornecedor">
               <CampoFormularioComAcao label="CEP" name="cep" value={formulario.cep} onChange={alterarCampo} aoAcionar={buscarDadosCep} carregando={buscandoCep} rotuloAcao="Buscar CEP" disabled={somenteLeitura} />
               <CampoFormulario label="Logradouro" name="logradouro" value={formulario.logradouro} onChange={alterarCampo} disabled={somenteLeitura} />
               <CampoFormulario label="Numero" name="numero" value={formulario.numero} onChange={alterarCampo} disabled={somenteLeitura} />
@@ -362,7 +362,7 @@ export function ModalEmpresa({
           ) : null}
 
           {abaAtiva === 'agenda' ? (
-            <section className="gradeCamposModalCliente">
+            <section className="gradeCamposModalFornecedor">
               <CampoFormulario label="Inicio da manha" name="horaInicioManha" type="time" value={formulario.horaInicioManha} onChange={alterarCampo} disabled={somenteLeitura} />
               <CampoFormulario label="Fim da manha" name="horaFimManha" type="time" value={formulario.horaFimManha} onChange={alterarCampo} disabled={somenteLeitura} />
               <CampoFormulario label="Inicio da tarde" name="horaInicioTarde" type="time" value={formulario.horaInicioTarde} onChange={alterarCampo} disabled={somenteLeitura} />
@@ -383,14 +383,14 @@ export function ModalEmpresa({
             </section>
           ) : null}
 
-          {abaAtiva === 'orcamentosPedidos' ? (
-            <section className="gradeCamposModalCliente">
-              <CampoFormulario label="Validade padrao da cotacao (dias)" name="diasValidadeOrcamento" type="number" min="0" value={formulario.diasValidadeOrcamento} onChange={alterarCampo} disabled={somenteLeitura} />
-              <CampoFormulario label="Prazo padrao de entrega da ordem de compra (dias)" name="diasEntregaPedido" type="number" min="0" value={formulario.diasEntregaPedido} onChange={alterarCampo} disabled={somenteLeitura} />
+          {abaAtiva === 'cotacoesOrdensCompra' ? (
+            <section className="gradeCamposModalFornecedor">
+              <CampoFormulario label="Validade padrao da cotacao (dias)" name="diasValidadeCotacao" type="number" min="0" value={formulario.diasValidadeCotacao} onChange={alterarCampo} disabled={somenteLeitura} />
+              <CampoFormulario label="Prazo padrao de entrega da ordem de compra (dias)" name="diasEntregaOrdemCompra" type="number" min="0" value={formulario.diasEntregaOrdemCompra} onChange={alterarCampo} disabled={somenteLeitura} />
               <CampoSelect
                 label="Codigo principal do fornecedor"
-                name="codigoPrincipalCliente"
-                value={formulario.codigoPrincipalCliente}
+                name="codigoPrincipalFornecedor"
+                value={formulario.codigoPrincipalFornecedor}
                 onChange={alterarCampo}
                 options={[
                   { valor: 'codigo', label: 'Codigo padrao' },
@@ -400,8 +400,8 @@ export function ModalEmpresa({
               />
               <CampoSelect
                 label="Primeiro plano dos itens"
-                name="destaqueItemOrcamentoPdf"
-                value={formulario.destaqueItemOrcamentoPdf}
+                name="destaqueItemCotacaoPdf"
+                value={formulario.destaqueItemCotacaoPdf}
                 onChange={alterarCampo}
                 options={[
                   { valor: 'descricao', label: 'Descricao em primeiro plano' },
@@ -413,36 +413,36 @@ export function ModalEmpresa({
                 className="campoFormularioIntegral"
                 label="Filtro padrao de status da cotacao"
                 titulo="Status padrao da cotacao"
-                itens={etapasOrcamentoAtivasOrdenadas.map((etapa) => ({
-                  valor: String(etapa.idEtapaOrcamento),
+                itens={etapasCotacaoAtivasOrdenadas.map((etapa) => ({
+                  valor: String(etapa.idEtapaCotacao),
                   label: etapa.descricao
                 }))}
-                valoresSelecionados={formulario.etapasFiltroPadraoOrcamento}
+                valoresSelecionados={formulario.etapasFiltroPadraoCotacao}
                 placeholder="Todos"
                 disabled={somenteLeitura}
                 aoAlterar={(valores) => definirFormulario((estadoAtual) => ({
                   ...estadoAtual,
-                  etapasFiltroPadraoOrcamento: valores
+                  etapasFiltroPadraoCotacao: valores
                 }))}
               />
             </section>
           ) : null}
 
           {abaAtiva === 'email' ? (
-            <section className="gradeCamposModalCliente">
+            <section className="gradeCamposModalFornecedor">
               <CampoFormulario
                 className="campoFormularioIntegral"
                 label="Assunto do e-mail da cotacao"
-                name="assuntoEmailOrcamento"
-                value={formulario.assuntoEmailOrcamento}
+                name="assuntoEmailCotacao"
+                value={formulario.assuntoEmailCotacao}
                 onChange={alterarCampo}
                 disabled={somenteLeitura}
               />
               <CampoTextoLongo
                 className="campoFormularioIntegral"
                 label="Corpo do e-mail da cotacao"
-                name="corpoEmailOrcamento"
-                value={formulario.corpoEmailOrcamento}
+                name="corpoEmailCotacao"
+                value={formulario.corpoEmailCotacao}
                 onChange={alterarCampo}
                 disabled={somenteLeitura}
                 rows={8}
@@ -450,8 +450,8 @@ export function ModalEmpresa({
               <CampoTextoLongo
                 className="campoFormularioIntegral"
                 label="Assinatura do e-mail da cotacao"
-                name="assinaturaEmailOrcamento"
-                value={formulario.assinaturaEmailOrcamento}
+                name="assinaturaEmailCotacao"
+                value={formulario.assinaturaEmailCotacao}
                 onChange={alterarCampo}
                 disabled={somenteLeitura}
                 rows={4}
@@ -460,7 +460,7 @@ export function ModalEmpresa({
               <div className="campoFormularioIntegral painelOpcaoEmpresaPaginaInicial">
                 <strong>Tags disponiveis</strong>
                 <p className="descricaoOpcaoEmpresaPaginaInicial">
-                  Use estas tags para montar o texto dinamicamente: <code>{'{empresa_nome}'}</code>, <code>{'{cliente_codigo}'}</code>, <code>{'{cliente_codigo_principal}'}</code>, <code>{'{cliente_codigo_alternativo}'}</code>, <code>{'{cliente_nome}'}</code>, <code>{'{cliente_fantasia}'}</code>, <code>{'{cliente_cidade}'}</code>, <code>{'{cliente_uf}'}</code>, <code>{'{cotacao_codigo}'}</code>, <code>{'{cotacao_data}'}</code>, <code>{'{cotacao_validade}'}</code>, <code>{'{cotacao_total}'}</code>, <code>{'{cotacao_observacao}'}</code>, <code>{'{cotacao_campos_extras}'}</code>, <code>{'{cotacao_itens}'}</code>, <code>{'{vendedor_nome}'}</code> e <code>{'{contato_nome}'}</code>.
+                  Use estas tags para montar o texto dinamicamente: <code>{'{empresa_nome}'}</code>, <code>{'{fornecedor_codigo}'}</code>, <code>{'{fornecedor_codigo_principal}'}</code>, <code>{'{fornecedor_codigo_alternativo}'}</code>, <code>{'{fornecedor_nome}'}</code>, <code>{'{fornecedor_fantasia}'}</code>, <code>{'{fornecedor_cidade}'}</code>, <code>{'{fornecedor_uf}'}</code>, <code>{'{cotacao_codigo}'}</code>, <code>{'{cotacao_data}'}</code>, <code>{'{cotacao_validade}'}</code>, <code>{'{cotacao_total}'}</code>, <code>{'{cotacao_observacao}'}</code>, <code>{'{cotacao_campos_extras}'}</code>, <code>{'{cotacao_itens}'}</code>, <code>{'{comprador_nome}'}</code> e <code>{'{contato_nome}'}</code>.
                 </p>
                 <p className="descricaoOpcaoEmpresaPaginaInicial">
                   A tag <code>{'{cotacao_itens}'}</code> ja traz cada item com referencia, descricao, quantidade, valor unitario e valor total em linhas separadas.
@@ -570,17 +570,17 @@ function criarFormularioEmpresa(empresa) {
     exibirFunilPaginaInicial: empresa.exibirFunilPaginaInicial === undefined
       ? true
       : Boolean(empresa.exibirFunilPaginaInicial),
-    diasValidadeOrcamento: String(empresa.diasValidadeOrcamento ?? 7),
-    diasEntregaPedido: String(empresa.diasEntregaPedido ?? 7),
-    codigoPrincipalFornecedor: normalizarCodigoPrincipalCliente(empresa.codigoPrincipalCliente),
-    etapasFiltroPadraoOrcamento: normalizarListaEmpresa(empresa.etapasFiltroPadraoOrcamento),
-    corPrimariaOrcamento: empresa.corPrimariaOrcamento || '#111827',
-    corSecundariaOrcamento: empresa.corSecundariaOrcamento || '#ef4444',
-    corDestaqueOrcamento: empresa.corDestaqueOrcamento || '#f59e0b',
-    destaqueItemOrcamentoPdf: normalizarDestaqueItemOrcamentoPdf(empresa.destaqueItemOrcamentoPdf),
-    assuntoEmailOrcamento: empresa.assuntoEmailOrcamento || estadoInicialFormulario.assuntoEmailOrcamento,
-    corpoEmailOrcamento: empresa.corpoEmailOrcamento || estadoInicialFormulario.corpoEmailOrcamento,
-    assinaturaEmailOrcamento: empresa.assinaturaEmailOrcamento || estadoInicialFormulario.assinaturaEmailOrcamento,
+    diasValidadeCotacao: String(empresa.diasValidadeCotacao ?? 7),
+    diasEntregaOrdemCompra: String(empresa.diasEntregaOrdemCompra ?? 7),
+    codigoPrincipalFornecedor: normalizarCodigoPrincipalFornecedor(empresa.codigoPrincipalFornecedor),
+    etapasFiltroPadraoCotacao: normalizarListaEmpresa(empresa.etapasFiltroPadraoCotacao),
+    corPrimariaCotacao: empresa.corPrimariaCotacao || '#111827',
+    corSecundariaCotacao: empresa.corSecundariaCotacao || '#ef4444',
+    corDestaqueCotacao: empresa.corDestaqueCotacao || '#f59e0b',
+    destaqueItemCotacaoPdf: normalizarDestaqueItemCotacaoPdf(empresa.destaqueItemCotacaoPdf),
+    assuntoEmailCotacao: empresa.assuntoEmailCotacao || estadoInicialFormulario.assuntoEmailCotacao,
+    corpoEmailCotacao: empresa.corpoEmailCotacao || estadoInicialFormulario.corpoEmailCotacao,
+    assinaturaEmailCotacao: empresa.assinaturaEmailCotacao || estadoInicialFormulario.assinaturaEmailCotacao,
     logradouro: empresa.logradouro || '',
     numero: empresa.numero || '',
     complemento: empresa.complemento || '',
@@ -592,11 +592,11 @@ function criarFormularioEmpresa(empresa) {
   };
 }
 
-function normalizarDestaqueItemOrcamentoPdf(valor) {
+function normalizarDestaqueItemCotacaoPdf(valor) {
   return String(valor || '').trim() === 'referencia' ? 'referencia' : 'descricao';
 }
 
-function normalizarCodigoPrincipalCliente(valor) {
+function normalizarCodigoPrincipalFornecedor(valor) {
   return String(valor || '').trim() === 'codigoAlternativo' ? 'codigoAlternativo' : 'codigo';
 }
 

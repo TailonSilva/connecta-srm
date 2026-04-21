@@ -17,7 +17,7 @@ const caminhosIcones = {
       <path d="M9.5 9h5.5M9.5 12h5.5M9.5 15h3.5" />
     </>
   ),
-  clientes: (
+  fornecedores: (
     <path d="M12 12.5a4.25 4.25 0 1 0-4.25-4.25A4.25 4.25 0 0 0 12 12.5Zm0 2c-4.7 0-8.5 2.35-8.5 5.25V21h17v-1.25c0-2.9-3.8-5.25-8.5-5.25Z" />
   ),
   produtos: (
@@ -163,7 +163,7 @@ const caminhosIcones = {
       <path d="M14.5 4.5V8h3M9 11h6M9 14h6" />
     </>
   ),
-  pedido: (
+  ordemCompra: (
     <>
       <path d="M6.5 4.5h8l3 3V18A1.5 1.5 0 0 1 16 19.5H8A1.5 1.5 0 0 1 6.5 18Z" />
       <path d="M14.5 4.5V8h3M9 11h6M9 14h6M9 17h4" />
@@ -188,12 +188,10 @@ const caminhosIcones = {
 };
 
 const aliasesIcones = {
+  cotacao: 'cotacao',
   cotacoes: 'cotacao',
-  orcamento: 'cotacao',
-  orcamentos: 'cotacao',
-  pedidos: 'pedido',
-  ordemCompra: 'pedido',
-  ordensCompra: 'pedido'
+  ordemCompra: 'ordemCompra',
+  ordensCompra: 'ordemCompra'
 };
 
 export function Icone({ nome, className = '' }) {

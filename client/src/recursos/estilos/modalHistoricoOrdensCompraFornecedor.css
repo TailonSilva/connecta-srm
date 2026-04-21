@@ -1,4 +1,4 @@
-.modalCliente.modalHistoricoOrdensCompraCadastro {
+.modalFornecedor.modalHistoricoOrdensCompraCadastro {
   width: min(1720px, calc(100vw - 24px));
   max-width: calc(100vw - 24px);
 }
@@ -16,29 +16,29 @@
   overflow-y: auto;
 }
 
-.modalCliente.modalHistoricoOrdensCompraCadastro .tabelaContatosModal {
+.modalFornecedor.modalHistoricoOrdensCompraCadastro .tabelaContatosModal {
   min-width: 0;
   table-layout: auto;
 }
 
-.modalCliente.modalHistoricoOrdensCompraCadastro .tabelaContatosModal th,
-.modalCliente.modalHistoricoOrdensCompraCadastro .tabelaContatosModal td {
+.modalFornecedor.modalHistoricoOrdensCompraCadastro .tabelaContatosModal th,
+.modalFornecedor.modalHistoricoOrdensCompraCadastro .tabelaContatosModal td {
   white-space: normal;
   overflow-wrap: anywhere;
   word-break: break-word;
 }
 
-.modalCliente.modalHistoricoOrdensCompraCadastro .colunaHistoricoData {
+.modalFornecedor.modalHistoricoOrdensCompraCadastro .colunaHistoricoData {
   width: 108px;
   white-space: nowrap;
 }
 
-.modalCliente.modalHistoricoOrdensCompraCadastro .colunaHistoricoPedido {
+.modalFornecedor.modalHistoricoOrdensCompraCadastro .colunaHistoricoOrdemCompra {
   width: 88px;
   white-space: nowrap;
 }
 
-.modalCliente.modalHistoricoOrdensCompraCadastro .codigoHistoricoPedido {
+.modalFornecedor.modalHistoricoOrdensCompraCadastro .codigoHistoricoOrdemCompra {
   display: inline;
   min-width: 0;
   padding: 0;
@@ -51,52 +51,52 @@
   white-space: nowrap;
 }
 
-.modalCliente.modalHistoricoOrdensCompraCadastro .colunaHistoricoCliente {
+.modalFornecedor.modalHistoricoOrdensCompraCadastro .colunaHistoricoFornecedor {
   width: auto;
 }
 
-.modalCliente.modalHistoricoOrdensCompraCadastro .colunaHistoricoEtapa {
+.modalFornecedor.modalHistoricoOrdensCompraCadastro .colunaHistoricoEtapa {
   width: 168px;
 }
 
-.modalCliente.modalHistoricoOrdensCompraCadastro .colunaHistoricoVendedor {
+.modalFornecedor.modalHistoricoOrdensCompraCadastro .colunaHistoricoComprador {
   width: 160px;
 }
 
-.modalCliente.modalHistoricoOrdensCompraCadastro .colunaHistoricoPrazoPagamento {
+.modalFornecedor.modalHistoricoOrdensCompraCadastro .colunaHistoricoPrazoPagamento {
   width: auto;
   white-space: normal;
 }
 
-.modalCliente.modalHistoricoOrdensCompraCadastro .colunaHistoricoReferencia {
+.modalFornecedor.modalHistoricoOrdensCompraCadastro .colunaHistoricoReferencia {
   width: 150px;
   white-space: nowrap;
 }
 
-.modalCliente.modalHistoricoOrdensCompraCadastro .colunaHistoricoDescricao {
+.modalFornecedor.modalHistoricoOrdensCompraCadastro .colunaHistoricoDescricao {
   width: auto;
   min-width: 0;
   white-space: normal;
 }
 
-.modalCliente.modalHistoricoOrdensCompraCadastro .colunaHistoricoValor,
-.modalCliente.modalHistoricoOrdensCompraCadastro .colunaHistoricoValorTotal {
+.modalFornecedor.modalHistoricoOrdensCompraCadastro .colunaHistoricoValor,
+.modalFornecedor.modalHistoricoOrdensCompraCadastro .colunaHistoricoValorTotal {
   width: 118px;
   white-space: nowrap;
 }
 
-.modalCliente.modalHistoricoOrdensCompraCadastro .colunaHistoricoQuantidade {
+.modalFornecedor.modalHistoricoOrdensCompraCadastro .colunaHistoricoQuantidade {
   width: 92px;
   white-space: nowrap;
 }
 
-.modalCliente.modalHistoricoOrdensCompraCadastro .tabelaPedidosCliente th.cabecalhoAcoesContato,
-.modalCliente.modalHistoricoOrdensCompraCadastro .tabelaItensPedidosCliente th.cabecalhoAcoesContato {
+.modalFornecedor.modalHistoricoOrdensCompraCadastro .tabelaOrdensCompraFornecedor th.cabecalhoAcoesContato,
+.modalFornecedor.modalHistoricoOrdensCompraCadastro .tabelaItensOrdensCompraFornecedor th.cabecalhoAcoesContato {
   width: 84px;
 }
 
 @media (max-width: 640px) {
-  .modalCliente.modalHistoricoOrdensCompraCadastro {
+  .modalFornecedor.modalHistoricoOrdensCompraCadastro {
     width: min(100%, calc(100vw - 12px));
   }
 }

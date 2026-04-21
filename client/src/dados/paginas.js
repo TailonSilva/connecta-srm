@@ -3,7 +3,7 @@ export const paginasPainel = [
     id: 'inicio',
     rotulo: 'Pagina inicial',
     titulo: 'Painel inicial',
-    descricao: 'Base visual pronta para receber os modulos do CRM.',
+    descricao: 'Base visual pronta para receber os modulos do SRM.',
     icone: 'inicio'
   },
   {
@@ -21,11 +21,11 @@ export const paginasPainel = [
     icone: 'atendimentos'
   },
   {
-    id: 'clientes',
+    id: 'fornecedores',
     rotulo: 'Fornecedores',
     titulo: 'Pagina de fornecedores',
     descricao: 'Estrutura inicial para cadastro, consulta e manutencao de fornecedores.',
-    icone: 'clientes'
+    icone: 'fornecedores'
   },
   {
     id: 'produtos',
@@ -35,18 +35,18 @@ export const paginasPainel = [
     icone: 'produtos'
   },
   {
-    id: 'orcamentos',
+    id: 'cotacoes',
     rotulo: 'Cotacoes',
     titulo: 'Pagina de cotacoes',
     descricao: 'Area reservada para propostas comerciais e simulacoes.',
-    icone: 'orcamentos'
+    icone: 'cotacoes'
   },
   {
-    id: 'pedidos',
+    id: 'ordensCompra',
     rotulo: 'Ordens de Compra',
     titulo: 'Pagina de ordens de compra',
     descricao: 'Espaco preparado para ordens de compra, status e acompanhamentos.',
-    icone: 'pedidos'
+    icone: 'ordensCompra'
   },
   {
     id: 'configuracoes',

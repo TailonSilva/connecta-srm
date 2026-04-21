@@ -118,7 +118,7 @@ Hoje o projeto ja atende um cenario real de desktop comercial, com login, contro
 - Cada componente novo deve ter seu proprio arquivo de estilo com o mesmo nome do componente salvo em `client/src/recursos/estilos/`
 - CSS de pagina deve ficar restrito a layout/composicao da pagina e tambem salvo em `client/src/recursos/estilos/`
 - Classes CSS devem ser prefixadas pelo nome do componente para reduzir acoplamento visual e colisao de seletores
-- Mesmo componentes de pagina devem seguir a mesma regra: `paginaInicio.jsx` usa `client/src/recursos/estilos/paginaInicio.css`, `funilVendas.jsx` usa `client/src/recursos/estilos/funilVendas.css`, e assim por diante
+- Mesmo componentes de pagina devem seguir a mesma regra: `paginaInicio.jsx` usa `client/src/recursos/estilos/paginaInicio.css`, `funilCotacoes.jsx` usa `client/src/recursos/estilos/funilCotacoes.css`, e assim por diante
 - Para `Usuario padrao`, cards e graficos de `cotacoes` e `ordens de compra` da pagina inicial devem sempre filtrar por `idComprador` do usuario logado
 - Para `Usuario padrao`, cards e graficos de `atendimentos` da pagina inicial devem sempre filtrar apenas pelos atendimentos cujo `idUsuario` seja o do usuario logado
 - `Administrador` e `Gestor` veem leitura geral sem esses recortes individuais
@@ -246,7 +246,7 @@ Utilitarios importantes:
 - A pagina inicial foi separada em componentes proprios e usa arquivos CSS dedicados para indicadores e funil
 - Todo novo card/componente da pagina inicial deve ser reutilizavel e possuir arquivo CSS proprio em `client/src/recursos/estilos/`
 - O cabecalho e cada card de indicador da pagina inicial seguem o padrao de CSS separado por componente
-- O funil da pagina inicial foi dividido em subcomponentes com classes prefixadas por componente (`funilVendas...`, `inicioIndicadorResumo...`, `inicioCabecalho...`)
+- O funil da pagina inicial foi dividido em subcomponentes com classes prefixadas por componente (`funilCotacoes...`, `inicioIndicadorResumo...`, `inicioCabecalho...`)
 - Todos os CSS desses componentes ficam centralizados em `client/src/recursos/estilos/`
 - Componentes-base compartilhados como App, PaginaLogin, BarraLateral, Botao, BotaoMenu, Icone, CampoPesquisa, PopupAvisos, CorpoPagina e CartaoPaginaVazia tambem ja seguem esse padrao
 - `client/src/recursos/estilos/aplicacao.css` agora contem apenas variaveis, reset global e estilos base de tags
@@ -336,14 +336,14 @@ Filtros de fornecedores:
 - Nesse historico do produto, os filtros consideram separadamente `Data de inclusao` e `Data de entrega`
 - Codigo automatico ao incluir
 - Upload de imagem no padrao reutilizavel do projeto, com recorte final em 320 x 320 px para a foto principal do produto
-- Campo de preco com mascara e digitacao amigavel em real
+- Campo de custo com mascara e digitacao amigavel em real
 - Campo `Grupo de Produto` com botao de pesquisa para abrir o modal de configuracao
 - O modal de `Grupo de Produto` permite definir quais `Tamanhos` estao disponiveis para cada grupo e em qual ordem devem aparecer
 - Campo `Marca` com botao de pesquisa para abrir o modal de configuracao
 - Campo `Unidade` com botao de pesquisa para abrir o modal de configuracao
 - O botao de importacao de produtos abre um modal com download de modelo em planilha; apos importar, o sistema informa as linhas rejeitadas e o motivo de cada uma
 - Quando uma linha de produtos falha por grupo, marca ou unidade nao encontrado/inativo, o modal de importacao passa a exibir um grid de pendencias para escolher um registro existente e reprocessar apenas essas linhas
-- A importacao de produtos diferencia referencias auxiliares inativas de referencias inexistentes e tambem valida preco, codigo numerico e status com mensagens mais objetivas
+- A importacao de produtos diferencia referencias auxiliares inativas de referencias inexistentes e tambem valida custo, codigo numerico e status com mensagens mais objetivas
 - Inclusao e selecao imediata de registros auxiliares dentro do cadastro de produto
 - Inativacao persiste no banco
 

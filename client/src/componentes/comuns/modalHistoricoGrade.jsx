@@ -33,19 +33,19 @@ export function ModalHistoricoGrade({
   return (
     <div className="camadaModal camadaModalSecundaria" role="presentation" onMouseDown={onFechar}>
       <section
-        className={`modalCliente modalHistoricoGrade ${className}`.trim()}
+        className={`modalFornecedor modalHistoricoGrade ${className}`.trim()}
         role="dialog"
         aria-modal="true"
         aria-labelledby={`titulo${normalizarIdModal(titulo)}`}
         onMouseDown={(evento) => evento.stopPropagation()}
       >
-        <header className="cabecalhoModalCliente">
+        <header className="cabecalhoModalFornecedor">
           <div className="modalHistoricoGradeCabecalhoTexto">
             <h2 id={`titulo${normalizarIdModal(titulo)}`}>{titulo}</h2>
             {subtitulo ? <p className="modalHistoricoGradeSubtitulo">{subtitulo}</p> : null}
           </div>
 
-          <div className="acoesCabecalhoModalCliente">
+          <div className="acoesCabecalhoModalFornecedor">
             {exibirAbasNoCabecalho || typeof onAbrirFiltros === 'function' ? (
               <div className="modalHistoricoGradeControlesCabecalho">
                 {exibirAbasNoCabecalho ? (
@@ -55,7 +55,7 @@ export function ModalHistoricoGrade({
                         key={aba.id}
                         type="button"
                         role="tab"
-                        className={`abaModalCliente ${abaAtiva === aba.id ? 'ativa' : ''}`}
+                        className={`abaModalFornecedor ${abaAtiva === aba.id ? 'ativa' : ''}`}
                         aria-selected={abaAtiva === aba.id}
                         onClick={() => onSelecionarAba?.(aba.id)}
                       >
@@ -105,13 +105,13 @@ export function ModalHistoricoGrade({
         </header>
 
         {exibirAbas && !exibirAbasNoCabecalho ? (
-          <div className="abasModalCliente modalHistoricoGradeAbas" role="tablist" aria-label={titulo}>
+          <div className="abasModalFornecedor modalHistoricoGradeAbas" role="tablist" aria-label={titulo}>
             {abas.map((aba) => (
               <button
                 key={aba.id}
                 type="button"
                 role="tab"
-                className={`abaModalCliente ${abaAtiva === aba.id ? 'ativa' : ''}`}
+                className={`abaModalFornecedor ${abaAtiva === aba.id ? 'ativa' : ''}`}
                 aria-selected={abaAtiva === aba.id}
                 onClick={() => onSelecionarAba?.(aba.id)}
               >
@@ -121,7 +121,7 @@ export function ModalHistoricoGrade({
           </div>
         ) : null}
 
-        <div className="corpoModalCliente corpoModalClienteSemRolagem modalHistoricoGradeCorpo">
+        <div className="corpoModalFornecedor corpoModalFornecedorSemRolagem modalHistoricoGradeCorpo">
           {children}
         </div>
       </section>

@@ -14,7 +14,7 @@ export function ConteudoPainel({ paginaSelecionada, usuarioLogado }) {
     return <PaginaInicio usuarioLogado={usuarioLogado} />;
   }
 
-  if (paginaSelecionada.id === 'clientes') {
+  if (paginaSelecionada.id === 'fornecedores') {
     return <PaginaFornecedores usuarioLogado={usuarioLogado} />;
   }
 
@@ -30,11 +30,11 @@ export function ConteudoPainel({ paginaSelecionada, usuarioLogado }) {
     return <PaginaProdutos usuarioLogado={usuarioLogado} />;
   }
 
-  if (paginaSelecionada.id === 'orcamentos') {
+  if (paginaSelecionada.id === 'cotacoes') {
     return <PaginaCotacoes usuarioLogado={usuarioLogado} />;
   }
 
-  if (paginaSelecionada.id === 'pedidos') {
+  if (paginaSelecionada.id === 'ordensCompra') {
     return <PaginaOrdensCompra usuarioLogado={usuarioLogado} />;
   }
 

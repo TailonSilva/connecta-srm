@@ -13,7 +13,7 @@ export function ModalManualInicio({
       descricao="Resumo da estrutura atual da home comercial."
       eyebrow="Dashboard"
       heroTitulo="Leitura comercial por abas"
-      heroDescricao="A pagina inicial separa `Orcamentos`, `Ordens de compra` e `Atendimentos` em abas e usa secoes compactas com leitura visual padronizada."
+      heroDescricao="A pagina inicial separa `Cotacoes`, `Ordens de compra` e `Atendimentos` em abas e usa secoes compactas com leitura visual padronizada."
       painelHeroi={[
         { valor: '3 abas', rotulo: 'Cotacoes, Ordens de compra e Atendimentos' },
         { valor: 'Top 5', rotulo: 'Itens exibidos por grafico' },
@@ -30,17 +30,17 @@ export function ModalManualInicio({
           titulo: 'Aba Cotacoes',
           descricao: 'Reune o funil e os resumos de cotacoes em aberto.',
           detalhe: 'As secoes usam apenas etapas em aberto, com visoes por grupo, marca e produto, sempre validando etapas obrigatorias por ID.',
-          icone: 'orcamento'
+          icone: 'cotacao'
         },
         {
           titulo: 'Aba Ordens de compra',
-          descricao: 'Reune ordens de compra por grupo, marca, UF, cliente, conceito, produto e ranking.',
+          descricao: 'Reune ordens de compra por grupo, marca, UF, fornecedor, conceito, produto e ranking.',
           detalhe: 'As leituras usam ordens de compra do mes corrente conforme a regra definida em cada sessao, incluindo a nova visao por conceito de fornecedor.',
-          icone: 'pedido'
+          icone: 'ordemCompra'
         },
         {
           titulo: 'Aba Atendimentos',
-          descricao: 'Reune leituras por canal, origem, cliente, tipo e usuario.',
+          descricao: 'Reune leituras por canal, origem, fornecedor, tipo e usuario.',
           detalhe: 'As sessoes usam sempre os atendimentos do mes corrente pela data do atendimento.',
           icone: 'atendimentos'
         },
@@ -69,7 +69,7 @@ export function ModalManualInicio({
         },
         {
           titulo: 'Alternar contexto',
-          descricao: 'As abas separam a leitura de Orcamentos e Ordens de compra sem misturar funil com analise comercial.',
+          descricao: 'As abas separam a leitura de Cotacoes e Ordens de compra sem misturar funil com analise comercial.',
           icone: 'configuracoes'
         }
       ]}
@@ -93,7 +93,7 @@ export function ModalManualInicio({
           items: undefined,
           itens: [
             usuarioLogado?.tipo === 'Usuario padrao'
-              ? 'Usuario padrao ve cards e graficos da home com `orcamentos` e `ordens de compra` do proprio comprador e com `atendimentos` do proprio usuario do registro.'
+              ? 'Usuario padrao ve cards e graficos da home com `cotacoes` e `ordens de compra` do proprio comprador e com `atendimentos` do proprio usuario do registro.'
               : 'Perfis administrativos veem a home com leitura geral da operacao.',
             'O mesmo padrao visual das secoes e mantido independentemente do perfil.',
             'As explicacoes das secoes ajudam a identificar o periodo e a logica de calculo usada em cada bloco.'

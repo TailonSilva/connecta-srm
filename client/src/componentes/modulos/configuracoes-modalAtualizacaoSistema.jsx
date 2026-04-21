@@ -203,14 +203,14 @@ export function ModalAtualizacaoSistema({
   return (
     <div className="camadaModal" role="presentation" onMouseDown={fecharAoClicarNoFundo}>
       <form
-        className="modalCliente modalAtualizacaoSistema"
+        className="modalFornecedor modalAtualizacaoSistema"
         role="dialog"
         aria-modal="true"
         aria-labelledby="tituloModalAtualizacaoSistema"
         onMouseDown={(evento) => evento.stopPropagation()}
         onSubmit={submeterFormulario}
       >
-        <header className="cabecalhoModalCliente">
+        <header className="cabecalhoModalFornecedor">
           <div>
             <h2 id="tituloModalAtualizacaoSistema">Atualizacao do sistema</h2>
             <p className="textoAuxiliarAtualizacaoSistema">
@@ -218,7 +218,7 @@ export function ModalAtualizacaoSistema({
             </p>
           </div>
 
-          <div className="acoesCabecalhoModalCliente">
+          <div className="acoesCabecalhoModalFornecedor">
             <Botao variante="secundario" type="button" onClick={aoFechar} disabled={salvando || verificando || gerandoBackup}>
               Fechar
             </Botao>
@@ -228,7 +228,7 @@ export function ModalAtualizacaoSistema({
           </div>
         </header>
 
-        <div className="corpoModalCliente">
+        <div className="corpoModalFornecedor">
           <div className="painelAtualizacaoSistema">
             <div className="campoFormulario campoFormularioIntegral">
               <label htmlFor="urlRepositorio">Link do GitHub</label>

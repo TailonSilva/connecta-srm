@@ -5,13 +5,13 @@ export function ModalHistoricoOrdensCompraProduto({
   produto,
   carregando,
   mensagemErro,
-  itensPedidos,
+  itensOrdensCompra,
   filtrosAtivos,
   valorPesquisa = '',
   onAlterarPesquisa,
   onFechar,
   onAbrirFiltros,
-  onConsultarPedido
+  onConsultarOrdemCompra
 }) {
   return (
     <ModalHistoricoOrdensCompraCadastro
@@ -28,14 +28,14 @@ export function ModalHistoricoOrdensCompraProduto({
       onFechar={onFechar}
       carregando={carregando}
       mensagemErro={mensagemErro}
-      itensPedidos={itensPedidos}
-      exibirPedidos={false}
+      itensOrdensCompra={itensOrdensCompra}
+      exibirOrdensCompra={false}
       contextoSalvo={Boolean(produto?.idProduto)}
       mensagemSemContextoItens="Os itens das ordens de compra ficarao disponiveis apos salvar o produto."
       mensagemVazioItens="Nenhum item de ordem de compra encontrado com os filtros informados."
-      exibirClienteNosItens
+      exibirFornecedorNosItens
       exibirAcaoItens
-      onConsultarPedido={onConsultarPedido}
+      onConsultarOrdemCompra={onConsultarOrdemCompra}
     />
   );
 }

@@ -1,0 +1,171 @@
+.funilCotacoesCardDetalhe {
+  position: relative;
+  display: grid;
+  gap: 14px;
+  align-self: start;
+  padding: 18px 18px 16px;
+  border-radius: 24px;
+  border: 1px solid color-mix(in srgb, var(--cor-etapa-funil) 18%, white);
+  background:
+    radial-gradient(circle at top right, color-mix(in srgb, var(--cor-etapa-funil) 16%, white), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(246, 250, 253, 0.96) 100%);
+  box-shadow: 0 18px 34px rgba(32, 76, 109, 0.10);
+  overflow: hidden;
+  transform-origin: 50% 50%;
+  animation: funilCotacoesCardDetalheEntrada 220ms ease;
+}
+
+.funilCotacoesCardDetalhe::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 8px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--cor-etapa-funil) 78%, white), var(--cor-etapa-funil));
+}
+
+.funilCotacoesCardDetalheTopo {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.funilCotacoesCardDetalheTopo h3 {
+  margin: 4px 0 0;
+  font-size: 1.22rem;
+  line-height: 1.1;
+  color: var(--corTextoTitulo);
+}
+
+.funilCotacoesCardDetalheRotulo {
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--corTextoSuave);
+}
+
+.funilCotacoesCardDetalheIcone {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--cor-etapa-funil) 14%, white);
+  color: var(--cor-etapa-funil);
+}
+
+.funilCotacoesCardDetalheIcone .iconeBase {
+  width: 22px;
+  height: 22px;
+}
+
+.funilCotacoesCardDetalheCorpo {
+  display: grid;
+  grid-template-columns: 102px minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.funilCotacoesCardDetalheAnel {
+  display: grid;
+  place-items: center;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background:
+    conic-gradient(var(--cor-etapa-funil) var(--percentual-etapa-funil), rgba(219, 228, 236, 0.85) 0);
+}
+
+.funilCotacoesCardDetalheAnel div {
+  display: grid;
+  place-items: center;
+  width: 66px;
+  height: 66px;
+  padding: 8px;
+  border-radius: 50%;
+  background: #ffffff;
+  text-align: center;
+}
+
+.funilCotacoesCardDetalheAnel strong {
+  font-size: 1rem;
+  color: var(--corTextoTitulo);
+}
+
+.funilCotacoesCardDetalheAnel span,
+.funilCotacoesCardDetalheResumo span {
+  color: var(--corTextoSuave);
+}
+
+.funilCotacoesCardDetalheAnel span {
+  font-size: 0.62rem;
+  line-height: 1.1;
+}
+
+.funilCotacoesCardDetalheResumo {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.funilCotacoesCardDetalheResumo article {
+  min-width: 0;
+  padding: 10px 12px;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--cor-etapa-funil) 12%, white);
+  background: rgba(255, 255, 255, 0.86);
+}
+
+.funilCotacoesCardDetalheResumo span {
+  display: block;
+  font-size: 0.72rem;
+  line-height: 1.1;
+}
+
+.funilCotacoesCardDetalheResumo strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--corTextoTitulo);
+  font-size: 0.95rem;
+  line-height: 1.15;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@keyframes funilCotacoesCardDetalheEntrada {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+    box-shadow: 0 10px 18px rgba(32, 76, 109, 0.06);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    box-shadow: 0 18px 34px rgba(32, 76, 109, 0.10);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .funilCotacoesCardDetalhe {
+    animation: none;
+  }
+}
+
+@media (max-width: 960px) {
+  .funilCotacoesCardDetalheCorpo {
+    grid-template-columns: 1fr;
+  }
+
+  .funilCotacoesCardDetalheAnel {
+    margin: 0 auto;
+  }
+
+  .funilCotacoesCardDetalhe {
+    height: auto;
+  }
+
+  .funilCotacoesCardDetalheResumo {
+    grid-template-columns: 1fr 1fr;
+  }
+}

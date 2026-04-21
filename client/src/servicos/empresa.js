@@ -1,13 +1,13 @@
 import { requisitarApi } from './api';
 import { requisitarListaApi } from './listas';
-import { buscarCep } from './clientes';
-import { normalizarConfiguracoesColunasGridClientes } from '../dados/colunasGridClientes';
-import { normalizarConfiguracoesColunasGridOrcamentos } from '../dados/colunasGridOrcamentos';
+import { buscarCep } from './fornecedores';
+import { normalizarConfiguracoesColunasGridFornecedores } from '../dados/colunasGridFornecedores';
+import { normalizarConfiguracoesColunasGridCotacoes } from '../dados/colunasGridCotacoes';
 import { normalizarConfiguracoesColunasGridProdutos } from '../dados/colunasGridProdutos';
-import { normalizarConfiguracoesColunasGridPedidos } from '../dados/colunasGridPedidos';
+import { normalizarConfiguracoesColunasGridOrdensCompra } from '../dados/colunasGridOrdensCompra';
 import { normalizarConfiguracoesColunasGridAtendimentos } from '../dados/colunasGridAtendimentos';
 import {
-  normalizarConfiguracoesGraficosPaginaInicialOrcamentos,
+  normalizarConfiguracoesGraficosPaginaInicialCotacoes,
   normalizarConfiguracoesGraficosPaginaInicialOrdensCompra,
   normalizarConfiguracoesGraficosPaginaInicialAtendimentos
 } from '../dados/graficosPaginaInicial';
@@ -43,12 +43,12 @@ export function atualizarEmpresa(idEmpresa, payload) {
 
 export function criarPayloadAtualizacaoColunasGrid(chave, colunas) {
   const normalizadores = {
-    colunasGridClientes: normalizarConfiguracoesColunasGridClientes,
-    colunasGridOrcamentos: normalizarConfiguracoesColunasGridOrcamentos,
+    colunasGridFornecedores: normalizarConfiguracoesColunasGridFornecedores,
+    colunasGridCotacoes: normalizarConfiguracoesColunasGridCotacoes,
     colunasGridProdutos: normalizarConfiguracoesColunasGridProdutos,
-    colunasGridPedidos: normalizarConfiguracoesColunasGridPedidos,
+    colunasGridOrdensCompra: normalizarConfiguracoesColunasGridOrdensCompra,
     colunasGridAtendimentos: normalizarConfiguracoesColunasGridAtendimentos,
-    graficosPaginaInicialOrcamentos: normalizarConfiguracoesGraficosPaginaInicialOrcamentos,
+    graficosPaginaInicialCotacoes: normalizarConfiguracoesGraficosPaginaInicialCotacoes,
     graficosPaginaInicialOrdensCompra: normalizarConfiguracoesGraficosPaginaInicialOrdensCompra,
     graficosPaginaInicialAtendimentos: normalizarConfiguracoesGraficosPaginaInicialAtendimentos,
     cardsPaginaInicial: normalizarConfiguracoesCardsPaginaInicial
@@ -83,12 +83,12 @@ function normalizarEmpresa(empresa) {
 
   return {
     ...empresa,
-    colunasGridClientes: normalizarConfiguracoesColunasGridClientes(empresa.colunasGridClientes),
-    colunasGridOrcamentos: normalizarConfiguracoesColunasGridOrcamentos(empresa.colunasGridOrcamentos),
+    colunasGridFornecedores: normalizarConfiguracoesColunasGridFornecedores(empresa.colunasGridFornecedores),
+    colunasGridCotacoes: normalizarConfiguracoesColunasGridCotacoes(empresa.colunasGridCotacoes),
     colunasGridProdutos: normalizarConfiguracoesColunasGridProdutos(empresa.colunasGridProdutos),
-    colunasGridPedidos: normalizarConfiguracoesColunasGridPedidos(empresa.colunasGridPedidos),
+    colunasGridOrdensCompra: normalizarConfiguracoesColunasGridOrdensCompra(empresa.colunasGridOrdensCompra),
     colunasGridAtendimentos: normalizarConfiguracoesColunasGridAtendimentos(empresa.colunasGridAtendimentos),
-    graficosPaginaInicialOrcamentos: normalizarConfiguracoesGraficosPaginaInicialOrcamentos(empresa.graficosPaginaInicialOrcamentos),
+    graficosPaginaInicialCotacoes: normalizarConfiguracoesGraficosPaginaInicialCotacoes(empresa.graficosPaginaInicialCotacoes),
     graficosPaginaInicialOrdensCompra: normalizarConfiguracoesGraficosPaginaInicialOrdensCompra(empresa.graficosPaginaInicialOrdensCompra),
     graficosPaginaInicialAtendimentos: normalizarConfiguracoesGraficosPaginaInicialAtendimentos(empresa.graficosPaginaInicialAtendimentos),
     cardsPaginaInicial: normalizarConfiguracoesCardsPaginaInicial(empresa.cardsPaginaInicial),

@@ -1,6 +1,6 @@
-export function CabecalhoGradeClientes() {
+export function CabecalhoGradeFornecedores() {
   return (
-    <tr className="CabecalhoGradeClientes">
+    <tr className="CabecalhoGradeFornecedores">
       <th className="colunaGradeMidia">Imagem</th>
       <th className="colunaGradeCodigo">Codigo</th>
       <th className="colunaGradeTexto">Fornecedor</th>

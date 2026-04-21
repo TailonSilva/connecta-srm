@@ -8,7 +8,7 @@ export function CabecalhoGradeProdutos() {
       <th className="colunaGradeTexto">Grupo</th>
       <th className="colunaGradeTexto">Marca</th>
       <th className="colunaGradeTextoCurto">Unidade</th>
-      <th className="colunaGradeValor">Preco</th>
+      <th className="colunaGradeValor">Custo</th>
       <th className="colunaGradeStatus">Status</th>
       <th className="colunaGradeAcoes">Acoes</th>
     </tr>

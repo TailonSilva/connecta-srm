@@ -1,4 +1,4 @@
-.modalContatoCliente.modalImportacaoCadastro {
+.modalContatoFornecedor.modalImportacaoCadastro {
   width: min(1440px, calc(100vw - 24px));
   max-width: calc(100vw - 24px);
 }
@@ -230,7 +230,7 @@
 }
 
 @media (max-width: 640px) {
-  .modalContatoCliente.modalImportacaoCadastro {
+  .modalContatoFornecedor.modalImportacaoCadastro {
     width: min(100%, calc(100vw - 12px));
     max-width: calc(100vw - 12px);
   }

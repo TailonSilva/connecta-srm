@@ -4,7 +4,7 @@ function BlocoInfo({ rotulo, valor, className = '' }) {
   }
 
   return (
-    <div className={`documentoOrcamentoPdfInfoItem ${className}`.trim()}>
+    <div className={`documentoCotacaoPdfInfoItem ${className}`.trim()}>
       <span>{rotulo}</span>
       <strong>{valor}</strong>
     </div>
@@ -15,8 +15,8 @@ export function DocumentoCotacaoPdf({ documento }) {
   const {
     estilo,
     empresa,
-    cliente,
-    orcamento,
+    fornecedor,
+    cotacao,
     itens,
     totais,
     observacoes
@@ -24,32 +24,32 @@ export function DocumentoCotacaoPdf({ documento }) {
 
   return (
     <div
-      className="documentoOrcamentoPdf"
+      className="documentoCotacaoPdf"
       style={{
-        '--documento-orcamento-cor-primaria': estilo.corPrimaria,
-        '--documento-orcamento-cor-secundaria': estilo.corSecundaria,
-        '--documento-orcamento-cor-destaque': estilo.corDestaque
+        '--documento-cotacao-cor-primaria': estilo.corPrimaria,
+        '--documento-cotacao-cor-secundaria': estilo.corSecundaria,
+        '--documento-cotacao-cor-destaque': estilo.corDestaque
       }}
     >
-      <header className="documentoOrcamentoPdfHero">
-        <div className="documentoOrcamentoPdfHeroDecoracao documentoOrcamentoPdfHeroDecoracaoPrimaria" />
-        <div className="documentoOrcamentoPdfHeroDecoracao documentoOrcamentoPdfHeroDecoracaoSecundaria" />
+      <header className="documentoCotacaoPdfHero">
+        <div className="documentoCotacaoPdfHeroDecoracao documentoCotacaoPdfHeroDecoracaoPrimaria" />
+        <div className="documentoCotacaoPdfHeroDecoracao documentoCotacaoPdfHeroDecoracaoSecundaria" />
 
-        <div className="documentoOrcamentoPdfHeroConteudo">
-          <div className="documentoOrcamentoPdfEmpresa">
+        <div className="documentoCotacaoPdfHeroConteudo">
+          <div className="documentoCotacaoPdfEmpresa">
             {empresa.imagem ? (
               <img
-                className="documentoOrcamentoPdfLogo"
+                className="documentoCotacaoPdfLogo"
                 src={empresa.imagem}
                 alt={`Logo de ${empresa.nome}`}
               />
             ) : (
-              <div className="documentoOrcamentoPdfLogoPlaceholder">
+              <div className="documentoCotacaoPdfLogoPlaceholder">
                 {empresa.iniciais}
               </div>
             )}
 
-            <div className="documentoOrcamentoPdfEmpresaConteudo">
+            <div className="documentoCotacaoPdfEmpresaConteudo">
               <strong>{empresa.nome}</strong>
               {empresa.razaoSocial && empresa.razaoSocial !== empresa.nome ? (
                 <span>{empresa.razaoSocial}</span>
@@ -62,51 +62,51 @@ export function DocumentoCotacaoPdf({ documento }) {
             </div>
           </div>
 
-          <div className="documentoOrcamentoPdfHeroResumo">
-            <span className="documentoOrcamentoPdfTituloAuxiliar">Documento comercial</span>
+          <div className="documentoCotacaoPdfHeroResumo">
+            <span className="documentoCotacaoPdfTituloAuxiliar">Documento comercial</span>
             <h1>Cotação</h1>
-            <div className="documentoOrcamentoPdfBadges">
-              <span>{orcamento.codigo}</span>
-              <span>{orcamento.dataInclusao}</span>
+            <div className="documentoCotacaoPdfBadges">
+              <span>{cotacao.codigo}</span>
+              <span>{cotacao.dataInclusao}</span>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="documentoOrcamentoPdfConteudo">
-        <section className="documentoOrcamentoPdfSecao documentoOrcamentoPdfSecaoCliente">
-          <div className="documentoOrcamentoPdfSecaoCabecalho">
+      <main className="documentoCotacaoPdfConteudo">
+        <section className="documentoCotacaoPdfSecao documentoCotacaoPdfSecaoFornecedor">
+          <div className="documentoCotacaoPdfSecaoCabecalho">
             <h2>Fornecedor</h2>
           </div>
 
-          <div className="documentoOrcamentoPdfGradeInfo documentoOrcamentoPdfGradeInfoCliente">
-            <BlocoInfo rotulo="Nome" valor={cliente.nome} />
-            <BlocoInfo rotulo="CNPJ/CPF" valor={cliente.documento} />
-            <BlocoInfo rotulo="Contato" valor={cliente.contato} />
-            <BlocoInfo rotulo="E-mail" valor={cliente.email} />
-            <BlocoInfo rotulo="Endereço" valor={cliente.endereco} className="documentoOrcamentoPdfInfoItemIntegral" />
+          <div className="documentoCotacaoPdfGradeInfo documentoCotacaoPdfGradeInfoFornecedor">
+            <BlocoInfo rotulo="Nome" valor={fornecedor.nome} />
+            <BlocoInfo rotulo="CNPJ/CPF" valor={fornecedor.documento} />
+            <BlocoInfo rotulo="Contato" valor={fornecedor.contato} />
+            <BlocoInfo rotulo="E-mail" valor={fornecedor.email} />
+            <BlocoInfo rotulo="Endereço" valor={fornecedor.endereco} className="documentoCotacaoPdfInfoItemIntegral" />
           </div>
         </section>
 
-        <section className="documentoOrcamentoPdfSecao documentoOrcamentoPdfSecaoItens">
-          <div className="documentoOrcamentoPdfSecaoCabecalho">
+        <section className="documentoCotacaoPdfSecao documentoCotacaoPdfSecaoItens">
+          <div className="documentoCotacaoPdfSecaoCabecalho">
             <h2>Itens</h2>
           </div>
 
-          <div className="documentoOrcamentoPdfTabelaWrapper">
-            <table className="documentoOrcamentoPdfTabela">
+          <div className="documentoCotacaoPdfTabelaWrapper">
+            <table className="documentoCotacaoPdfTabela">
               <colgroup>
-                <col className="documentoOrcamentoPdfColunaItem" />
-                <col className="documentoOrcamentoPdfColunaFoto" />
-                <col className="documentoOrcamentoPdfColunaDescricao" />
-                <col className="documentoOrcamentoPdfColunaQuantidade" />
-                <col className="documentoOrcamentoPdfColunaValorUnitario" />
-                <col className="documentoOrcamentoPdfColunaTotal" />
+                <col className="documentoCotacaoPdfColunaItem" />
+                <col className="documentoCotacaoPdfColunaFoto" />
+                <col className="documentoCotacaoPdfColunaDescricao" />
+                <col className="documentoCotacaoPdfColunaQuantidade" />
+                <col className="documentoCotacaoPdfColunaValorUnitario" />
+                <col className="documentoCotacaoPdfColunaTotal" />
               </colgroup>
               <thead>
                 <tr>
                   <th>Item</th>
-                  <th className="documentoOrcamentoPdfColunaFoto">Foto</th>
+                  <th className="documentoCotacaoPdfColunaFoto">Foto</th>
                   <th>Descrição</th>
                   <th>Qtd</th>
                   <th>Valor Unitário</th>
@@ -116,20 +116,20 @@ export function DocumentoCotacaoPdf({ documento }) {
               <tbody>
                 {itens.map((item) => (
                   <tr key={item.chave}>
-                    <td><span className="documentoOrcamentoPdfCodigoItem">{item.codigo}</span></td>
-                    <td className="documentoOrcamentoPdfCelulaFoto">
+                    <td><span className="documentoCotacaoPdfCodigoItem">{item.codigo}</span></td>
+                    <td className="documentoCotacaoPdfCelulaFoto">
                       {item.imagem ? (
                         <img
-                          className="documentoOrcamentoPdfImagemItem"
+                          className="documentoCotacaoPdfImagemItem"
                           src={item.imagem}
                           alt={item.descricao}
                         />
                       ) : (
-                        <div className="documentoOrcamentoPdfImagemItemPlaceholder" />
+                        <div className="documentoCotacaoPdfImagemItemPlaceholder" />
                       )}
                     </td>
                     <td>
-                      <div className="documentoOrcamentoPdfDescricaoItem">
+                      <div className="documentoCotacaoPdfDescricaoItem">
                         <strong>{item.descricao}</strong>
                         {item.detalhe ? <span>{item.detalhe}</span> : null}
                         {item.observacao ? <small>{item.observacao}</small> : null}
@@ -144,42 +144,42 @@ export function DocumentoCotacaoPdf({ documento }) {
             </table>
           </div>
 
-          <div className="documentoOrcamentoPdfResumoFinanceiro">
-            <div className="documentoOrcamentoPdfResumoCard documentoOrcamentoPdfResumoCardDestaque">
+          <div className="documentoCotacaoPdfResumoFinanceiro">
+            <div className="documentoCotacaoPdfResumoCard documentoCotacaoPdfResumoCardDestaque">
               <span>Total</span>
               <strong>{totais.total}</strong>
             </div>
           </div>
         </section>
 
-        <section className="documentoOrcamentoPdfSecao documentoOrcamentoPdfSecaoMetadados">
-          <div className="documentoOrcamentoPdfSecaoCabecalho">
+        <section className="documentoCotacaoPdfSecao documentoCotacaoPdfSecaoMetadados">
+          <div className="documentoCotacaoPdfSecaoCabecalho">
             <h2>Resumo da Cotação</h2>
           </div>
 
-          <div className="documentoOrcamentoPdfGradeInfo documentoOrcamentoPdfGradeInfoMetadados">
-            <BlocoInfo rotulo="Validade" valor={orcamento.dataValidade} />
-            <BlocoInfo rotulo="Comprador" valor={orcamento.vendedor} />
-            <BlocoInfo rotulo="Pagamento" valor={orcamento.prazoPagamento} />
+          <div className="documentoCotacaoPdfGradeInfo documentoCotacaoPdfGradeInfoMetadados">
+            <BlocoInfo rotulo="Validade" valor={cotacao.dataValidade} />
+            <BlocoInfo rotulo="Comprador" valor={cotacao.comprador} />
+            <BlocoInfo rotulo="Pagamento" valor={cotacao.prazoPagamento} />
           </div>
         </section>
 
-        <section className="documentoOrcamentoPdfSecao documentoOrcamentoPdfSecaoObservacoes">
-          <div className="documentoOrcamentoPdfSecaoCabecalho">
+        <section className="documentoCotacaoPdfSecao documentoCotacaoPdfSecaoObservacoes">
+          <div className="documentoCotacaoPdfSecaoCabecalho">
             <h2>Observações</h2>
           </div>
 
           {observacoes.length > 0 ? (
-            <div className="documentoOrcamentoPdfListaObservacoes">
+            <div className="documentoCotacaoPdfListaObservacoes">
               {observacoes.map((observacao) => (
-                <article key={observacao.chave} className="documentoOrcamentoPdfObservacaoCard">
+                <article key={observacao.chave} className="documentoCotacaoPdfObservacaoCard">
                   <strong>{observacao.titulo}</strong>
                   <p>{observacao.texto}</p>
                 </article>
               ))}
             </div>
           ) : (
-            <div className="documentoOrcamentoPdfEstadoVazio">
+            <div className="documentoCotacaoPdfEstadoVazio">
               Nenhuma observacao adicional informada.
             </div>
           )}

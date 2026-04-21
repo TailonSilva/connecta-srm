@@ -3,30 +3,30 @@ import '../recursos/estilos/paginaInicio.css';
 import { CorpoPagina } from '../componentes/layout/corpoPagina';
 import { listarAgendamentos } from '../servicos/agenda';
 import { listarAtendimentosGrid } from '../servicos/atendimentos';
-import { listarClientes, listarConceitosCliente, listarVendedores } from '../servicos/clientes';
+import { listarFornecedores, listarConceitosFornecedor, listarCompradores } from '../servicos/fornecedores';
 import {
   listarCanaisAtendimentoConfiguracao,
-  listarEtapasOrcamentoConfiguracao,
-  listarEtapasPedidoConfiguracao,
+  listarEtapasCotacaoConfiguracao,
+  listarEtapasOrdemCompraConfiguracao,
   listarOrigensAtendimentoConfiguracao,
   listarTiposAtendimentoConfiguracao
 } from '../servicos/configuracoes';
 import { listarEmpresas } from '../servicos/empresa';
-import { listarOrcamentos } from '../servicos/orcamentos';
-import { listarPedidos } from '../servicos/pedidos';
+import { listarCotacoes } from '../servicos/cotacoes';
+import { listarOrdensCompra } from '../servicos/ordensCompra';
 import { listarGruposProduto, listarMarcas, listarProdutos } from '../servicos/produtos';
 import { listarUsuarios } from '../servicos/usuarios';
-import { formatarCodigoCliente } from '../utilitarios/codigoCliente';
+import { formatarCodigoFornecedor } from '../utilitarios/codigoFornecedor';
 import { normalizarPreco } from '../utilitarios/normalizarPreco';
 import { registroEstaAtivo } from '../utilitarios/statusRegistro';
 import { normalizarConfiguracoesCardsPaginaInicial } from '../dados/cardsPaginaInicial';
 import { CabecalhoInicio } from '../componentes/modulos/inicio-cabecalhoInicio';
 import { IndicadorConfiguravelInicio } from '../componentes/modulos/inicio-indicadorConfiguravelInicio';
 import { IndicadorResumoInicio } from '../componentes/modulos/inicio-indicadorResumoInicio';
-import { SecaoFunilOrcamentosInicio } from '../componentes/modulos/inicio-secaoFunilOrcamentosInicio';
-import { SecaoOrcamentosGrupoProdutosInicio } from '../componentes/modulos/inicio-secaoOrcamentosGrupoProdutosInicio';
-import { SecaoOrcamentosMarcaInicio } from '../componentes/modulos/inicio-secaoOrcamentosMarcaInicio';
-import { SecaoOrcamentosProdutosInicio } from '../componentes/modulos/inicio-secaoOrcamentosProdutosInicio';
+import { SecaoFunilCotacoesInicio } from '../componentes/modulos/inicio-secaoFunilCotacoesInicio';
+import { SecaoCotacoesGrupoProdutosInicio } from '../componentes/modulos/inicio-secaoCotacoesGrupoProdutosInicio';
+import { SecaoCotacoesMarcaInicio } from '../componentes/modulos/inicio-secaoCotacoesMarcaInicio';
+import { SecaoCotacoesProdutosInicio } from '../componentes/modulos/inicio-secaoCotacoesProdutosInicio';
 import { SecaoRankingInicio } from '../componentes/modulos/inicio-secaoRankingInicio';
 import { SecaoOrdensCompraGrupoProdutosInicio } from '../componentes/modulos/inicio-secaoOrdensCompraGrupoProdutosInicio';
 import { SecaoOrdensCompraMarcaInicio } from '../componentes/modulos/inicio-secaoOrdensCompraMarcaInicio';
@@ -36,27 +36,27 @@ import { SecaoOrdensCompraProdutosInicio } from '../componentes/modulos/inicio-s
 import { SecaoOrdensCompraUfInicio } from '../componentes/modulos/inicio-secaoOrdensCompraUfInicio';
 import { SecaoAtendimentosCanalInicio } from '../componentes/modulos/inicio-secaoAtendimentosCanalInicio';
 import { SecaoAtendimentosOrigemInicio } from '../componentes/modulos/inicio-secaoAtendimentosOrigemInicio';
-import { SecaoAtendimentosClientesInicio } from '../componentes/modulos/inicio-secaoAtendimentosClientesInicio';
+import { SecaoAtendimentosFornecedoresInicio } from '../componentes/modulos/inicio-secaoAtendimentosFornecedoresInicio';
 import { SecaoAtendimentosUsuariosInicio } from '../componentes/modulos/inicio-secaoAtendimentosUsuariosInicio';
 import { SecaoAtendimentosTipoInicio } from '../componentes/modulos/inicio-secaoAtendimentosTipoInicio';
 import { SecaoConfiguravelInicio } from '../componentes/modulos/inicio-secaoConfiguravelInicio';
 import { ModalManualInicio } from '../componentes/modulos/inicio-modalManualInicio';
-import { criarResumoFunilVendas } from '../utilitarios/inicio/criarResumoFunilVendas';
+import { criarResumoFunilCotacoes } from '../utilitarios/inicio/criarResumoFunilCotacoes';
 
-const ID_ETAPA_ORCAMENTO_FECHADO = 1;
-const IDS_ETAPAS_ORCAMENTO_FECHADAS = new Set([1, 2, 3, 4]);
-const ID_ETAPA_PEDIDO_ENTREGUE = 5;
+const ID_ETAPA_COTACAO_FECHADO = 1;
+const IDS_ETAPAS_COTACAO_FECHADAS = new Set([1, 2, 3, 4]);
+const ID_ETAPA_ORDEM_COMPRA_ENTREGUE = 5;
 
 export function PaginaInicio({ usuarioLogado }) {
   const [carregando, definirCarregando] = useState(true);
   const [mensagemErro, definirMensagemErro] = useState('');
   const [painelBruto, definirPainelBruto] = useState(null);
-  const [abaAtiva, definirAbaAtiva] = useState('orcamentos');
+  const [abaAtiva, definirAbaAtiva] = useState('cotacoes');
   const [modalManualAberto, definirModalManualAberto] = useState(false);
 
   useEffect(() => {
     carregarPainel();
-  }, [usuarioLogado?.idUsuario, usuarioLogado?.idVendedor, usuarioLogado?.tipo]);
+  }, [usuarioLogado?.idUsuario, usuarioLogado?.idComprador, usuarioLogado?.tipo]);
 
   useEffect(() => {
     function tratarEmpresaAtualizada() {
@@ -68,7 +68,7 @@ export function PaginaInicio({ usuarioLogado }) {
     return () => {
       window.removeEventListener('empresa-atualizada', tratarEmpresaAtualizada);
     };
-  }, [usuarioLogado?.idUsuario, usuarioLogado?.idVendedor, usuarioLogado?.tipo]);
+  }, [usuarioLogado?.idUsuario, usuarioLogado?.idComprador, usuarioLogado?.tipo]);
 
   useEffect(() => {
     function tratarAtalhoManual(evento) {
@@ -93,16 +93,16 @@ export function PaginaInicio({ usuarioLogado }) {
     () => montarPainel(painelBruto, usuarioLogado),
     [painelBruto, usuarioLogado]
   );
-  const secoesOrcamentosConfiguradas = useMemo(
-    () => montarSecoesOrcamentos(painel),
+  const secoesCotacoesConfiguradas = useMemo(
+    () => montarSecoesCotacoes(painel),
     [painel]
   );
   const indicadoresConfigurados = useMemo(
     () => montarIndicadoresConfigurados(painel),
     [painel]
   );
-  const secoesVendasConfiguradas = useMemo(
-    () => montarSecoesVendas(painel),
+  const secoesOrdensCompraConfiguradas = useMemo(
+    () => montarSecoesOrdensCompra(painel),
     [painel]
   );
   const secoesAtendimentosConfiguradas = useMemo(
@@ -115,9 +115,9 @@ export function PaginaInicio({ usuarioLogado }) {
     definirMensagemErro('');
 
     try {
-      const recorteUsuarioPadrao = usuarioLogado?.tipo === 'Usuario padrao' && usuarioLogado?.idVendedor
+      const recorteUsuarioPadrao = usuarioLogado?.tipo === 'Usuario padrao' && usuarioLogado?.idComprador
         ? {
-          escopoIdVendedor: usuarioLogado.idVendedor,
+          escopoIdComprador: usuarioLogado.idComprador,
           escopoIdUsuario: usuarioLogado.idUsuario
         }
         : {};
@@ -125,9 +125,9 @@ export function PaginaInicio({ usuarioLogado }) {
       const dataInicioAgenda = dataInput(hoje);
       const dataFimAgenda = dataInput(new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() + 7));
       const resultados = await Promise.allSettled([
-        listarClientes(),
-        listarConceitosCliente({ incluirInativos: true }),
-        listarVendedores(),
+        listarFornecedores(),
+        listarConceitosFornecedor({ incluirInativos: true }),
+        listarCompradores(),
         listarAtendimentosGrid({
           filtros: recorteUsuarioPadrao
         }),
@@ -136,13 +136,13 @@ export function PaginaInicio({ usuarioLogado }) {
           dataFim: dataFimAgenda,
           ...recorteUsuarioPadrao
         }),
-        listarOrcamentos(recorteUsuarioPadrao),
-        listarPedidos(recorteUsuarioPadrao),
+        listarCotacoes(recorteUsuarioPadrao),
+        listarOrdensCompra(recorteUsuarioPadrao),
         listarProdutos(),
         listarGruposProduto(),
         listarMarcas(),
-        listarEtapasOrcamentoConfiguracao(),
-        listarEtapasPedidoConfiguracao(),
+        listarEtapasCotacaoConfiguracao(),
+        listarEtapasOrdemCompraConfiguracao(),
         listarCanaisAtendimentoConfiguracao(),
         listarOrigensAtendimentoConfiguracao(),
         listarTiposAtendimentoConfiguracao(),
@@ -151,18 +151,18 @@ export function PaginaInicio({ usuarioLogado }) {
       ]);
 
       const [
-        clientesResultado,
-        conceitosClienteResultado,
-        vendedoresResultado,
+        fornecedoresResultado,
+        conceitosFornecedorResultado,
+        compradoresResultado,
         atendimentosResultado,
         agendamentosResultado,
-        orcamentosResultado,
-        pedidosResultado,
+        cotacoesResultado,
+        ordensCompraResultado,
         produtosResultado,
         gruposProdutoResultado,
         marcasResultado,
-        etapasOrcamentoResultado,
-        etapasPedidoResultado,
+        etapasCotacaoResultado,
+        etapasOrdemCompraResultado,
         canaisAtendimentoResultado,
         origensAtendimentoResultado,
         tiposAtendimentoResultado,
@@ -170,18 +170,18 @@ export function PaginaInicio({ usuarioLogado }) {
         empresasResultado
       ] = resultados;
 
-      const clientes = clientesResultado.status === 'fulfilled' ? clientesResultado.value : [];
-      const conceitosCliente = conceitosClienteResultado.status === 'fulfilled' ? conceitosClienteResultado.value : [];
-      const vendedores = vendedoresResultado.status === 'fulfilled' ? vendedoresResultado.value : [];
+      const fornecedores = fornecedoresResultado.status === 'fulfilled' ? fornecedoresResultado.value : [];
+      const conceitosFornecedor = conceitosFornecedorResultado.status === 'fulfilled' ? conceitosFornecedorResultado.value : [];
+      const compradores = compradoresResultado.status === 'fulfilled' ? compradoresResultado.value : [];
       const atendimentos = atendimentosResultado.status === 'fulfilled' ? atendimentosResultado.value : [];
       const agendamentos = agendamentosResultado.status === 'fulfilled' ? agendamentosResultado.value : [];
-      const orcamentos = orcamentosResultado.status === 'fulfilled' ? orcamentosResultado.value : [];
-      const pedidos = pedidosResultado.status === 'fulfilled' ? pedidosResultado.value : [];
+      const cotacoes = cotacoesResultado.status === 'fulfilled' ? cotacoesResultado.value : [];
+      const ordensCompra = ordensCompraResultado.status === 'fulfilled' ? ordensCompraResultado.value : [];
       const produtos = produtosResultado.status === 'fulfilled' ? produtosResultado.value : [];
       const gruposProduto = gruposProdutoResultado.status === 'fulfilled' ? gruposProdutoResultado.value : [];
       const marcas = marcasResultado.status === 'fulfilled' ? marcasResultado.value : [];
-      const etapasOrcamento = etapasOrcamentoResultado.status === 'fulfilled' ? etapasOrcamentoResultado.value : [];
-      const etapasPedido = etapasPedidoResultado.status === 'fulfilled' ? etapasPedidoResultado.value : [];
+      const etapasCotacao = etapasCotacaoResultado.status === 'fulfilled' ? etapasCotacaoResultado.value : [];
+      const etapasOrdemCompra = etapasOrdemCompraResultado.status === 'fulfilled' ? etapasOrdemCompraResultado.value : [];
       const canaisAtendimento = canaisAtendimentoResultado.status === 'fulfilled' ? canaisAtendimentoResultado.value : [];
       const origensAtendimento = origensAtendimentoResultado.status === 'fulfilled' ? origensAtendimentoResultado.value : [];
       const tiposAtendimento = tiposAtendimentoResultado.status === 'fulfilled' ? tiposAtendimentoResultado.value : [];
@@ -189,18 +189,18 @@ export function PaginaInicio({ usuarioLogado }) {
       const empresas = empresasResultado.status === 'fulfilled' ? empresasResultado.value : [];
 
       definirPainelBruto({
-        clientes,
-        conceitosCliente,
-        vendedores,
+        fornecedores,
+        conceitosFornecedor,
+        compradores,
         atendimentos,
         agendamentos,
-        orcamentos,
-        pedidos,
+        cotacoes,
+        ordensCompra,
         produtos,
         gruposProduto,
         marcas,
-        etapasOrcamento,
-        etapasPedido,
+        etapasCotacao,
+        etapasOrdemCompra,
         canaisAtendimento,
         origensAtendimento,
         tiposAtendimento,
@@ -220,8 +220,8 @@ export function PaginaInicio({ usuarioLogado }) {
         descricao={painel.descricao}
         resumo={painel.resumo}
         abas={[
-          { id: 'orcamentos', rotulo: 'Orcamentos' },
-          { id: 'vendas', rotulo: 'Ordens de compra' },
+          { id: 'cotacoes', rotulo: 'Cotacoes' },
+          { id: 'ordensCompra', rotulo: 'Ordens de compra' },
           { id: 'atendimentos', rotulo: 'Atendimentos' }
         ]}
         abaAtiva={abaAtiva}
@@ -253,14 +253,14 @@ export function PaginaInicio({ usuarioLogado }) {
             </div>
 
             <div className="paginaInicioSecoes">
-              {abaAtiva === 'orcamentos' ? (
-                secoesOrcamentosConfiguradas.map((secao) => (
+              {abaAtiva === 'cotacoes' ? (
+                secoesCotacoesConfiguradas.map((secao) => (
                   <SecaoConfiguravelInicio key={secao.id} colunas={secao.span}>
                     {secao.renderizar()}
                   </SecaoConfiguravelInicio>
                 ))
-              ) : abaAtiva === 'vendas' ? (
-                secoesVendasConfiguradas.map((secao) => (
+              ) : abaAtiva === 'ordensCompra' ? (
+                secoesOrdensCompraConfiguradas.map((secao) => (
                   <SecaoConfiguravelInicio key={secao.id} colunas={secao.span}>
                     {secao.renderizar()}
                   </SecaoConfiguravelInicio>
@@ -294,51 +294,51 @@ function montarPainel(dados, usuarioLogado) {
     return base;
   }
 
-  const clientesVisiveis = filtrarClientesVisiveis(dados.clientes, usuarioLogado);
-  const idsClientes = new Set(clientesVisiveis.map((cliente) => String(cliente.idCliente)));
-  const clientesPorId = new Map(clientesVisiveis.map((cliente) => [
-    String(cliente.idCliente),
-    cliente.nomeFantasia || cliente.razaoSocial || '-'
+  const fornecedoresVisiveis = filtrarFornecedoresVisiveis(dados.fornecedores, usuarioLogado);
+  const idsFornecedores = new Set(fornecedoresVisiveis.map((fornecedor) => String(fornecedor.idFornecedor)));
+  const fornecedoresPorId = new Map(fornecedoresVisiveis.map((fornecedor) => [
+    String(fornecedor.idFornecedor),
+    fornecedor.nomeFantasia || fornecedor.razaoSocial || '-'
   ]));
-  const vendedoresPorId = new Map((dados.vendedores || []).map((vendedor) => [String(vendedor.idVendedor), vendedor.nome]));
-  const clientesAtivos = clientesVisiveis.filter((item) => registroEstaAtivo(item.status));
+  const compradoresPorId = new Map((dados.compradores || []).map((comprador) => [String(comprador.idComprador), comprador.nome]));
+  const fornecedoresAtivos = fornecedoresVisiveis.filter((item) => registroEstaAtivo(item.status));
   const produtosAtivos = (dados.produtos || []).filter((item) => registroEstaAtivo(item.status));
-  const orcamentos = filtrarOrcamentosVisiveis(dados.orcamentos, idsClientes, usuarioLogado);
-  const pedidos = filtrarPedidosVisiveis(dados.pedidos, idsClientes, usuarioLogado);
-  const atendimentos = filtrarAtendimentosVisiveis(dados.atendimentos, idsClientes, usuarioLogado);
-  const agendamentos = filtrarAgendamentosVisiveis(dados.agendamentos, idsClientes, usuarioLogado);
+  const cotacoes = filtrarCotacoesVisiveis(dados.cotacoes, idsFornecedores, usuarioLogado);
+  const ordensCompra = filtrarOrdensCompraVisiveis(dados.ordensCompra, idsFornecedores, usuarioLogado);
+  const atendimentos = filtrarAtendimentosVisiveis(dados.atendimentos, idsFornecedores, usuarioLogado);
+  const agendamentos = filtrarAgendamentosVisiveis(dados.agendamentos, idsFornecedores, usuarioLogado);
   const inicioMes = dataInput(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
   const fimMes = dataInput(new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0));
   const hoje = dataInput(new Date());
-  const orcamentosAbertos = orcamentos.filter((item) => !orcamentoEhFechado(item));
-  const orcamentosMes = orcamentos.filter((item) => dataNoPeriodo(item.dataInclusao, inicioMes, fimMes));
-  const orcamentosFechadosMes = orcamentos.filter((item) => (
-    Number(item.idEtapaOrcamento) === ID_ETAPA_ORCAMENTO_FECHADO
+  const cotacoesAbertos = cotacoes.filter((item) => !cotacaoEhFechado(item));
+  const cotacoesMes = cotacoes.filter((item) => dataNoPeriodo(item.dataInclusao, inicioMes, fimMes));
+  const cotacoesFechadosMes = cotacoes.filter((item) => (
+    Number(item.idEtapaCotacao) === ID_ETAPA_COTACAO_FECHADO
     && dataNoPeriodo(item.dataFechamento, inicioMes, fimMes)
   ));
-  const orcamentosFechadosMesConversao = usuarioLogado?.tipo === 'Usuario padrao'
-    ? orcamentosFechadosMes.filter((item) => String(item.idUsuario) === String(usuarioLogado?.idUsuario || ''))
-    : orcamentosFechadosMes;
-  const pedidosMes = pedidos.filter((item) => dataNoPeriodo(item.dataInclusao, inicioMes, fimMes));
+  const cotacoesFechadosMesConversao = usuarioLogado?.tipo === 'Usuario padrao'
+    ? cotacoesFechadosMes.filter((item) => String(item.idUsuario) === String(usuarioLogado?.idUsuario || ''))
+    : cotacoesFechadosMes;
+  const ordensCompraMes = ordensCompra.filter((item) => dataNoPeriodo(item.dataInclusao, inicioMes, fimMes));
   const positivacaoMes = new Set(
-    pedidosMes
-      .map((item) => Number(item?.idCliente))
-      .filter((idCliente) => Number.isFinite(idCliente) && idCliente > 0)
+    ordensCompraMes
+      .map((item) => Number(item?.idFornecedor))
+      .filter((idFornecedor) => Number.isFinite(idFornecedor) && idFornecedor > 0)
   ).size;
-  const idsClientesAtivos = new Set(
-    clientesAtivos
-      .map((cliente) => Number(cliente?.idCliente))
-      .filter((idCliente) => Number.isFinite(idCliente) && idCliente > 0)
+  const idsFornecedoresAtivos = new Set(
+    fornecedoresAtivos
+      .map((fornecedor) => Number(fornecedor?.idFornecedor))
+      .filter((idFornecedor) => Number.isFinite(idFornecedor) && idFornecedor > 0)
   );
   const positivacaoCarteiraMes = new Set(
-    pedidosMes
-      .map((item) => Number(item?.idCliente))
-      .filter((idCliente) => idsClientesAtivos.has(idCliente))
+    ordensCompraMes
+      .map((item) => Number(item?.idFornecedor))
+      .filter((idFornecedor) => idsFornecedoresAtivos.has(idFornecedor))
   ).size;
-  const percentualPositivacaoCarteiraMes = clientesAtivos.length > 0
-    ? (positivacaoCarteiraMes / clientesAtivos.length) * 100
+  const percentualPositivacaoCarteiraMes = fornecedoresAtivos.length > 0
+    ? (positivacaoCarteiraMes / fornecedoresAtivos.length) * 100
     : 0;
-  const pedidosEntregaMes = pedidos.filter((item) => dataNoPeriodo(item.dataEntrega, inicioMes, fimMes));
+  const ordensCompraEntregaMes = ordensCompra.filter((item) => dataNoPeriodo(item.dataEntrega, inicioMes, fimMes));
   const atendimentosMes = atendimentos.filter((item) => dataNoPeriodo(item.data, inicioMes, fimMes));
   // A home de atendimentos precisa usar a mesma base para cards e graficos e evitar leituras diferentes por perfil.
   const atendimentosMesHome = usuarioLogado?.tipo === 'Usuario padrao'
@@ -350,17 +350,17 @@ function montarPainel(dados, usuarioLogado) {
     idTipoAtendimentoProspeccao != null
     && Number(item.idTipoAtendimento) === Number(idTipoAtendimentoProspeccao)
   ));
-  const valorAberto = somarTotais(orcamentosAbertos);
-  const faturamentoMes = somarTotais(pedidosEntregaMes);
-  const mediaDiasConversaoMes = calcularMediaDiasConversao(orcamentosFechadosMesConversao);
-  const quantidadeVendidaMesBruta = somarQuantidadeItensBruta(pedidosMes);
-  const ticketMedio = pedidosEntregaMes.length ? faturamentoMes / pedidosEntregaMes.length : 0;
-  const convertidosMes = orcamentosMes.filter((item) => Boolean(item.idPedidoVinculado)).length;
-  const taxaConversaoMes = orcamentosMes.length ? (convertidosMes / orcamentosMes.length) * 100 : 0;
-  const orcamentosVencidos = orcamentosAbertos.filter((item) => dataAnterior(item.dataValidade, hoje)).length;
-  const orcamentosVencendo = orcamentosAbertos.filter((item) => dataNosProximosDias(item.dataValidade, 7)).length;
-  const pedidosEntregaProxima = pedidos.filter((item) => pedidoPendente(item) && dataNosProximosDias(item.dataEntrega, 7)).length;
-  const clientesSemAtendimento = contarClientesSemAtendimento(clientesVisiveis, atendimentos, 30);
+  const valorAberto = somarTotais(cotacoesAbertos);
+  const faturamentoMes = somarTotais(ordensCompraEntregaMes);
+  const mediaDiasConversaoMes = calcularMediaDiasConversao(cotacoesFechadosMesConversao);
+  const quantidadeVendidaMesBruta = somarQuantidadeItensBruta(ordensCompraMes);
+  const ticketMedio = ordensCompraEntregaMes.length ? faturamentoMes / ordensCompraEntregaMes.length : 0;
+  const convertidosMes = cotacoesMes.filter((item) => Boolean(item.idOrdemCompraVinculado)).length;
+  const taxaConversaoMes = cotacoesMes.length ? (convertidosMes / cotacoesMes.length) * 100 : 0;
+  const cotacoesVencidos = cotacoesAbertos.filter((item) => dataAnterior(item.dataValidade, hoje)).length;
+  const cotacoesVencendo = cotacoesAbertos.filter((item) => dataNosProximosDias(item.dataValidade, 7)).length;
+  const ordensCompraEntregaProxima = ordensCompra.filter((item) => ordemCompraPendente(item) && dataNosProximosDias(item.dataEntrega, 7)).length;
+  const fornecedoresSemAtendimento = contarFornecedoresSemAtendimento(fornecedoresVisiveis, atendimentos, 30);
   const agenda = agendamentos
     .filter((item) => criarDataHoraAgendamento(item))
     .filter((item) => dataNosProximosDias(criarDataHoraAgendamento(item), 7))
@@ -370,16 +370,16 @@ function montarPainel(dados, usuarioLogado) {
       id: item.idAgendamento,
       assunto: item.assunto || 'Compromisso agendado',
       dataHora: formatarAgendamento(item),
-      detalhe: clientesPorId.get(String(item.idCliente)) || 'Sem fornecedor vinculado',
+      detalhe: fornecedoresPorId.get(String(item.idFornecedor)) || 'Sem fornecedor vinculado',
       ajuda: {
         conceito: 'Compromisso futuro dentro do recorte visivel da agenda.',
         calculo: 'Entram apenas registros agendados entre hoje e os proximos 7 dias.',
         observacao: 'Para usuario padrao, o recorte considera o proprio usuario e sua carteira.'
       }
     }));
-  const funil = montarFunil(criarResumoFunilVendas(dados.etapasOrcamento, orcamentosAbertos));
-  const orcamentosPorGrupo = montarResumoPorRelacionamento(
-    orcamentosAbertos,
+  const funil = montarFunil(criarResumoFunilCotacoes(dados.etapasCotacao, cotacoesAbertos));
+  const cotacoesPorGrupo = montarResumoPorRelacionamento(
+    cotacoesAbertos,
     dados.produtos,
     dados.gruposProduto,
     'idGrupo',
@@ -387,12 +387,12 @@ function montarPainel(dados, usuarioLogado) {
     'descricao',
     'Sem grupo',
     {
-      chaveRegistroId: 'idOrcamento',
+      chaveRegistroId: 'idCotacao',
       sufixoQuantidadeRegistros: 'orc.'
     }
   );
-  const orcamentosPorMarca = montarResumoPorRelacionamento(
-    orcamentosAbertos,
+  const cotacoesPorMarca = montarResumoPorRelacionamento(
+    cotacoesAbertos,
     dados.produtos,
     dados.marcas,
     'idMarca',
@@ -400,12 +400,12 @@ function montarPainel(dados, usuarioLogado) {
     'descricao',
     'Sem marca',
     {
-      chaveRegistroId: 'idOrcamento',
+      chaveRegistroId: 'idCotacao',
       sufixoQuantidadeRegistros: 'orc.'
     }
   );
-  const orcamentosPorProduto = montarResumoPorRelacionamento(
-    orcamentosAbertos,
+  const cotacoesPorProduto = montarResumoPorRelacionamento(
+    cotacoesAbertos,
     dados.produtos,
     dados.produtos,
     'idProduto',
@@ -413,12 +413,12 @@ function montarPainel(dados, usuarioLogado) {
     'descricao',
     'Sem produto',
     {
-      chaveRegistroId: 'idOrcamento',
+      chaveRegistroId: 'idCotacao',
       sufixoQuantidadeRegistros: 'orc.'
     }
   );
-  const vendasPorGrupo = montarResumoPorRelacionamento(
-    pedidosMes,
+  const ordensCompraPorGrupo = montarResumoPorRelacionamento(
+    ordensCompraMes,
     dados.produtos,
     dados.gruposProduto,
     'idGrupo',
@@ -426,8 +426,8 @@ function montarPainel(dados, usuarioLogado) {
     'descricao',
     'Sem grupo'
   );
-  const vendasPorMarca = montarResumoPorRelacionamento(
-    pedidosMes,
+  const ordensCompraPorMarca = montarResumoPorRelacionamento(
+    ordensCompraMes,
     dados.produtos,
     dados.marcas,
     'idMarca',
@@ -435,8 +435,8 @@ function montarPainel(dados, usuarioLogado) {
     'descricao',
     'Sem marca'
   );
-  const vendasPorProduto = montarResumoPorRelacionamento(
-    pedidosMes,
+  const ordensCompraPorProduto = montarResumoPorRelacionamento(
+    ordensCompraMes,
     dados.produtos,
     dados.produtos,
     'idProduto',
@@ -444,12 +444,12 @@ function montarPainel(dados, usuarioLogado) {
     'descricao',
     'Sem produto'
   );
-  const vendasPorUf = montarResumoPorUf(pedidosMes, clientesVisiveis);
-  const vendasPorFornecedor = montarResumoPorCliente(pedidosMes, clientesVisiveis, dados.empresa);
-  const vendasPorConceitoFornecedor = montarResumoPorConceitoCliente(
-    pedidosMes,
-    clientesVisiveis,
-    dados.conceitosCliente
+  const ordensCompraPorUf = montarResumoPorUf(ordensCompraMes, fornecedoresVisiveis);
+  const ordensCompraPorFornecedor = montarResumoPorFornecedor(ordensCompraMes, fornecedoresVisiveis, dados.empresa);
+  const ordensCompraPorConceitoFornecedor = montarResumoPorConceitoFornecedor(
+    ordensCompraMes,
+    fornecedoresVisiveis,
+    dados.conceitosFornecedor
   );
   const atendimentosPorCanal = montarResumoAtendimentosPorRelacionamento(
     atendimentosMesHome,
@@ -467,9 +467,9 @@ function montarPainel(dados, usuarioLogado) {
     'descricao',
     'Sem origem'
   );
-  const atendimentosPorFornecedor = montarResumoAtendimentosPorCliente(
+  const atendimentosPorFornecedor = montarResumoAtendimentosPorFornecedor(
     atendimentosMesHome,
-    clientesVisiveis,
+    fornecedoresVisiveis,
     dados.empresa
   );
   const atendimentosPorTipo = montarResumoAtendimentosPorRelacionamento(
@@ -489,31 +489,31 @@ function montarPainel(dados, usuarioLogado) {
     ...base,
     empresa: dados.empresa || null,
     resumo: usuarioLogado?.tipo === 'Usuario padrao'
-      ? `${clientesVisiveis.length} fornecedores na sua carteira`
-      : `${clientesVisiveis.length} fornecedores no acompanhamento`,
+      ? `${fornecedoresVisiveis.length} fornecedores na sua carteira`
+      : `${fornecedoresVisiveis.length} fornecedores no acompanhamento`,
     indicadores: [
       {
-        id: 'orcamentosAbertos',
-        icone: 'orcamento',
+        id: 'cotacoesAbertos',
+        icone: 'cotacao',
         titulo: 'Cotacoes em aberto',
-        valor: String(orcamentosAbertos.length),
+        valor: String(cotacoesAbertos.length),
         descricao: 'Negociacoes ainda ativas no funil.',
         destaque: normalizarPreco(valorAberto),
         ajuda: {
-          composicao: 'Quantidade de cotacoes em aberto e valor total desses orcamentos.',
+          composicao: 'Quantidade de cotacoes em aberto e valor total desses cotacoes.',
           periodo: 'Posicao atual da carteira visivel na data de hoje.'
         }
       },
       {
-        id: 'pedidosMes',
-        icone: 'pedido',
+        id: 'ordensCompraMes',
+        icone: 'ordemCompra',
         titulo: 'Ordens de Compra no mes',
-        valor: String(pedidosMes.length),
+        valor: String(ordensCompraMes.length),
         descricao: 'Ordens de Compra gerados no mes atual.',
         destaque: normalizarPreco(faturamentoMes),
         ajuda: {
           composicao: 'Quantidade de ordens de compra e valor liquido dos itens.',
-          periodo: 'Mes corrente pela data de inclusao do pedido.'
+          periodo: 'Mes corrente pela data de inclusao do ordemCompra.'
         }
       },
       {
@@ -524,7 +524,7 @@ function montarPainel(dados, usuarioLogado) {
         valorComplemento: 'dias',
         descricao: 'Tempo medio para fechar no mes atual.',
         ajuda: {
-          composicao: `${orcamentosFechadosMesConversao.length} orcamentos na etapa Fechado, medindo da inclusao ate o fechamento.`,
+          composicao: `${cotacoesFechadosMesConversao.length} cotacoes na etapa Fechado, medindo da inclusao ate o fechamento.`,
           periodo: 'Mes corrente pela data de fechamento da cotacao.'
         }
       },
@@ -560,18 +560,18 @@ function montarPainel(dados, usuarioLogado) {
         descricao: 'Quantidade bruta de itens vendidos no mes atual.',
         ajuda: {
           composicao: 'Soma da quantidade de itens das ordens de compra do mes corrente.',
-          periodo: 'Mes corrente pela data de inclusao do pedido.'
+          periodo: 'Mes corrente pela data de inclusao do ordemCompra.'
         }
       },
       {
         id: 'positivacaoMes',
-        icone: 'clientes',
+        icone: 'fornecedores',
         titulo: 'Positivacao no mes',
         valor: String(positivacaoMes),
         descricao: 'Fornecedores unicos que geraram ordem de compra no mes.',
         ajuda: {
-          composicao: 'Quantidade de fornecedores diferentes com pelo menos um pedido.',
-          periodo: 'Mes corrente pela data de inclusao do pedido.'
+          composicao: 'Quantidade de fornecedores diferentes com pelo menos um ordemCompra.',
+          periodo: 'Mes corrente pela data de inclusao do ordemCompra.'
         }
       },
       {
@@ -581,8 +581,8 @@ function montarPainel(dados, usuarioLogado) {
         valor: formatarPercentualTaxa(percentualPositivacaoCarteiraMes),
         descricao: 'Percentual da carteira ativa que comprou no mes.',
         ajuda: {
-          composicao: `${positivacaoCarteiraMes} fornecedores que compraram / ${clientesAtivos.length} fornecedores ativos da carteira.`,
-          periodo: 'Mes corrente pela data de inclusao do pedido.'
+          composicao: `${positivacaoCarteiraMes} fornecedores que compraram / ${fornecedoresAtivos.length} fornecedores ativos da carteira.`,
+          periodo: 'Mes corrente pela data de inclusao do ordemCompra.'
         }
       },
       {
@@ -601,9 +601,9 @@ function montarPainel(dados, usuarioLogado) {
         id: 'carteira',
         icone: 'selo',
         titulo: 'Carteira',
-        valor: String(clientesAtivos.length),
+        valor: String(fornecedoresAtivos.length),
         descricao: 'Fornecedores ativos em acompanhamento.',
-        destaque: `${clientesVisiveis.length} visiveis`,
+        destaque: `${fornecedoresVisiveis.length} visiveis`,
         ajuda: {
           composicao: 'Quantidade de fornecedores ativos no escopo visivel.',
           periodo: 'Base cadastral atual (sem recorte mensal).'
@@ -617,14 +617,14 @@ function montarPainel(dados, usuarioLogado) {
         ajuda: {
           conceito: 'Volume financeiro estimado das oportunidades em aberto.',
           calculo: 'Soma dos valores totais dos itens das cotacoes abertos.',
-          observacao: 'Nao representa venda fechada; mostra potencial em negociacao.'
+          observacao: 'Nao representa ordemCompra fechada; mostra potencial em negociacao.'
         }
       },
       {
         rotulo: 'Faturamento do mes',
         valor: normalizarPreco(faturamentoMes),
         ajuda: {
-          conceito: 'Valor movimentado pelos pedidos com entrega prevista no mes atual.',
+          conceito: 'Valor movimentado pelos ordensCompra com entrega prevista no mes atual.',
           calculo: 'Soma dos itens de todos as ordens de compra visiveis cuja data de entrega cai dentro do mes atual.',
           observacao: 'Leitura rapida da receita prevista para entrega no mes atual.'
         }
@@ -633,8 +633,8 @@ function montarPainel(dados, usuarioLogado) {
         rotulo: 'Ticket medio',
         valor: normalizarPreco(ticketMedio),
         ajuda: {
-          conceito: 'Valor medio por pedido com entrega prevista no mes atual.',
-          calculo: `${normalizarPreco(faturamentoMes)} dividido por ${pedidosEntregaMes.length || 0} ordens de compra com data de entrega no mes atual.`,
+          conceito: 'Valor medio por ordemCompra com entrega prevista no mes atual.',
+          calculo: `${normalizarPreco(faturamentoMes)} dividido por ${ordensCompraEntregaMes.length || 0} ordens de compra com data de entrega no mes atual.`,
           observacao: 'Ajuda a entender se o resultado do mes atual vem de volume ou de valor medio.'
         }
       }
@@ -642,7 +642,7 @@ function montarPainel(dados, usuarioLogado) {
     faixas: [
       {
         rotulo: 'Fornecedores acompanhados',
-        valor: String(clientesVisiveis.length),
+        valor: String(fornecedoresVisiveis.length),
         ajuda: {
           conceito: 'Base de fornecedores usada na dashboard.',
           calculo: usuarioLogado?.tipo === 'Usuario padrao'
@@ -653,25 +653,25 @@ function montarPainel(dados, usuarioLogado) {
       },
       {
         rotulo: 'Ordens de Compra a entregar',
-        valor: String(pedidosEntregaProxima),
+        valor: String(ordensCompraEntregaProxima),
         ajuda: {
-          conceito: 'Pedidos ainda nao entregues com entrega prevista em ate 7 dias.',
+          conceito: 'OrdensCompra ainda nao entregues com entrega prevista em ate 7 dias.',
           calculo: 'Conta ordens de compra pendentes cuja data de entrega cai entre hoje e os proximos 7 dias.',
           observacao: 'Bom indicador para alinhamento comercial e operacional.'
         }
       },
       {
         rotulo: 'Cotacoes vencidos',
-        valor: String(orcamentosVencidos),
+        valor: String(cotacoesVencidos),
         ajuda: {
-          conceito: 'Orcamentos abertos com validade anterior a hoje.',
+          conceito: 'Cotacoes abertos com validade anterior a hoje.',
           calculo: 'Conta negociacoes abertas cuja data de validade ja expirou.',
           observacao: 'Normalmente pedem renovacao, retorno ou encerramento.'
         }
       },
       {
         rotulo: 'Sem atendimento recente',
-        valor: String(clientesSemAtendimento),
+        valor: String(fornecedoresSemAtendimento),
         ajuda: {
           conceito: 'Fornecedores sem atendimento registrado nos ultimos 30 dias.',
           calculo: 'Compara a ultima data de atendimento de cada fornecedor com a data atual.',
@@ -681,48 +681,48 @@ function montarPainel(dados, usuarioLogado) {
     ],
     exibirFunil: dados.empresa?.exibirFunilPaginaInicial !== 0,
     funil,
-    orcamentosPorGrupo,
-    orcamentosPorMarca,
-    orcamentosPorProduto,
-    vendasPorGrupo,
-    vendasPorMarca,
-    vendasPorUf,
-    vendasPorFornecedor,
-    vendasPorConceitoFornecedor,
-    vendasPorProduto,
+    cotacoesPorGrupo,
+    cotacoesPorMarca,
+    cotacoesPorProduto,
+    ordensCompraPorGrupo,
+    ordensCompraPorMarca,
+    ordensCompraPorUf,
+    ordensCompraPorFornecedor,
+    ordensCompraPorConceitoFornecedor,
+    ordensCompraPorProduto,
     atendimentosPorCanal,
     atendimentosPorOrigem,
     atendimentosPorFornecedor,
     atendimentosPorTipo,
     atendimentosPorUsuario,
-    alertas: montarAlertas(orcamentosVencidos, orcamentosVencendo, pedidosEntregaProxima, clientesSemAtendimento),
+    alertas: montarAlertas(cotacoesVencidos, cotacoesVencendo, ordensCompraEntregaProxima, fornecedoresSemAtendimento),
     tituloRanking: usuarioLogado?.tipo === 'Usuario padrao' ? 'Fornecedores em destaque' : 'Compradores em destaque',
     descricaoRanking: usuarioLogado?.tipo === 'Usuario padrao'
       ? 'Quem mais comprou no mes pela data de entrada da ordem de compra dentro da sua carteira.'
       : 'Quem mais movimentou ordens de compra pela data de entrada no mes atual.',
     ranking: usuarioLogado?.tipo === 'Usuario padrao'
-      ? montarRankingClientes(pedidosMes, clientesPorId)
-      : montarRankingVendedores(pedidosMes, vendedoresPorId),
+      ? montarRankingFornecedores(ordensCompraMes, fornecedoresPorId)
+      : montarRankingCompradores(ordensCompraMes, compradoresPorId),
     agenda
   };
 }
 
-function montarSecoesOrcamentos(painel) {
-  const configuracoes = Array.isArray(painel?.empresa?.graficosPaginaInicialOrcamentos)
-    ? painel.empresa.graficosPaginaInicialOrcamentos
+function montarSecoesCotacoes(painel) {
+  const configuracoes = Array.isArray(painel?.empresa?.graficosPaginaInicialCotacoes)
+    ? painel.empresa.graficosPaginaInicialCotacoes
     : [];
   const definicoes = new Map([
-    ['funilOrcamentos', {
-      renderizar: (configuracao) => <SecaoFunilOrcamentosInicio itens={painel.funil} titulo={configuracao.rotulo} />
+    ['funilCotacoes', {
+      renderizar: (configuracao) => <SecaoFunilCotacoesInicio itens={painel.funil} titulo={configuracao.rotulo} />
     }],
-    ['orcamentosGrupoProdutos', {
-      renderizar: (configuracao) => <SecaoOrcamentosGrupoProdutosInicio itens={painel.orcamentosPorGrupo} titulo={configuracao.rotulo} />
+    ['cotacoesGrupoProdutos', {
+      renderizar: (configuracao) => <SecaoCotacoesGrupoProdutosInicio itens={painel.cotacoesPorGrupo} titulo={configuracao.rotulo} />
     }],
-    ['orcamentosMarca', {
-      renderizar: (configuracao) => <SecaoOrcamentosMarcaInicio itens={painel.orcamentosPorMarca} titulo={configuracao.rotulo} />
+    ['cotacoesMarca', {
+      renderizar: (configuracao) => <SecaoCotacoesMarcaInicio itens={painel.cotacoesPorMarca} titulo={configuracao.rotulo} />
     }],
-    ['orcamentosProdutos', {
-      renderizar: (configuracao) => <SecaoOrcamentosProdutosInicio itens={painel.orcamentosPorProduto} titulo={configuracao.rotulo} />
+    ['cotacoesProdutos', {
+      renderizar: (configuracao) => <SecaoCotacoesProdutosInicio itens={painel.cotacoesPorProduto} titulo={configuracao.rotulo} />
     }]
   ]);
 
@@ -763,30 +763,30 @@ function montarIndicadoresConfigurados(painel) {
     .filter(Boolean);
 }
 
-function montarSecoesVendas(painel) {
+function montarSecoesOrdensCompra(painel) {
   const configuracoes = Array.isArray(painel?.empresa?.graficosPaginaInicialOrdensCompra)
     ? painel.empresa.graficosPaginaInicialOrdensCompra
     : [];
   const definicoes = new Map([
-    ['vendasGrupoProdutos', {
-      renderizar: (configuracao) => <SecaoOrdensCompraGrupoProdutosInicio itens={painel.vendasPorGrupo} titulo={configuracao.rotulo} />
+    ['ordensCompraGrupoProdutos', {
+      renderizar: (configuracao) => <SecaoOrdensCompraGrupoProdutosInicio itens={painel.ordensCompraPorGrupo} titulo={configuracao.rotulo} />
     }],
-    ['vendasMarca', {
-      renderizar: (configuracao) => <SecaoOrdensCompraMarcaInicio itens={painel.vendasPorMarca} titulo={configuracao.rotulo} />
+    ['ordensCompraMarca', {
+      renderizar: (configuracao) => <SecaoOrdensCompraMarcaInicio itens={painel.ordensCompraPorMarca} titulo={configuracao.rotulo} />
     }],
-    ['vendasUf', {
-      renderizar: (configuracao) => <SecaoOrdensCompraUfInicio itens={painel.vendasPorUf} titulo={configuracao.rotulo} />
+    ['ordensCompraUf', {
+      renderizar: (configuracao) => <SecaoOrdensCompraUfInicio itens={painel.ordensCompraPorUf} titulo={configuracao.rotulo} />
     }],
-    ['vendasClientes', {
-      renderizar: (configuracao) => <SecaoOrdensCompraFornecedoresInicio itens={painel.vendasPorFornecedor} titulo={configuracao.rotulo} />
+    ['ordensCompraFornecedores', {
+      renderizar: (configuracao) => <SecaoOrdensCompraFornecedoresInicio itens={painel.ordensCompraPorFornecedor} titulo={configuracao.rotulo} />
     }],
-    ['vendasConceitosCliente', {
-      renderizar: (configuracao) => <SecaoOrdensCompraConceitosFornecedorInicio itens={painel.vendasPorConceitoFornecedor} titulo={configuracao.rotulo} />
+    ['ordensCompraConceitosFornecedor', {
+      renderizar: (configuracao) => <SecaoOrdensCompraConceitosFornecedorInicio itens={painel.ordensCompraPorConceitoFornecedor} titulo={configuracao.rotulo} />
     }],
-    ['vendasProdutos', {
-      renderizar: (configuracao) => <SecaoOrdensCompraProdutosInicio itens={painel.vendasPorProduto} titulo={configuracao.rotulo} />
+    ['ordensCompraProdutos', {
+      renderizar: (configuracao) => <SecaoOrdensCompraProdutosInicio itens={painel.ordensCompraPorProduto} titulo={configuracao.rotulo} />
     }],
-    ['rankingVendas', {
+    ['rankingOrdensCompra', {
       renderizar: (configuracao) => (
         <SecaoRankingInicio
           titulo={configuracao.rotulo}
@@ -819,8 +819,8 @@ function montarSecoesAtendimentos(painel) {
     ['atendimentosOrigem', {
       renderizar: (configuracao) => <SecaoAtendimentosOrigemInicio itens={painel.atendimentosPorOrigem} titulo={configuracao.rotulo} />
     }],
-    ['atendimentosCliente', {
-      renderizar: (configuracao) => <SecaoAtendimentosClientesInicio itens={painel.atendimentosPorFornecedor} titulo={configuracao.rotulo} />
+    ['atendimentosFornecedor', {
+      renderizar: (configuracao) => <SecaoAtendimentosFornecedoresInicio itens={painel.atendimentosPorFornecedor} titulo={configuracao.rotulo} />
     }],
     ['atendimentosTipo', {
       renderizar: (configuracao) => <SecaoAtendimentosTipoInicio itens={painel.atendimentosPorTipo} titulo={configuracao.rotulo} />
@@ -844,8 +844,8 @@ function montarSecoesAtendimentos(painel) {
 function criarPainelBase(usuarioLogado) {
   return {
     descricao: usuarioLogado?.tipo === 'Usuario padrao'
-      ? 'Acompanhe somente sua carteira, seus orcamentos e suas ordens de compra.'
-      : 'Acompanhe o desempenho comercial de orcamentos e ordens de compra da operacao.',
+      ? 'Acompanhe somente sua carteira, seus cotacoes e suas ordens de compra.'
+      : 'Acompanhe o desempenho comercial de cotacoes e ordens de compra da operacao.',
     resumo: '',
     tag: usuarioLogado?.tipo === 'Usuario padrao' ? 'Minha carteira' : 'Visao geral',
     titulo: usuarioLogado?.tipo === 'Usuario padrao'
@@ -856,8 +856,8 @@ function criarPainelBase(usuarioLogado) {
       : 'Leitura consolidada do funil, das ordens de compra e das proximas acoes comerciais.',
     indicadores: [
       {
-        id: 'orcamentosAbertos',
-        icone: 'orcamento',
+        id: 'cotacoesAbertos',
+        icone: 'cotacao',
         titulo: 'Cotacoes em aberto',
         valor: '0',
         descricao: '',
@@ -867,14 +867,14 @@ function criarPainelBase(usuarioLogado) {
         }
       },
       {
-        id: 'pedidosMes',
-        icone: 'pedido',
+        id: 'ordensCompraMes',
+        icone: 'ordemCompra',
         titulo: 'Ordens de Compra no mes',
         valor: '0',
         descricao: '',
         ajuda: {
           composicao: 'Quantidade de ordens de compra e valor liquido dos itens.',
-          periodo: 'Mes corrente pela data de inclusao do pedido.'
+          periodo: 'Mes corrente pela data de inclusao do ordemCompra.'
         }
       },
       {
@@ -919,18 +919,18 @@ function criarPainelBase(usuarioLogado) {
         descricao: '',
         ajuda: {
           composicao: 'Soma da quantidade de itens das ordens de compra do mes corrente.',
-          periodo: 'Mes corrente pela data de inclusao do pedido.'
+          periodo: 'Mes corrente pela data de inclusao do ordemCompra.'
         }
       },
       {
         id: 'positivacaoMes',
-        icone: 'clientes',
+        icone: 'fornecedores',
         titulo: 'Positivacao no mes',
         valor: '0',
         descricao: '',
         ajuda: {
-          composicao: 'Quantidade de fornecedores diferentes com pelo menos um pedido.',
-          periodo: 'Mes corrente pela data de inclusao do pedido.'
+          composicao: 'Quantidade de fornecedores diferentes com pelo menos um ordemCompra.',
+          periodo: 'Mes corrente pela data de inclusao do ordemCompra.'
         }
       },
       {
@@ -941,7 +941,7 @@ function criarPainelBase(usuarioLogado) {
         descricao: '',
         ajuda: {
           composicao: 'Fornecedores da carteira ativa que compraram / total de fornecedores ativos da carteira.',
-          periodo: 'Mes corrente pela data de inclusao do pedido.'
+          periodo: 'Mes corrente pela data de inclusao do ordemCompra.'
         }
       },
       {
@@ -972,15 +972,15 @@ function criarPainelBase(usuarioLogado) {
     empresa: null,
     exibirFunil: true,
     funil: [],
-    orcamentosPorGrupo: [],
-    orcamentosPorMarca: [],
-    orcamentosPorProduto: [],
-    vendasPorGrupo: [],
-    vendasPorMarca: [],
-    vendasPorUf: [],
-    vendasPorFornecedor: [],
-    vendasPorConceitoFornecedor: [],
-    vendasPorProduto: [],
+    cotacoesPorGrupo: [],
+    cotacoesPorMarca: [],
+    cotacoesPorProduto: [],
+    ordensCompraPorGrupo: [],
+    ordensCompraPorMarca: [],
+    ordensCompraPorUf: [],
+    ordensCompraPorFornecedor: [],
+    ordensCompraPorConceitoFornecedor: [],
+    ordensCompraPorProduto: [],
     atendimentosPorCanal: [],
     atendimentosPorOrigem: [],
     atendimentosPorFornecedor: [],
@@ -994,37 +994,37 @@ function criarPainelBase(usuarioLogado) {
   };
 }
 
-function filtrarClientesVisiveis(clientes, usuarioLogado) {
-  const listaClientes = Array.isArray(clientes) ? clientes : [];
+function filtrarFornecedoresVisiveis(fornecedores, usuarioLogado) {
+  const listaFornecedores = Array.isArray(fornecedores) ? fornecedores : [];
 
-  if (usuarioLogado?.tipo !== 'Usuario padrao' || !usuarioLogado?.idVendedor) {
-    return listaClientes;
+  if (usuarioLogado?.tipo !== 'Usuario padrao' || !usuarioLogado?.idComprador) {
+    return listaFornecedores;
   }
 
-  return listaClientes.filter((cliente) => String(cliente.idVendedor) === String(usuarioLogado.idVendedor));
+  return listaFornecedores.filter((fornecedor) => String(fornecedor.idComprador) === String(usuarioLogado.idComprador));
 }
 
-function filtrarOrcamentosVisiveis(orcamentos, idsClientes, usuarioLogado) {
-  if (usuarioLogado?.tipo !== 'Usuario padrao' || !usuarioLogado?.idVendedor) {
-    return Array.isArray(orcamentos) ? orcamentos : [];
+function filtrarCotacoesVisiveis(cotacoes, idsFornecedores, usuarioLogado) {
+  if (usuarioLogado?.tipo !== 'Usuario padrao' || !usuarioLogado?.idComprador) {
+    return Array.isArray(cotacoes) ? cotacoes : [];
   }
 
-  return (orcamentos || []).filter(
-    (item) => String(item.idVendedor) === String(usuarioLogado.idVendedor)
+  return (cotacoes || []).filter(
+    (item) => String(item.idComprador) === String(usuarioLogado.idComprador)
   );
 }
 
-function filtrarPedidosVisiveis(pedidos, idsClientes, usuarioLogado) {
-  if (usuarioLogado?.tipo !== 'Usuario padrao' || !usuarioLogado?.idVendedor) {
-    return Array.isArray(pedidos) ? pedidos : [];
+function filtrarOrdensCompraVisiveis(ordensCompra, idsFornecedores, usuarioLogado) {
+  if (usuarioLogado?.tipo !== 'Usuario padrao' || !usuarioLogado?.idComprador) {
+    return Array.isArray(ordensCompra) ? ordensCompra : [];
   }
 
-  return (pedidos || []).filter(
-    (item) => String(item.idVendedor) === String(usuarioLogado.idVendedor)
+  return (ordensCompra || []).filter(
+    (item) => String(item.idComprador) === String(usuarioLogado.idComprador)
   );
 }
 
-function filtrarAtendimentosVisiveis(atendimentos, idsClientes, usuarioLogado) {
+function filtrarAtendimentosVisiveis(atendimentos, idsFornecedores, usuarioLogado) {
   if (usuarioLogado?.tipo !== 'Usuario padrao' || !usuarioLogado?.idUsuario) {
     return Array.isArray(atendimentos) ? atendimentos : [];
   }
@@ -1049,13 +1049,13 @@ function normalizarTextoComparacao(valor) {
     .toLowerCase();
 }
 
-function filtrarAgendamentosVisiveis(agendamentos, idsClientes, usuarioLogado) {
+function filtrarAgendamentosVisiveis(agendamentos, idsFornecedores, usuarioLogado) {
   if (usuarioLogado?.tipo !== 'Usuario padrao') {
     return Array.isArray(agendamentos) ? agendamentos : [];
   }
 
   return (agendamentos || []).filter((item) => {
-    if (idsClientes.has(String(item.idCliente))) {
+    if (idsFornecedores.has(String(item.idFornecedor))) {
       return true;
     }
 
@@ -1070,16 +1070,16 @@ function montarFunil(funil) {
   const totalQuantidadeItens = (funil || []).reduce((acumulado, item) => acumulado + (Number(item.quantidadeItens) || 0), 0);
   const totalValor = (funil || []).reduce((acumulado, item) => acumulado + (Number(item.valorTotal) || 0), 0);
   return (funil || []).map((item) => ({
-    idEtapaOrcamento: item.idEtapaOrcamento,
+    idEtapaCotacao: item.idEtapaCotacao,
     descricao: item.descricao,
-    quantidadeOrcamentos: `${item.quantidadeOrcamentos} orc.`,
+    quantidadeCotacoes: `${item.quantidadeCotacoes} orc.`,
     quantidadeItens: Number(item.quantidadeItens || 0),
     valor: normalizarPreco(item.valorTotal),
     cor: item.cor,
     percentualProdutos: calcularPercentualParteDoTotal(Number(item.quantidadeItens || 0), totalQuantidadeItens),
     percentualValor: calcularPercentualParteDoTotal(Number(item.valorTotal || 0), totalValor),
     ajuda: {
-      composicao: `${item.quantidadeOrcamentos} orcamentos, ${Number(item.quantidadeItens || 0)} itens e ${normalizarPreco(item.valorTotal)} nessa etapa.`,
+      composicao: `${item.quantidadeCotacoes} cotacoes, ${Number(item.quantidadeItens || 0)} itens e ${normalizarPreco(item.valorTotal)} nessa etapa.`,
       periodo: 'Posicao atual do funil de cotacoes em aberto.'
     }
   }));
@@ -1106,7 +1106,7 @@ function montarAlertas(vencidos, vencendo, entrega, semAtendimento) {
       percentual: Math.round((vencidos / maior) * 100),
       ajuda: {
         conceito: 'Negociacoes abertas cuja validade ja terminou.',
-        calculo: 'Conta orcamentos abertos com data de validade anterior a data de hoje.',
+        calculo: 'Conta cotacoes abertos com data de validade anterior a data de hoje.',
         observacao: 'Mostra risco de perda por falta de retorno.'
       }
     },
@@ -1116,7 +1116,7 @@ function montarAlertas(vencidos, vencendo, entrega, semAtendimento) {
       descricao: 'Negociacoes que precisam de retorno rapido.',
       percentual: Math.round((vencendo / maior) * 100),
       ajuda: {
-        conceito: 'Orcamentos abertos que vencem em ate 7 dias.',
+        conceito: 'Cotacoes abertos que vencem em ate 7 dias.',
         calculo: 'Conta validade entre a data de hoje e os proximos 7 dias.',
         observacao: 'Ajuda a priorizar follow-up antes do vencimento.'
       }
@@ -1127,7 +1127,7 @@ function montarAlertas(vencidos, vencendo, entrega, semAtendimento) {
       descricao: 'Ordens de Compra previstos para os proximos 7 dias.',
       percentual: Math.round((entrega / maior) * 100),
       ajuda: {
-        conceito: 'Pedidos pendentes com entrega prevista em ate 7 dias.',
+        conceito: 'OrdensCompra pendentes com entrega prevista em ate 7 dias.',
         calculo: 'Conta ordens de compra nao entregues cuja data de entrega cai entre hoje e os proximos 7 dias.',
         observacao: 'Bom indicador para antecipar alinhamentos.'
       }
@@ -1157,7 +1157,7 @@ function montarResumoPorRelacionamento(
   opcoes = {}
 ) {
   const {
-    chaveRegistroId = 'idPedido',
+    chaveRegistroId = 'idOrdemCompra',
     sufixoQuantidadeRegistros = 'ped.'
   } = opcoes;
   const produtosPorId = new Map((produtos || []).map((produto) => [
@@ -1180,12 +1180,12 @@ function montarResumoPorRelacionamento(
         descricao: relacionamento?.[chaveDescricao] || descricaoFallback,
         quantidadeItens: 0,
         valorTotal: 0,
-        pedidos: new Set()
+        ordensCompra: new Set()
       };
 
       atual.quantidadeItens += Number(item.quantidade) || 0;
       atual.valorTotal += Number(item.valorTotal) || 0;
-      atual.pedidos.add(String(registro[chaveRegistroId]));
+      atual.ordensCompra.add(String(registro[chaveRegistroId]));
       resumoPorRelacionamento.set(idRelacionamento, atual);
     });
   });
@@ -1193,8 +1193,8 @@ function montarResumoPorRelacionamento(
   const lista = [...resumoPorRelacionamento.values()]
     .map((item) => ({
       ...item,
-      quantidadePedidos: `${item.pedidos.size} ${sufixoQuantidadeRegistros}`,
-      pedidos: undefined
+      quantidadeOrdensCompra: `${item.ordensCompra.size} ${sufixoQuantidadeRegistros}`,
+      ordensCompra: undefined
     }))
     .filter((item) => item.quantidadeItens !== 0 || item.valorTotal !== 0)
     .sort((a, b) => b.valorTotal - a.valorTotal);
@@ -1213,45 +1213,45 @@ function montarResumoPorRelacionamento(
     percentualQuantidade: calcularPercentualParteDoTotal(Number(item.quantidadeItens || 0), totalQuantidade),
     percentualValor: calcularPercentualParteDoTotal(Number(item.valorTotal || 0), totalValor),
     ajuda: {
-      composicao: `${item.quantidadePedidos}, ${item.quantidadeItens} itens e ${normalizarPreco(item.valorTotal)} para ${item.descricao}.`,
-      periodo: 'Mes corrente pela data de entrada do pedido.'
+      composicao: `${item.quantidadeOrdensCompra}, ${item.quantidadeItens} itens e ${normalizarPreco(item.valorTotal)} para ${item.descricao}.`,
+      periodo: 'Mes corrente pela data de entrada do ordemCompra.'
     }
   }));
 }
 
-function montarResumoPorUf(pedidos, clientes) {
-  const clientesPorId = new Map((clientes || []).map((cliente) => [
-    String(cliente.idCliente),
-    cliente
+function montarResumoPorUf(ordensCompra, fornecedores) {
+  const fornecedoresPorId = new Map((fornecedores || []).map((fornecedor) => [
+    String(fornecedor.idFornecedor),
+    fornecedor
   ]));
   const resumoPorUf = new Map();
 
-  (pedidos || []).forEach((pedido) => {
-    const cliente = clientesPorId.get(String(pedido?.idCliente || ''));
-    const ufNormalizada = String(cliente?.estado || '').trim().toUpperCase();
+  (ordensCompra || []).forEach((ordemCompra) => {
+    const fornecedor = fornecedoresPorId.get(String(ordemCompra?.idFornecedor || ''));
+    const ufNormalizada = String(fornecedor?.estado || '').trim().toUpperCase();
     const uf = ufNormalizada || 'Sem UF';
     const atual = resumoPorUf.get(uf) || {
       id: uf,
       descricao: uf,
       quantidadeItens: 0,
       valorTotal: 0,
-      pedidos: new Set()
+      ordensCompra: new Set()
     };
 
-    (pedido?.itens || []).forEach((item) => {
+    (ordemCompra?.itens || []).forEach((item) => {
       atual.quantidadeItens += Number(item.quantidade) || 0;
       atual.valorTotal += Number(item.valorTotal) || 0;
     });
 
-    atual.pedidos.add(String(pedido.idPedido || ''));
+    atual.ordensCompra.add(String(ordemCompra.idOrdemCompra || ''));
     resumoPorUf.set(uf, atual);
   });
 
   const lista = [...resumoPorUf.values()]
     .map((item) => ({
       ...item,
-      quantidadePedidos: `${item.pedidos.size} ped.`,
-      pedidos: undefined
+      quantidadeOrdensCompra: `${item.ordensCompra.size} ped.`,
+      ordensCompra: undefined
     }))
     .filter((item) => item.quantidadeItens !== 0 || item.valorTotal !== 0)
     .sort((a, b) => b.valorTotal - a.valorTotal);
@@ -1271,47 +1271,47 @@ function montarResumoPorUf(pedidos, clientes) {
     percentualQuantidade: calcularPercentualParteDoTotal(Number(item.quantidadeItens || 0), totalQuantidade),
     percentualValor: calcularPercentualParteDoTotal(Number(item.valorTotal || 0), totalValor),
     ajuda: {
-      composicao: `${item.quantidadePedidos}, ${item.quantidadeItens} itens e ${normalizarPreco(item.valorTotal)} na UF ${item.descricao}.`,
-      periodo: 'Mes corrente pela data de entrada do pedido.'
+      composicao: `${item.quantidadeOrdensCompra}, ${item.quantidadeItens} itens e ${normalizarPreco(item.valorTotal)} na UF ${item.descricao}.`,
+      periodo: 'Mes corrente pela data de entrada do ordemCompra.'
     }
   }));
 }
 
-function montarResumoPorCliente(pedidos, clientes, empresa) {
-  const clientesPorId = new Map((clientes || []).map((cliente) => [
-    String(cliente.idCliente),
-    cliente
+function montarResumoPorFornecedor(ordensCompra, fornecedores, empresa) {
+  const fornecedoresPorId = new Map((fornecedores || []).map((fornecedor) => [
+    String(fornecedor.idFornecedor),
+    fornecedor
   ]));
-  const resumoPorCliente = new Map();
+  const resumoPorFornecedor = new Map();
 
-  (pedidos || []).forEach((pedido) => {
-    const idCliente = String(pedido?.idCliente || '');
-    const cliente = clientesPorId.get(idCliente);
-    const nomeFantasiaCliente = cliente?.nomeFantasia || cliente?.razaoSocial || 'Fornecedor sem nome';
-    const codigoCliente = formatarCodigoCliente(cliente || { idCliente: pedido?.idCliente }, empresa);
-    const descricaoCliente = `${codigoCliente} - ${nomeFantasiaCliente}`;
-    const atual = resumoPorCliente.get(idCliente) || {
-      id: idCliente || 'sem-cliente',
-      descricao: descricaoCliente,
+  (ordensCompra || []).forEach((ordemCompra) => {
+    const idFornecedor = String(ordemCompra?.idFornecedor || '');
+    const fornecedor = fornecedoresPorId.get(idFornecedor);
+    const nomeFantasiaFornecedor = fornecedor?.nomeFantasia || fornecedor?.razaoSocial || 'Fornecedor sem nome';
+    const codigoFornecedor = formatarCodigoFornecedor(fornecedor || { idFornecedor: ordemCompra?.idFornecedor }, empresa);
+    const descricaoFornecedor = `${codigoFornecedor} - ${nomeFantasiaFornecedor}`;
+    const atual = resumoPorFornecedor.get(idFornecedor) || {
+      id: idFornecedor || 'sem-fornecedor',
+      descricao: descricaoFornecedor,
       quantidadeItens: 0,
       valorTotal: 0,
-      pedidos: new Set()
+      ordensCompra: new Set()
     };
 
-    (pedido?.itens || []).forEach((item) => {
+    (ordemCompra?.itens || []).forEach((item) => {
       atual.quantidadeItens += Number(item.quantidade) || 0;
       atual.valorTotal += Number(item.valorTotal) || 0;
     });
 
-    atual.pedidos.add(String(pedido.idPedido || ''));
-    resumoPorCliente.set(idCliente, atual);
+    atual.ordensCompra.add(String(ordemCompra.idOrdemCompra || ''));
+    resumoPorFornecedor.set(idFornecedor, atual);
   });
 
-  const lista = [...resumoPorCliente.values()]
+  const lista = [...resumoPorFornecedor.values()]
     .map((item) => ({
       ...item,
-      quantidadePedidos: `${item.pedidos.size} ped.`,
-      pedidos: undefined
+      quantidadeOrdensCompra: `${item.ordensCompra.size} ped.`,
+      ordensCompra: undefined
     }))
     .filter((item) => item.quantidadeItens !== 0 || item.valorTotal !== 0)
     .sort((a, b) => b.valorTotal - a.valorTotal);
@@ -1331,27 +1331,27 @@ function montarResumoPorCliente(pedidos, clientes, empresa) {
     percentualQuantidade: calcularPercentualParteDoTotal(Number(item.quantidadeItens || 0), totalQuantidade),
     percentualValor: calcularPercentualParteDoTotal(Number(item.valorTotal || 0), totalValor),
     ajuda: {
-      composicao: `${item.quantidadePedidos}, ${item.quantidadeItens} itens e ${normalizarPreco(item.valorTotal)} para ${item.descricao}.`,
-      periodo: 'Mes corrente pela data de entrada do pedido.'
+      composicao: `${item.quantidadeOrdensCompra}, ${item.quantidadeItens} itens e ${normalizarPreco(item.valorTotal)} para ${item.descricao}.`,
+      periodo: 'Mes corrente pela data de entrada do ordemCompra.'
     }
   }));
 }
 
-// O conceito precisa ser resolvido a partir do fornecedor porque o pedido nao guarda esse snapshot hoje.
-function montarResumoPorConceitoCliente(pedidos, clientes, conceitosCliente) {
-  const clientesPorId = new Map((clientes || []).map((cliente) => [
-    String(cliente.idCliente),
-    cliente
+// O conceito precisa ser resolvido a partir do fornecedor porque o ordemCompra nao guarda esse snapshot hoje.
+function montarResumoPorConceitoFornecedor(ordensCompra, fornecedores, conceitosFornecedor) {
+  const fornecedoresPorId = new Map((fornecedores || []).map((fornecedor) => [
+    String(fornecedor.idFornecedor),
+    fornecedor
   ]));
-  const conceitosPorId = new Map((conceitosCliente || []).map((conceito) => [
+  const conceitosPorId = new Map((conceitosFornecedor || []).map((conceito) => [
     String(conceito.idConceito),
     conceito
   ]));
   const resumoPorConceito = new Map();
 
-  (pedidos || []).forEach((pedido) => {
-    const cliente = clientesPorId.get(String(pedido?.idCliente || ''));
-    const idConceito = String(cliente?.idConceito || 1);
+  (ordensCompra || []).forEach((ordemCompra) => {
+    const fornecedor = fornecedoresPorId.get(String(ordemCompra?.idFornecedor || ''));
+    const idConceito = String(fornecedor?.idConceito || 1);
     const conceito = conceitosPorId.get(idConceito);
     const descricaoConceito = conceito?.descricao || 'Sem Conceito';
     const resumoAtual = resumoPorConceito.get(idConceito) || {
@@ -1359,23 +1359,23 @@ function montarResumoPorConceitoCliente(pedidos, clientes, conceitosCliente) {
       descricao: descricaoConceito,
       quantidadeItens: 0,
       valorTotal: 0,
-      pedidos: new Set()
+      ordensCompra: new Set()
     };
 
-    (pedido?.itens || []).forEach((item) => {
+    (ordemCompra?.itens || []).forEach((item) => {
       resumoAtual.quantidadeItens += Number(item.quantidade) || 0;
       resumoAtual.valorTotal += Number(item.valorTotal) || 0;
     });
 
-    resumoAtual.pedidos.add(String(pedido.idPedido || ''));
+    resumoAtual.ordensCompra.add(String(ordemCompra.idOrdemCompra || ''));
     resumoPorConceito.set(idConceito, resumoAtual);
   });
 
   const lista = [...resumoPorConceito.values()]
     .map((item) => ({
       ...item,
-      quantidadePedidos: `${item.pedidos.size} ped.`,
-      pedidos: undefined
+      quantidadeOrdensCompra: `${item.ordensCompra.size} ped.`,
+      ordensCompra: undefined
     }))
     .filter((item) => item.quantidadeItens !== 0 || item.valorTotal !== 0)
     .sort((itemA, itemB) => itemB.valorTotal - itemA.valorTotal);
@@ -1394,8 +1394,8 @@ function montarResumoPorConceitoCliente(pedidos, clientes, conceitosCliente) {
     percentualQuantidade: calcularPercentualParteDoTotal(Number(item.quantidadeItens || 0), totalQuantidade),
     percentualValor: calcularPercentualParteDoTotal(Number(item.valorTotal || 0), totalValor),
     ajuda: {
-      composicao: `${item.quantidadePedidos}, ${item.quantidadeItens} itens e ${normalizarPreco(item.valorTotal)} no conceito ${item.descricao}.`,
-      periodo: 'Mes corrente pela data de entrada do pedido.'
+      composicao: `${item.quantidadeOrdensCompra}, ${item.quantidadeItens} itens e ${normalizarPreco(item.valorTotal)} no conceito ${item.descricao}.`,
+      periodo: 'Mes corrente pela data de entrada do ordemCompra.'
     }
   }));
 }
@@ -1421,12 +1421,12 @@ function montarResumoAtendimentosPorRelacionamento(
       id: idRelacionamento,
       descricao: relacionamento?.[chaveDescricao] || descricaoFallback,
       quantidadeAtendimentos: 0,
-      quantidadeClientesSet: new Set()
+      quantidadeFornecedoresSet: new Set()
     };
 
     resumoAtual.quantidadeAtendimentos += 1;
-    if (atendimento?.idCliente) {
-      resumoAtual.quantidadeClientesSet.add(String(atendimento.idCliente));
+    if (atendimento?.idFornecedor) {
+      resumoAtual.quantidadeFornecedoresSet.add(String(atendimento.idFornecedor));
     }
     resumoPorRelacionamento.set(idRelacionamento, resumoAtual);
   });
@@ -1434,40 +1434,40 @@ function montarResumoAtendimentosPorRelacionamento(
   const lista = [...resumoPorRelacionamento.values()]
     .map((item) => ({
       ...item,
-      quantidadeClientes: item.quantidadeClientesSet.size,
-      quantidadeClientesSet: undefined
+      quantidadeFornecedores: item.quantidadeFornecedoresSet.size,
+      quantidadeFornecedoresSet: undefined
     }))
     .sort((itemA, itemB) => itemB.quantidadeAtendimentos - itemA.quantidadeAtendimentos);
   const totalAtendimentos = lista.reduce((total, item) => total + Number(item.quantidadeAtendimentos || 0), 0);
-  const totalClientes = lista.reduce((total, item) => total + Number(item.quantidadeClientes || 0), 0);
+  const totalFornecedores = lista.reduce((total, item) => total + Number(item.quantidadeFornecedores || 0), 0);
 
   return lista.map((item) => ({
     ...item,
     percentualAtendimentos: calcularPercentualParteDoTotal(item.quantidadeAtendimentos, totalAtendimentos),
-    percentualClientes: calcularPercentualParteDoTotal(item.quantidadeClientes, totalClientes),
+    percentualFornecedores: calcularPercentualParteDoTotal(item.quantidadeFornecedores, totalFornecedores),
     ajuda: {
-      composicao: `${item.quantidadeAtendimentos} atendimentos e ${item.quantidadeClientes} fornecedores para ${item.descricao}.`,
+      composicao: `${item.quantidadeAtendimentos} atendimentos e ${item.quantidadeFornecedores} fornecedores para ${item.descricao}.`,
       periodo: 'Mes corrente pela data do atendimento.'
     }
   }));
 }
 
-function montarResumoAtendimentosPorCliente(atendimentos, clientes, empresa) {
-  const clientesPorId = new Map((clientes || []).map((cliente) => [
-    String(cliente.idCliente),
-    cliente
+function montarResumoAtendimentosPorFornecedor(atendimentos, fornecedores, empresa) {
+  const fornecedoresPorId = new Map((fornecedores || []).map((fornecedor) => [
+    String(fornecedor.idFornecedor),
+    fornecedor
   ]));
-  const resumoPorCliente = new Map();
+  const resumoPorFornecedor = new Map();
 
   (atendimentos || []).forEach((atendimento) => {
-    const idCliente = String(atendimento?.idCliente || '');
-    const cliente = clientesPorId.get(idCliente);
-    const descricaoCliente = cliente
-      ? `${formatarCodigoCliente(cliente, empresa)} - ${cliente.nomeFantasia || cliente.razaoSocial || 'Fornecedor sem nome'}`
+    const idFornecedor = String(atendimento?.idFornecedor || '');
+    const fornecedor = fornecedoresPorId.get(idFornecedor);
+    const descricaoFornecedor = fornecedor
+      ? `${formatarCodigoFornecedor(fornecedor, empresa)} - ${fornecedor.nomeFantasia || fornecedor.razaoSocial || 'Fornecedor sem nome'}`
       : 'Fornecedor sem nome';
-    const resumoAtual = resumoPorCliente.get(idCliente) || {
-      id: idCliente || 'sem-cliente',
-      descricao: descricaoCliente,
+    const resumoAtual = resumoPorFornecedor.get(idFornecedor) || {
+      id: idFornecedor || 'sem-fornecedor',
+      descricao: descricaoFornecedor,
       quantidadeAtendimentos: 0,
       usuariosSet: new Set()
     };
@@ -1476,10 +1476,10 @@ function montarResumoAtendimentosPorCliente(atendimentos, clientes, empresa) {
     if (atendimento?.idUsuario) {
       resumoAtual.usuariosSet.add(String(atendimento.idUsuario));
     }
-    resumoPorCliente.set(idCliente, resumoAtual);
+    resumoPorFornecedor.set(idFornecedor, resumoAtual);
   });
 
-  const lista = [...resumoPorCliente.values()]
+  const lista = [...resumoPorFornecedor.values()]
     .map((item) => ({
       ...item,
       quantidadeUsuarios: item.usuariosSet.size,
@@ -1515,12 +1515,12 @@ function montarResumoAtendimentosPorUsuario(atendimentos, usuarios) {
       id: idUsuario || 'sem-usuario',
       descricao: descricaoUsuario,
       quantidadeAtendimentos: 0,
-      clientesSet: new Set()
+      fornecedoresSet: new Set()
     };
 
     resumoAtual.quantidadeAtendimentos += 1;
-    if (atendimento?.idCliente) {
-      resumoAtual.clientesSet.add(String(atendimento.idCliente));
+    if (atendimento?.idFornecedor) {
+      resumoAtual.fornecedoresSet.add(String(atendimento.idFornecedor));
     }
     resumoPorUsuario.set(idUsuario, resumoAtual);
   });
@@ -1528,47 +1528,47 @@ function montarResumoAtendimentosPorUsuario(atendimentos, usuarios) {
   const lista = [...resumoPorUsuario.values()]
     .map((item) => ({
       ...item,
-      quantidadeClientes: item.clientesSet.size,
-      clientesSet: undefined
+      quantidadeFornecedores: item.fornecedoresSet.size,
+      fornecedoresSet: undefined
     }))
     .sort((itemA, itemB) => itemB.quantidadeAtendimentos - itemA.quantidadeAtendimentos);
   const totalAtendimentos = lista.reduce((total, item) => total + Number(item.quantidadeAtendimentos || 0), 0);
-  const totalClientes = lista.reduce((total, item) => total + Number(item.quantidadeClientes || 0), 0);
+  const totalFornecedores = lista.reduce((total, item) => total + Number(item.quantidadeFornecedores || 0), 0);
 
   return lista.map((item) => ({
     ...item,
     percentualAtendimentos: calcularPercentualParteDoTotal(item.quantidadeAtendimentos, totalAtendimentos),
-    percentualClientes: calcularPercentualParteDoTotal(item.quantidadeClientes, totalClientes),
+    percentualFornecedores: calcularPercentualParteDoTotal(item.quantidadeFornecedores, totalFornecedores),
     ajuda: {
-      composicao: `${item.quantidadeAtendimentos} atendimentos e ${item.quantidadeClientes} fornecedores para ${item.descricao}.`,
+      composicao: `${item.quantidadeAtendimentos} atendimentos e ${item.quantidadeFornecedores} fornecedores para ${item.descricao}.`,
       periodo: 'Mes corrente pela data do atendimento.'
     }
   }));
 }
 
-function montarRankingVendedores(pedidos, vendedoresPorId) {
+function montarRankingCompradores(ordensCompra, compradoresPorId) {
   return montarRanking(
-    pedidos,
-    (item) => String(item.idVendedor || ''),
-    (chave) => vendedoresPorId.get(chave) || 'Sem comprador'
+    ordensCompra,
+    (item) => String(item.idComprador || ''),
+    (chave) => compradoresPorId.get(chave) || 'Sem comprador'
   );
 }
 
-function montarRankingClientes(pedidos, clientesPorId) {
+function montarRankingFornecedores(ordensCompra, fornecedoresPorId) {
   return montarRanking(
-    pedidos,
-    (item) => String(item.idCliente || ''),
-    (chave) => clientesPorId.get(chave) || 'Fornecedor sem nome'
+    ordensCompra,
+    (item) => String(item.idFornecedor || ''),
+    (chave) => fornecedoresPorId.get(chave) || 'Fornecedor sem nome'
   );
 }
 
-function montarRanking(pedidos, obterChave, obterNome) {
+function montarRanking(ordensCompra, obterChave, obterNome) {
   const mapa = new Map();
 
-  (pedidos || []).forEach((pedido) => {
-    const chave = obterChave(pedido);
+  (ordensCompra || []).forEach((ordemCompra) => {
+    const chave = obterChave(ordemCompra);
     const atual = mapa.get(chave) || { nome: obterNome(chave), total: 0, quantidade: 0 };
-    atual.total += totalRegistro(pedido);
+    atual.total += totalRegistro(ordemCompra);
     atual.quantidade += 1;
     mapa.set(chave, atual);
   });
@@ -1583,16 +1583,16 @@ function montarRanking(pedidos, obterChave, obterNome) {
     percentual: maior > 0 ? Math.max(12, Math.round((item.total / maior) * 100)) : 0,
     ajuda: {
       composicao: `${item.quantidade} ordens de compra somando ${normalizarPreco(item.total)}.`,
-      periodo: 'Mes corrente pela data de entrada do pedido.'
+      periodo: 'Mes corrente pela data de entrada do ordemCompra.'
     }
   }));
 }
 
-function contarClientesSemAtendimento(clientes, atendimentos, diasLimite) {
+function contarFornecedoresSemAtendimento(fornecedores, atendimentos, diasLimite) {
   const ultimos = new Map();
 
   (atendimentos || []).forEach((item) => {
-    const chave = String(item.idCliente || '');
+    const chave = String(item.idFornecedor || '');
     const data = normalizarData(item.data);
     if (!data || (!chave)) {
       return;
@@ -1602,8 +1602,8 @@ function contarClientesSemAtendimento(clientes, atendimentos, diasLimite) {
     }
   });
 
-  return (clientes || []).filter((cliente) => {
-    const ultimaData = ultimos.get(String(cliente.idCliente));
+  return (fornecedores || []).filter((fornecedor) => {
+    const ultimaData = ultimos.get(String(fornecedor.idFornecedor));
     return !ultimaData || diferencaDias(ultimaData, dataInput(new Date())) > diasLimite;
   }).length;
 }
@@ -1641,12 +1641,12 @@ function totalRegistro(registro) {
     : 0;
 }
 
-function orcamentoEhFechado(orcamento) {
-  return IDS_ETAPAS_ORCAMENTO_FECHADAS.has(Number(orcamento?.idEtapaOrcamento));
+function cotacaoEhFechado(cotacao) {
+  return IDS_ETAPAS_COTACAO_FECHADAS.has(Number(cotacao?.idEtapaCotacao));
 }
 
-function pedidoPendente(pedido) {
-  return Number(pedido?.idEtapaPedido) !== ID_ETAPA_PEDIDO_ENTREGUE;
+function ordemCompraPendente(ordemCompra) {
+  return Number(ordemCompra?.idEtapaOrdemCompra) !== ID_ETAPA_ORDEM_COMPRA_ENTREGUE;
 }
 
 function dataNoPeriodo(valor, inicio, fim) {

@@ -1,0 +1,190 @@
+import { requisitarApi } from './api';
+import { requisitarListaApi } from './listas';
+import { normalizarTextoCapitalizado } from '../utilitarios/normalizarTextoFormulario';
+import { montarParametrosConsulta } from '../utilitarios/montarParametrosConsulta';
+
+export function listarFornecedores(parametros) {
+  return requisitarApi(`/fornecedores${montarParametrosConsulta(parametros)}`);
+}
+
+export function listarFornecedoresGrid({ pesquisa = '', filtros = {} } = {}) {
+  return requisitarApi(`/listagens/fornecedores${montarParametrosConsulta({
+    search: pesquisa,
+    ...filtros
+  })}`);
+}
+
+export function listarContatos(parametros) {
+  return requisitarApi(`/contatos${montarParametrosConsulta(parametros)}`);
+}
+
+export function listarCompradores(opcoes) {
+  return requisitarListaApi('/compradores', opcoes);
+}
+
+export function listarRamosAtividade(opcoes) {
+  return requisitarListaApi('/ramosAtividade', opcoes);
+}
+
+export function listarConceitosFornecedor(opcoes) {
+  return requisitarListaApi('/conceitosFornecedor', opcoes);
+}
+
+export function listarGruposEmpresa(opcoes) {
+  return requisitarListaApi('/gruposEmpresa', opcoes);
+}
+
+export function incluirGrupoEmpresa(payload) {
+  return requisitarApi('/gruposEmpresa', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+}
+
+export function atualizarGrupoEmpresa(idGrupoEmpresa, payload) {
+  return requisitarApi(`/gruposEmpresa/${idGrupoEmpresa}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+}
+
+export function incluirRamoAtividade(payload) {
+  return requisitarApi('/ramosAtividade', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+}
+
+export function atualizarRamoAtividade(idRamo, payload) {
+  return requisitarApi(`/ramosAtividade/${idRamo}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+}
+
+export function incluirConceitoFornecedor(payload) {
+  return requisitarApi('/conceitosFornecedor', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+}
+
+export function atualizarConceitoFornecedor(idConceito, payload) {
+  return requisitarApi(`/conceitosFornecedor/${idConceito}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+}
+
+export function incluirFornecedor(payload) {
+  return requisitarApi('/fornecedores', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+}
+
+export function atualizarFornecedor(idFornecedor, payload) {
+  return requisitarApi(`/fornecedores/${idFornecedor}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+}
+
+export function importarFornecedoresPlanilha(payload) {
+  return requisitarApi('/importacao/fornecedores', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+}
+
+export function incluirContato(payload) {
+  return requisitarApi('/contatos', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+}
+
+export function atualizarContato(idContato, payload) {
+  return requisitarApi(`/contatos/${idContato}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+}
+
+export async function buscarCep(cep) {
+  const cepNormalizado = String(cep || '').replace(/\D/g, '');
+
+  if (cepNormalizado.length !== 8) {
+    throw new Error('Informe um CEP com 8 digitos.');
+  }
+
+  const resposta = await fetch(`https://viacep.com.br/ws/${cepNormalizado}/json/`);
+  const dados = await resposta.json();
+
+  if (!resposta.ok || dados.erro) {
+    throw new Error('CEP nao encontrado.');
+  }
+
+  return dados;
+}
+
+export async function buscarCnpj(cnpj) {
+  const cnpjNormalizado = String(cnpj || '').replace(/\D/g, '');
+
+  if (cnpjNormalizado.length !== 14) {
+    throw new Error('Informe um CNPJ com 14 digitos.');
+  }
+
+  const resposta = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpjNormalizado}`);
+  const dados = await resposta.json();
+
+  if (!resposta.ok) {
+    throw new Error(dados.message || 'CNPJ nao encontrado.');
+  }
+
+  return {
+    ...dados,
+    razao_social: normalizarTextoCapitalizado(dados.razao_social),
+    nome_fantasia: normalizarTextoCapitalizado(dados.nome_fantasia),
+    email: String(dados.email || '').toLowerCase(),
+    descricao_tipo_de_logradouro: normalizarTextoCapitalizado(dados.descricao_tipo_de_logradouro),
+    logradouro: normalizarTextoCapitalizado(dados.logradouro),
+    complemento: normalizarTextoCapitalizado(dados.complemento),
+    bairro: normalizarTextoCapitalizado(dados.bairro),
+    municipio: normalizarTextoCapitalizado(dados.municipio),
+    uf: String(dados.uf || '').toUpperCase()
+  };
+}

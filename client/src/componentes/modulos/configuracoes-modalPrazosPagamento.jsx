@@ -219,16 +219,16 @@ export function ModalPrazosPagamento({
   return (
     <div className="camadaModal" role="presentation" onMouseDown={fecharAoClicarNoFundo}>
       <section
-        className="modalCliente"
+        className="modalFornecedor"
         role="dialog"
         aria-modal="true"
         aria-labelledby="tituloModalPrazosPagamento"
         onMouseDown={(evento) => evento.stopPropagation()}
       >
-        <header className="cabecalhoModalCliente">
+        <header className="cabecalhoModalFornecedor">
           <h2 id="tituloModalPrazosPagamento">Prazos de pagamento</h2>
 
-          <div className="acoesCabecalhoModalCliente">
+          <div className="acoesCabecalhoModalFornecedor">
             <Botao
               variante="secundario"
               type="button"
@@ -267,8 +267,8 @@ export function ModalPrazosPagamento({
           </div>
         </header>
 
-        <div className="corpoModalCliente corpoModalUsuarios corpoModalUsuariosConfiguracao">
-          <section className="painelContatosModalCliente painelContatosConfiguracao">
+        <div className="corpoModalFornecedor corpoModalUsuarios corpoModalUsuariosConfiguracao">
+          <section className="painelContatosModalFornecedor painelContatosConfiguracao">
             <GradePadrao
               className="gradeContatosModal"
               classNameTabela="tabelaContatosModal tabelaCadastrosConfiguracao tabelaPrazosPagamento"
@@ -341,7 +341,7 @@ export function ModalPrazosPagamento({
         {modalFormularioAberto ? (
           <div className="camadaModalContato" role="presentation" onMouseDown={fecharFormularioNoFundo}>
             <form
-              className="modalContatoCliente"
+              className="modalContatoFornecedor"
               role="dialog"
               aria-modal="true"
               aria-labelledby="tituloFormularioPrazoPagamento"
@@ -369,7 +369,7 @@ export function ModalPrazosPagamento({
               </div>
 
               <div className="corpoModalContato">
-                <div className="gradeCamposModalCliente">
+                <div className="gradeCamposModalFornecedor">
                   <CampoFormulario
                     label="Descricao"
                     name="descricao"

@@ -1,14 +1,33 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Botao } from '../comuns/botao';
 import { MensagemErroPopup } from '../comuns/mensagemErroPopup';
 import { CampoImagemPadrao } from '../comuns/campoImagemPadrao';
 import { CodigoRegistro } from '../comuns/codigoRegistro';
 import { ModalFiltros } from '../comuns/modalFiltros';
-import { listarClientes, listarContatos, listarVendedores } from '../../servicos/clientes';
-import { listarEtapasPedidoConfiguracao, listarPrazosPagamentoConfiguracao } from '../../servicos/configuracoes';
+import { GradePadrao } from '../comuns/gradePadrao';
+import { BotaoAcaoGrade } from '../comuns/botaoAcaoGrade';
+import { ModalBuscaFornecedores } from '../comuns/modalBuscaFornecedores';
+import { ModalFornecedor } from './fornecedores-modalFornecedor';
+import {
+  incluirContato,
+  incluirFornecedor,
+  listarConceitosFornecedor,
+  listarFornecedores,
+  listarContatos,
+  listarCompradores,
+  listarGruposEmpresa,
+  listarRamosAtividade
+} from '../../servicos/fornecedores';
+import { listarEtapasOrdemCompraConfiguracao, listarPrazosPagamentoConfiguracao } from '../../servicos/configuracoes';
 import { listarEmpresas } from '../../servicos/empresa';
 import { ModalOrdemCompra } from './ordensCompra-modalOrdemCompra';
-import { listarPedidos } from '../../servicos/pedidos';
+import { listarOrdensCompra } from '../../servicos/ordensCompra';
+import {
+  atualizarProdutoFornecedor,
+  excluirProdutoFornecedor,
+  incluirProdutoFornecedor,
+  listarProdutosFornecedores
+} from '../../servicos/produtos';
 import { ModalHistoricoOrdensCompraProduto } from './produtos-modalHistoricoOrdensCompraProduto';
 import { ModalGruposProduto } from './configuracoes-modalGruposProduto';
 import { ModalMarcas } from './configuracoes-modalMarcas';
@@ -20,9 +39,12 @@ import {
   normalizarPrecoDigitado
 } from '../../utilitarios/normalizarPreco';
 import { normalizarValorEntradaFormulario } from '../../utilitarios/normalizarTextoFormulario';
+import { normalizarTelefone } from '../../utilitarios/normalizarTelefone';
+import { obterPrimeiroCodigoDisponivel } from '../../utilitarios/obterPrimeiroCodigoDisponivel';
 
 const abasModalProduto = [
   { id: 'dadosGerais', label: 'Dados gerais' },
+  { id: 'fornecedoresPadrao', label: 'Fornecedores padrão' },
   { id: 'ordensCompra', label: 'Ordens de compra', abreModal: 'ordensCompra' }
 ];
 
@@ -32,9 +54,17 @@ const estadoInicialFormulario = {
   idGrupo: '',
   idMarca: '',
   idUnidade: '',
-  preco: '',
+  custo: '',
   imagem: '',
   status: true
+};
+
+const estadoInicialFornecedorProduto = {
+  idProdutoFornecedor: '',
+  idTemporario: '',
+  idFornecedor: '',
+  codigoFornecedor: '',
+  unidadeFornecedor: ''
 };
 
 export function ModalProduto({
@@ -65,24 +95,39 @@ export function ModalProduto({
   const [modalGruposProdutoAberto, definirModalGruposProdutoAberto] = useState(false);
   const [modalMarcasAberto, definirModalMarcasAberto] = useState(false);
   const [modalUnidadesAberto, definirModalUnidadesAberto] = useState(false);
-  const [clientesPedidos, definirClientesPedidos] = useState([]);
-  const [contatosPedidos, definirContatosPedidos] = useState([]);
+  const [fornecedoresOrdensCompra, definirFornecedoresOrdensCompra] = useState([]);
+  const [contatosOrdensCompra, definirContatosOrdensCompra] = useState([]);
   const [usuariosHistorico, definirUsuariosHistorico] = useState([]);
-  const [vendedoresHistorico, definirVendedoresHistorico] = useState([]);
-  const [prazosPagamentoPedidos, definirPrazosPagamentoPedidos] = useState([]);
-  const [etapasPedido, definirEtapasPedido] = useState([]);
-  const [empresaPedidos, definirEmpresaPedidos] = useState(null);
-  const [pedidosProduto, definirPedidosProduto] = useState([]);
-  const [carregandoOrdensCompra, definirCarregandoPedidos] = useState(false);
+  const [compradoresHistorico, definirCompradoresHistorico] = useState([]);
+  const [prazosPagamentoOrdensCompra, definirPrazosPagamentoOrdensCompra] = useState([]);
+  const [etapasOrdemCompra, definirEtapasOrdemCompra] = useState([]);
+  const [empresaOrdensCompra, definirEmpresaOrdensCompra] = useState(null);
+  const [ordensCompraProduto, definirOrdensCompraProduto] = useState([]);
+  const [fornecedoresProduto, definirFornecedoresProduto] = useState([]);
+  const [formularioFornecedorProduto, definirFormularioFornecedorProduto] = useState(estadoInicialFornecedorProduto);
+  const [modalFornecedorProdutoAberto, definirModalFornecedorProdutoAberto] = useState(false);
+  const [modalBuscaFornecedorProdutoAberto, definirModalBuscaFornecedorProdutoAberto] = useState(false);
+  const [modalCadastroFornecedorAberto, definirModalCadastroFornecedorAberto] = useState(false);
+  const [fornecedoresBuscaProduto, definirFornecedoresBuscaProduto] = useState([]);
+  const [compradoresFornecedorProduto, definirCompradoresFornecedorProduto] = useState([]);
+  const [ramosAtividadeFornecedorProduto, definirRamosAtividadeFornecedorProduto] = useState([]);
+  const [conceitosFornecedorProduto, definirConceitosFornecedorProduto] = useState([]);
+  const [gruposEmpresaFornecedorProduto, definirGruposEmpresaFornecedorProduto] = useState([]);
+  const [proximoCodigoFornecedorProduto, definirProximoCodigoFornecedorProduto] = useState(1);
+  const [carregandoBuscaFornecedorProduto, definirCarregandoBuscaFornecedorProduto] = useState(false);
+  const [salvandoFornecedorProduto, definirSalvandoFornecedorProduto] = useState(false);
+  const [mensagemErroFornecedorProduto, definirMensagemErroFornecedorProduto] = useState('');
+  const [carregandoOrdensCompra, definirCarregandoOrdensCompra] = useState(false);
   const [mensagemErroOrdensCompra, definirMensagemErroOrdensCompra] = useState('');
   const [modalHistoricoOrdensCompraAberto, definirModalHistoricoOrdensCompraAberto] = useState(false);
-  const [modalFiltrosPedidosAberto, definirModalFiltrosPedidosAberto] = useState(false);
-  const [pedidoSelecionado, definirPedidoSelecionado] = useState(null);
-  const [modalPedidoAberto, definirModalOrdemCompraAberto] = useState(false);
-  const [filtrosPedidos, definirFiltrosPedidos] = useState(criarFiltrosIniciaisOrdensCompraProduto());
+  const [modalFiltrosOrdensCompraAberto, definirModalFiltrosOrdensCompraAberto] = useState(false);
+  const [ordemCompraSelecionado, definirOrdemCompraSelecionado] = useState(null);
+  const [modalOrdemCompraAberto, definirModalOrdemCompraAberto] = useState(false);
+  const [filtrosOrdensCompra, definirFiltrosOrdensCompra] = useState(criarFiltrosIniciaisOrdensCompraProduto());
   const [pesquisaRapidaOrdensCompra, definirPesquisaRapidaOrdensCompra] = useState('');
   const somenteLeitura = modo === 'consulta';
   const modoInclusao = !produto;
+  const referenciaCampoFornecedorProduto = useRef(null);
   const gruposAtivos = gruposProduto.filter((grupo) => grupo.status !== 0);
   const marcasAtivas = marcas.filter((marca) => marca.status !== 0);
   const unidadesAtivas = unidadesMedida.filter((unidade) => unidade.status !== 0);
@@ -101,10 +146,24 @@ export function ModalProduto({
     definirModalMarcasAberto(false);
     definirModalUnidadesAberto(false);
     definirModalHistoricoOrdensCompraAberto(false);
-    definirModalFiltrosPedidosAberto(false);
-    definirPedidoSelecionado(null);
+    definirModalFiltrosOrdensCompraAberto(false);
+    definirOrdemCompraSelecionado(null);
     definirModalOrdemCompraAberto(false);
-    definirFiltrosPedidos(criarFiltrosIniciaisOrdensCompraProduto());
+    definirFornecedoresProduto([]);
+    definirFormularioFornecedorProduto(estadoInicialFornecedorProduto);
+    definirModalFornecedorProdutoAberto(false);
+    definirModalBuscaFornecedorProdutoAberto(false);
+    definirModalCadastroFornecedorAberto(false);
+    definirFornecedoresBuscaProduto([]);
+    definirCompradoresFornecedorProduto([]);
+    definirRamosAtividadeFornecedorProduto([]);
+    definirConceitosFornecedorProduto([]);
+    definirGruposEmpresaFornecedorProduto([]);
+    definirProximoCodigoFornecedorProduto(1);
+    definirCarregandoBuscaFornecedorProduto(false);
+    definirSalvandoFornecedorProduto(false);
+    definirMensagemErroFornecedorProduto('');
+    definirFiltrosOrdensCompra(criarFiltrosIniciaisOrdensCompraProduto());
     definirPesquisaRapidaOrdensCompra('');
   }, [aberto, produto]);
 
@@ -116,19 +175,20 @@ export function ModalProduto({
     let cancelado = false;
 
     async function carregarHistoricoProduto() {
-      definirCarregandoPedidos(true);
+      definirCarregandoOrdensCompra(true);
       definirMensagemErroOrdensCompra('');
 
       try {
         const resultados = await Promise.allSettled([
-          listarPedidos(),
-          listarClientes(),
+          listarOrdensCompra(),
+          listarFornecedores(),
           listarContatos(),
           listarUsuarios(),
-          listarVendedores(),
+          listarCompradores(),
           listarPrazosPagamentoConfiguracao(),
-          listarEtapasPedidoConfiguracao(),
-          listarEmpresas()
+          listarEtapasOrdemCompraConfiguracao(),
+          listarEmpresas(),
+          listarProdutosFornecedores()
         ]);
 
         if (cancelado) {
@@ -136,38 +196,43 @@ export function ModalProduto({
         }
 
         const [
-          pedidosResultado,
-          clientesResultado,
+          ordensCompraResultado,
+          fornecedoresResultado,
           contatosResultado,
           usuariosResultado,
-          vendedoresResultado,
+          compradoresResultado,
           prazosResultado,
           etapasResultado,
-          empresasResultado
+          empresasResultado,
+          produtosFornecedoresResultado
         ] = resultados;
 
-        const pedidosCarregados = pedidosResultado.status === 'fulfilled' ? pedidosResultado.value : [];
-        const clientesCarregados = clientesResultado.status === 'fulfilled' ? clientesResultado.value : [];
+        const ordensCompraCarregados = ordensCompraResultado.status === 'fulfilled' ? ordensCompraResultado.value : [];
+        const fornecedoresCarregados = fornecedoresResultado.status === 'fulfilled' ? fornecedoresResultado.value : [];
         const contatosCarregados = contatosResultado.status === 'fulfilled' ? contatosResultado.value : [];
         const usuariosCarregados = usuariosResultado.status === 'fulfilled' ? usuariosResultado.value : [];
-        const vendedoresCarregados = vendedoresResultado.status === 'fulfilled' ? vendedoresResultado.value : [];
+        const compradoresCarregados = compradoresResultado.status === 'fulfilled' ? compradoresResultado.value : [];
         const prazosCarregados = prazosResultado.status === 'fulfilled' ? prazosResultado.value : [];
         const etapasCarregadas = etapasResultado.status === 'fulfilled' ? etapasResultado.value : [];
         const empresasCarregadas = empresasResultado.status === 'fulfilled' ? empresasResultado.value : [];
+        const produtosFornecedoresCarregados = produtosFornecedoresResultado.status === 'fulfilled' ? produtosFornecedoresResultado.value : [];
 
-        definirClientesPedidos(clientesCarregados);
-        definirContatosPedidos(contatosCarregados);
+        definirFornecedoresOrdensCompra(fornecedoresCarregados);
+        definirContatosOrdensCompra(contatosCarregados);
         definirUsuariosHistorico(usuariosCarregados);
-        definirVendedoresHistorico(vendedoresCarregados);
-        definirPrazosPagamentoPedidos(prazosCarregados);
-        definirEtapasPedido(normalizarEtapasPedidoHistorico(etapasCarregadas));
-        definirEmpresaPedidos(empresasCarregadas[0] || null);
-        definirPedidosProduto(
-          enriquecerPedidosProduto(
-            pedidosCarregados,
+        definirCompradoresHistorico(compradoresCarregados);
+        definirPrazosPagamentoOrdensCompra(prazosCarregados);
+        definirEtapasOrdemCompra(normalizarEtapasOrdemCompraHistorico(etapasCarregadas));
+        definirEmpresaOrdensCompra(empresasCarregadas[0] || null);
+        definirFornecedoresProduto(
+          produtosFornecedoresCarregados.filter((item) => String(item.idProduto) === String(produto.idProduto))
+        );
+        definirOrdensCompraProduto(
+          enriquecerOrdensCompraProduto(
+            ordensCompraCarregados,
             produto.idProduto,
-            clientesCarregados,
-            vendedoresCarregados,
+            fornecedoresCarregados,
+            compradoresCarregados,
             etapasCarregadas
           )
         );
@@ -177,7 +242,7 @@ export function ModalProduto({
         }
       } finally {
         if (!cancelado) {
-          definirCarregandoPedidos(false);
+          definirCarregandoOrdensCompra(false);
         }
       }
     }
@@ -220,7 +285,7 @@ export function ModalProduto({
       ['idGrupo', 'Selecione um grupo.'],
       ['idMarca', 'Selecione uma marca.'],
       ['idUnidade', 'Selecione uma unidade.'],
-      ['preco', 'Informe o preco do produto.']
+      ['custo', 'Informe o custo do produto.']
     ];
 
     const mensagemValidacao = camposObrigatorios.find(([campo]) => {
@@ -237,7 +302,10 @@ export function ModalProduto({
     definirMensagemErro('');
 
     try {
-      await aoSalvar(formulario);
+      await aoSalvar({
+        ...formulario,
+        fornecedoresPadrao: fornecedoresProduto
+      });
     } catch (erro) {
       definirMensagemErro(erro.message || 'Nao foi possivel salvar o produto.');
       definirSalvando(false);
@@ -252,21 +320,21 @@ export function ModalProduto({
       ...estadoAtual,
       [name]: type === 'checkbox'
         ? checked
-        : name === 'preco' ? normalizarPrecoDigitado(value) : valorNormalizado
+        : name === 'custo' ? normalizarPrecoDigitado(value) : valorNormalizado
     }));
   }
 
-  function tratarFocoPreco() {
+  function tratarFocoCusto() {
     definirFormulario((estadoAtual) => ({
       ...estadoAtual,
-      preco: desformatarPreco(estadoAtual.preco)
+      custo: desformatarPreco(estadoAtual.custo)
     }));
   }
 
-  function tratarDesfoquePreco() {
+  function tratarDesfoqueCusto() {
     definirFormulario((estadoAtual) => ({
       ...estadoAtual,
-      preco: estadoAtual.preco ? normalizarPreco(estadoAtual.preco) : ''
+      custo: estadoAtual.custo ? normalizarPreco(estadoAtual.custo) : ''
     }));
   }
 
@@ -366,13 +434,274 @@ export function ModalProduto({
     definirModalHistoricoOrdensCompraAberto(false);
   }
 
-  function consultarPedido(pedido) {
-    definirPedidoSelecionado(pedido);
+  function alterarCampoFornecedorProduto(evento) {
+    const { name } = evento.target;
+    const valorNormalizado = normalizarValorEntradaFormulario(evento);
+
+    definirFormularioFornecedorProduto((estadoAtual) => ({
+      ...estadoAtual,
+      [name]: valorNormalizado
+    }));
+  }
+
+  function iniciarNovoFornecedorProduto() {
+    definirFormularioFornecedorProduto(estadoInicialFornecedorProduto);
+    definirMensagemErroFornecedorProduto('');
+    definirModalFornecedorProdutoAberto(true);
+  }
+
+  function editarFornecedorProduto(vinculo) {
+    definirFormularioFornecedorProduto({
+      idProdutoFornecedor: vinculo.idProdutoFornecedor || '',
+      idTemporario: vinculo.idTemporario || '',
+      idFornecedor: String(vinculo.idFornecedor || ''),
+      codigoFornecedor: vinculo.codigoFornecedor || '',
+      unidadeFornecedor: vinculo.unidadeFornecedor || ''
+    });
+    definirMensagemErroFornecedorProduto('');
+    definirModalFornecedorProdutoAberto(true);
+  }
+
+  function fecharModalFornecedorProduto() {
+    if (salvandoFornecedorProduto) {
+      return;
+    }
+
+    definirModalFornecedorProdutoAberto(false);
+    definirFormularioFornecedorProduto(estadoInicialFornecedorProduto);
+    definirMensagemErroFornecedorProduto('');
+  }
+
+  async function abrirModalBuscaFornecedorProduto() {
+    if (somenteLeitura || carregandoBuscaFornecedorProduto) {
+      return;
+    }
+
+    definirCarregandoBuscaFornecedorProduto(true);
+    definirMensagemErroFornecedorProduto('');
+
+    try {
+      const fornecedoresCarregados = await listarFornecedores();
+      const fornecedoresAtivos = fornecedoresCarregados.filter((fornecedor) => fornecedor.status !== 0);
+      definirFornecedoresBuscaProduto(fornecedoresAtivos);
+      definirFornecedoresOrdensCompra((estadoAtual) => combinarFornecedoresUnicos(estadoAtual, fornecedoresAtivos));
+      definirModalBuscaFornecedorProdutoAberto(true);
+    } catch (erro) {
+      definirMensagemErroFornecedorProduto(erro.message || 'Nao foi possivel carregar a busca de fornecedores.');
+    } finally {
+      definirCarregandoBuscaFornecedorProduto(false);
+    }
+  }
+
+  async function abrirModalCadastroFornecedorProduto() {
+    definirModalBuscaFornecedorProdutoAberto(false);
+    definirCarregandoBuscaFornecedorProduto(true);
+    definirMensagemErroFornecedorProduto('');
+
+    try {
+      const resultados = await Promise.allSettled([
+        listarFornecedores(),
+        listarCompradores({ incluirInativos: true }),
+        listarRamosAtividade({ incluirInativos: true }),
+        listarConceitosFornecedor({ incluirInativos: true }),
+        listarGruposEmpresa({ incluirInativos: true }),
+        listarEmpresas()
+      ]);
+
+      const [
+        fornecedoresResultado,
+        compradoresResultado,
+        ramosResultado,
+        conceitosResultado,
+        gruposEmpresaResultado,
+        empresasResultado
+      ] = resultados;
+
+      const fornecedoresCarregados = fornecedoresResultado.status === 'fulfilled' ? fornecedoresResultado.value : [];
+      const compradoresCarregados = compradoresResultado.status === 'fulfilled' ? compradoresResultado.value : [];
+      const ramosCarregados = ramosResultado.status === 'fulfilled' ? ramosResultado.value : [];
+      const conceitosCarregados = conceitosResultado.status === 'fulfilled' ? conceitosResultado.value : [];
+      const gruposEmpresaCarregados = gruposEmpresaResultado.status === 'fulfilled' ? gruposEmpresaResultado.value : [];
+      const empresasCarregadas = empresasResultado.status === 'fulfilled' ? empresasResultado.value : [];
+
+      definirFornecedoresBuscaProduto(fornecedoresCarregados.filter((fornecedor) => fornecedor.status !== 0));
+      definirFornecedoresOrdensCompra((estadoAtual) => combinarFornecedoresUnicos(estadoAtual, fornecedoresCarregados));
+      definirCompradoresFornecedorProduto(compradoresCarregados);
+      definirRamosAtividadeFornecedorProduto(ramosCarregados);
+      definirConceitosFornecedorProduto(conceitosCarregados);
+      definirGruposEmpresaFornecedorProduto(gruposEmpresaCarregados);
+      definirEmpresaOrdensCompra((estadoAtual) => estadoAtual || empresasCarregadas[0] || null);
+      definirProximoCodigoFornecedorProduto(obterPrimeiroCodigoDisponivel(fornecedoresCarregados, 'idFornecedor'));
+      definirModalCadastroFornecedorAberto(true);
+    } catch (erro) {
+      definirMensagemErroFornecedorProduto(erro.message || 'Nao foi possivel abrir o cadastro de fornecedor.');
+    } finally {
+      definirCarregandoBuscaFornecedorProduto(false);
+    }
+  }
+
+  function fecharModalCadastroFornecedorProduto() {
+    definirModalCadastroFornecedorAberto(false);
+  }
+
+  async function salvarFornecedorProdutoCadastro(dadosFornecedor) {
+    const payload = normalizarPayloadFornecedorProduto({
+      ...dadosFornecedor,
+      idFornecedor: proximoCodigoFornecedorProduto
+    });
+
+    const fornecedorSalvo = await incluirFornecedor(payload);
+    await salvarContatosFornecedorProduto(fornecedorSalvo.idFornecedor, dadosFornecedor.contatos || []);
+
+    const fornecedoresAtualizados = await listarFornecedores();
+    const fornecedoresAtivos = fornecedoresAtualizados.filter((fornecedor) => fornecedor.status !== 0);
+    const fornecedorCompleto = fornecedoresAtualizados.find((fornecedor) => String(fornecedor.idFornecedor) === String(fornecedorSalvo.idFornecedor)) || fornecedorSalvo;
+
+    definirFornecedoresBuscaProduto(fornecedoresAtivos);
+    definirFornecedoresOrdensCompra((estadoAtual) => combinarFornecedoresUnicos(estadoAtual, fornecedoresAtualizados));
+    selecionarFornecedorProdutoBusca(fornecedorCompleto);
+    definirModalCadastroFornecedorAberto(false);
+    definirModalFornecedorProdutoAberto(true);
+    return fornecedorCompleto;
+  }
+
+  function selecionarFornecedorProdutoBusca(fornecedor) {
+    if (!fornecedor?.idFornecedor) {
+      return;
+    }
+
+    definirFornecedoresOrdensCompra((estadoAtual) => combinarFornecedoresUnicos(estadoAtual, [fornecedor]));
+    definirFormularioFornecedorProduto((estadoAtual) => ({
+      ...estadoAtual,
+      idFornecedor: String(fornecedor.idFornecedor)
+    }));
+    definirModalBuscaFornecedorProdutoAberto(false);
+
+    window.requestAnimationFrame(() => {
+      referenciaCampoFornecedorProduto.current?.focus({ preventScroll: true });
+    });
+  }
+
+  async function salvarFornecedorProduto() {
+    if (somenteLeitura) {
+      return;
+    }
+
+    const payload = {
+      idProduto: produto?.idProduto ? Number(produto.idProduto) : null,
+      idFornecedor: Number(formularioFornecedorProduto.idFornecedor),
+      codigoFornecedor: String(formularioFornecedorProduto.codigoFornecedor || '').trim(),
+      unidadeFornecedor: String(formularioFornecedorProduto.unidadeFornecedor || '').trim()
+    };
+
+    if (!payload.idFornecedor || !payload.codigoFornecedor || !payload.unidadeFornecedor) {
+      definirMensagemErroFornecedorProduto('Informe fornecedor, codigo do fornecedor e unidade do fornecedor.');
+      return;
+    }
+
+    const fornecedorDuplicado = fornecedoresProduto.some((vinculo) => (
+      String(vinculo.idFornecedor) === String(payload.idFornecedor)
+      && String(vinculo.idProdutoFornecedor) !== String(formularioFornecedorProduto.idProdutoFornecedor || '')
+      && String(vinculo.idTemporario || '') !== String(formularioFornecedorProduto.idTemporario || '')
+    ));
+
+    if (fornecedorDuplicado) {
+      definirMensagemErroFornecedorProduto('Este fornecedor ja esta vinculado ao produto.');
+      return;
+    }
+
+    definirSalvandoFornecedorProduto(true);
+    definirMensagemErroFornecedorProduto('');
+
+    try {
+      if (!produto?.idProduto) {
+        const registroTemporario = {
+          ...payload,
+          idTemporario: formularioFornecedorProduto.idTemporario || `temporario-${Date.now()}`
+        };
+
+        definirFornecedoresProduto((estadoAtual) => {
+          if (formularioFornecedorProduto.idTemporario) {
+            return estadoAtual.map((item) => (
+              String(item.idTemporario) === String(formularioFornecedorProduto.idTemporario)
+                ? registroTemporario
+                : item
+            ));
+          }
+
+          return [registroTemporario, ...estadoAtual];
+        });
+        definirFormularioFornecedorProduto(estadoInicialFornecedorProduto);
+        definirModalFornecedorProdutoAberto(false);
+        return;
+      }
+
+      const registro = formularioFornecedorProduto.idProdutoFornecedor
+        ? await atualizarProdutoFornecedor(formularioFornecedorProduto.idProdutoFornecedor, payload)
+        : await incluirProdutoFornecedor(payload);
+
+      definirFornecedoresProduto((estadoAtual) => {
+        if (formularioFornecedorProduto.idProdutoFornecedor) {
+          return estadoAtual.map((item) => (
+            String(item.idProdutoFornecedor) === String(formularioFornecedorProduto.idProdutoFornecedor)
+              ? registro
+              : item
+          ));
+        }
+
+        return [registro, ...estadoAtual];
+      });
+      definirFormularioFornecedorProduto(estadoInicialFornecedorProduto);
+      definirModalFornecedorProdutoAberto(false);
+    } catch (erro) {
+      definirMensagemErroFornecedorProduto(erro.message || 'Nao foi possivel salvar o fornecedor do produto.');
+    } finally {
+      definirSalvandoFornecedorProduto(false);
+    }
+  }
+
+  async function removerFornecedorProduto(vinculo) {
+    if (somenteLeitura) {
+      return;
+    }
+
+    if (!vinculo?.idProdutoFornecedor) {
+      definirFornecedoresProduto((estadoAtual) => estadoAtual.filter(
+        (item) => String(item.idTemporario) !== String(vinculo.idTemporario)
+      ));
+
+      if (String(formularioFornecedorProduto.idTemporario) === String(vinculo.idTemporario)) {
+        definirFormularioFornecedorProduto(estadoInicialFornecedorProduto);
+      }
+      return;
+    }
+
+    definirSalvandoFornecedorProduto(true);
+    definirMensagemErroFornecedorProduto('');
+
+    try {
+      await excluirProdutoFornecedor(vinculo.idProdutoFornecedor);
+      definirFornecedoresProduto((estadoAtual) => estadoAtual.filter(
+        (item) => String(item.idProdutoFornecedor) !== String(vinculo.idProdutoFornecedor)
+      ));
+
+      if (String(formularioFornecedorProduto.idProdutoFornecedor) === String(vinculo.idProdutoFornecedor)) {
+        definirFormularioFornecedorProduto(estadoInicialFornecedorProduto);
+      }
+    } catch (erro) {
+      definirMensagemErroFornecedorProduto(erro.message || 'Nao foi possivel remover o fornecedor do produto.');
+    } finally {
+      definirSalvandoFornecedorProduto(false);
+    }
+  }
+
+  function consultarOrdemCompra(ordemCompra) {
+    definirOrdemCompraSelecionado(ordemCompra);
     definirModalOrdemCompraAberto(true);
   }
 
   function fecharModalOrdemCompra() {
-    definirPedidoSelecionado(null);
+    definirOrdemCompraSelecionado(null);
     definirModalOrdemCompraAberto(false);
   }
 
@@ -385,18 +714,22 @@ export function ModalProduto({
     definirAbaAtiva(aba.id);
   }
 
-  const itensPedidosFiltrados = useMemo(
-    () => filtrarItensPedidosDigitacaoProduto(
-      criarItensPedidosProduto(pedidosProduto, produto?.idProduto, filtrosPedidos),
+  const itensOrdensCompraFiltrados = useMemo(
+    () => filtrarItensOrdensCompraDigitacaoProduto(
+      criarItensOrdensCompraProduto(ordensCompraProduto, produto?.idProduto, filtrosOrdensCompra),
       pesquisaRapidaOrdensCompra
     ),
-    [pedidosProduto, produto?.idProduto, filtrosPedidos, pesquisaRapidaOrdensCompra]
+    [ordensCompraProduto, produto?.idProduto, filtrosOrdensCompra, pesquisaRapidaOrdensCompra]
   );
-  const produtosConsultaPedido = useMemo(
+  const produtosConsultaOrdemCompra = useMemo(
     () => (produto ? [produto] : []),
     [produto]
   );
-  const filtrosOrdensCompraAtivos = filtrosHistoricoEstaoAtivos(filtrosPedidos, criarFiltrosIniciaisOrdensCompraProduto());
+  const filtrosOrdensCompraAtivos = filtrosHistoricoEstaoAtivos(filtrosOrdensCompra, criarFiltrosIniciaisOrdensCompraProduto());
+  const fornecedoresProdutoEnriquecidos = useMemo(
+    () => enriquecerFornecedoresProduto(fornecedoresProduto, fornecedoresOrdensCompra),
+    [fornecedoresProduto, fornecedoresOrdensCompra]
+  );
 
   if (!aberto) {
     return null;
@@ -406,19 +739,19 @@ export function ModalProduto({
     <>
       <div className="camadaModal" role="presentation" onMouseDown={fecharAoClicarNoFundo}>
         <form
-          className="modalCliente modalClienteComAbas"
+          className="modalFornecedor modalFornecedorComAbas"
           role="dialog"
           aria-modal="true"
           aria-labelledby="tituloModalProduto"
           onMouseDown={(evento) => evento.stopPropagation()}
           onSubmit={submeterFormulario}
         >
-          <header className="cabecalhoModalCliente">
+          <header className="cabecalhoModalFornecedor">
             <h2 id="tituloModalProduto">
               {somenteLeitura ? 'Consultar produto' : produto ? 'Editar produto' : 'Incluir produto'}
             </h2>
 
-            <div className="acoesCabecalhoModalCliente">
+            <div className="acoesCabecalhoModalFornecedor">
               <Botao variante="secundario" type="button" onClick={tentarFecharModal} disabled={salvando}>
                 {somenteLeitura ? 'Fechar' : 'Cancelar'}
               </Botao>
@@ -430,13 +763,13 @@ export function ModalProduto({
             </div>
           </header>
 
-          <div className="abasModalCliente" role="tablist" aria-label="Secoes do cadastro do produto">
+          <div className="abasModalFornecedor" role="tablist" aria-label="Secoes do cadastro do produto">
             {abasModalProduto.map((aba) => (
               <button
                 key={aba.id}
                 type="button"
                 role={aba.abreModal ? undefined : 'tab'}
-                className={`abaModalCliente ${abaAtiva === aba.id ? 'ativa' : ''}`}
+                className={`abaModalFornecedor ${abaAtiva === aba.id ? 'ativa' : ''}`}
                 aria-selected={aba.abreModal ? undefined : abaAtiva === aba.id}
                 onClick={() => selecionarAbaProduto(aba)}
                 disabled={aba.id === 'ordensCompra' && modoInclusao}
@@ -446,9 +779,9 @@ export function ModalProduto({
             ))}
           </div>
 
-          <div className="corpoModalCliente">
+          <div className="corpoModalFornecedor">
             {abaAtiva === 'dadosGerais' ? (
-              <section className="painelDadosGeraisCliente">
+              <section className="painelDadosGeraisFornecedor">
                 <CampoImagemPadrao
                   valor={formulario.imagem}
                   alt={`Imagem de ${formulario.descricao || formulario.referencia || 'produto'}`}
@@ -463,7 +796,7 @@ export function ModalProduto({
                   }))}
                 />
 
-                <div className="gradeCamposModalCliente">
+                <div className="gradeCamposModalFornecedor">
                   <CampoFormulario
                     label="Referencia"
                     name="referencia"
@@ -559,12 +892,12 @@ export function ModalProduto({
                     ) : null}
                   />
                   <CampoFormulario
-                    label="Preco"
-                    name="preco"
-                    value={formulario.preco}
+                    label="Custo"
+                    name="custo"
+                    value={formulario.custo}
                     onChange={alterarCampo}
-                    onFocus={tratarFocoPreco}
-                    onBlur={tratarDesfoquePreco}
+                    onFocus={tratarFocoCusto}
+                    onBlur={tratarDesfoqueCusto}
                     disabled={somenteLeitura}
                     inputMode="decimal"
                     required
@@ -581,6 +914,76 @@ export function ModalProduto({
                     <span>Produto ativo</span>
                   </label>
                 </div>
+              </section>
+            ) : null}
+
+            {abaAtiva === 'fornecedoresPadrao' ? (
+              <section className="painelContatosModalFornecedor painelContatosModalFornecedor">
+                <div className="cabecalhoGradeContatosModal">
+                  <div>
+                    <h3>Fornecedores padrão</h3>
+                    <p className="descricaoSecaoModalFornecedor descricaoSecaoModalFornecedor">
+                      Cadastre os fornecedores que trabalham com este produto, usando o codigo e a unidade informados por cada fornecedor.
+                    </p>
+                  </div>
+                  <Botao
+                    variante="primario"
+                    type="button"
+                    icone="adicionar"
+                    somenteIcone
+                    title="Incluir fornecedor padrão"
+                    aria-label="Incluir fornecedor padrão"
+                    onClick={iniciarNovoFornecedorProduto}
+                    disabled={somenteLeitura || salvandoFornecedorProduto}
+                  >
+                    Incluir fornecedor padrão
+                  </Botao>
+                </div>
+
+                <GradePadrao
+                  className="gradeContatosModal"
+                  classNameTabela="tabelaContatosModal"
+                  classNameMensagem="mensagemTabelaContatosModal"
+                  cabecalho={(
+                    <tr>
+                      <th>Fornecedor</th>
+                      <th>Codigo do fornecedor</th>
+                      <th>Unidade</th>
+                      <th className="cabecalhoAcoesContato">Acoes</th>
+                    </tr>
+                  )}
+                  temItens={fornecedoresProdutoEnriquecidos.length > 0}
+                  mensagemVazia="Nenhum fornecedor vinculado a este produto."
+                >
+                  {fornecedoresProdutoEnriquecidos.map((vinculo) => (
+                    <tr key={vinculo.idProdutoFornecedor || vinculo.idTemporario}>
+                      <td>
+                        <div className="celulaContatoModal">
+                          <strong>{vinculo.nomeFornecedor}</strong>
+                          <span>{`#${String(vinculo.idFornecedor || '').padStart(4, '0')}`}</span>
+                        </div>
+                      </td>
+                      <td>{vinculo.codigoFornecedor}</td>
+                      <td>{vinculo.unidadeFornecedor}</td>
+                      <td>
+                        <div className="acoesContatoModal">
+                          <BotaoAcaoGrade
+                            icone="editar"
+                            titulo="Editar fornecedor do produto"
+                            onClick={() => editarFornecedorProduto(vinculo)}
+                            disabled={somenteLeitura || salvandoFornecedorProduto}
+                          />
+                          <BotaoAcaoGrade
+                            icone="limpar"
+                            titulo="Remover fornecedor do produto"
+                            onClick={() => removerFornecedorProduto(vinculo)}
+                            disabled={somenteLeitura || salvandoFornecedorProduto}
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </GradePadrao>
               </section>
             ) : null}
           </div>
@@ -617,6 +1020,117 @@ export function ModalProduto({
           ) : null}
         </form>
       </div>
+
+      {modalFornecedorProdutoAberto ? (
+        <div className="camadaModal" role="presentation" onMouseDown={fecharModalFornecedorProduto}>
+          <form
+            className="modalFornecedor modalFornecedorProdutoPadrao"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="tituloModalFornecedorProduto"
+            onMouseDown={(evento) => evento.stopPropagation()}
+            onSubmit={(evento) => {
+              evento.preventDefault();
+              salvarFornecedorProduto();
+            }}
+          >
+            <header className="cabecalhoModalFornecedor">
+              <h2 id="tituloModalFornecedorProduto">
+                {formularioFornecedorProduto.idProdutoFornecedor || formularioFornecedorProduto.idTemporario
+                  ? 'Editar fornecedor padrão'
+                  : 'Incluir fornecedor padrão'}
+              </h2>
+
+              <div className="acoesCabecalhoModalFornecedor">
+                <Botao variante="secundario" type="button" onClick={fecharModalFornecedorProduto} disabled={salvandoFornecedorProduto}>
+                  Cancelar
+                </Botao>
+                <Botao variante="primario" type="submit" disabled={salvandoFornecedorProduto}>
+                  {salvandoFornecedorProduto ? 'Salvando...' : 'Salvar'}
+                </Botao>
+              </div>
+            </header>
+
+            <div className="corpoModalFornecedor">
+              <section className="gradeCamposModalFornecedor gradeFornecedorProdutoPadrao">
+                <CampoFormularioComAcao
+                  label="Fornecedor"
+                  name="nomeFornecedorProduto"
+                  value={obterNomeFornecedorPorId(formularioFornecedorProduto.idFornecedor, fornecedoresOrdensCompra)}
+                  referenciaCampo={referenciaCampoFornecedorProduto}
+                  data-atalho-busca-id="fornecedor"
+                  readOnly
+                  disabled={somenteLeitura || salvandoFornecedorProduto}
+                  acaoExtra={!somenteLeitura ? (
+                    <Botao
+                      variante="secundario"
+                      type="button"
+                      icone="pesquisa"
+                      className="botaoCampoAcao"
+                      somenteIcone
+                      title="Buscar fornecedor"
+                      aria-label="Buscar fornecedor"
+                      data-atalho-busca-id="fornecedor"
+                      onClick={abrirModalBuscaFornecedorProduto}
+                      disabled={salvandoFornecedorProduto || carregandoBuscaFornecedorProduto}
+                    >
+                      Buscar fornecedor
+                    </Botao>
+                  ) : null}
+                />
+                <CampoFormulario
+                  label="Código do fornecedor"
+                  name="codigoFornecedor"
+                  value={formularioFornecedorProduto.codigoFornecedor}
+                  onChange={alterarCampoFornecedorProduto}
+                  disabled={somenteLeitura || salvandoFornecedorProduto}
+                />
+                <CampoFormulario
+                  label="Unidade do fornecedor"
+                  name="unidadeFornecedor"
+                  value={formularioFornecedorProduto.unidadeFornecedor}
+                  onChange={alterarCampoFornecedorProduto}
+                  disabled={somenteLeitura || salvandoFornecedorProduto}
+                />
+              </section>
+            </div>
+
+            <MensagemErroPopup mensagem={mensagemErroFornecedorProduto} titulo="Nao foi possivel salvar o fornecedor do produto." />
+          </form>
+        </div>
+      ) : null}
+
+      <ModalBuscaFornecedores
+        aberto={modalBuscaFornecedorProdutoAberto}
+        empresa={empresaOrdensCompra}
+        fornecedores={fornecedoresBuscaProduto}
+        placeholder="Pesquisar fornecedor"
+        ariaLabelPesquisa="Pesquisar fornecedor"
+        rotuloAcaoPrimaria="Incluir fornecedor"
+        tituloAcaoPrimaria="Incluir fornecedor"
+        iconeAcaoPrimaria="adicionar"
+        aoAcionarPrimaria={abrirModalCadastroFornecedorProduto}
+        aoSelecionar={selecionarFornecedorProdutoBusca}
+        aoFechar={() => definirModalBuscaFornecedorProdutoAberto(false)}
+      />
+
+      <ModalFornecedor
+        aberto={modalCadastroFornecedorAberto}
+        fornecedor={null}
+        empresa={empresaOrdensCompra}
+        codigoSugerido={proximoCodigoFornecedorProduto}
+        contatos={[]}
+        contatosEditaveis={[]}
+        gruposEmpresa={gruposEmpresaFornecedorProduto}
+        contatosGruposEmpresa={[]}
+        compradores={compradoresFornecedorProduto}
+        ramosAtividade={ramosAtividadeFornecedorProduto}
+        conceitosFornecedor={conceitosFornecedorProduto}
+        modo="novo"
+        classNameCamada="camadaModal camadaModalSecundaria"
+        aoFechar={fecharModalCadastroFornecedorProduto}
+        aoSalvar={salvarFornecedorProdutoCadastro}
+      />
 
       <ModalGruposProduto
         aberto={modalGruposProdutoAberto}
@@ -656,27 +1170,27 @@ export function ModalProduto({
         produto={produto}
         carregando={carregandoOrdensCompra}
         mensagemErro={mensagemErroOrdensCompra}
-        itensPedidos={itensPedidosFiltrados}
+        itensOrdensCompra={itensOrdensCompraFiltrados}
         filtrosAtivos={filtrosOrdensCompraAtivos}
         valorPesquisa={pesquisaRapidaOrdensCompra}
         onAlterarPesquisa={definirPesquisaRapidaOrdensCompra}
         onFechar={fecharModalHistoricoOrdensCompra}
-        onAbrirFiltros={() => definirModalFiltrosPedidosAberto(true)}
-        onConsultarPedido={consultarPedido}
+        onAbrirFiltros={() => definirModalFiltrosOrdensCompraAberto(true)}
+        onConsultarOrdemCompra={consultarOrdemCompra}
       />
 
       <ModalOrdemCompra
-        aberto={modalPedidoAberto}
-        pedido={pedidoSelecionado}
-        clientes={clientesPedidos}
-        contatos={contatosPedidos}
+        aberto={modalOrdemCompraAberto}
+        ordemCompra={ordemCompraSelecionado}
+        fornecedores={fornecedoresOrdensCompra}
+        contatos={contatosOrdensCompra}
         usuarios={usuariosHistorico}
-        vendedores={vendedoresHistorico}
-        prazosPagamento={prazosPagamentoPedidos}
-        etapasPedido={etapasPedido}
-        produtos={produtosConsultaPedido}
-        camposPedido={[]}
-        empresa={empresaPedidos}
+        compradores={compradoresHistorico}
+        prazosPagamento={prazosPagamentoOrdensCompra}
+        etapasOrdemCompra={etapasOrdemCompra}
+        produtos={produtosConsultaOrdemCompra}
+        camposOrdemCompra={[]}
+        empresa={empresaOrdensCompra}
         usuarioLogado={null}
         modo="consulta"
         camadaSecundaria
@@ -685,16 +1199,16 @@ export function ModalProduto({
       />
 
       <ModalFiltros
-        aberto={modalFiltrosPedidosAberto}
+        aberto={modalFiltrosOrdensCompraAberto}
         titulo="Filtros de itens vendidos"
-        filtros={filtrosPedidos}
+        filtros={filtrosOrdensCompra}
         campos={[
           {
             name: 'dataInclusaoInicio',
             label: 'Inclusao inicial',
             type: 'date',
             inputProps: {
-              max: filtrosPedidos.dataInclusaoFim || undefined
+              max: filtrosOrdensCompra.dataInclusaoFim || undefined
             }
           },
           {
@@ -702,7 +1216,7 @@ export function ModalProduto({
             label: 'Inclusao final',
             type: 'date',
             inputProps: {
-              min: filtrosPedidos.dataInclusaoInicio || undefined
+              min: filtrosOrdensCompra.dataInclusaoInicio || undefined
             }
           },
           {
@@ -710,7 +1224,7 @@ export function ModalProduto({
             label: 'Entrega inicial',
             type: 'date',
             inputProps: {
-              max: filtrosPedidos.dataEntregaFim || undefined
+              max: filtrosOrdensCompra.dataEntregaFim || undefined
             }
           },
           {
@@ -718,11 +1232,11 @@ export function ModalProduto({
             label: 'Entrega final',
             type: 'date',
             inputProps: {
-              min: filtrosPedidos.dataEntregaInicio || undefined
+              min: filtrosOrdensCompra.dataEntregaInicio || undefined
             }
           },
           {
-            name: 'codigoPedido',
+            name: 'codigoOrdemCompra',
             label: 'Ordem de Compra',
             type: 'text',
             inputProps: {
@@ -754,28 +1268,28 @@ export function ModalProduto({
             }
           },
           {
-            name: 'idEtapaPedido',
+            name: 'idEtapaOrdemCompra',
             label: 'Etapa',
-            options: etapasPedido.map((etapa) => ({
-              valor: String(etapa.idEtapaPedido),
+            options: etapasOrdemCompra.map((etapa) => ({
+              valor: String(etapa.idEtapaOrdemCompra),
               label: etapa.descricao
             }))
           },
           {
-            name: 'idVendedor',
+            name: 'idComprador',
             label: 'Comprador',
-            options: vendedoresHistorico.map((vendedor) => ({
-              valor: String(vendedor.idVendedor),
-              label: vendedor.nome
+            options: compradoresHistorico.map((comprador) => ({
+              valor: String(comprador.idComprador),
+              label: comprador.nome
             }))
           }
         ]}
-        aoFechar={() => definirModalFiltrosPedidosAberto(false)}
+        aoFechar={() => definirModalFiltrosOrdensCompraAberto(false)}
         aoAplicar={(proximosFiltros) => {
-          definirFiltrosPedidos(proximosFiltros);
-          definirModalFiltrosPedidosAberto(false);
+          definirFiltrosOrdensCompra(proximosFiltros);
+          definirModalFiltrosOrdensCompraAberto(false);
         }}
-        aoLimpar={() => definirFiltrosPedidos(criarFiltrosIniciaisOrdensCompraProduto())}
+        aoLimpar={() => definirFiltrosOrdensCompra(criarFiltrosIniciaisOrdensCompraProduto())}
       />
     </>
   );
@@ -786,6 +1300,18 @@ function CampoFormulario({ label, name, type = 'text', ...props }) {
     <div className="campoFormulario">
       <label htmlFor={name}>{label}</label>
       <input id={name} name={name} type={type} className="entradaFormulario" {...props} />
+    </div>
+  );
+}
+
+function CampoFormularioComAcao({ label, name, acaoExtra = null, referenciaCampo = null, ...props }) {
+  return (
+    <div className="campoFormulario">
+      <label htmlFor={name}>{label}</label>
+      <div className={`campoSelectComAcao ${acaoExtra ? 'temAcao' : ''}`.trim()}>
+        <input id={name} name={name} ref={referenciaCampo} className="entradaFormulario" {...props} />
+        {acaoExtra}
+      </div>
     </div>
   );
 }
@@ -820,7 +1346,7 @@ function criarFormularioProduto(produto) {
     idGrupo: String(produto.idGrupo || ''),
     idMarca: String(produto.idMarca || ''),
     idUnidade: String(produto.idUnidade || ''),
-    preco: produto.preco ? normalizarPreco(produto.preco) : '',
+    custo: produto.custo ? normalizarPreco(produto.custo) : '',
     imagem: produto.imagem || '',
     status: Boolean(produto.status)
   };
@@ -832,48 +1358,146 @@ function obterIniciaisProduto(produto) {
   return textoBase.slice(0, 2).toUpperCase();
 }
 
-function enriquecerPedidosProduto(pedidos, idProduto, fornecedores, vendedores, etapasPedido) {
-  const clientesPorId = new Map((fornecedores || []).map((cliente) => [cliente.idCliente, cliente.nomeFantasia || cliente.razaoSocial || '']));
-  const vendedoresPorId = new Map((vendedores || []).map((vendedor) => [vendedor.idVendedor, vendedor.nome]));
-  const etapasNormalizadas = normalizarEtapasPedidoHistorico(etapasPedido);
-  const etapasPorId = new Map(etapasNormalizadas.map((etapa) => [etapa.idEtapaPedido, etapa]));
+function enriquecerFornecedoresProduto(vinculos, fornecedores) {
+  const fornecedoresPorId = new Map(
+    (fornecedores || []).map((fornecedor) => [
+      String(fornecedor.idFornecedor),
+      fornecedor.nomeFantasia || fornecedor.razaoSocial || `Fornecedor #${fornecedor.idFornecedor}`
+    ])
+  );
 
-  return (pedidos || [])
-    .filter((pedido) => Array.isArray(pedido.itens) && pedido.itens.some((item) => String(item.idProduto) === String(idProduto)))
-    .sort((pedidoA, pedidoB) => {
-      const dataHoraA = `${pedidoA.dataInclusao || ''}T00:00:00`;
-      const dataHoraB = `${pedidoB.dataInclusao || ''}T00:00:00`;
+  return (vinculos || []).map((vinculo) => ({
+    ...vinculo,
+    nomeFornecedor: fornecedoresPorId.get(String(vinculo.idFornecedor)) || `Fornecedor #${vinculo.idFornecedor}`
+  }));
+}
+
+function obterNomeFornecedorPorId(idFornecedor, fornecedores) {
+  if (!idFornecedor) {
+    return '';
+  }
+
+  const fornecedor = (fornecedores || []).find((item) => String(item.idFornecedor) === String(idFornecedor));
+  return fornecedor?.nomeFantasia || fornecedor?.razaoSocial || `Fornecedor #${idFornecedor}`;
+}
+
+function combinarFornecedoresUnicos(fornecedoresBase, fornecedoresExtras) {
+  const mapa = new Map();
+
+  [...(Array.isArray(fornecedoresBase) ? fornecedoresBase : []), ...(Array.isArray(fornecedoresExtras) ? fornecedoresExtras : [])]
+    .forEach((fornecedor) => {
+      if (!fornecedor?.idFornecedor) {
+        return;
+      }
+
+      mapa.set(String(fornecedor.idFornecedor), fornecedor);
+    });
+
+  return Array.from(mapa.values());
+}
+
+async function salvarContatosFornecedorProduto(idFornecedor, contatos) {
+  const contatosNormalizados = (contatos || []).map((contato) => ({
+    idFornecedor,
+    nome: String(contato.nome || '').trim(),
+    cargo: limparTextoOpcional(contato.cargo),
+    email: limparTextoOpcional(contato.email),
+    telefone: limparTextoOpcional(normalizarTelefone(contato.telefone)),
+    whatsapp: limparTextoOpcional(normalizarTelefone(contato.whatsapp)),
+    status: contato.status ? 1 : 0,
+    principal: contato.principal ? 1 : 0
+  }));
+
+  for (const contato of contatosNormalizados) {
+    await incluirContato(contato);
+  }
+}
+
+function normalizarPayloadFornecedorProduto(dadosFornecedor) {
+  const payload = {
+    idComprador: Number(dadosFornecedor.idComprador),
+    idConceito: Number(dadosFornecedor.idConceito),
+    idGrupoEmpresa: dadosFornecedor.idGrupoEmpresa ? Number(dadosFornecedor.idGrupoEmpresa) : null,
+    idRamo: Number(dadosFornecedor.idRamo),
+    razaoSocial: String(dadosFornecedor.razaoSocial || '').trim(),
+    nomeFantasia: String(dadosFornecedor.nomeFantasia || '').trim(),
+    tipo: String(dadosFornecedor.tipo || '').trim(),
+    cnpj: String(dadosFornecedor.cnpj || '').trim(),
+    inscricaoEstadual: limparTextoOpcional(dadosFornecedor.inscricaoEstadual),
+    status: dadosFornecedor.status ? 1 : 0,
+    email: limparTextoOpcional(dadosFornecedor.email),
+    telefone: limparTextoOpcional(normalizarTelefone(dadosFornecedor.telefone)),
+    logradouro: limparTextoOpcional(dadosFornecedor.logradouro),
+    numero: limparTextoOpcional(dadosFornecedor.numero),
+    complemento: limparTextoOpcional(dadosFornecedor.complemento),
+    bairro: limparTextoOpcional(dadosFornecedor.bairro),
+    cidade: limparTextoOpcional(dadosFornecedor.cidade),
+    estado: limparTextoOpcional(dadosFornecedor.estado)?.toUpperCase(),
+    cep: limparTextoOpcional(dadosFornecedor.cep),
+    observacao: limparTextoOpcional(dadosFornecedor.observacao),
+    codigoAlternativo: normalizarCodigoAlternativoFornecedorProduto(dadosFornecedor.codigoAlternativo),
+    imagem: limparTextoOpcional(dadosFornecedor.imagem)
+  };
+
+  if (dadosFornecedor.idFornecedor) {
+    payload.idFornecedor = Number(dadosFornecedor.idFornecedor);
+  }
+
+  return payload;
+}
+
+function limparTextoOpcional(valor) {
+  const texto = String(valor || '').trim();
+  return texto || null;
+}
+
+function normalizarCodigoAlternativoFornecedorProduto(valor) {
+  const digitos = String(valor ?? '').replace(/\D/g, '').trim();
+  return digitos ? Number(digitos) : null;
+}
+
+function enriquecerOrdensCompraProduto(ordensCompra, idProduto, fornecedores, compradores, etapasOrdemCompra) {
+  const fornecedoresPorId = new Map((fornecedores || []).map((fornecedor) => [fornecedor.idFornecedor, fornecedor.nomeFantasia || fornecedor.razaoSocial || '']));
+  const compradoresPorId = new Map((compradores || []).map((comprador) => [comprador.idComprador, comprador.nome]));
+  const etapasNormalizadas = normalizarEtapasOrdemCompraHistorico(etapasOrdemCompra);
+  const etapasPorId = new Map(etapasNormalizadas.map((etapa) => [etapa.idEtapaOrdemCompra, etapa]));
+
+  return (ordensCompra || [])
+    .filter((ordemCompra) => Array.isArray(ordemCompra.itens) && ordemCompra.itens.some((item) => String(item.idProduto) === String(idProduto)))
+    .sort((ordemCompraA, ordemCompraB) => {
+      const dataHoraA = `${ordemCompraA.dataInclusao || ''}T00:00:00`;
+      const dataHoraB = `${ordemCompraB.dataInclusao || ''}T00:00:00`;
       return new Date(dataHoraB).getTime() - new Date(dataHoraA).getTime();
     })
-    .map((pedido) => ({
-      ...pedido,
-      totalPedido: Array.isArray(pedido.itens)
-        ? pedido.itens.reduce((total, item) => total + (Number(item.valorTotal) || 0), 0)
+    .map((ordemCompra) => ({
+      ...ordemCompra,
+      totalOrdemCompra: Array.isArray(ordemCompra.itens)
+        ? ordemCompra.itens.reduce((total, item) => total + (Number(item.valorTotal) || 0), 0)
         : 0,
-      nomeClienteSnapshot: pedido.nomeClienteSnapshot || clientesPorId.get(pedido.idCliente) || '',
-      nomeVendedorSnapshot: pedido.nomeVendedorSnapshot || vendedoresPorId.get(pedido.idVendedor) || '',
-      nomeEtapaPedidoSnapshot: pedido.nomeEtapaPedidoSnapshot || etapasPorId.get(pedido.idEtapaPedido)?.descricao || ''
+      nomeFornecedorSnapshot: ordemCompra.nomeFornecedorSnapshot || fornecedoresPorId.get(ordemCompra.idFornecedor) || '',
+      nomeCompradorSnapshot: ordemCompra.nomeCompradorSnapshot || compradoresPorId.get(ordemCompra.idComprador) || '',
+      nomeEtapaOrdemCompraSnapshot: ordemCompra.nomeEtapaOrdemCompraSnapshot || etapasPorId.get(ordemCompra.idEtapaOrdemCompra)?.descricao || ''
     }));
 }
 
-function criarItensPedidosProduto(pedidos, idProduto, filtros) {
-  return (pedidos || []).flatMap((pedido) => (
-    Array.isArray(pedido.itens)
-      ? pedido.itens
+function criarItensOrdensCompraProduto(ordensCompra, idProduto, filtros) {
+  return (ordensCompra || []).flatMap((ordemCompra) => (
+    Array.isArray(ordemCompra.itens)
+      ? ordemCompra.itens
         .filter((item) => String(item.idProduto) === String(idProduto))
-        .filter((item) => itemPedidoAtendeFiltrosProduto(pedido, item, filtros))
+        .filter((item) => itemOrdemCompraAtendeFiltrosProduto(ordemCompra, item, filtros))
         .map((item, indice) => ({
-          chave: `${pedido.idPedido || 'pedido'}-${item.idItemPedido || indice}`,
-          idPedido: pedido.idPedido,
-          dataInclusao: pedido.dataInclusao,
-          dataEntrega: pedido.dataEntrega,
-          nomeFornecedor: pedido.nomeClienteSnapshot || 'Fornecedor nao informado',
+          chave: `${ordemCompra.idOrdemCompra || 'ordemCompra'}-${item.idItemOrdemCompra || indice}`,
+          idOrdemCompra: ordemCompra.idOrdemCompra,
+          dataInclusao: ordemCompra.dataInclusao,
+          dataEntrega: ordemCompra.dataEntrega,
+          nomeFornecedor: ordemCompra.nomeFornecedorSnapshot || 'Fornecedor nao informado',
           referenciaProduto: item.referenciaProdutoSnapshot || '',
           descricaoProduto: item.descricaoProdutoSnapshot || 'Produto nao informado',
           valorUnitario: Number(item.valorUnitario) || 0,
           quantidade: item.quantidade || 0,
           valorTotal: Number(item.valorTotal) || 0,
-          pedido
+          ordemCompra
         }))
       : []
   ));
@@ -885,20 +1509,20 @@ function criarFiltrosIniciaisOrdensCompraProduto() {
     dataInclusaoFim: '',
     dataEntregaInicio: '',
     dataEntregaFim: '',
-    codigoPedido: '',
+    codigoOrdemCompra: '',
     prazoPagamento: '',
     referenciaProduto: '',
     descricaoProduto: '',
-    idEtapaPedido: '',
-    idVendedor: ''
+    idEtapaOrdemCompra: '',
+    idComprador: ''
   };
 }
 
-function itemPedidoAtendeFiltrosProduto(pedido, item, filtros) {
-  const dataInclusao = String(pedido?.dataInclusao || '');
-  const dataEntrega = String(pedido?.dataEntrega || '');
-  const codigoPedido = String(pedido?.idPedido || '');
-  const prazoPagamento = String(pedido?.nomePrazoPagamentoSnapshot || '').toLowerCase();
+function itemOrdemCompraAtendeFiltrosProduto(ordemCompra, item, filtros) {
+  const dataInclusao = String(ordemCompra?.dataInclusao || '');
+  const dataEntrega = String(ordemCompra?.dataEntrega || '');
+  const codigoOrdemCompra = String(ordemCompra?.idOrdemCompra || '');
+  const prazoPagamento = String(ordemCompra?.nomePrazoPagamentoSnapshot || '').toLowerCase();
   const referencia = String(item?.referenciaProdutoSnapshot || '').toLowerCase();
   const descricao = String(item?.descricaoProdutoSnapshot || '').toLowerCase();
 
@@ -907,35 +1531,35 @@ function itemPedidoAtendeFiltrosProduto(pedido, item, filtros) {
     && (!filtros.dataInclusaoFim || dataInclusao <= filtros.dataInclusaoFim)
     && (!filtros.dataEntregaInicio || (dataEntrega && dataEntrega >= filtros.dataEntregaInicio))
     && (!filtros.dataEntregaFim || (dataEntrega && dataEntrega <= filtros.dataEntregaFim))
-    && (!String(filtros.codigoPedido || '').trim() || codigoPedido.includes(String(filtros.codigoPedido || '').trim()))
+    && (!String(filtros.codigoOrdemCompra || '').trim() || codigoOrdemCompra.includes(String(filtros.codigoOrdemCompra || '').trim()))
     && (!String(filtros.prazoPagamento || '').trim() || prazoPagamento.includes(String(filtros.prazoPagamento || '').trim().toLowerCase()))
     && (!String(filtros.referenciaProduto || '').trim() || referencia.includes(String(filtros.referenciaProduto || '').trim().toLowerCase()))
     && (!String(filtros.descricaoProduto || '').trim() || descricao.includes(String(filtros.descricaoProduto || '').trim().toLowerCase()))
-    && (!filtros.idEtapaPedido || String(pedido?.idEtapaPedido) === String(filtros.idEtapaPedido))
-    && (!filtros.idVendedor || String(pedido?.idVendedor) === String(filtros.idVendedor))
+    && (!filtros.idEtapaOrdemCompra || String(ordemCompra?.idEtapaOrdemCompra) === String(filtros.idEtapaOrdemCompra))
+    && (!filtros.idComprador || String(ordemCompra?.idComprador) === String(filtros.idComprador))
   );
 }
 
-function filtrarItensPedidosDigitacaoProduto(itensPedidos, pesquisa) {
+function filtrarItensOrdensCompraDigitacaoProduto(itensOrdensCompra, pesquisa) {
   const termo = String(pesquisa || '').trim().toLowerCase();
 
   if (!termo) {
-    return itensPedidos;
+    return itensOrdensCompra;
   }
 
-  return (itensPedidos || []).filter((item) => [
-    item.idPedido,
+  return (itensOrdensCompra || []).filter((item) => [
+    item.idOrdemCompra,
     item.dataInclusao,
     item.dataEntrega,
-    item.nomeCliente,
+    item.nomeFornecedor,
     item.referenciaProduto,
     item.descricaoProduto,
     item.valorUnitario,
     item.quantidade,
     item.valorTotal,
-    item.pedido?.nomePrazoPagamentoSnapshot,
-    item.pedido?.nomeEtapaPedidoSnapshot,
-    item.pedido?.nomeVendedorSnapshot
+    item.ordemCompra?.nomePrazoPagamentoSnapshot,
+    item.ordemCompra?.nomeEtapaOrdemCompraSnapshot,
+    item.ordemCompra?.nomeCompradorSnapshot
   ].some((valor) => String(valor || '').toLowerCase().includes(termo)));
 }
 
@@ -943,25 +1567,25 @@ function filtrosHistoricoEstaoAtivos(filtros, filtrosPadrao) {
   return Object.keys(filtrosPadrao).some((chave) => String(filtros?.[chave] || '') !== String(filtrosPadrao[chave] || ''));
 }
 
-function normalizarEtapasPedidoHistorico(etapasPedido) {
-  if (!Array.isArray(etapasPedido)) {
+function normalizarEtapasOrdemCompraHistorico(etapasOrdemCompra) {
+  if (!Array.isArray(etapasOrdemCompra)) {
     return [];
   }
 
-  return etapasPedido
+  return etapasOrdemCompra
     .map((etapa) => ({
       ...etapa,
-      idEtapaPedido: etapa.idEtapaPedido ?? etapa.idEtapa
+      idEtapaOrdemCompra: etapa.idEtapaOrdemCompra ?? etapa.idEtapa
     }))
     .sort((etapaA, etapaB) => {
-      const ordemA = obterValorOrdemEtapaHistorico(etapaA?.ordem, etapaA?.idEtapaPedido);
-      const ordemB = obterValorOrdemEtapaHistorico(etapaB?.ordem, etapaB?.idEtapaPedido);
+      const ordemA = obterValorOrdemEtapaHistorico(etapaA?.ordem, etapaA?.idEtapaOrdemCompra);
+      const ordemB = obterValorOrdemEtapaHistorico(etapaB?.ordem, etapaB?.idEtapaOrdemCompra);
 
       if (ordemA !== ordemB) {
         return ordemA - ordemB;
       }
 
-      return Number(etapaA?.idEtapaPedido || 0) - Number(etapaB?.idEtapaPedido || 0);
+      return Number(etapaA?.idEtapaOrdemCompra || 0) - Number(etapaB?.idEtapaOrdemCompra || 0);
     });
 }
 

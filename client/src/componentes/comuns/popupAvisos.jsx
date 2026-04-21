@@ -47,7 +47,7 @@ export function PopupAvisos({ avisos, aoFechar }) {
 function normalizarIconeAviso(icone) {
   const nome = String(icone || '').trim().toLowerCase();
 
-  if (['agenda', 'confirmar', 'fechar', 'mensagem', 'pagamento', 'orcamento', 'pedido', 'clientes', 'contato', 'configuracoes', 'alerta'].includes(nome)) {
+  if (['agenda', 'confirmar', 'fechar', 'mensagem', 'pagamento', 'cotacao', 'ordemCompra', 'fornecedores', 'contato', 'configuracoes', 'alerta'].includes(nome)) {
     return nome;
   }
 

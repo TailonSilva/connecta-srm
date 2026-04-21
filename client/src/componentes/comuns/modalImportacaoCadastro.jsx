@@ -186,7 +186,7 @@ export function ModalImportacaoCadastro({
   return (
     <div className="camadaModalContato" role="presentation" onMouseDown={fecharModal}>
       <div
-        className="modalContatoCliente modalImportacaoCadastro"
+        className="modalContatoFornecedor modalImportacaoCadastro"
         role="dialog"
         aria-modal="true"
         aria-labelledby={`tituloImportacao${configuracao.tipo}`}

@@ -275,16 +275,16 @@ export function ModalGruposProduto({
   return (
     <div className="camadaModal" role="presentation" onMouseDown={fecharAoClicarNoFundo}>
       <section
-        className="modalCliente"
+        className="modalFornecedor"
         role="dialog"
         aria-modal="true"
         aria-labelledby="tituloModalGruposProduto"
         onMouseDown={(evento) => evento.stopPropagation()}
       >
-        <header className="cabecalhoModalCliente">
+        <header className="cabecalhoModalFornecedor">
           <h2 id="tituloModalGruposProduto">Grupos de Produto</h2>
 
-          <div className="acoesCabecalhoModalCliente">
+          <div className="acoesCabecalhoModalFornecedor">
             <Botao
               variante="secundario"
               type="button"
@@ -316,8 +316,8 @@ export function ModalGruposProduto({
           </div>
         </header>
 
-        <div className="corpoModalCliente corpoModalUsuarios corpoModalUsuariosConfiguracao">
-          <section className="painelContatosModalCliente painelContatosConfiguracao">
+        <div className="corpoModalFornecedor corpoModalUsuarios corpoModalUsuariosConfiguracao">
+          <section className="painelContatosModalFornecedor painelContatosConfiguracao">
             <GradePadrao
               className="gradeContatosModal"
               classNameTabela="tabelaContatosModal tabelaCadastrosConfiguracao tabelaGruposProdutoConfiguracao"
@@ -390,7 +390,7 @@ export function ModalGruposProduto({
         {modalFormularioAberto ? (
           <div className="camadaModalContato" role="presentation" onMouseDown={fecharFormularioNoFundo}>
             <form
-              className="modalContatoCliente modalGrupoProdutoTamanho"
+              className="modalContatoFornecedor modalGrupoProdutoTamanho"
               role="dialog"
               aria-modal="true"
               aria-labelledby="tituloFormularioGrupoProduto"
@@ -412,7 +412,7 @@ export function ModalGruposProduto({
               </div>
 
               <div className="corpoModalContato corpoModalGrupoProdutoTamanho">
-                <div className="gradeCamposModalCliente gradeCamposGrupoProdutoTamanho">
+                <div className="gradeCamposModalFornecedor gradeCamposGrupoProdutoTamanho">
                   <div className="campoFormulario campoFormulario-descricaoGrupoProduto">
                     <label htmlFor="descricaoGrupoProduto">Descricao</label>
                     <input
@@ -455,7 +455,7 @@ export function ModalGruposProduto({
               {modalTamanhosAberto ? (
                 <div className="camadaModalContato" role="presentation" onMouseDown={fecharModalTamanhosNoFundo}>
                   <section
-                    className="modalContatoCliente modalSelecaoTamanhosGrupoProduto"
+                    className="modalContatoFornecedor modalSelecaoTamanhosGrupoProduto"
                     role="dialog"
                     aria-modal="true"
                     aria-labelledby="tituloSelecaoTamanhosGrupoProduto"

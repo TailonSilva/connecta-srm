@@ -60,28 +60,28 @@
   white-space: nowrap;
 }
 
-.celulaAvatarCliente,
+.celulaAvatarFornecedor,
 .celulaImagemProduto {
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.avatarClienteImagem,
-.avatarClientePlaceholder {
+.avatarFornecedorImagem,
+.avatarFornecedorPlaceholder {
   width: 44px;
   height: 44px;
   border-radius: 16px;
 }
 
-.avatarClienteImagem {
+.avatarFornecedorImagem {
   display: block;
   object-fit: cover;
   border: 1px solid rgba(149, 6, 244, 0.12);
   box-shadow: 0 10px 22px rgba(149, 6, 244, 0.10);
 }
 
-.avatarClientePlaceholder {
+.avatarFornecedorPlaceholder {
   display: grid;
   place-items: center;
   background: linear-gradient(135deg, rgba(149, 6, 244, 0.16), rgba(107, 4, 184, 0.24));
@@ -169,7 +169,7 @@
   -webkit-box-orient: vertical;
 }
 
-.linhaCliente td,
+.linhaFornecedor td,
 .linhaProduto td,
 .linhaAtendimento td {
   color: var(--corTextoSuave);
@@ -207,7 +207,7 @@
   color: #1f6ea9;
 }
 
-.etiquetaEtapaOrcamento {
+.etiquetaEtapaCotacao {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -222,12 +222,12 @@
 }
 
 @media (max-width: 640px) {
-  .linhaCliente,
+  .linhaFornecedor,
   .linhaProduto {
     border-bottom: 1px solid rgba(200, 213, 223, 0.6);
   }
 
-  .celulaAvatarCliente,
+  .celulaAvatarFornecedor,
   .celulaImagemProduto {
     justify-content: flex-start;
   }

@@ -2,13 +2,13 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Botao } from '../comuns/botao';
 import { CodigoRegistro } from '../comuns/codigoRegistro';
 import { GradePadrao } from '../comuns/gradePadrao';
-import { ModalBuscaClientes } from '../comuns/modalBuscaClientes';
+import { ModalBuscaFornecedores } from '../comuns/modalBuscaFornecedores';
 import { ModalBuscaContatos } from '../comuns/modalBuscaContatos';
 import { ModalItemProduto } from '../comuns/modalItemProduto';
 import { PopupAvisos } from '../comuns/popupAvisos';
 import { MensagemErroPopup } from '../comuns/mensagemErroPopup';
 import { ModalPrazosPagamento } from './configuracoes-modalPrazosPagamento';
-import { ModalFornecedor as ModalCliente } from './fornecedores-modalFornecedor';
+import { ModalFornecedor as ModalFornecedor } from './fornecedores-modalFornecedor';
 import { formatarNomeContato } from '../../utilitarios/formatarNomeContato';
 import { useFormularioItemProduto } from '../../hooks/useFormularioItemProduto';
 import {
@@ -18,10 +18,10 @@ import {
 } from '../../utilitarios/normalizarPreco';
 import { normalizarValorEntradaFormulario } from '../../utilitarios/normalizarTextoFormulario';
 import { desktopTemExportacaoPdf } from '../../servicos/desktop';
-import { exportarOrcamentoPdf } from '../../utilitarios/orcamentos/exportarOrcamentoPdf';
-import { abrirEmailOrcamento } from '../../utilitarios/orcamentos/abrirEmailOrcamento';
-import { formatarCodigoCliente } from '../../utilitarios/codigoCliente';
-import { obterEtapasOrcamentoParaInputManual } from '../../utilitarios/etapasOrcamento';
+import { exportarCotacaoPdf } from '../../utilitarios/cotacoes/exportarCotacaoPdf';
+import { abrirEmailCotacao } from '../../utilitarios/cotacoes/abrirEmailCotacao';
+import { formatarCodigoFornecedor } from '../../utilitarios/codigoFornecedor';
+import { obterEtapasCotacaoParaInputManual } from '../../utilitarios/etapasCotacao';
 
 const abasModalCotacao = [
   { id: 'dadosGerais', label: 'Dados gerais' },
@@ -30,8 +30,8 @@ const abasModalCotacao = [
   { id: 'campos', label: 'Campos da cotacao' }
 ];
 
-const ID_ETAPA_ORCAMENTO_FECHAMENTO = 1;
-const IDS_ETAPAS_ORCAMENTO_FECHADAS = new Set([1, 2, 3, 4]);
+const ID_ETAPA_COTACAO_FECHAMENTO = 1;
+const IDS_ETAPAS_COTACAO_FECHADAS = new Set([1, 2, 3, 4]);
 
 const estadoInicialFormulario = {
   dataInclusao: '',
@@ -41,11 +41,11 @@ const estadoInicialFormulario = {
   idContato: '',
   idUsuario: '',
   nomeUsuario: '',
-  idVendedor: '',
+  idComprador: '',
   idPrazoPagamento: '',
-  idEtapaOrcamento: '',
-  idPedidoVinculado: '',
-  solicitarPedidoAoSalvar: false,
+  idEtapaCotacao: '',
+  idOrdemCompraVinculado: '',
+  solicitarOrdemCompraAoSalvar: false,
   observacao: '',
   itens: [],
   camposExtras: []
@@ -65,26 +65,25 @@ const estadoInicialItem = {
 
 export function ModalCotacao({
   aberto,
-  orcamento,
-  fornecedores,
-  clientes = [],
+  cotacao,
+  fornecedores = [],
   contatos = [],
   usuarios = [],
-  vendedores = [],
+  compradores = [],
   ramosAtividade = [],
-  conceitosCliente = [],
+  conceitosFornecedor = [],
   metodosPagamento = [],
   prazosPagamento = [],
-  etapasOrcamento = [],
+  etapasCotacao = [],
   produtos = [],
-  camposOrcamento = [],
-  camposPedido = [],
+  camposCotacao = [],
+  camposOrdemCompra = [],
   empresa,
   usuarioLogado,
   modo = 'novo',
-  idVendedorBloqueado = null,
+  idCompradorBloqueado = null,
   somenteConsultaPrazos = false,
-  aoIncluirCliente,
+  aoIncluirFornecedor,
   aoFechar,
   aoSalvar,
   aoSalvarPrazoPagamento,
@@ -101,50 +100,50 @@ export function ModalCotacao({
   const [confirmandoFechamento, definirConfirmandoFechamento] = useState(false);
   const [idEtapaAnteriorFechamento, definirIdEtapaAnteriorFechamento] = useState('');
   const [idEtapaPendenteFechamento, definirIdEtapaPendenteFechamento] = useState('');
-  const [modalBuscaClienteAberto, definirModalBuscaClienteAberto] = useState(false);
-  const [modalClienteAberto, definirModalClienteAberto] = useState(false);
+  const [modalBuscaFornecedorAberto, definirModalBuscaFornecedorAberto] = useState(false);
+  const [modalFornecedorAberto, definirModalFornecedorAberto] = useState(false);
   const [modalBuscaContatoAberto, definirModalBuscaContatoAberto] = useState(false);
-  const referenciaCampoCliente = useRef(null);
+  const referenciaCampoFornecedor = useRef(null);
   const referenciaCampoContato = useRef(null);
   const [contatosCriadosLocalmente, definirContatosCriadosLocalmente] = useState([]);
   const [modalPrazosPagamentoAberto, definirModalPrazosPagamentoAberto] = useState(false);
   const somenteLeitura = modo === 'consulta';
   const modoInclusao = modo === 'novo';
   const modoEdicao = modo === 'edicao';
-  const vendedorBloqueado = Boolean(idVendedorBloqueado);
-  const listaFornecedores = Array.isArray(fornecedores) ? fornecedores : clientes;
-  const clientesAtivos = listaFornecedores.filter((cliente) => cliente.status !== 0);
+  const compradorBloqueado = Boolean(idCompradorBloqueado);
+  const listaFornecedores = Array.isArray(fornecedores) ? fornecedores : fornecedores;
+  const fornecedoresAtivos = listaFornecedores.filter((fornecedor) => fornecedor.status !== 0);
   const contatosAtivos = contatos.filter((contato) => contato.status !== 0);
   const usuariosAtivos = usuarios.filter((usuario) => usuario.ativo !== 0);
-  const vendedoresAtivos = vendedores.filter((vendedor) => vendedor.status !== 0);
+  const compradoresAtivos = compradores.filter((comprador) => comprador.status !== 0);
   const prazosAtivos = prazosPagamento.filter((prazo) => prazo.status !== 0);
   const etapasAtivas = useMemo(
-    () => ordenarEtapasPorOrdem(etapasOrcamento.filter((etapa) => etapa.status !== 0), 'idEtapaOrcamento'),
-    [etapasOrcamento]
+    () => ordenarEtapasPorOrdem(etapasCotacao.filter((etapa) => etapa.status !== 0), 'idEtapaCotacao'),
+    [etapasCotacao]
   );
   const etapasDisponiveisEscolhaManual = useMemo(
-    () => obterEtapasOrcamentoParaInputManual(etapasAtivas, formulario.idEtapaOrcamento),
-    [etapasAtivas, formulario.idEtapaOrcamento]
+    () => obterEtapasCotacaoParaInputManual(etapasAtivas, formulario.idEtapaCotacao),
+    [etapasAtivas, formulario.idEtapaCotacao]
   );
   const produtosAtivos = produtos.filter((produto) => produto.status !== 0);
   const exportacaoPdfDisponivel = desktopTemExportacaoPdf();
-  const contatosDoCliente = useMemo(
-    () => combinarContatosDoCliente(contatosAtivos, contatosCriadosLocalmente, formulario.idCliente),
-    [contatosAtivos, contatosCriadosLocalmente, formulario.idCliente]
+  const contatosDoFornecedor = useMemo(
+    () => combinarContatosDoFornecedor(contatosAtivos, contatosCriadosLocalmente, formulario.idFornecedor),
+    [contatosAtivos, contatosCriadosLocalmente, formulario.idFornecedor]
   );
-  const proximoCodigoCliente = useMemo(
-    () => obterProximoCodigoCliente(listaFornecedores),
+  const proximoCodigoFornecedor = useMemo(
+    () => obterProximoCodigoFornecedor(listaFornecedores),
     [listaFornecedores]
   );
-  const etapaSelecionada = etapasAtivas.find((etapa) => String(etapa.idEtapaOrcamento) === String(formulario.idEtapaOrcamento));
-  const etapaAtualEhFechada = etapaOrcamentoEhFechadoPorId(formulario.idEtapaOrcamento);
-  const totalOrcamento = useMemo(
+  const etapaSelecionada = etapasAtivas.find((etapa) => String(etapa.idEtapaCotacao) === String(formulario.idEtapaCotacao));
+  const etapaAtualEhFechada = etapaCotacaoEhFechadoPorId(formulario.idEtapaCotacao);
+  const totalCotacao = useMemo(
     () => formulario.itens.reduce((total, item) => total + (converterPrecoParaNumero(item.valorTotal) || 0), 0),
     [formulario.itens]
   );
-  const nomeVendedorSelecionado = useMemo(
-    () => vendedoresAtivos.find((item) => String(item.idVendedor) === String(formulario.idVendedor || ''))?.nome || '',
-    [vendedoresAtivos, formulario.idVendedor]
+  const nomeCompradorSelecionado = useMemo(
+    () => compradoresAtivos.find((item) => String(item.idComprador) === String(formulario.idComprador || ''))?.nome || '',
+    [compradoresAtivos, formulario.idComprador]
   );
   const {
     modalItemAberto,
@@ -187,13 +186,13 @@ export function ModalCotacao({
 
     definirFormulario(
       criarFormularioInicial(
-        orcamento,
+        cotacao,
         usuarioLogado,
-        camposOrcamento,
+        camposCotacao,
         empresa,
         usuariosAtivos,
-        vendedoresAtivos,
-        idVendedorBloqueado
+        compradoresAtivos,
+        idCompradorBloqueado
       )
     );
     definirAbaAtiva(abasModalCotacao[0].id);
@@ -206,12 +205,12 @@ export function ModalCotacao({
     definirConfirmandoFechamento(false);
     definirIdEtapaAnteriorFechamento('');
     definirIdEtapaPendenteFechamento('');
-    definirModalBuscaClienteAberto(false);
+    definirModalBuscaFornecedorAberto(false);
     definirModalBuscaContatoAberto(false);
     definirContatosCriadosLocalmente([]);
     definirModalPrazosPagamentoAberto(false);
     redefinirItemModal();
-  }, [aberto, orcamento, usuarioLogado, camposOrcamento, empresa]);
+  }, [aberto, cotacao, usuarioLogado, camposCotacao, empresa]);
 
   useEffect(() => {
     if (avisosPopup.length === 0) {
@@ -247,13 +246,13 @@ export function ModalCotacao({
         return;
       }
 
-      if (modalBuscaClienteAberto) {
-        fecharModalBuscaCliente();
+      if (modalBuscaFornecedorAberto) {
+        fecharModalBuscaFornecedor();
         return;
       }
 
-      if (modalClienteAberto) {
-        fecharModalNovoCliente();
+      if (modalFornecedorAberto) {
+        fecharModalNovoFornecedor();
         return;
       }
 
@@ -285,7 +284,7 @@ export function ModalCotacao({
     return () => {
       window.removeEventListener('keydown', tratarTecla);
     };
-  }, [aberto, confirmandoFechamento, confirmandoSaida, gerandoPdf, modalBuscaClienteAberto, modalBuscaContatoAberto, modalBuscaProdutoAberto, modalClienteAberto, modalItemAberto, modalPrazosPagamentoAberto, salvando]);
+  }, [aberto, confirmandoFechamento, confirmandoSaida, gerandoPdf, modalBuscaFornecedorAberto, modalBuscaContatoAberto, modalBuscaProdutoAberto, modalFornecedorAberto, modalItemAberto, modalPrazosPagamentoAberto, salvando]);
 
   if (!aberto) {
     return null;
@@ -295,17 +294,17 @@ export function ModalCotacao({
     const { name, value } = evento.target;
     const valorNormalizado = normalizarValorEntradaFormulario(evento);
 
-    if (name === 'idEtapaOrcamento') {
-      const etapaAtual = etapasAtivas.find((item) => String(item.idEtapaOrcamento) === String(formulario.idEtapaOrcamento || ''));
-      const proximaEtapa = etapasAtivas.find((item) => String(item.idEtapaOrcamento) === String(value || ''));
+    if (name === 'idEtapaCotacao') {
+      const etapaAtual = etapasAtivas.find((item) => String(item.idEtapaCotacao) === String(formulario.idEtapaCotacao || ''));
+      const proximaEtapa = etapasAtivas.find((item) => String(item.idEtapaCotacao) === String(value || ''));
 
       if (
         !somenteLeitura
-        && !formulario.idPedidoVinculado
-        && !etapaOrcamentoEhFechamento(etapaAtual)
-        && etapaOrcamentoEhFechamento(proximaEtapa)
+        && !formulario.idOrdemCompraVinculado
+        && !etapaCotacaoEhFechamento(etapaAtual)
+        && etapaCotacaoEhFechamento(proximaEtapa)
       ) {
-        definirIdEtapaAnteriorFechamento(String(formulario.idEtapaOrcamento || ''));
+        definirIdEtapaAnteriorFechamento(String(formulario.idEtapaCotacao || ''));
         definirIdEtapaPendenteFechamento(String(value || ''));
         definirConfirmandoFechamento(true);
         return;
@@ -313,38 +312,38 @@ export function ModalCotacao({
     }
 
     definirFormulario((estadoAtual) => {
-      const entrouEmEtapaFechada = name === 'idEtapaOrcamento'
-        && !etapaOrcamentoEhFechadoPorId(estadoAtual.idEtapaOrcamento)
-        && etapaOrcamentoEhFechadoPorId(value);
+      const entrouEmEtapaFechada = name === 'idEtapaCotacao'
+        && !etapaCotacaoEhFechadoPorId(estadoAtual.idEtapaCotacao)
+        && etapaCotacaoEhFechadoPorId(value);
       const proximoEstado = {
         ...estadoAtual,
-        ...(name === 'idCliente' ? { idContato: '' } : {}),
+        ...(name === 'idFornecedor' ? { idContato: '' } : {}),
         [name]: valorNormalizado,
         ...(entrouEmEtapaFechada && !estadoAtual.dataFechamento
           ? { dataFechamento: obterDataAtualFormatoInput() }
           : {})
       };
 
-      if (name === 'idCliente') {
+      if (name === 'idFornecedor') {
         proximoEstado.idContato = '';
       }
 
       if (name === 'idUsuario') {
-        const vendedorPadrao = obterVendedorPadrao(
+        const compradorPadrao = obterCompradorPadrao(
           value,
           usuariosAtivos,
-          vendedoresAtivos,
-          idVendedorBloqueado
+          compradoresAtivos,
+          idCompradorBloqueado
         );
-        proximoEstado.idVendedor = vendedorPadrao.idVendedor;
+        proximoEstado.idComprador = compradorPadrao.idComprador;
       }
 
-      if (name === 'idVendedor' && !vendedorBloqueado) {
-        const vendedor = vendedoresAtivos.find((item) => String(item.idVendedor) === String(value));
+      if (name === 'idComprador' && !compradorBloqueado) {
+        const comprador = compradoresAtivos.find((item) => String(item.idComprador) === String(value));
       }
 
-      if (name === 'idEtapaOrcamento') {
-        proximoEstado.solicitarPedidoAoSalvar = false;
+      if (name === 'idEtapaCotacao') {
+        proximoEstado.solicitarOrdemCompraAoSalvar = false;
       }
 
       return proximoEstado;
@@ -367,18 +366,18 @@ export function ModalCotacao({
   }
 
   async function salvarFormulario(formularioAtual = formulario) {
-    const etapaAtualEhFechadaAtual = etapaOrcamentoEhFechadoPorId(formularioAtual.idEtapaOrcamento);
+    const etapaAtualEhFechadaAtual = etapaCotacaoEhFechadoPorId(formularioAtual.idEtapaCotacao);
 
     if (somenteLeitura) {
       return;
     }
 
-    if (!String(formularioAtual.idCliente || '').trim()) {
+    if (!String(formularioAtual.idFornecedor || '').trim()) {
       definirMensagemErro('Selecione o fornecedor da cotacao.');
       return;
     }
 
-    if (!String(formularioAtual.idVendedor || '').trim()) {
+    if (!String(formularioAtual.idComprador || '').trim()) {
       definirMensagemErro('Selecione o comprador.');
       return;
     }
@@ -410,14 +409,14 @@ export function ModalCotacao({
       return;
     }
 
-    if (!String(formulario.idCliente || '').trim()) {
-      adicionarAvisoOrcamento('erro', 'Nao foi possivel gerar o PDF.', 'Selecione o fornecedor antes de exportar o PDF da cotacao.');
+    if (!String(formulario.idFornecedor || '').trim()) {
+      adicionarAvisoCotacao('erro', 'Nao foi possivel gerar o PDF.', 'Selecione o fornecedor antes de exportar o PDF da cotacao.');
       definirAbaAtiva('dadosGerais');
       return;
     }
 
     if (!Array.isArray(formulario.itens) || formulario.itens.length === 0) {
-      adicionarAvisoOrcamento('erro', 'Nao foi possivel gerar o PDF.', 'Inclua ao menos um item antes de exportar o PDF da cotacao.');
+      adicionarAvisoCotacao('erro', 'Nao foi possivel gerar o PDF.', 'Inclua ao menos um item antes de exportar o PDF da cotacao.');
       definirAbaAtiva('itens');
       return;
     }
@@ -425,18 +424,18 @@ export function ModalCotacao({
     definirGerandoPdf(true);
 
     try {
-      const resultado = await exportarOrcamentoPdf({
+      const resultado = await exportarCotacaoPdf({
         formulario,
-        orcamento,
+        cotacao,
         fornecedores,
         contatos,
         usuarios,
-        vendedores,
+        compradores,
         prazosPagamento,
-        etapasOrcamento,
+        etapasCotacao,
         produtos,
         empresa,
-        camposPedido
+        camposOrdemCompra
       });
 
       if (resultado.cancelado) {
@@ -444,13 +443,13 @@ export function ModalCotacao({
       }
 
       if (!resultado.sucesso) {
-        adicionarAvisoOrcamento('erro', 'Nao foi possivel gerar o PDF.', resultado.mensagem || 'Nao foi possivel exportar o PDF da cotacao.');
+        adicionarAvisoCotacao('erro', 'Nao foi possivel gerar o PDF.', resultado.mensagem || 'Nao foi possivel exportar o PDF da cotacao.');
         return;
       }
 
-      adicionarAvisoOrcamento('sucesso', 'PDF gerado com sucesso.', '');
+      adicionarAvisoCotacao('sucesso', 'PDF gerado com sucesso.', '');
     } catch (erro) {
-      adicionarAvisoOrcamento('erro', 'Nao foi possivel gerar o PDF.', erro.message || 'Nao foi possivel exportar o PDF da cotacao.');
+      adicionarAvisoCotacao('erro', 'Nao foi possivel gerar o PDF.', erro.message || 'Nao foi possivel exportar o PDF da cotacao.');
     } finally {
       definirGerandoPdf(false);
     }
@@ -461,14 +460,14 @@ export function ModalCotacao({
       return;
     }
 
-    if (!String(formulario.idCliente || '').trim()) {
-      adicionarAvisoOrcamento('erro', 'Nao foi possivel gerar o e-mail.', 'Selecione o fornecedor antes de abrir o e-mail da cotacao.');
+    if (!String(formulario.idFornecedor || '').trim()) {
+      adicionarAvisoCotacao('erro', 'Nao foi possivel gerar o e-mail.', 'Selecione o fornecedor antes de abrir o e-mail da cotacao.');
       definirAbaAtiva('dadosGerais');
       return;
     }
 
     if (!Array.isArray(formulario.itens) || formulario.itens.length === 0) {
-      adicionarAvisoOrcamento('erro', 'Nao foi possivel gerar o e-mail.', 'Inclua ao menos um item antes de abrir o e-mail da cotacao.');
+      adicionarAvisoCotacao('erro', 'Nao foi possivel gerar o e-mail.', 'Inclua ao menos um item antes de abrir o e-mail da cotacao.');
       definirAbaAtiva('itens');
       return;
     }
@@ -476,31 +475,31 @@ export function ModalCotacao({
     definirGerandoEmail(true);
 
     try {
-      const resultado = await abrirEmailOrcamento({
+      const resultado = await abrirEmailCotacao({
         formulario,
-        orcamento,
+        cotacao,
         fornecedores,
         contatos,
         usuarios,
-        vendedores,
+        compradores,
         empresa
       });
 
       if (!resultado.sucesso) {
-        adicionarAvisoOrcamento('erro', 'Nao foi possivel gerar o e-mail.', resultado.mensagem || 'Nao foi possivel abrir o Outlook Web com a cotacao.');
+        adicionarAvisoCotacao('erro', 'Nao foi possivel gerar o e-mail.', resultado.mensagem || 'Nao foi possivel abrir o Outlook Web com a cotacao.');
         return;
       }
 
-      adicionarAvisoOrcamento('sucesso', 'E-mail aberto com sucesso.', 'O Outlook Web foi aberto com a cotacao preenchida.');
+      adicionarAvisoCotacao('sucesso', 'E-mail aberto com sucesso.', 'O Outlook Web foi aberto com a cotacao preenchida.');
     } catch (erro) {
-      adicionarAvisoOrcamento('erro', 'Nao foi possivel gerar o e-mail.', erro.message || 'Nao foi possivel abrir o Outlook Web com a cotacao.');
+      adicionarAvisoCotacao('erro', 'Nao foi possivel gerar o e-mail.', erro.message || 'Nao foi possivel abrir o Outlook Web com a cotacao.');
     } finally {
       definirGerandoEmail(false);
     }
   }
 
-  function adicionarAvisoOrcamento(tipo, titulo, mensagem) {
-    const id = `orcamento-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  function adicionarAvisoCotacao(tipo, titulo, mensagem) {
+    const id = `cotacao-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
     definirAvisosPopup((estadoAtual) => ([
       {
@@ -525,9 +524,9 @@ export function ModalCotacao({
   function confirmarFechamento() {
     const proximoFormulario = {
       ...formulario,
-      idEtapaOrcamento: idEtapaPendenteFechamento,
+      idEtapaCotacao: idEtapaPendenteFechamento,
       dataFechamento: formulario.dataFechamento || obterDataAtualFormatoInput(),
-      solicitarPedidoAoSalvar: true
+      solicitarOrdemCompraAoSalvar: true
     };
 
     definirFormulario(proximoFormulario);
@@ -541,8 +540,8 @@ export function ModalCotacao({
   function cancelarConfirmacaoFechamento() {
     definirFormulario((estadoAtual) => ({
       ...estadoAtual,
-      idEtapaOrcamento: idEtapaAnteriorFechamento,
-      solicitarPedidoAoSalvar: false
+      idEtapaCotacao: idEtapaAnteriorFechamento,
+      solicitarOrdemCompraAoSalvar: false
     }));
     definirConfirmandoFechamento(false);
     definirIdEtapaAnteriorFechamento('');
@@ -560,32 +559,32 @@ export function ModalCotacao({
     }
   }
 
-  function abrirModalBuscaCliente() {
+  function abrirModalBuscaFornecedor() {
     if (somenteLeitura || salvando) {
       return;
     }
 
-    definirModalBuscaClienteAberto(true);
+    definirModalBuscaFornecedorAberto(true);
   }
 
-  function abrirModalNovoCliente() {
-    if (somenteLeitura || salvando || !aoIncluirCliente) {
+  function abrirModalNovoFornecedor() {
+    if (somenteLeitura || salvando || !aoIncluirFornecedor) {
       return;
     }
 
-    definirModalClienteAberto(true);
+    definirModalFornecedorAberto(true);
   }
 
-  function fecharModalNovoCliente() {
-    definirModalClienteAberto(false);
+  function fecharModalNovoFornecedor() {
+    definirModalFornecedorAberto(false);
   }
 
-  function fecharModalBuscaCliente() {
-    definirModalBuscaClienteAberto(false);
+  function fecharModalBuscaFornecedor() {
+    definirModalBuscaFornecedorAberto(false);
   }
 
   function abrirModalBuscaContato() {
-    if (somenteLeitura || salvando || !formulario.idCliente) {
+    if (somenteLeitura || salvando || !formulario.idFornecedor) {
       return;
     }
 
@@ -619,21 +618,21 @@ export function ModalCotacao({
     }));
   }
 
-  function selecionarCliente(cliente) {
-    if (!cliente) {
+  function selecionarFornecedor(fornecedor) {
+    if (!fornecedor) {
       return;
     }
 
     definirFormulario((estadoAtual) => {
       return {
         ...estadoAtual,
-        idFornecedor: String(cliente.idCliente),
+        idFornecedor: String(fornecedor.idFornecedor),
         idContato: ''
       };
     });
 
-    fecharModalBuscaCliente();
-    agendarFocoCampo(referenciaCampoCliente);
+    fecharModalBuscaFornecedor();
+    agendarFocoCampo(referenciaCampoFornecedor);
   }
 
   function selecionarContato(contato) {
@@ -658,34 +657,34 @@ export function ModalCotacao({
     definirContatosCriadosLocalmente((estadoAtual) => combinarContatosUnicos(estadoAtual, [contato]));
   }
 
-  async function salvarNovoCliente(dadosCliente) {
-    const clienteCriado = await aoIncluirCliente(dadosCliente);
+  async function salvarNovoFornecedor(dadosFornecedor) {
+    const fornecedorCriado = await aoIncluirFornecedor(dadosFornecedor);
 
-    selecionarCliente(clienteCriado);
-    definirModalClienteAberto(false);
+    selecionarFornecedor(fornecedorCriado);
+    definirModalFornecedorAberto(false);
   }
 
   return (
     <div className="camadaModal camadaModalSecundaria" role="presentation" onMouseDown={fecharAoClicarNoFundo}>
       <form
-        className="modalCliente modalFornecedor modalClienteComAbas modalOrcamento"
+        className="modalFornecedor modalFornecedor modalFornecedorComAbas modalCotacao"
         role="dialog"
         aria-modal="true"
         aria-labelledby="tituloModalCotacao"
         onMouseDown={(evento) => evento.stopPropagation()}
         onSubmit={submeterFormulario}
       >
-        <header className="cabecalhoModalCliente">
+        <header className="cabecalhoModalFornecedor">
           <div className="cabecalhoModalCotacao">
             <div>
               <h2 id="tituloModalCotacao">
                 {somenteLeitura ? 'Consultar cotacao' : modoEdicao ? 'Editar cotacao' : 'Incluir cotacao'}
               </h2>
             </div>
-            {orcamento?.idOrcamento ? <CodigoRegistro valor={orcamento.idOrcamento} /> : null}
+            {cotacao?.idCotacao ? <CodigoRegistro valor={cotacao.idCotacao} /> : null}
           </div>
 
-          <div className="acoesCabecalhoModalCliente">
+          <div className="acoesCabecalhoModalFornecedor">
             <Botao
               variante="secundario"
               type="button"
@@ -715,13 +714,13 @@ export function ModalCotacao({
           </div>
         </header>
 
-        <div className="abasModalCliente" role="tablist" aria-label="Secoes da cotacao">
+        <div className="abasModalFornecedor" role="tablist" aria-label="Secoes da cotacao">
           {abasModalCotacao.map((aba) => (
             <button
               key={aba.id}
               type="button"
               role="tab"
-              className={`abaModalCliente abaModalFornecedor ${abaAtiva === aba.id ? 'ativa' : ''}`}
+              className={`abaModalFornecedor abaModalFornecedor ${abaAtiva === aba.id ? 'ativa' : ''}`}
               aria-selected={abaAtiva === aba.id}
               onClick={() => definirAbaAtiva(aba.id)}
             >
@@ -730,10 +729,10 @@ export function ModalCotacao({
           ))}
         </div>
 
-        <div className="corpoModalCliente corpoModalFornecedor corpoModalCotacaoAbas">
+        <div className="corpoModalFornecedor corpoModalFornecedor corpoModalCotacaoAbas">
           {abaAtiva === 'dadosGerais' ? (
             <section className="layoutModalCotacaoAba">
-              <div className="linhaOrcamentoDatas">
+              <div className="linhaCotacaoDatas">
                 <CampoFormulario
                   label="Data de inclusao"
                   name="dataInclusao"
@@ -760,17 +759,17 @@ export function ModalCotacao({
                 />
               </div>
 
-              <div className="linhaClienteContatoAtendimento">
+              <div className="linhaFornecedorContatoAtendimento">
                 <CampoSelect
                   label="Fornecedor"
-                  name="idCliente"
-                  data-atalho-busca-id="cliente"
-                  referenciaCampo={referenciaCampoCliente}
-                  value={formulario.idCliente}
+                  name="idFornecedor"
+                  data-atalho-busca-id="fornecedor"
+                  referenciaCampo={referenciaCampoFornecedor}
+                  value={formulario.idFornecedor}
                   onChange={alterarCampo}
-                  options={clientesAtivos.map((cliente) => ({
-                    valor: String(cliente.idCliente),
-                    label: montarRotuloCliente(cliente, empresa)
+                  options={fornecedoresAtivos.map((fornecedor) => ({
+                    valor: String(fornecedor.idFornecedor),
+                    label: montarRotuloFornecedor(fornecedor, empresa)
                   }))}
                   disabled={somenteLeitura}
                   required
@@ -783,8 +782,8 @@ export function ModalCotacao({
                       somenteIcone
                       title="Buscar fornecedor"
                       aria-label="Buscar fornecedor"
-                      data-atalho-busca-id="cliente"
-                      onClick={abrirModalBuscaCliente}
+                      data-atalho-busca-id="fornecedor"
+                      onClick={abrirModalBuscaFornecedor}
                     />
                   ) : null}
                 />
@@ -795,12 +794,12 @@ export function ModalCotacao({
                   referenciaCampo={referenciaCampoContato}
                   value={formulario.idContato}
                   onChange={alterarCampo}
-                  options={contatosDoCliente.map((contato) => ({
+                  options={contatosDoFornecedor.map((contato) => ({
                     valor: String(contato.idContato),
                     label: formatarNomeContato(contato)
                   }))}
-                  disabled={somenteLeitura || !formulario.idCliente}
-                  acaoExtra={!somenteLeitura && formulario.idCliente ? (
+                  disabled={somenteLeitura || !formulario.idFornecedor}
+                  acaoExtra={!somenteLeitura && formulario.idFornecedor ? (
                     <Botao
                       variante="secundario"
                       type="button"
@@ -816,23 +815,23 @@ export function ModalCotacao({
                 />
               </div>
 
-              <div className="linhaOrcamentoComercial">
-                {vendedorBloqueado ? (
+              <div className="linhaCotacaoComercial">
+                {compradorBloqueado ? (
                   <CampoFormulario
                     label="Comprador"
-                    name="nomeVendedorBloqueado"
-                    value={nomeVendedorSelecionado}
+                    name="nomeCompradorBloqueado"
+                    value={nomeCompradorSelecionado}
                     disabled
                   />
                 ) : (
                   <CampoSelect
                     label="Comprador"
-                    name="idVendedor"
-                    value={formulario.idVendedor}
+                    name="idComprador"
+                    value={formulario.idComprador}
                     onChange={alterarCampo}
-                    options={vendedoresAtivos.map((vendedor) => ({
-                      valor: String(vendedor.idVendedor),
-                      label: vendedor.nome
+                    options={compradoresAtivos.map((comprador) => ({
+                      valor: String(comprador.idComprador),
+                      label: comprador.nome
                     }))}
                     disabled={somenteLeitura}
                     required
@@ -863,22 +862,22 @@ export function ModalCotacao({
                 />
               </div>
 
-              <div className="linhaOrcamentoFechamento">
+              <div className="linhaCotacaoFechamento">
                 <CampoSelect
                   label="Etapa da cotacao"
-                  name="idEtapaOrcamento"
-                  value={formulario.idEtapaOrcamento}
+                  name="idEtapaCotacao"
+                  value={formulario.idEtapaCotacao}
                   onChange={alterarCampo}
                   options={etapasDisponiveisEscolhaManual.map((etapa) => ({
-                    valor: String(etapa.idEtapaOrcamento),
+                    valor: String(etapa.idEtapaCotacao),
                     label: etapa.descricao
                   }))}
-                  disabled={somenteLeitura || Boolean(formulario.idPedidoVinculado)}
+                  disabled={somenteLeitura || Boolean(formulario.idOrdemCompraVinculado)}
                 />
                 <CampoFormulario
                   label="Total"
-                  name="totalOrcamento"
-                  value={normalizarPreco(totalOrcamento)}
+                  name="totalCotacao"
+                  value={normalizarPreco(totalCotacao)}
                   disabled
                 />
               </div>
@@ -888,8 +887,8 @@ export function ModalCotacao({
 
           {abaAtiva === 'itens' ? (
             <section className="layoutModalCotacaoAba layoutModalCotacaoAbaItens">
-              <section className="painelItensOrcamento">
-                <div className="cabecalhoItensOrcamento">
+              <section className="painelItensCotacao">
+                <div className="cabecalhoItensCotacao">
                   <h3>Itens da cotacao</h3>
                   {!somenteLeitura ? (
                     <Botao variante="secundario" type="button" onClick={abrirNovoItem}>
@@ -899,7 +898,7 @@ export function ModalCotacao({
                 </div>
 
                 <GradePadrao
-                  className="gradeContatosModal gradeItensOrcamentoRolavel"
+                  className="gradeContatosModal gradeItensCotacaoRolavel"
                   classNameTabela="tabelaContatosModal tabelaItensCotacao"
                   classNameMensagem="mensagemTabelaContatosModal"
                   cabecalho={(
@@ -919,22 +918,22 @@ export function ModalCotacao({
                 >
                   {formulario.itens.map((item, indice) => {
                     const imagemItem = item.imagem || '';
-                    const apresentacaoProduto = montarApresentacaoProdutoOrcamento(item, empresa);
+                    const apresentacaoProduto = montarApresentacaoProdutoCotacao(item, empresa);
 
                     return (
-                      <tr key={`${item.idItemOrcamento || indice}-${indice}`}>
+                      <tr key={`${item.idItemCotacao || indice}-${indice}`}>
                         <td>
                           {imagemItem ? (
-                            <img src={imagemItem} alt={item.descricaoProdutoSnapshot || 'Item da cotacao'} className="miniaturaItemOrcamento" />
+                            <img src={imagemItem} alt={item.descricaoProdutoSnapshot || 'Item da cotacao'} className="miniaturaItemCotacao" />
                           ) : (
-                            <div className="miniaturaItemOrcamentoPlaceholder">
-                              {obterIniciaisItemOrcamento(item)}
+                            <div className="miniaturaItemCotacaoPlaceholder">
+                              {obterIniciaisItemCotacao(item)}
                             </div>
                           )}
                         </td>
                         <td><CodigoRegistro valor={item.idProduto || 0} /></td>
                         <td>
-                          <div className="produtoGradeItemPedido">
+                          <div className="produtoGradeItemOrdemCompra">
                             <strong>{apresentacaoProduto.principal}</strong>
                             {apresentacaoProduto.secundario ? (
                               <span>{apresentacaoProduto.secundario}</span>
@@ -975,21 +974,21 @@ export function ModalCotacao({
                 </GradePadrao>
 
               </section>
-              <div className="resumoTotalItensCotacao resumoTotalItensOrcamentoRodape">
-                <span className="rotuloResumoTotalItensOrcamento">Total dos itens</span>
-                <strong className="valorResumoTotalItensOrcamento">{normalizarPreco(totalOrcamento)}</strong>
+              <div className="resumoTotalItensCotacao resumoTotalItensCotacaoRodape">
+                <span className="rotuloResumoTotalItensCotacao">Total dos itens</span>
+                <strong className="valorResumoTotalItensCotacao">{normalizarPreco(totalCotacao)}</strong>
               </div>
             </section>
           ) : null}
 
           {abaAtiva === 'outros' ? (
             <section className="layoutModalCotacaoAba">
-              <div className="linhaOrcamentoComercial">
+              <div className="linhaCotacaoComercial">
                 <CampoFormulario
                   label="Ordem de Compra vinculado"
-                  name="pedidoVinculadoOrcamento"
-                  value={formulario.idPedidoVinculado
-                    ? `#${String(formulario.idPedidoVinculado).padStart(4, '0')}`
+                  name="ordemCompraVinculadoCotacao"
+                  value={formulario.idOrdemCompraVinculado
+                    ? `#${String(formulario.idOrdemCompraVinculado).padStart(4, '0')}`
                     : ''}
                   placeholder="Sem ordem de compra vinculado"
                   disabled
@@ -1002,9 +1001,9 @@ export function ModalCotacao({
           {abaAtiva === 'campos' ? (
             <section className="layoutModalCotacaoAba layoutModalCotacaoCampos">
               <div className="campoFormulario campoFormularioIntegral">
-                <label htmlFor="observacaoOrcamento">Observacao da cotacao</label>
+                <label htmlFor="observacaoCotacao">Observacao da cotacao</label>
                 <textarea
-                  id="observacaoOrcamento"
+                  id="observacaoCotacao"
                   name="observacao"
                   className="entradaFormulario entradaFormularioTextoCurto"
                   rows={2}
@@ -1015,13 +1014,13 @@ export function ModalCotacao({
               </div>
 
               {formulario.camposExtras.length > 0 ? (
-                <section className="painelCamposExtrasOrcamento">
-                  <div className="listaCamposExtrasOrcamento">
+                <section className="painelCamposExtrasCotacao">
+                  <div className="listaCamposExtrasCotacao">
                     {formulario.camposExtras.map((campo, indice) => (
-                      <div key={campo.idCampoOrcamento} className="campoFormulario campoFormularioIntegral">
-                        <label htmlFor={`campoOrcamento${campo.idCampoOrcamento}`}>{campo.titulo}</label>
+                      <div key={campo.idCampoCotacao} className="campoFormulario campoFormularioIntegral">
+                        <label htmlFor={`campoCotacao${campo.idCampoCotacao}`}>{campo.titulo}</label>
                         <textarea
-                          id={`campoOrcamento${campo.idCampoOrcamento}`}
+                          id={`campoCotacao${campo.idCampoCotacao}`}
                           className="entradaFormulario entradaFormularioTextoCurto"
                           rows={2}
                           value={campo.valor}
@@ -1046,11 +1045,11 @@ export function ModalCotacao({
               className="modalConfirmacaoAgenda"
               role="alertdialog"
               aria-modal="true"
-              aria-labelledby="tituloConfirmacaoSaidaOrcamento"
+              aria-labelledby="tituloConfirmacaoSaidaCotacao"
               onMouseDown={(evento) => evento.stopPropagation()}
             >
               <div className="cabecalhoConfirmacaoModal">
-                <h4 id="tituloConfirmacaoSaidaOrcamento">Cancelar cadastro</h4>
+                <h4 id="tituloConfirmacaoSaidaCotacao">Cancelar cadastro</h4>
               </div>
               <div className="corpoConfirmacaoModal">
                 <p>Se fechar agora, todas as informacoes preenchidas serao perdidas.</p>
@@ -1063,45 +1062,45 @@ export function ModalCotacao({
           </div>
         ) : null}
 
-      <ModalCliente
-          aberto={modalClienteAberto}
-          cliente={null}
+      <ModalFornecedor
+          aberto={modalFornecedorAberto}
+          fornecedor={null}
           empresa={empresa}
-          codigoSugerido={proximoCodigoCliente}
+          codigoSugerido={proximoCodigoFornecedor}
           contatos={[]}
-          vendedores={vendedores}
+          compradores={compradores}
           ramosAtividade={ramosAtividade}
-          conceitosCliente={conceitosCliente}
+          conceitosFornecedor={conceitosFornecedor}
           modo="novo"
           classNameCamada="camadaModal camadaModalSecundaria"
-          idVendedorBloqueado={idVendedorBloqueado}
-          aoFechar={fecharModalNovoCliente}
-          aoSalvar={salvarNovoCliente}
+          idCompradorBloqueado={idCompradorBloqueado}
+          aoFechar={fecharModalNovoFornecedor}
+          aoSalvar={salvarNovoFornecedor}
       />
 
-      <ModalBuscaClientes
-          aberto={modalBuscaClienteAberto}
+      <ModalBuscaFornecedores
+          aberto={modalBuscaFornecedorAberto}
           empresa={empresa}
-          clientes={clientesAtivos}
+          fornecedores={fornecedoresAtivos}
           placeholder="Pesquisar fornecedores"
           ariaLabelPesquisa="Pesquisar fornecedores"
-          rotuloAcaoPrimaria={aoIncluirCliente ? 'Incluir fornecedor' : ''}
-          tituloAcaoPrimaria={aoIncluirCliente ? 'Incluir fornecedor' : ''}
+          rotuloAcaoPrimaria={aoIncluirFornecedor ? 'Incluir fornecedor' : ''}
+          tituloAcaoPrimaria={aoIncluirFornecedor ? 'Incluir fornecedor' : ''}
           iconeAcaoPrimaria="adicionar"
-          aoAcionarPrimaria={aoIncluirCliente
+          aoAcionarPrimaria={aoIncluirFornecedor
             ? () => {
-              fecharModalBuscaCliente();
-              abrirModalNovoCliente();
+              fecharModalBuscaFornecedor();
+              abrirModalNovoFornecedor();
             }
             : null}
-          aoSelecionar={selecionarCliente}
-          aoFechar={fecharModalBuscaCliente}
+          aoSelecionar={selecionarFornecedor}
+          aoFechar={fecharModalBuscaFornecedor}
       />
 
       <ModalBuscaContatos
           aberto={modalBuscaContatoAberto}
-          idCliente={formulario.idCliente}
-          contatos={contatosDoCliente}
+          idFornecedor={formulario.idFornecedor}
+          contatos={contatosDoFornecedor}
           placeholder="Pesquisar contatos do fornecedor"
           ariaLabelPesquisa="Pesquisar contatos do fornecedor"
           aoCriarContato={registrarContatoCriado}
@@ -1145,7 +1144,7 @@ export function ModalCotacao({
           onAbrirBuscaProduto={abrirModalBuscaProduto}
           onFecharBuscaProduto={fecharModalBuscaProduto}
           onSelecionarProduto={selecionarProdutoBusca}
-          obterIniciais={obterIniciaisItemOrcamento}
+          obterIniciais={obterIniciaisItemCotacao}
       />
 
       {confirmandoFechamento ? (
@@ -1154,15 +1153,15 @@ export function ModalCotacao({
               className="modalConfirmacaoAgenda"
               role="dialog"
               aria-modal="true"
-              aria-labelledby="tituloConfirmacaoFechamentoOrcamento"
+              aria-labelledby="tituloConfirmacaoFechamentoCotacao"
               onMouseDown={(evento) => evento.stopPropagation()}
             >
               <div className="cabecalhoConfirmacaoModal">
-                <h4 id="tituloConfirmacaoFechamentoOrcamento">Fechar cotacao</h4>
+                <h4 id="tituloConfirmacaoFechamentoCotacao">Fechar cotacao</h4>
               </div>
 
               <div className="corpoConfirmacaoModal">
-                <p>Ao salvar com a etapa de fechamento, sera necessario gerar um pedido. Deseja manter esta etapa?</p>
+                <p>Ao salvar com a etapa de fechamento, sera necessario gerar um ordemCompra. Deseja manter esta etapa?</p>
               </div>
 
               <div className="acoesConfirmacaoModal">
@@ -1180,12 +1179,12 @@ export function ModalCotacao({
   );
 }
 
-function etapaOrcamentoEhFechamento(etapa) {
-  return Number(etapa?.idEtapaOrcamento) === ID_ETAPA_ORCAMENTO_FECHAMENTO;
+function etapaCotacaoEhFechamento(etapa) {
+  return Number(etapa?.idEtapaCotacao) === ID_ETAPA_COTACAO_FECHAMENTO;
 }
 
-function etapaOrcamentoEhFechadoPorId(idEtapaOrcamento) {
-  return IDS_ETAPAS_ORCAMENTO_FECHADAS.has(Number(idEtapaOrcamento));
+function etapaCotacaoEhFechadoPorId(idEtapaCotacao) {
+  return IDS_ETAPAS_COTACAO_FECHADAS.has(Number(idEtapaCotacao));
 }
 
 function CampoFormulario({ label, name, type = 'text', ...props }) {
@@ -1197,8 +1196,8 @@ function CampoFormulario({ label, name, type = 'text', ...props }) {
   );
 }
 
-function montarApresentacaoProdutoOrcamento(item, empresa) {
-  const destaque = normalizarDestaqueItemOrcamentoPdf(empresa?.destaqueItemOrcamentoPdf);
+function montarApresentacaoProdutoCotacao(item, empresa) {
+  const destaque = normalizarDestaqueItemCotacaoPdf(empresa?.destaqueItemCotacaoPdf);
   const referencia = String(item?.referenciaProdutoSnapshot || '').trim();
   const descricao = String(item?.descricaoProdutoSnapshot || '').trim() || 'Produto nao informado';
 
@@ -1215,7 +1214,7 @@ function montarApresentacaoProdutoOrcamento(item, empresa) {
   };
 }
 
-function normalizarDestaqueItemOrcamentoPdf(valor) {
+function normalizarDestaqueItemCotacaoPdf(valor) {
   return String(valor || '').trim() === 'referencia' ? 'referencia' : 'descricao';
 }
 
@@ -1244,44 +1243,44 @@ function agendarFocoCampo(referenciaCampo) {
   }, 0);
 }
 
-function criarFormularioInicial(orcamento, usuarioLogado, camposOrcamento, empresa, usuarios = [], vendedores = [], idVendedorBloqueado = null) {
-  const camposExtrasRegistro = Array.isArray(orcamento?.camposExtras) ? orcamento.camposExtras : [];
+function criarFormularioInicial(cotacao, usuarioLogado, camposCotacao, empresa, usuarios = [], compradores = [], idCompradorBloqueado = null) {
+  const camposExtrasRegistro = Array.isArray(cotacao?.camposExtras) ? cotacao.camposExtras : [];
   const camposRegistroPorId = new Map(
-    camposExtrasRegistro.map((campo) => [String(campo.idCampoOrcamento), campo.valor || ''])
+    camposExtrasRegistro.map((campo) => [String(campo.idCampoCotacao), campo.valor || ''])
   );
-  const configuracoesAtivas = camposOrcamento.filter((campo) => campo.status !== 0);
+  const configuracoesAtivas = camposCotacao.filter((campo) => campo.status !== 0);
   const camposMesclados = [
     ...configuracoesAtivas,
     ...camposExtrasRegistro
-      .filter((campo) => !configuracoesAtivas.some((configuracao) => String(configuracao.idCampoOrcamento) === String(campo.idCampoOrcamento)))
+      .filter((campo) => !configuracoesAtivas.some((configuracao) => String(configuracao.idCampoCotacao) === String(campo.idCampoCotacao)))
       .map((campo) => ({
-        idCampoOrcamento: campo.idCampoOrcamento,
-        titulo: campo.titulo || `Campo ${campo.idCampoOrcamento}`,
+        idCampoCotacao: campo.idCampoCotacao,
+        titulo: campo.titulo || `Campo ${campo.idCampoCotacao}`,
         descricaoPadrao: ''
       }))
   ];
-  const vendedorPadraoUsuario = obterVendedorPadrao(
+  const compradorPadraoUsuario = obterCompradorPadrao(
     usuarioLogado?.idUsuario,
     usuarios,
-    vendedores,
-    idVendedorBloqueado
+    compradores,
+    idCompradorBloqueado
   );
 
-  if (!orcamento) {
+  if (!cotacao) {
     return {
       ...estadoInicialFormulario,
       dataInclusao: obterDataAtualFormatoInput(),
       dataValidade: somarDiasNaData(
         obterDataAtualFormatoInput(),
-        Number(empresa?.diasValidadeOrcamento ?? 7)
+        Number(empresa?.diasValidadeCotacao ?? 7)
       ),
       dataFechamento: '',
-      solicitarPedidoAoSalvar: false,
+      solicitarOrdemCompraAoSalvar: false,
       idUsuario: String(usuarioLogado?.idUsuario || ''),
       nomeUsuario: usuarioLogado?.nome || '',
-      idVendedor: vendedorPadraoUsuario.idVendedor,
+      idComprador: compradorPadraoUsuario.idComprador,
       camposExtras: camposMesclados.map((campo) => ({
-        idCampoOrcamento: campo.idCampoOrcamento,
+        idCampoCotacao: campo.idCampoCotacao,
         titulo: campo.titulo,
         valor: campo.descricaoPadrao || ''
       }))
@@ -1290,21 +1289,21 @@ function criarFormularioInicial(orcamento, usuarioLogado, camposOrcamento, empre
 
   return {
     ...estadoInicialFormulario,
-    dataInclusao: orcamento.dataInclusao || obterDataAtualFormatoInput(),
-    dataValidade: orcamento.dataValidade || '',
-    dataFechamento: orcamento.dataFechamento || '',
-    idFornecedor: normalizarValorFormulario(orcamento.idCliente),
-    idContato: normalizarValorFormulario(orcamento.idContato),
-    idUsuario: normalizarValorFormulario(orcamento.idUsuario || usuarioLogado?.idUsuario),
-    nomeUsuario: orcamento.nomeUsuario || usuarioLogado?.nome || '',
-    idVendedor: normalizarValorFormulario(orcamento.idVendedor),
-    idPrazoPagamento: normalizarValorFormulario(orcamento.idPrazoPagamento),
-    idEtapaOrcamento: normalizarValorFormulario(orcamento.idEtapaOrcamento),
-    idPedidoVinculado: normalizarValorFormulario(orcamento.idPedidoVinculado),
-    solicitarPedidoAoSalvar: false,
-    observacao: orcamento.observacao || '',
-    itens: Array.isArray(orcamento.itens) ? orcamento.itens.map((item) => ({
-      idItemOrcamento: item.idItemOrcamento,
+    dataInclusao: cotacao.dataInclusao || obterDataAtualFormatoInput(),
+    dataValidade: cotacao.dataValidade || '',
+    dataFechamento: cotacao.dataFechamento || '',
+    idFornecedor: normalizarValorFormulario(cotacao.idFornecedor),
+    idContato: normalizarValorFormulario(cotacao.idContato),
+    idUsuario: normalizarValorFormulario(cotacao.idUsuario || usuarioLogado?.idUsuario),
+    nomeUsuario: cotacao.nomeUsuario || usuarioLogado?.nome || '',
+    idComprador: normalizarValorFormulario(cotacao.idComprador),
+    idPrazoPagamento: normalizarValorFormulario(cotacao.idPrazoPagamento),
+    idEtapaCotacao: normalizarValorFormulario(cotacao.idEtapaCotacao),
+    idOrdemCompraVinculado: normalizarValorFormulario(cotacao.idOrdemCompraVinculado),
+    solicitarOrdemCompraAoSalvar: false,
+    observacao: cotacao.observacao || '',
+    itens: Array.isArray(cotacao.itens) ? cotacao.itens.map((item) => ({
+      idItemCotacao: item.idItemCotacao,
       idProduto: item.idProduto,
       descricaoProdutoSnapshot: item.descricaoProdutoSnapshot || item.nomeProduto || '',
       referenciaProdutoSnapshot: item.referenciaProdutoSnapshot || '',
@@ -1316,41 +1315,41 @@ function criarFormularioInicial(orcamento, usuarioLogado, camposOrcamento, empre
       observacao: item.observacao || ''
     })) : [],
     camposExtras: camposMesclados.map((campo) => ({
-      idCampoOrcamento: campo.idCampoOrcamento,
+      idCampoCotacao: campo.idCampoCotacao,
       titulo: campo.titulo,
-      valor: camposRegistroPorId.has(String(campo.idCampoOrcamento))
-        ? camposRegistroPorId.get(String(campo.idCampoOrcamento))
+      valor: camposRegistroPorId.has(String(campo.idCampoCotacao))
+        ? camposRegistroPorId.get(String(campo.idCampoCotacao))
         : (campo.descricaoPadrao || '')
     }))
   };
 }
 
-function obterVendedorPadraoPorUsuarioId(idUsuario, usuarios = [], vendedores = []) {
+function obterCompradorPadraoPorUsuarioId(idUsuario, usuarios = [], compradores = []) {
   const usuario = usuarios.find((item) => String(item.idUsuario) === String(idUsuario || ''));
-  const idVendedor = usuario?.idVendedor ? String(usuario.idVendedor) : '';
-  const vendedor = vendedores.find((item) => String(item.idVendedor) === idVendedor);
+  const idComprador = usuario?.idComprador ? String(usuario.idComprador) : '';
+  const comprador = compradores.find((item) => String(item.idComprador) === idComprador);
 
   return {
-    idVendedor,
+    idComprador,
   };
 }
 
-function obterVendedorPadrao(idUsuario, usuarios = [], vendedores = [], idVendedorBloqueado = null) {
-  if (idVendedorBloqueado) {
-    const vendedor = vendedores.find((item) => String(item.idVendedor) === String(idVendedorBloqueado));
+function obterCompradorPadrao(idUsuario, usuarios = [], compradores = [], idCompradorBloqueado = null) {
+  if (idCompradorBloqueado) {
+    const comprador = compradores.find((item) => String(item.idComprador) === String(idCompradorBloqueado));
 
     return {
-      idVendedor: String(idVendedorBloqueado),
+      idComprador: String(idCompradorBloqueado),
       };
   }
 
-  return obterVendedorPadraoPorUsuarioId(idUsuario, usuarios, vendedores);
+  return obterCompradorPadraoPorUsuarioId(idUsuario, usuarios, compradores);
 }
 
-function montarRotuloCliente(cliente, empresa) {
-  const codigo = formatarCodigoCliente(cliente, empresa);
-  const nome = cliente.nomeFantasia || cliente.razaoSocial || 'Fornecedor sem nome';
-  const localizacao = [cliente.cidade, cliente.estado].filter(Boolean).join('/');
+function montarRotuloFornecedor(fornecedor, empresa) {
+  const codigo = formatarCodigoFornecedor(fornecedor, empresa);
+  const nome = fornecedor.nomeFantasia || fornecedor.razaoSocial || 'Fornecedor sem nome';
+  const localizacao = [fornecedor.cidade, fornecedor.estado].filter(Boolean).join('/');
 
   return localizacao ? `${codigo} - ${nome} - ${localizacao}` : `${codigo} - ${nome}`;
 }
@@ -1447,31 +1446,31 @@ function calcularTotalItem(quantidade, valorUnitario) {
   return desformatarPreco(numeroQuantidade * numeroValorUnitario);
 }
 
-function obterIniciaisItemOrcamento(item) {
+function obterIniciaisItemCotacao(item) {
   const descricao = item?.descricaoProdutoSnapshot || item?.descricao || 'Item';
   const partes = String(descricao).trim().split(/\s+/).filter(Boolean);
   const iniciais = partes.slice(0, 2).map((parte) => parte[0]).join('');
   return (iniciais || 'IT').toUpperCase();
 }
 
-function combinarContatosDoCliente(contatosBase, contatosLocais, idCliente) {
+function combinarContatosDoFornecedor(contatosBase, contatosLocais, idFornecedor) {
   return combinarContatosUnicos(
     (Array.isArray(contatosBase) ? contatosBase : []).filter(
-      (contato) => String(contato.idCliente) === String(idCliente)
+      (contato) => String(contato.idFornecedor) === String(idFornecedor)
     ),
     (Array.isArray(contatosLocais) ? contatosLocais : []).filter(
-      (contato) => String(contato.idCliente) === String(idCliente)
+      (contato) => String(contato.idFornecedor) === String(idFornecedor)
     )
   );
 }
 
-function obterProximoCodigoCliente(clientes) {
-  if (!Array.isArray(clientes) || clientes.length === 0) {
+function obterProximoCodigoFornecedor(fornecedores) {
+  if (!Array.isArray(fornecedores) || fornecedores.length === 0) {
     return 1;
   }
 
-  const maiorCodigo = clientes.reduce((maior, cliente) => {
-    const codigoAtual = Number(cliente?.idCliente);
+  const maiorCodigo = fornecedores.reduce((maior, fornecedor) => {
+    const codigoAtual = Number(fornecedor?.idFornecedor);
     return Number.isFinite(codigoAtual) && codigoAtual > maior ? codigoAtual : maior;
   }, 0);
 

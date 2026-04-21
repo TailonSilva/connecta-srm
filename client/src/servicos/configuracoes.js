@@ -159,8 +159,8 @@ export function listarRamosAtividadeConfiguracao(opcoes) {
   return listarCadastroConfiguracao('/ramosAtividade', opcoes);
 }
 
-export function listarConceitosClienteConfiguracao(opcoes) {
-  return listarCadastroConfiguracao('/conceitosCliente', opcoes);
+export function listarConceitosFornecedorConfiguracao(opcoes) {
+  return listarCadastroConfiguracao('/conceitosFornecedor', opcoes);
 }
 
 export function incluirRamoAtividade(payload) {
@@ -183,8 +183,8 @@ export function atualizarRamoAtividade(idRamo, payload) {
   });
 }
 
-export function incluirConceitoCliente(payload) {
-  return requisitarApi('/conceitosCliente', {
+export function incluirConceitoFornecedor(payload) {
+  return requisitarApi('/conceitosFornecedor', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -193,8 +193,8 @@ export function incluirConceitoCliente(payload) {
   });
 }
 
-export function atualizarConceitoCliente(idConceito, payload) {
-  return requisitarApi(`/conceitosCliente/${idConceito}`, {
+export function atualizarConceitoFornecedor(idConceito, payload) {
+  return requisitarApi(`/conceitosFornecedor/${idConceito}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json'
@@ -203,11 +203,11 @@ export function atualizarConceitoCliente(idConceito, payload) {
   });
 }
 
-export function listarVendedoresConfiguracao(opcoes) {
+export function listarCompradoresConfiguracao(opcoes) {
   return listarCadastroConfiguracao('/compradores', opcoes);
 }
 
-export function incluirVendedor(payload) {
+export function incluirComprador(payload) {
   return requisitarApi('/compradores', {
     method: 'POST',
     headers: {
@@ -217,8 +217,8 @@ export function incluirVendedor(payload) {
   });
 }
 
-export function atualizarVendedor(idVendedor, payload) {
-  return requisitarApi(`/compradores/${idVendedor}`, {
+export function atualizarComprador(idComprador, payload) {
+  return requisitarApi(`/compradores/${idComprador}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json'
@@ -227,12 +227,12 @@ export function atualizarVendedor(idVendedor, payload) {
   });
 }
 
-export function listarCamposOrcamentoConfiguracao(opcoes) {
-  return listarCadastroConfiguracao('/camposOrcamento', opcoes);
+export function listarCamposCotacaoConfiguracao(opcoes) {
+  return listarCadastroConfiguracao('/camposCotacao', opcoes);
 }
 
-export function incluirCampoOrcamento(payload) {
-  return requisitarApi('/camposOrcamento', {
+export function incluirCampoCotacao(payload) {
+  return requisitarApi('/camposCotacao', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -241,8 +241,8 @@ export function incluirCampoOrcamento(payload) {
   });
 }
 
-export function atualizarCampoOrcamento(idCampoOrcamento, payload) {
-  return requisitarApi(`/camposOrcamento/${idCampoOrcamento}`, {
+export function atualizarCampoCotacao(idCampoCotacao, payload) {
+  return requisitarApi(`/camposCotacao/${idCampoCotacao}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json'
@@ -251,12 +251,12 @@ export function atualizarCampoOrcamento(idCampoOrcamento, payload) {
   });
 }
 
-export function listarCamposPedidoConfiguracao(opcoes) {
-  return listarCadastroConfiguracao('/camposPedido', opcoes);
+export function listarCamposOrdemCompraConfiguracao(opcoes) {
+  return listarCadastroConfiguracao('/camposOrdemCompra', opcoes);
 }
 
-export function incluirCampoPedido(payload) {
-  return requisitarApi('/camposPedido', {
+export function incluirCampoOrdemCompra(payload) {
+  return requisitarApi('/camposOrdemCompra', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -265,8 +265,8 @@ export function incluirCampoPedido(payload) {
   });
 }
 
-export function atualizarCampoPedido(idCampoPedido, payload) {
-  return requisitarApi(`/camposPedido/${idCampoPedido}`, {
+export function atualizarCampoOrdemCompra(idCampoOrdemCompra, payload) {
+  return requisitarApi(`/camposOrdemCompra/${idCampoOrdemCompra}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json'
@@ -303,8 +303,8 @@ export function listarMetodosPagamentoConfiguracao(opcoes) {
   return listarCadastroConfiguracao('/metodosPagamento', opcoes);
 }
 
-export function listarTiposPedidoConfiguracao(opcoes) {
-  return listarCadastroConfiguracao('/tiposPedido', opcoes);
+export function listarTiposOrdemCompraConfiguracao(opcoes) {
+  return listarCadastroConfiguracao('/tiposOrdemCompra', opcoes);
 }
 
 export function incluirMetodoPagamento(payload) {
@@ -327,8 +327,8 @@ export function atualizarMetodoPagamento(idMetodoPagamento, payload) {
   });
 }
 
-export function incluirTipoPedido(payload) {
-  return requisitarApi('/tiposPedido', {
+export function incluirTipoOrdemCompra(payload) {
+  return requisitarApi('/tiposOrdemCompra', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -337,8 +337,8 @@ export function incluirTipoPedido(payload) {
   });
 }
 
-export function atualizarTipoPedido(idTipoPedido, payload) {
-  return requisitarApi(`/tiposPedido/${idTipoPedido}`, {
+export function atualizarTipoOrdemCompra(idTipoOrdemCompra, payload) {
+  return requisitarApi(`/tiposOrdemCompra/${idTipoOrdemCompra}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json'
@@ -371,12 +371,12 @@ export function atualizarPrazoPagamento(idPrazoPagamento, payload) {
   });
 }
 
-export function listarEtapasPedidoConfiguracao(opcoes) {
-  return listarCadastroConfiguracao('/etapasPedido', opcoes);
+export function listarEtapasOrdemCompraConfiguracao(opcoes) {
+  return listarCadastroConfiguracao('/etapasOrdemCompra', opcoes);
 }
 
-export function incluirEtapaPedido(payload) {
-  return requisitarApi('/etapasPedido', {
+export function incluirEtapaOrdemCompra(payload) {
+  return requisitarApi('/etapasOrdemCompra', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -385,8 +385,8 @@ export function incluirEtapaPedido(payload) {
   });
 }
 
-export function atualizarEtapaPedido(idEtapa, payload) {
-  return requisitarApi(`/etapasPedido/${idEtapa}`, {
+export function atualizarEtapaOrdemCompra(idEtapa, payload) {
+  return requisitarApi(`/etapasOrdemCompra/${idEtapa}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json'
@@ -395,12 +395,12 @@ export function atualizarEtapaPedido(idEtapa, payload) {
   });
 }
 
-export function listarEtapasOrcamentoConfiguracao(opcoes) {
-  return listarCadastroConfiguracao('/etapasOrcamento', opcoes);
+export function listarEtapasCotacaoConfiguracao(opcoes) {
+  return listarCadastroConfiguracao('/etapasCotacao', opcoes);
 }
 
-export function incluirEtapaOrcamento(payload) {
-  return requisitarApi('/etapasOrcamento', {
+export function incluirEtapaCotacao(payload) {
+  return requisitarApi('/etapasCotacao', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -409,8 +409,8 @@ export function incluirEtapaOrcamento(payload) {
   });
 }
 
-export function atualizarEtapaOrcamento(idEtapaOrcamento, payload) {
-  return requisitarApi(`/etapasOrcamento/${idEtapaOrcamento}`, {
+export function atualizarEtapaCotacao(idEtapaCotacao, payload) {
+  return requisitarApi(`/etapasCotacao/${idEtapaCotacao}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json'

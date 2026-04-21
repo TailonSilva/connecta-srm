@@ -14,10 +14,10 @@ import './recursos/estilos/paginaConfiguracoes.css';
 import './recursos/estilos/paginaFornecedores.css';
 import './recursos/estilos/paginaProdutos.css';
 import './recursos/estilos/paginaAtendimentos.css';
-import './recursos/estilos/paginaOrcamentos.css';
-import './recursos/estilos/paginaPedidos.css';
+import './recursos/estilos/paginaCotacoes.css';
+import './recursos/estilos/paginaOrdensCompra.css';
 import './recursos/estilos/modalAtendimento.css';
-import './recursos/estilos/modalOrcamento.css';
+import './recursos/estilos/modalCotacao.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

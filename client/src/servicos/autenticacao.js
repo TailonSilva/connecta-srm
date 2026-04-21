@@ -1,6 +1,6 @@
 import { requisitarApi } from './api';
 
-const chaveSessao = 'crm.usuarioLogado';
+const chaveSessao = 'srm.usuarioLogado';
 function obterUrlApiPadrao() {
   if (typeof window !== 'undefined' && window.location?.protocol !== 'file:') {
     return 'http://127.0.0.1:3101/api';

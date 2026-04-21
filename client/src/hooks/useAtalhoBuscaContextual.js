@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 // `encontrarBotaoBuscaContextualF8` centraliza no utilitario a leitura do DOM para manter o hook focado no ciclo de vida React.
 import { encontrarBotaoBuscaContextualF8 } from '../utilitarios/interacoesGlobaisModais';
 
-// Este hook registra o atalho global `F8` para abrir a busca do campo focado quando o usuario estiver em cliente, contato ou produto.
+// Este hook registra o atalho global `F8` para abrir a busca do campo focado quando o usuario estiver em fornecedor, contato ou produto.
 export function useAtalhoBuscaContextual() {
   // O listener global nasce na montagem e e removido na limpeza para evitar duplicidade quando o `App` remontar.
   useEffect(() => {

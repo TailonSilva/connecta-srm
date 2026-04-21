@@ -1,20 +1,20 @@
-.thumbnailCliente {
+.thumbnailFornecedor {
   display: grid;
   gap: 12px;
   align-content: start;
   justify-items: start;
 }
 
-.codigoThumbnailCliente,
-.codigoThumbnailCliente .codigoRegistro {
+.codigoThumbnailFornecedor,
+.codigoThumbnailFornecedor .codigoRegistro {
   width: 120px;
 }
 
-.codigoThumbnailCliente .codigoRegistro {
+.codigoThumbnailFornecedor .codigoRegistro {
   justify-content: center;
 }
 
-.previewThumbnailCliente {
+.previewThumbnailFornecedor {
   display: grid;
   place-items: center;
   width: 120px;
@@ -27,13 +27,13 @@
   overflow: hidden;
 }
 
-.previewThumbnailCliente img {
+.previewThumbnailFornecedor img {
   width: 120px;
   height: 120px;
   object-fit: cover;
 }
 
-.previewThumbnailCliente span {
+.previewThumbnailFornecedor span {
   display: grid;
   place-items: center;
   width: 72px;
@@ -214,14 +214,14 @@
 }
 
 @media (max-width: 640px) {
-  .previewThumbnailCliente,
-  .previewThumbnailCliente img {
+  .previewThumbnailFornecedor,
+  .previewThumbnailFornecedor img {
     width: 104px;
     height: 104px;
   }
 
-  .codigoThumbnailCliente,
-  .codigoThumbnailCliente .codigoRegistro {
+  .codigoThumbnailFornecedor,
+  .codigoThumbnailFornecedor .codigoRegistro {
     width: 104px;
   }
 

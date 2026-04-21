@@ -1,8 +1,8 @@
 const { banco, executar, consultarTodos, caminhoBanco } = require('../configuracoes/banco');
 
 const IDS_ETAPAS_COTACAO_OBRIGATORIAS = [1, 2, 3, 4];
-const ID_ETAPA_PEDIDO_ENTREGUE = 5;
-const IDS_TIPOS_PEDIDO_OBRIGATORIOS = [1, 2];
+const ID_ETAPA_ORDEM_COMPRA_ENTREGUE = 5;
+const IDS_TIPOS_ORDEM_COMPRA_OBRIGATORIOS = [1, 2];
 const ID_CONCEITO_FORNECEDOR_PADRAO = 1;
 const STATUS_VISITA_OBRIGATORIOS = ['agendado', 'confirmado', 'realizado', 'cancelado', 'nao compareceu'];
 const TIPOS_AGENDA_OBRIGATORIOS = ['visita', 'reuniao', 'ligacao', 'apresentacao'];
@@ -31,14 +31,14 @@ const estrategiasPreservacao = {
     );
   },
   etapaOrdemCompra: async () => {
-    await executar('DELETE FROM etapaOrdemCompra WHERE idEtapa <> ?', [ID_ETAPA_PEDIDO_ENTREGUE]);
+    await executar('DELETE FROM etapaOrdemCompra WHERE idEtapa <> ?', [ID_ETAPA_ORDEM_COMPRA_ENTREGUE]);
   },
   tipoOrdemCompra: async () => {
-    const marcadores = IDS_TIPOS_PEDIDO_OBRIGATORIOS.map(() => '?').join(', ');
+    const marcadores = IDS_TIPOS_ORDEM_COMPRA_OBRIGATORIOS.map(() => '?').join(', ');
     await executar(
       `DELETE FROM tipoOrdemCompra
       WHERE idTipoOrdemCompra NOT IN (${marcadores})`,
-      IDS_TIPOS_PEDIDO_OBRIGATORIOS
+      IDS_TIPOS_ORDEM_COMPRA_OBRIGATORIOS
     );
   },
   conceitoFornecedor: async () => {

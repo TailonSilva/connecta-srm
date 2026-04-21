@@ -3,8 +3,8 @@ import { useState } from 'react';
 // `normalizarValorEntradaFormulario` vem de `../utilitarios/normalizarTextoFormulario` e padroniza o valor digitado antes de ir para o estado.
 import { normalizarValorEntradaFormulario } from '../utilitarios/normalizarTextoFormulario';
 
-// Este hook concentra o estado e as acoes do formulario de item usado em orcamentos e pedidos.
-// A separacao evita duplicar a mesma regra de produto, quantidade, preco e total em varios modais.
+// Este hook concentra o estado e as acoes do formulario de item usado em cotacoes e ordensCompra.
+// A separacao evita duplicar a mesma regra de produto, quantidade, custo e total em varios modais.
 export function useFormularioItemProduto({
   estadoInicialItem,
   produtos,
@@ -96,16 +96,16 @@ export function useFormularioItemProduto({
           : valorNormalizado
       };
 
-      // Quando o produto muda, preenchemos snapshots e preco padrao para congelar o contexto comercial do item.
+      // Quando o produto muda, preenchemos snapshots e custo padrao para congelar o contexto comercial do item.
       if (name === 'idProduto') {
         const produto = produtos.find((item) => String(item.idProduto) === String(value));
         if (produto) {
-          const precoPadrao = normalizarValorUnitario(formatarPrecoInput(produto.preco));
+          const custoPadrao = normalizarValorUnitario(formatarPrecoInput(produto.custo));
           proximoEstado.descricaoProdutoSnapshot = produto.descricao || '';
           proximoEstado.referenciaProdutoSnapshot = produto.referencia || '';
           proximoEstado.unidadeProdutoSnapshot = produto.nomeUnidadeMedida || produto.siglaUnidadeMedida || '';
-          proximoEstado.valorUnitario = precoPadrao;
-          proximoEstado.valorTotal = calcularTotalItem(proximoEstado.quantidade, precoPadrao);
+          proximoEstado.valorUnitario = custoPadrao;
+          proximoEstado.valorTotal = calcularTotalItem(proximoEstado.quantidade, custoPadrao);
           proximoEstado.imagem = produto.imagem || estadoAtual.imagem || '';
         }
       }

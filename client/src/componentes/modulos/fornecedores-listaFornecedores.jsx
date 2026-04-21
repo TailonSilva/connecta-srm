@@ -3,58 +3,58 @@ import { GradePadrao } from '../comuns/gradePadrao';
 import { AcoesRegistro } from '../comuns/acoesRegistro';
 import { CodigoRegistro } from '../comuns/codigoRegistro';
 import { TextoGradeClamp } from '../comuns/textoGradeClamp';
-import { obterCodigoPrincipalCliente } from '../../utilitarios/codigoCliente';
+import { obterCodigoPrincipalFornecedor } from '../../utilitarios/codigoFornecedor';
 import { registroEstaAtivo } from '../../utilitarios/statusRegistro';
 import { obterValorGrid } from '../../utilitarios/valorPadraoGrid';
 import { AvatarFornecedor as AvatarFornecedor } from './fornecedores-avatarFornecedor';
 import {
-  normalizarColunasGridClientes,
-  TOTAL_COLUNAS_GRID_CLIENTES
-} from '../../dados/colunasGridClientes';
+  normalizarColunasGridFornecedores,
+  TOTAL_COLUNAS_GRID_FORNECEDORES
+} from '../../dados/colunasGridFornecedores';
 
 export function ListaFornecedores({
   empresa,
   fornecedores,
   carregando,
   mensagemErro,
-  aoEditarCliente,
-  aoConsultarCliente,
-  aoInativarCliente
+  aoEditarFornecedor,
+  aoConsultarFornecedor,
+  aoInativarFornecedor
 }) {
-  const colunasVisiveisClientes = useMemo(
-    () => normalizarColunasGridClientes(empresa?.colunasGridClientes),
-    [empresa?.colunasGridClientes]
+  const colunasVisiveisFornecedores = useMemo(
+    () => normalizarColunasGridFornecedores(empresa?.colunasGridFornecedores),
+    [empresa?.colunasGridFornecedores]
   );
 
   return (
     <GradePadrao
       modo="layout"
-      totalColunasLayout={TOTAL_COLUNAS_GRID_CLIENTES}
-      cabecalho={<CabecalhoGradeClientes colunas={colunasVisiveisClientes} />}
+      totalColunasLayout={TOTAL_COLUNAS_GRID_FORNECEDORES}
+      cabecalho={<CabecalhoGradeFornecedores colunas={colunasVisiveisFornecedores} />}
       carregando={carregando}
       mensagemErro={mensagemErro}
       temItens={fornecedores.length > 0}
       mensagemCarregando="Carregando fornecedores..."
       mensagemVazia="Nenhum fornecedor encontrado."
     >
-      {fornecedores.map((cliente) => (
-        <LinhaCliente
-          key={cliente.idCliente}
+      {fornecedores.map((fornecedor) => (
+        <LinhaFornecedor
+          key={fornecedor.idFornecedor}
           empresa={empresa}
-          cliente={cliente}
-          colunas={colunasVisiveisClientes}
-          aoConsultar={() => aoConsultarCliente(cliente)}
-          aoEditar={() => aoEditarCliente(cliente)}
-          aoInativar={() => aoInativarCliente(cliente)}
+          fornecedor={fornecedor}
+          colunas={colunasVisiveisFornecedores}
+          aoConsultar={() => aoConsultarFornecedor(fornecedor)}
+          aoEditar={() => aoEditarFornecedor(fornecedor)}
+          aoInativar={() => aoInativarFornecedor(fornecedor)}
         />
       ))}
     </GradePadrao>
   );
 }
 
-function CabecalhoGradeClientes({ colunas }) {
+function CabecalhoGradeFornecedores({ colunas }) {
   return (
-    <div className="cabecalhoLayoutGradePadrao cabecalhoGradeClientes">
+    <div className="cabecalhoLayoutGradePadrao cabecalhoGradeFornecedores">
       {colunas.map((coluna) => (
         <div key={coluna.id} className={coluna.classe} style={obterEstiloColunaLayout(coluna)}>
           {coluna.rotulo}
@@ -64,13 +64,13 @@ function CabecalhoGradeClientes({ colunas }) {
   );
 }
 
-function LinhaCliente({ empresa, cliente, colunas, aoConsultar, aoEditar, aoInativar }) {
+function LinhaFornecedor({ empresa, fornecedor, colunas, aoConsultar, aoEditar, aoInativar }) {
   return (
-    <div className="linhaLayoutGradePadrao linhaCliente">
-      {colunas.map((coluna) => renderizarCelulaCliente({
+    <div className="linhaLayoutGradePadrao linhaFornecedor">
+      {colunas.map((coluna) => renderizarCelulaFornecedor({
         coluna,
         empresa,
-        cliente,
+        fornecedor,
         aoConsultar,
         aoEditar,
         aoInativar
@@ -79,7 +79,7 @@ function LinhaCliente({ empresa, cliente, colunas, aoConsultar, aoEditar, aoInat
   );
 }
 
-function renderizarCelulaCliente({ coluna, empresa, cliente, aoConsultar, aoEditar, aoInativar }) {
+function renderizarCelulaFornecedor({ coluna, empresa, fornecedor, aoConsultar, aoEditar, aoInativar }) {
   const propriedadesCelula = {
     key: coluna.id,
     className: `celulaLayoutGradePadrao ${coluna.classe}`.trim(),
@@ -88,255 +88,255 @@ function renderizarCelulaCliente({ coluna, empresa, cliente, aoConsultar, aoEdit
 
   if (coluna.id === 'imagem') {
     return (
-      <CelulaLayoutCliente coluna={coluna} {...propriedadesCelula}>
-        <AvatarFornecedor cliente={cliente} />
-      </CelulaLayoutCliente>
+      <CelulaLayoutFornecedor coluna={coluna} {...propriedadesCelula}>
+        <AvatarFornecedor fornecedor={fornecedor} />
+      </CelulaLayoutFornecedor>
     );
   }
 
   if (coluna.id === 'codigo') {
     return (
-      <CelulaLayoutCliente coluna={coluna} {...propriedadesCelula}>
-        <CodigoRegistro valor={obterCodigoPrincipalCliente(cliente, empresa) || 0} />
-      </CelulaLayoutCliente>
+      <CelulaLayoutFornecedor coluna={coluna} {...propriedadesCelula}>
+        <CodigoRegistro valor={obterCodigoPrincipalFornecedor(fornecedor, empresa) || 0} />
+      </CelulaLayoutFornecedor>
     );
   }
 
-  if (coluna.id === 'idCliente') {
+  if (coluna.id === 'idFornecedor') {
     return (
-      <CelulaLayoutCliente coluna={coluna} {...propriedadesCelula}>
-        <CodigoRegistro valor={cliente.idCliente || 0} />
-      </CelulaLayoutCliente>
+      <CelulaLayoutFornecedor coluna={coluna} {...propriedadesCelula}>
+        <CodigoRegistro valor={fornecedor.idFornecedor || 0} />
+      </CelulaLayoutFornecedor>
     );
   }
 
   if (coluna.id === 'codigoAlternativo') {
     return (
-      <CelulaLayoutCliente coluna={coluna} {...propriedadesCelula}>
-        {cliente.codigoAlternativo ? (
-          <CodigoRegistro valor={cliente.codigoAlternativo} />
+      <CelulaLayoutFornecedor coluna={coluna} {...propriedadesCelula}>
+        {fornecedor.codigoAlternativo ? (
+          <CodigoRegistro valor={fornecedor.codigoAlternativo} />
         ) : (
           '-'
         )}
-      </CelulaLayoutCliente>
+      </CelulaLayoutFornecedor>
     );
   }
 
-  if (coluna.id === 'cliente') {
+  if (coluna.id === 'fornecedor') {
     return (
-      <CelulaLayoutCliente coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(cliente.nomeFantasia || cliente.razaoSocial)}</TextoGradeClamp>
-      </CelulaLayoutCliente>
+      <CelulaLayoutFornecedor coluna={coluna} {...propriedadesCelula}>
+        <TextoGradeClamp>{obterValorGrid(fornecedor.nomeFantasia || fornecedor.razaoSocial)}</TextoGradeClamp>
+      </CelulaLayoutFornecedor>
     );
   }
 
   if (coluna.id === 'razaoSocial') {
     return (
-      <CelulaLayoutCliente coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(cliente.razaoSocial)}</TextoGradeClamp>
-      </CelulaLayoutCliente>
+      <CelulaLayoutFornecedor coluna={coluna} {...propriedadesCelula}>
+        <TextoGradeClamp>{obterValorGrid(fornecedor.razaoSocial)}</TextoGradeClamp>
+      </CelulaLayoutFornecedor>
     );
   }
 
   if (coluna.id === 'nomeFantasia') {
     return (
-      <CelulaLayoutCliente coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(cliente.nomeFantasia)}</TextoGradeClamp>
-      </CelulaLayoutCliente>
+      <CelulaLayoutFornecedor coluna={coluna} {...propriedadesCelula}>
+        <TextoGradeClamp>{obterValorGrid(fornecedor.nomeFantasia)}</TextoGradeClamp>
+      </CelulaLayoutFornecedor>
     );
   }
 
   if (coluna.id === 'documento') {
     return (
-      <CelulaLayoutCliente coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(cliente.cnpj)}</TextoGradeClamp>
-      </CelulaLayoutCliente>
+      <CelulaLayoutFornecedor coluna={coluna} {...propriedadesCelula}>
+        <TextoGradeClamp>{obterValorGrid(fornecedor.cnpj)}</TextoGradeClamp>
+      </CelulaLayoutFornecedor>
     );
   }
 
   if (coluna.id === 'cnpj') {
     return (
-      <CelulaLayoutCliente coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(cliente.cnpj)}</TextoGradeClamp>
-      </CelulaLayoutCliente>
+      <CelulaLayoutFornecedor coluna={coluna} {...propriedadesCelula}>
+        <TextoGradeClamp>{obterValorGrid(fornecedor.cnpj)}</TextoGradeClamp>
+      </CelulaLayoutFornecedor>
     );
   }
 
   if (coluna.id === 'tipo') {
     return (
-      <CelulaLayoutCliente coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(cliente.tipo)}</TextoGradeClamp>
-      </CelulaLayoutCliente>
+      <CelulaLayoutFornecedor coluna={coluna} {...propriedadesCelula}>
+        <TextoGradeClamp>{obterValorGrid(fornecedor.tipo)}</TextoGradeClamp>
+      </CelulaLayoutFornecedor>
     );
   }
 
   if (coluna.id === 'inscricaoEstadual') {
     return (
-      <CelulaLayoutCliente coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(cliente.inscricaoEstadual)}</TextoGradeClamp>
-      </CelulaLayoutCliente>
+      <CelulaLayoutFornecedor coluna={coluna} {...propriedadesCelula}>
+        <TextoGradeClamp>{obterValorGrid(fornecedor.inscricaoEstadual)}</TextoGradeClamp>
+      </CelulaLayoutFornecedor>
     );
   }
 
   if (coluna.id === 'idGrupoEmpresa') {
     return (
-      <CelulaLayoutCliente coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(cliente.nomeGrupoEmpresa)}</TextoGradeClamp>
-      </CelulaLayoutCliente>
+      <CelulaLayoutFornecedor coluna={coluna} {...propriedadesCelula}>
+        <TextoGradeClamp>{obterValorGrid(fornecedor.nomeGrupoEmpresa)}</TextoGradeClamp>
+      </CelulaLayoutFornecedor>
     );
   }
 
   if (coluna.id === 'idRamo') {
     return (
-      <CelulaLayoutCliente coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(cliente.nomeRamo)}</TextoGradeClamp>
-      </CelulaLayoutCliente>
+      <CelulaLayoutFornecedor coluna={coluna} {...propriedadesCelula}>
+        <TextoGradeClamp>{obterValorGrid(fornecedor.nomeRamo)}</TextoGradeClamp>
+      </CelulaLayoutFornecedor>
     );
   }
 
   if (coluna.id === 'idConceito') {
     return (
-      <CelulaLayoutCliente coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(cliente.nomeConceito)}</TextoGradeClamp>
-      </CelulaLayoutCliente>
+      <CelulaLayoutFornecedor coluna={coluna} {...propriedadesCelula}>
+        <TextoGradeClamp>{obterValorGrid(fornecedor.nomeConceito)}</TextoGradeClamp>
+      </CelulaLayoutFornecedor>
     );
   }
 
   if (coluna.id === 'cidade') {
     return (
-      <CelulaLayoutCliente coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(cliente.cidade)}</TextoGradeClamp>
-      </CelulaLayoutCliente>
+      <CelulaLayoutFornecedor coluna={coluna} {...propriedadesCelula}>
+        <TextoGradeClamp>{obterValorGrid(fornecedor.cidade)}</TextoGradeClamp>
+      </CelulaLayoutFornecedor>
     );
   }
 
   if (coluna.id === 'estado') {
     return (
-      <CelulaLayoutCliente coluna={coluna} {...propriedadesCelula}>
-        {obterValorGrid(cliente.estado)}
-      </CelulaLayoutCliente>
+      <CelulaLayoutFornecedor coluna={coluna} {...propriedadesCelula}>
+        {obterValorGrid(fornecedor.estado)}
+      </CelulaLayoutFornecedor>
     );
   }
 
   if (coluna.id === 'contato') {
     return (
-      <CelulaLayoutCliente coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(cliente.nomeContatoPrincipal)}</TextoGradeClamp>
-      </CelulaLayoutCliente>
+      <CelulaLayoutFornecedor coluna={coluna} {...propriedadesCelula}>
+        <TextoGradeClamp>{obterValorGrid(fornecedor.nomeContatoPrincipal)}</TextoGradeClamp>
+      </CelulaLayoutFornecedor>
     );
   }
 
   if (coluna.id === 'emailContatoPrincipal') {
     return (
-      <CelulaLayoutCliente coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(cliente.emailContatoPrincipal)}</TextoGradeClamp>
-      </CelulaLayoutCliente>
+      <CelulaLayoutFornecedor coluna={coluna} {...propriedadesCelula}>
+        <TextoGradeClamp>{obterValorGrid(fornecedor.emailContatoPrincipal)}</TextoGradeClamp>
+      </CelulaLayoutFornecedor>
     );
   }
 
   if (coluna.id === 'email') {
     return (
-      <CelulaLayoutCliente coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(cliente.email)}</TextoGradeClamp>
-      </CelulaLayoutCliente>
+      <CelulaLayoutFornecedor coluna={coluna} {...propriedadesCelula}>
+        <TextoGradeClamp>{obterValorGrid(fornecedor.email)}</TextoGradeClamp>
+      </CelulaLayoutFornecedor>
     );
   }
 
   if (coluna.id === 'telefone') {
     return (
-      <CelulaLayoutCliente coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(cliente.telefone)}</TextoGradeClamp>
-      </CelulaLayoutCliente>
+      <CelulaLayoutFornecedor coluna={coluna} {...propriedadesCelula}>
+        <TextoGradeClamp>{obterValorGrid(fornecedor.telefone)}</TextoGradeClamp>
+      </CelulaLayoutFornecedor>
     );
   }
 
-  if (coluna.id === 'vendedor') {
+  if (coluna.id === 'comprador') {
     return (
-      <CelulaLayoutCliente coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(cliente.nomeVendedor)}</TextoGradeClamp>
-      </CelulaLayoutCliente>
+      <CelulaLayoutFornecedor coluna={coluna} {...propriedadesCelula}>
+        <TextoGradeClamp>{obterValorGrid(fornecedor.nomeComprador)}</TextoGradeClamp>
+      </CelulaLayoutFornecedor>
     );
   }
 
-  if (coluna.id === 'idVendedor') {
+  if (coluna.id === 'idComprador') {
     return (
-      <CelulaLayoutCliente coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(cliente.nomeVendedor)}</TextoGradeClamp>
-      </CelulaLayoutCliente>
+      <CelulaLayoutFornecedor coluna={coluna} {...propriedadesCelula}>
+        <TextoGradeClamp>{obterValorGrid(fornecedor.nomeComprador)}</TextoGradeClamp>
+      </CelulaLayoutFornecedor>
     );
   }
 
   if (coluna.id === 'logradouro') {
     return (
-      <CelulaLayoutCliente coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(cliente.logradouro)}</TextoGradeClamp>
-      </CelulaLayoutCliente>
+      <CelulaLayoutFornecedor coluna={coluna} {...propriedadesCelula}>
+        <TextoGradeClamp>{obterValorGrid(fornecedor.logradouro)}</TextoGradeClamp>
+      </CelulaLayoutFornecedor>
     );
   }
 
   if (coluna.id === 'numero') {
     return (
-      <CelulaLayoutCliente coluna={coluna} {...propriedadesCelula}>
-        {obterValorGrid(cliente.numero)}
-      </CelulaLayoutCliente>
+      <CelulaLayoutFornecedor coluna={coluna} {...propriedadesCelula}>
+        {obterValorGrid(fornecedor.numero)}
+      </CelulaLayoutFornecedor>
     );
   }
 
   if (coluna.id === 'complemento') {
     return (
-      <CelulaLayoutCliente coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(cliente.complemento)}</TextoGradeClamp>
-      </CelulaLayoutCliente>
+      <CelulaLayoutFornecedor coluna={coluna} {...propriedadesCelula}>
+        <TextoGradeClamp>{obterValorGrid(fornecedor.complemento)}</TextoGradeClamp>
+      </CelulaLayoutFornecedor>
     );
   }
 
   if (coluna.id === 'bairro') {
     return (
-      <CelulaLayoutCliente coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(cliente.bairro)}</TextoGradeClamp>
-      </CelulaLayoutCliente>
+      <CelulaLayoutFornecedor coluna={coluna} {...propriedadesCelula}>
+        <TextoGradeClamp>{obterValorGrid(fornecedor.bairro)}</TextoGradeClamp>
+      </CelulaLayoutFornecedor>
     );
   }
 
   if (coluna.id === 'cep') {
     return (
-      <CelulaLayoutCliente coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(cliente.cep)}</TextoGradeClamp>
-      </CelulaLayoutCliente>
+      <CelulaLayoutFornecedor coluna={coluna} {...propriedadesCelula}>
+        <TextoGradeClamp>{obterValorGrid(fornecedor.cep)}</TextoGradeClamp>
+      </CelulaLayoutFornecedor>
     );
   }
 
   if (coluna.id === 'observacao') {
     return (
-      <CelulaLayoutCliente coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(cliente.observacao)}</TextoGradeClamp>
-      </CelulaLayoutCliente>
+      <CelulaLayoutFornecedor coluna={coluna} {...propriedadesCelula}>
+        <TextoGradeClamp>{obterValorGrid(fornecedor.observacao)}</TextoGradeClamp>
+      </CelulaLayoutFornecedor>
     );
   }
 
   if (coluna.id === 'dataCriacao') {
     return (
-      <CelulaLayoutCliente coluna={coluna} {...propriedadesCelula}>
-        {formatarDataCriacaoCliente(cliente.dataCriacao)}
-      </CelulaLayoutCliente>
+      <CelulaLayoutFornecedor coluna={coluna} {...propriedadesCelula}>
+        {formatarDataCriacaoFornecedor(fornecedor.dataCriacao)}
+      </CelulaLayoutFornecedor>
     );
   }
 
   if (coluna.id === 'status') {
-    const ativo = registroEstaAtivo(cliente.status);
+    const ativo = registroEstaAtivo(fornecedor.status);
 
     return (
-      <CelulaLayoutCliente coluna={coluna} {...propriedadesCelula}>
+      <CelulaLayoutFornecedor coluna={coluna} {...propriedadesCelula}>
         <span className={`etiquetaStatus ${ativo ? 'ativo' : 'inativo'}`}>
           {ativo ? 'Ativo' : 'Inativo'}
         </span>
-      </CelulaLayoutCliente>
+      </CelulaLayoutFornecedor>
     );
   }
 
   if (coluna.id === 'acoes') {
     return (
-      <CelulaLayoutCliente coluna={coluna} {...propriedadesCelula}>
+      <CelulaLayoutFornecedor coluna={coluna} {...propriedadesCelula}>
         <AcoesRegistro
           rotuloConsulta="Consultar fornecedor"
           rotuloEdicao="Editar fornecedor"
@@ -345,14 +345,14 @@ function renderizarCelulaCliente({ coluna, empresa, cliente, aoConsultar, aoEdit
           aoEditar={aoEditar}
           aoInativar={aoInativar}
         />
-      </CelulaLayoutCliente>
+      </CelulaLayoutFornecedor>
     );
   }
 
   return null;
 }
 
-function CelulaLayoutCliente({ coluna, children, ...propriedades }) {
+function CelulaLayoutFornecedor({ coluna, children, ...propriedades }) {
   return (
     <div {...propriedades}>
       <span className="rotuloCelulaLayoutGradePadrao">{coluna.rotulo}</span>
@@ -368,7 +368,7 @@ function obterEstiloColunaLayout(coluna) {
   };
 }
 
-function formatarDataCriacaoCliente(valor) {
+function formatarDataCriacaoFornecedor(valor) {
   if (!valor) {
     return '-';
   }

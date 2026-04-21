@@ -1,0 +1,458 @@
+@page {
+  size: A4;
+  margin: 9mm;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: #ffffff;
+  color: #171717;
+  font-family: 'Segoe UI', 'Helvetica Neue', sans-serif;
+}
+
+body {
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.documentoCotacaoPdf {
+  position: relative;
+  overflow: hidden;
+  min-height: 100%;
+  background: #ffffff;
+}
+
+.documentoCotacaoPdfHero {
+  position: relative;
+  overflow: hidden;
+  padding: 28px 30px 36px;
+  border-radius: 26px;
+  background: linear-gradient(145deg, var(--documento-cotacao-cor-primaria), #262626);
+  color: #ffffff;
+}
+
+.documentoCotacaoPdfHeroDecoracao {
+  position: absolute;
+  border-radius: 999px;
+}
+
+.documentoCotacaoPdfHeroDecoracaoPrimaria {
+  width: 240px;
+  height: 240px;
+  right: -96px;
+  top: -126px;
+  background: var(--documento-cotacao-cor-secundaria);
+}
+
+.documentoCotacaoPdfHeroDecoracaoSecundaria {
+  width: 320px;
+  height: 90px;
+  left: -30px;
+  bottom: -44px;
+  background: var(--documento-cotacao-cor-destaque);
+  transform: rotate(-4deg);
+}
+
+.documentoCotacaoPdfHeroConteudo {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.documentoCotacaoPdfEmpresa {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  max-width: 62%;
+}
+
+.documentoCotacaoPdfLogo,
+.documentoCotacaoPdfLogoPlaceholder {
+  width: 72px;
+  height: 72px;
+  border-radius: 22px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.documentoCotacaoPdfLogo {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.documentoCotacaoPdfLogoPlaceholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.documentoCotacaoPdfEmpresaConteudo {
+  display: grid;
+  gap: 5px;
+}
+
+.documentoCotacaoPdfEmpresaConteudo strong {
+  font-size: 20px;
+  line-height: 1.1;
+}
+
+.documentoCotacaoPdfEmpresaConteudo span {
+  font-size: 11px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.documentoCotacaoPdfHeroResumo {
+  display: grid;
+  justify-items: end;
+  gap: 10px;
+  text-align: right;
+}
+
+.documentoCotacaoPdfTituloAuxiliar {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.documentoCotacaoPdfHeroResumo h1 {
+  margin: 0;
+  font-size: 40px;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+}
+
+.documentoCotacaoPdfBadges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.documentoCotacaoPdfBadges span {
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.documentoCotacaoPdfConteudo {
+  display: grid;
+  gap: 12px;
+  padding: 12px 2px 2px;
+}
+
+.documentoCotacaoPdfSecao {
+  padding: 20px 22px;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 16px 40px rgba(17, 24, 39, 0.06);
+  break-inside: avoid-page;
+  page-break-inside: avoid;
+}
+
+.documentoCotacaoPdfSecaoCabecalho {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+
+.documentoCotacaoPdfSecaoCabecalho h2 {
+  margin: 0;
+  font-size: 17px;
+  letter-spacing: -0.03em;
+}
+
+.documentoCotacaoPdfSecaoCabecalho p {
+  margin: 0;
+  color: #5f5f5f;
+  font-size: 11px;
+}
+
+.documentoCotacaoPdfGradeInfo {
+  display: grid;
+  column-gap: 4px;
+  row-gap: 4px;
+}
+
+.documentoCotacaoPdfGradeInfoFornecedor {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.documentoCotacaoPdfGradeInfoMetadados {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.documentoCotacaoPdfInfoItem {
+  display: grid;
+  gap: 3px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: #f8f6f3;
+  box-shadow: inset 0 0 0 1px rgba(17, 24, 39, 0.04);
+  border-left: 4px solid var(--documento-cotacao-cor-destaque);
+}
+
+.documentoCotacaoPdfInfoItemIntegral {
+  grid-column: 1 / -1;
+}
+
+.documentoCotacaoPdfInfoItem span {
+  font-size: 10px;
+  line-height: 1.1;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #6b7280;
+}
+
+.documentoCotacaoPdfInfoItem strong {
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+.documentoCotacaoPdfTabelaWrapper {
+  overflow: hidden;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 18px;
+}
+
+.documentoCotacaoPdfTabela {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.documentoCotacaoPdfColunaItem {
+  width: 70px;
+}
+
+.documentoCotacaoPdfColunaFoto {
+  width: 84px;
+}
+
+.documentoCotacaoPdfColunaDescricao {
+  width: auto;
+}
+
+.documentoCotacaoPdfColunaQuantidade {
+  width: 54px;
+}
+
+.documentoCotacaoPdfColunaValorUnitario {
+  width: 118px;
+}
+
+.documentoCotacaoPdfColunaTotal {
+  width: 104px;
+}
+
+.documentoCotacaoPdfTabela thead {
+  display: table-header-group;
+}
+
+.documentoCotacaoPdfTabela tr {
+  page-break-inside: avoid;
+}
+
+.documentoCotacaoPdfTabela th {
+  padding: 12px 14px;
+  background: var(--documento-cotacao-cor-primaria);
+  color: #ffffff;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.documentoCotacaoPdfTabela td {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(17, 24, 39, 0.08);
+  font-size: 11px;
+  vertical-align: top;
+}
+
+.documentoCotacaoPdfTabela th.documentoCotacaoPdfColunaFoto {
+  text-align: center !important;
+}
+
+.documentoCotacaoPdfTabela th:nth-child(4),
+.documentoCotacaoPdfTabela td:nth-child(4) {
+  text-align: center;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.documentoCotacaoPdfTabela th:nth-child(5),
+.documentoCotacaoPdfTabela td:nth-child(5),
+.documentoCotacaoPdfTabela th:nth-child(6),
+.documentoCotacaoPdfTabela td:nth-child(6) {
+  text-align: right;
+  padding-left: 8px;
+  padding-right: 10px;
+}
+
+.documentoCotacaoPdfCelulaFoto {
+  width: 84px;
+  text-align: center;
+  vertical-align: middle !important;
+}
+
+.documentoCotacaoPdfImagemItem {
+  width: 90%;
+  max-width: 52px;
+  aspect-ratio: 1;
+  border-radius: 10px;
+  object-fit: cover;
+  display: block;
+  margin: 0 auto;
+  background: #f4f4f5;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+}
+
+.documentoCotacaoPdfImagemItemPlaceholder {
+  width: 90%;
+  max-width: 52px;
+  aspect-ratio: 1;
+  margin: 0 auto;
+}
+
+.documentoCotacaoPdfCodigoItem {
+  display: inline-block;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.documentoCotacaoPdfTabela tbody tr:nth-child(even) {
+  background: rgba(248, 246, 243, 0.8);
+}
+
+.documentoCotacaoPdfDescricaoItem {
+  display: grid;
+  gap: 4px;
+}
+
+.documentoCotacaoPdfDescricaoItem strong {
+  font-size: 12px;
+}
+
+.documentoCotacaoPdfDescricaoItem span,
+.documentoCotacaoPdfDescricaoItem small {
+  color: #5f5f5f;
+  line-height: 1.45;
+}
+
+.documentoCotacaoPdfDescricaoItem small {
+  font-size: 10px;
+}
+
+.documentoCotacaoPdfResumoFinanceiro {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0;
+  margin-top: 12px;
+}
+
+.documentoCotacaoPdfResumoCard {
+  min-width: 170px;
+  display: grid;
+  gap: 6px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: #f8f6f3;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+}
+
+.documentoCotacaoPdfResumoCard span {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.documentoCotacaoPdfResumoCard strong {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.documentoCotacaoPdfResumoCardDestaque {
+  background: linear-gradient(135deg, var(--documento-cotacao-cor-secundaria), var(--documento-cotacao-cor-destaque));
+  color: #ffffff;
+}
+
+.documentoCotacaoPdfResumoCardDestaque span {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.documentoCotacaoPdfListaObservacoes {
+  display: grid;
+  gap: 12px;
+}
+
+.documentoCotacaoPdfObservacaoCard {
+  padding: 15px 16px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #fffefe 0%, #f8f6f3 100%);
+  border: 1px solid rgba(17, 24, 39, 0.08);
+}
+
+.documentoCotacaoPdfObservacaoCard strong {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+
+.documentoCotacaoPdfObservacaoCard p {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.6;
+  color: #464646;
+  white-space: pre-wrap;
+}
+
+.documentoCotacaoPdfEstadoVazio {
+  padding: 18px;
+  border-radius: 18px;
+  background: #f8f6f3;
+  color: #5f5f5f;
+  font-size: 11px;
+}
+
+@media print {
+  .documentoCotacaoPdf {
+    overflow: visible;
+  }
+
+  .documentoCotacaoPdfHero {
+    break-inside: avoid-page;
+    page-break-inside: avoid;
+  }
+
+  .documentoCotacaoPdfConteudo {
+    display: block;
+    padding-top: 12px;
+  }
+
+  .documentoCotacaoPdfSecao + .documentoCotacaoPdfSecao {
+    margin-top: 12px;
+  }
+
+  .documentoCotacaoPdfSecaoCabecalho,
+  .documentoCotacaoPdfTabelaWrapper,
+  .documentoCotacaoPdfResumoFinanceiro,
+  .documentoCotacaoPdfListaObservacoes,
+  .documentoCotacaoPdfEstadoVazio {
+    break-inside: avoid-page;
+    page-break-inside: avoid;
+  }
+}

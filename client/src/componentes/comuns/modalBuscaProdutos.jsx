@@ -31,14 +31,14 @@ export function ModalBuscaProdutos({
         },
         { key: 'referencia', label: 'Referencia', render: (produto) => produto.referencia || '-' },
         { key: 'descricao', label: 'Descricao', render: (produto) => produto.descricao || '-' },
-        { key: 'preco', label: 'Preco', render: (produto) => normalizarPreco(produto.preco || 0) }
+        { key: 'custo', label: 'Custo', render: (produto) => normalizarPreco(produto.custo || 0) }
       ]}
       registros={produtos}
       obterTextoBusca={(produto) => [
         produto.idProduto,
         produto.referencia,
         produto.descricao,
-        produto.preco
+        produto.custo
       ].join(' ')}
       obterChaveRegistro={(produto) => produto.idProduto}
       aoSelecionar={aoSelecionar}

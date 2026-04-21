@@ -3,30 +3,28 @@ import { ListaFornecedores } from './fornecedores-listaFornecedores';
 
 export function CorpoFornecedores({
   empresa,
-  fornecedores,
-  clientes = [],
+  fornecedores = [],
   carregando,
   mensagemErro,
-  aoEditarCliente,
-  aoConsultarCliente,
-  aoInativarCliente
+  aoEditarFornecedor,
+  aoConsultarFornecedor,
+  aoInativarFornecedor
 }) {
-  const listaFornecedores = Array.isArray(fornecedores) ? fornecedores : clientes;
+  const listaFornecedores = Array.isArray(fornecedores) ? fornecedores : [];
 
   return (
     <CorpoPagina>
-      <div className="gradePainelClientes">
+      <div className="gradePainelFornecedores">
         <ListaFornecedores
           empresa={empresa}
           fornecedores={listaFornecedores}
           carregando={carregando}
           mensagemErro={mensagemErro}
-          aoEditarCliente={aoEditarCliente}
-          aoConsultarCliente={aoConsultarCliente}
-          aoInativarCliente={aoInativarCliente}
+          aoEditarFornecedor={aoEditarFornecedor}
+          aoConsultarFornecedor={aoConsultarFornecedor}
+          aoInativarFornecedor={aoInativarFornecedor}
         />
       </div>
     </CorpoPagina>
   );
 }
-

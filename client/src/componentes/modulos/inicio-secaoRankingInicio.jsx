@@ -33,7 +33,7 @@ export function SecaoRankingInicio({ titulo, descricao, itens }) {
               titulo={titulo}
               ajuda={{
                 composicao: 'Ranking por valor liquido das ordens de compra.',
-                periodo: 'Mes corrente pela data de entrada do pedido.'
+                periodo: 'Mes corrente pela data de entrada do ordemCompra.'
               }}
             />
           </div>

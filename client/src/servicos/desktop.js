@@ -29,8 +29,8 @@ function exportarPdfNavegador({ html, nomeArquivo }) {
     };
   }
 
-  const tituloDocumento = String(nomeArquivo || 'orcamento.pdf').replace(/\.pdf$/i, '');
-  const htmlDocumento = html.replace('<title>Orcamento</title>', `<title>${tituloDocumento}</title>`);
+  const tituloDocumento = String(nomeArquivo || 'cotacao.pdf').replace(/\.pdf$/i, '');
+  const htmlDocumento = html.replace('<title>Cotacao</title>', `<title>${tituloDocumento}</title>`);
   const blobDocumento = new Blob([htmlDocumento], { type: 'text/html;charset=utf-8' });
   const urlDocumento = window.URL.createObjectURL(blobDocumento);
 

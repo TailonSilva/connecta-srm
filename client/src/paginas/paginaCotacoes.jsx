@@ -5,47 +5,47 @@ import { Botao } from '../componentes/comuns/botao';
 import { CampoPesquisa } from '../componentes/comuns/campoPesquisa';
 import { CodigoRegistro } from '../componentes/comuns/codigoRegistro';
 import { GradePadrao } from '../componentes/comuns/gradePadrao';
-import { ModalBuscaClientes } from '../componentes/comuns/modalBuscaClientes';
+import { ModalBuscaFornecedores } from '../componentes/comuns/modalBuscaFornecedores';
 import { ModalFiltros } from '../componentes/comuns/modalFiltros';
 import { TextoGradeClamp } from '../componentes/comuns/textoGradeClamp';
 import { CorpoPagina } from '../componentes/layout/corpoPagina';
 import {
-  incluirCliente,
+  incluirFornecedor,
   incluirContato,
-  listarClientes,
-  listarConceitosCliente,
+  listarFornecedores,
+  listarConceitosFornecedor,
   listarContatos,
   listarRamosAtividade,
-  listarVendedores
-} from '../servicos/clientes';
+  listarCompradores
+} from '../servicos/fornecedores';
 import {
   atualizarPrazoPagamento,
   incluirPrazoPagamento,
-  listarCamposPedidoConfiguracao,
-  listarEtapasPedidoConfiguracao,
-  listarCamposOrcamentoConfiguracao,
-  listarEtapasOrcamentoConfiguracao,
+  listarCamposOrdemCompraConfiguracao,
+  listarEtapasOrdemCompraConfiguracao,
+  listarCamposCotacaoConfiguracao,
+  listarEtapasCotacaoConfiguracao,
   listarMetodosPagamentoConfiguracao,
   listarPrazosPagamentoConfiguracao,
-  listarTiposPedidoConfiguracao
+  listarTiposOrdemCompraConfiguracao
 } from '../servicos/configuracoes';
-import { incluirPedido } from '../servicos/pedidos';
+import { incluirOrdemCompra } from '../servicos/ordensCompra';
 import {
-  listarOrcamentos,
-  atualizarOrcamento,
-  excluirOrcamento,
-  incluirOrcamento
-} from '../servicos/orcamentos';
+  listarCotacoes,
+  atualizarCotacao,
+  excluirCotacao,
+  incluirCotacao
+} from '../servicos/cotacoes';
 import { atualizarEmpresa, criarPayloadAtualizacaoColunasGrid, listarEmpresas } from '../servicos/empresa';
 import { listarProdutos } from '../servicos/produtos';
 import { listarUsuarios } from '../servicos/usuarios';
 import {
-  normalizarColunasGridOrcamentos,
-  TOTAL_COLUNAS_GRID_ORCAMENTOS
-} from '../dados/colunasGridOrcamentos';
+  normalizarColunasGridCotacoes,
+  TOTAL_COLUNAS_GRID_COTACOES
+} from '../dados/colunasGridCotacoes';
 import { normalizarPreco } from '../utilitarios/normalizarPreco';
-import { formatarCodigoCliente } from '../utilitarios/codigoCliente';
-import { obterEtapasOrcamentoParaInputManual } from '../utilitarios/etapasOrcamento';
+import { formatarCodigoFornecedor } from '../utilitarios/codigoFornecedor';
+import { obterEtapasCotacaoParaInputManual } from '../utilitarios/etapasCotacao';
 import { obterValorGrid } from '../utilitarios/valorPadraoGrid';
 import {
   normalizarFiltrosPorPadrao,
@@ -55,17 +55,17 @@ import {
 import { ModalCotacao } from '../componentes/modulos/cotacoes-modalCotacao';
 import { ModalManualCotacoes } from '../componentes/modulos/cotacoes-modalManualCotacoes';
 import { ModalOrdemCompra } from '../componentes/modulos/ordensCompra-modalOrdemCompra';
-import { ModalColunasGridOrcamentos } from '../componentes/modulos/configuracoes-modalColunasGridOrcamentos';
+import { ModalColunasGridCotacoes } from '../componentes/modulos/configuracoes-modalColunasGridCotacoes';
 
-function criarFiltrosIniciaisOrcamentos(usuarioLogado, empresa = null) {
-  const vendedorTravado = usuarioLogado?.tipo === 'Usuario padrao' && usuarioLogado?.idVendedor;
+function criarFiltrosIniciaisCotacoes(usuarioLogado, empresa = null) {
+  const compradorTravado = usuarioLogado?.tipo === 'Usuario padrao' && usuarioLogado?.idComprador;
 
   return {
     idFornecedor: '',
     idUsuario: [],
-    idVendedorFornecedor: [],
-    idVendedor: vendedorTravado ? [String(usuarioLogado.idVendedor)] : [],
-    idsEtapaOrcamento: obterEtapasFiltroPadraoOrcamento(empresa),
+    idCompradorFornecedor: [],
+    idComprador: compradorTravado ? [String(usuarioLogado.idComprador)] : [],
+    idsEtapaCotacao: obterEtapasFiltroPadraoCotacao(empresa),
     dataInclusaoInicio: '',
     dataInclusaoFim: '',
     dataFechamentoInicio: '',
@@ -73,21 +73,21 @@ function criarFiltrosIniciaisOrcamentos(usuarioLogado, empresa = null) {
   };
 }
 
-  const ID_ETAPA_ORCAMENTO_FECHAMENTO = 1;
-  const ID_ETAPA_ORCAMENTO_FECHADO_SEM_PEDIDO = 2;
-  const ID_ETAPA_ORCAMENTO_PEDIDO_EXCLUIDO = 3;
-  const ID_ETAPA_ORCAMENTO_RECUSADO = 4;
-  const ID_TIPO_PEDIDO_VENDA = 1;
+  const ID_ETAPA_COTACAO_FECHAMENTO = 1;
+  const ID_ETAPA_COTACAO_FECHADO_SEM_ORDEM_COMPRA = 2;
+  const ID_ETAPA_COTACAO_ORDEM_COMPRA_EXCLUIDO = 3;
+  const ID_ETAPA_COTACAO_RECUSADO = 4;
+  const ID_TIPO_ORDEM_COMPRA_VENDA = 1;
 
-function criarFiltrosLimposOrcamentos(usuarioLogado, empresa = null) {
-  const vendedorTravado = usuarioLogado?.tipo === 'Usuario padrao' && usuarioLogado?.idVendedor;
+function criarFiltrosLimposCotacoes(usuarioLogado, empresa = null) {
+  const compradorTravado = usuarioLogado?.tipo === 'Usuario padrao' && usuarioLogado?.idComprador;
 
   return {
     idFornecedor: '',
     idUsuario: [],
-    idVendedorFornecedor: [],
-    idVendedor: vendedorTravado ? [String(usuarioLogado.idVendedor)] : [],
-    idsEtapaOrcamento: obterEtapasFiltroPadraoOrcamento(empresa),
+    idCompradorFornecedor: [],
+    idComprador: compradorTravado ? [String(usuarioLogado.idComprador)] : [],
+    idsEtapaCotacao: obterEtapasFiltroPadraoCotacao(empresa),
     dataInclusaoInicio: '',
     dataInclusaoFim: '',
     dataFechamentoInicio: '',
@@ -97,21 +97,21 @@ function criarFiltrosLimposOrcamentos(usuarioLogado, empresa = null) {
 
 export function PaginaCotacoes({ usuarioLogado }) {
   const [pesquisa, definirPesquisa] = useState('');
-  const [orcamentos, definirOrcamentos] = useState([]);
-  const [fornecedores, definirClientes] = useState([]);
+  const [cotacoes, definirCotacoes] = useState([]);
+  const [fornecedores, definirFornecedores] = useState([]);
   const [contatos, definirContatos] = useState([]);
   const [usuarios, definirUsuarios] = useState([]);
   const [ramosAtividade, definirRamosAtividade] = useState([]);
-  const [conceitosCliente, definirConceitosCliente] = useState([]);
-  const [vendedores, definirVendedores] = useState([]);
+  const [conceitosFornecedor, definirConceitosFornecedor] = useState([]);
+  const [compradores, definirCompradores] = useState([]);
   const [metodosPagamento, definirMetodosPagamento] = useState([]);
   const [prazosPagamento, definirPrazosPagamento] = useState([]);
-  const [etapasOrcamento, definirEtapasOrcamento] = useState([]);
+  const [etapasCotacao, definirEtapasCotacao] = useState([]);
   const [produtos, definirProdutos] = useState([]);
-  const [camposOrcamento, definirCamposOrcamento] = useState([]);
-  const [camposPedido, definirCamposPedido] = useState([]);
-  const [etapasPedido, definirEtapasPedido] = useState([]);
-  const [tiposPedido, definirTiposPedido] = useState([]);
+  const [camposCotacao, definirCamposCotacao] = useState([]);
+  const [camposOrdemCompra, definirCamposOrdemCompra] = useState([]);
+  const [etapasOrdemCompra, definirEtapasOrdemCompra] = useState([]);
+  const [tiposOrdemCompra, definirTiposOrdemCompra] = useState([]);
   const [empresa, definirEmpresa] = useState(null);
   const [carregandoContexto, definirCarregandoContexto] = useState(true);
   const [carregandoGrade, definirCarregandoGrade] = useState(true);
@@ -120,60 +120,60 @@ export function PaginaCotacoes({ usuarioLogado }) {
   const [modalManualAberto, definirModalManualAberto] = useState(false);
   const [modalFiltrosAberto, definirModalFiltrosAberto] = useState(false);
   const [modalColunasGridAberto, definirModalColunasGridAberto] = useState(false);
-  const [modalBuscaClienteFiltrosAberto, definirModalBuscaClienteFiltrosAberto] = useState(false);
+  const [modalBuscaFornecedorFiltrosAberto, definirModalBuscaFornecedorFiltrosAberto] = useState(false);
   const [filtrosEmEdicao, definirFiltrosEmEdicao] = useState(null);
-  const [orcamentoSelecionado, definirOrcamentoSelecionado] = useState(null);
-  const [orcamentoExclusaoPendente, definirOrcamentoExclusaoPendente] = useState(null);
-  const [orcamentoPedidoPendente, definirOrcamentoPedidoPendente] = useState(null);
-  const [orcamentoPedidoEmCriacao, definirOrcamentoPedidoEmCriacao] = useState(null);
-  const [dadosIniciaisPedido, definirDadosIniciaisPedido] = useState(null);
-  const [modalPedidoAberto, definirModalOrdemCompraAberto] = useState(false);
+  const [cotacaoSelecionado, definirCotacaoSelecionado] = useState(null);
+  const [cotacaoExclusaoPendente, definirCotacaoExclusaoPendente] = useState(null);
+  const [cotacaoOrdemCompraPendente, definirCotacaoOrdemCompraPendente] = useState(null);
+  const [cotacaoOrdemCompraEmCriacao, definirCotacaoOrdemCompraEmCriacao] = useState(null);
+  const [dadosIniciaisOrdemCompra, definirDadosIniciaisOrdemCompra] = useState(null);
+  const [modalOrdemCompraAberto, definirModalOrdemCompraAberto] = useState(false);
   const [modoModal, definirModoModal] = useState('novo');
-  const usuarioSomenteVendedor = usuarioLogado?.tipo === 'Usuario padrao' && usuarioLogado?.idVendedor;
+  const usuarioSomenteComprador = usuarioLogado?.tipo === 'Usuario padrao' && usuarioLogado?.idComprador;
   const usuarioSomenteConsultaConfiguracao = usuarioLogado?.tipo === 'Usuario padrao';
   const permitirExcluir = usuarioLogado?.tipo !== 'Usuario padrao';
   const filtrosIniciais = useMemo(
-    () => criarFiltrosIniciaisOrcamentos(usuarioLogado, empresa),
-    [usuarioLogado?.idUsuario, usuarioLogado?.idVendedor, empresa?.etapasFiltroPadraoOrcamento]
+    () => criarFiltrosIniciaisCotacoes(usuarioLogado, empresa),
+    [usuarioLogado?.idUsuario, usuarioLogado?.idComprador, empresa?.etapasFiltroPadraoCotacao]
   );
   const [filtros, definirFiltros] = useFiltrosPersistidos({
-    chave: 'paginaOrcamentos',
+    chave: 'paginaCotacoes',
     usuario: usuarioLogado,
     filtrosPadrao: filtrosIniciais,
-    normalizarFiltros: normalizarFiltrosOrcamentos
+    normalizarFiltros: normalizarFiltrosCotacoes
   });
 
   useEffect(() => {
     carregarContexto();
-  }, [usuarioSomenteVendedor, usuarioLogado?.idVendedor]);
+  }, [usuarioSomenteComprador, usuarioLogado?.idComprador]);
 
   useEffect(() => {
     if (carregandoContexto) {
       return;
     }
 
-    carregarGradeOrcamentos();
-  }, [carregandoContexto, usuarioSomenteVendedor, usuarioLogado?.idVendedor, usuarioLogado?.idUsuario, pesquisa, JSON.stringify(filtros)]);
+    carregarGradeCotacoes();
+  }, [carregandoContexto, usuarioSomenteComprador, usuarioLogado?.idComprador, usuarioLogado?.idUsuario, pesquisa, JSON.stringify(filtros)]);
 
   useEffect(() => {
     if (usuarioLogado?.tipo === 'Usuario padrao') {
       return;
     }
 
-    if (!Array.isArray(filtros.idVendedor) || filtros.idVendedor.length === 0) {
+    if (!Array.isArray(filtros.idComprador) || filtros.idComprador.length === 0) {
       return;
     }
 
     definirFiltros((estadoAtual) => ({
       ...estadoAtual,
-      idVendedor: []
+      idComprador: []
     }));
   }, [usuarioLogado?.tipo]);
 
   useEffect(() => {
     function tratarGrupoEmpresaAtualizado() {
       carregarContexto();
-      carregarGradeOrcamentos();
+      carregarGradeCotacoes();
     }
 
     window.addEventListener('grupo-empresa-atualizado', tratarGrupoEmpresaAtualizado);
@@ -181,12 +181,12 @@ export function PaginaCotacoes({ usuarioLogado }) {
     return () => {
       window.removeEventListener('grupo-empresa-atualizado', tratarGrupoEmpresaAtualizado);
     };
-  }, [usuarioSomenteVendedor, usuarioLogado?.idVendedor, usuarioLogado?.idUsuario, pesquisa, JSON.stringify(filtros)]);
+  }, [usuarioSomenteComprador, usuarioLogado?.idComprador, usuarioLogado?.idUsuario, pesquisa, JSON.stringify(filtros)]);
 
   useEffect(() => {
     function tratarEmpresaAtualizada() {
       carregarContexto();
-      carregarGradeOrcamentos();
+      carregarGradeCotacoes();
     }
 
     window.addEventListener('empresa-atualizada', tratarEmpresaAtualizada);
@@ -194,10 +194,10 @@ export function PaginaCotacoes({ usuarioLogado }) {
     return () => {
       window.removeEventListener('empresa-atualizada', tratarEmpresaAtualizada);
     };
-  }, [usuarioSomenteVendedor, usuarioLogado?.idVendedor]);
+  }, [usuarioSomenteComprador, usuarioLogado?.idComprador]);
 
   useEffect(() => {
-    function tratarAtalhosOrcamentos(evento) {
+    function tratarAtalhosCotacoes(evento) {
       if (evento.key !== 'F1') {
         return;
       }
@@ -208,28 +208,28 @@ export function PaginaCotacoes({ usuarioLogado }) {
         !modalAberto
         && !modalManualAberto
         && !modalFiltrosAberto
-        && !modalPedidoAberto
-        && !orcamentoExclusaoPendente
-        && !orcamentoPedidoPendente
-        && !orcamentoPedidoEmCriacao
+        && !modalOrdemCompraAberto
+        && !cotacaoExclusaoPendente
+        && !cotacaoOrdemCompraPendente
+        && !cotacaoOrdemCompraEmCriacao
       ) {
         definirModalManualAberto(true);
       }
     }
 
-    window.addEventListener('keydown', tratarAtalhosOrcamentos);
+    window.addEventListener('keydown', tratarAtalhosCotacoes);
 
     return () => {
-      window.removeEventListener('keydown', tratarAtalhosOrcamentos);
+      window.removeEventListener('keydown', tratarAtalhosCotacoes);
     };
   }, [
     modalAberto,
     modalManualAberto,
     modalFiltrosAberto,
-    modalPedidoAberto,
-    orcamentoExclusaoPendente,
-    orcamentoPedidoEmCriacao,
-    orcamentoPedidoPendente
+    modalOrdemCompraAberto,
+    cotacaoExclusaoPendente,
+    cotacaoOrdemCompraEmCriacao,
+    cotacaoOrdemCompraPendente
   ]);
 
   async function carregarContexto() {
@@ -238,112 +238,112 @@ export function PaginaCotacoes({ usuarioLogado }) {
 
     try {
       const resultados = await Promise.allSettled([
-        listarClientes(),
+        listarFornecedores(),
         listarContatos(),
         listarUsuarios(),
         listarRamosAtividade(),
-        listarConceitosCliente({ incluirInativos: true }),
-        listarVendedores(),
+        listarConceitosFornecedor({ incluirInativos: true }),
+        listarCompradores(),
         listarMetodosPagamentoConfiguracao(),
         listarPrazosPagamentoConfiguracao(),
-        listarEtapasOrcamentoConfiguracao(),
+        listarEtapasCotacaoConfiguracao(),
         listarProdutos(),
-        listarCamposOrcamentoConfiguracao(),
-        listarCamposPedidoConfiguracao(),
-        listarEtapasPedidoConfiguracao(),
-        listarTiposPedidoConfiguracao(),
+        listarCamposCotacaoConfiguracao(),
+        listarCamposOrdemCompraConfiguracao(),
+        listarEtapasOrdemCompraConfiguracao(),
+        listarTiposOrdemCompraConfiguracao(),
         listarEmpresas()
       ]);
 
       const [
-        clientesResultado,
+        fornecedoresResultado,
         contatosResultado,
         usuariosResultado,
         ramosResultado,
         conceitosResultado,
-        vendedoresResultado,
+        compradoresResultado,
         metodosResultado,
         prazosResultado,
         etapasResultado,
         produtosResultado,
         camposResultado,
-        camposPedidoResultado,
-        etapasPedidoResultado,
-        tiposPedidoResultado,
+        camposOrdemCompraResultado,
+        etapasOrdemCompraResultado,
+        tiposOrdemCompraResultado,
         empresasResultado
       ] = resultados;
 
-      const clientesCarregados = clientesResultado.status === 'fulfilled' ? clientesResultado.value : [];
+      const fornecedoresCarregados = fornecedoresResultado.status === 'fulfilled' ? fornecedoresResultado.value : [];
       const contatosCarregados = contatosResultado.status === 'fulfilled' ? contatosResultado.value : [];
       const usuariosCarregados = usuariosResultado.status === 'fulfilled' ? usuariosResultado.value : [];
       const ramosCarregados = ramosResultado.status === 'fulfilled' ? ramosResultado.value : [];
       const conceitosCarregados = conceitosResultado.status === 'fulfilled' ? conceitosResultado.value : [];
-      const vendedoresCarregados = vendedoresResultado.status === 'fulfilled' ? vendedoresResultado.value : [];
+      const compradoresCarregados = compradoresResultado.status === 'fulfilled' ? compradoresResultado.value : [];
       const metodosCarregados = metodosResultado.status === 'fulfilled' ? metodosResultado.value : [];
       const prazosCarregados = prazosResultado.status === 'fulfilled' ? prazosResultado.value : [];
       const etapasCarregadas = etapasResultado.status === 'fulfilled' ? etapasResultado.value : [];
       const produtosCarregados = produtosResultado.status === 'fulfilled' ? produtosResultado.value : [];
       const camposCarregados = camposResultado.status === 'fulfilled' ? camposResultado.value : [];
-      const camposPedidoCarregados = camposPedidoResultado.status === 'fulfilled' ? camposPedidoResultado.value : [];
-      const etapasPedidoCarregadas = etapasPedidoResultado.status === 'fulfilled' ? etapasPedidoResultado.value : [];
-      const tiposPedidoCarregados = tiposPedidoResultado.status === 'fulfilled' ? tiposPedidoResultado.value : [];
+      const camposOrdemCompraCarregados = camposOrdemCompraResultado.status === 'fulfilled' ? camposOrdemCompraResultado.value : [];
+      const etapasOrdemCompraCarregadas = etapasOrdemCompraResultado.status === 'fulfilled' ? etapasOrdemCompraResultado.value : [];
+      const tiposOrdemCompraCarregados = tiposOrdemCompraResultado.status === 'fulfilled' ? tiposOrdemCompraResultado.value : [];
       const empresasCarregadas = empresasResultado.status === 'fulfilled' ? empresasResultado.value : [];
 
-      const etapasCarregadasOrdenadas = ordenarEtapasPorOrdem(etapasCarregadas, 'idEtapaOrcamento');
-      const clientesDisponiveis = clientesCarregados;
-      const idsClientesDisponiveis = new Set(clientesDisponiveis.map((cliente) => cliente.idCliente));
+      const etapasCarregadasOrdenadas = ordenarEtapasPorOrdem(etapasCarregadas, 'idEtapaCotacao');
+      const fornecedoresDisponiveis = fornecedoresCarregados;
+      const idsFornecedoresDisponiveis = new Set(fornecedoresDisponiveis.map((fornecedor) => fornecedor.idFornecedor));
 
-      definirClientes(clientesDisponiveis);
-      definirContatos(contatosCarregados.filter((contato) => idsClientesDisponiveis.has(contato.idCliente)));
+      definirFornecedores(fornecedoresDisponiveis);
+      definirContatos(contatosCarregados.filter((contato) => idsFornecedoresDisponiveis.has(contato.idFornecedor)));
       definirUsuarios(usuariosCarregados);
       definirRamosAtividade(ramosCarregados);
-      definirConceitosCliente(conceitosCarregados);
-      definirVendedores(vendedoresCarregados);
+      definirConceitosFornecedor(conceitosCarregados);
+      definirCompradores(compradoresCarregados);
       definirMetodosPagamento(metodosCarregados);
       definirPrazosPagamento(enriquecerPrazosPagamento(prazosCarregados, metodosCarregados));
-      definirEtapasOrcamento(etapasCarregadasOrdenadas);
+      definirEtapasCotacao(etapasCarregadasOrdenadas);
       definirProdutos(produtosCarregados.filter((produto) => produto.status !== 0));
-      definirCamposOrcamento(camposCarregados);
-      definirCamposPedido(camposPedidoCarregados);
-      definirEtapasPedido(etapasPedidoCarregadas);
-      definirTiposPedido(tiposPedidoCarregados);
+      definirCamposCotacao(camposCarregados);
+      definirCamposOrdemCompra(camposOrdemCompraCarregados);
+      definirEtapasOrdemCompra(etapasOrdemCompraCarregadas);
+      definirTiposOrdemCompra(tiposOrdemCompraCarregados);
       definirEmpresa(empresasCarregadas[0] || null);
 
       return {
-        clientes: clientesDisponiveis,
-        contatos: contatosCarregados.filter((contato) => idsClientesDisponiveis.has(contato.idCliente)),
+        fornecedores: fornecedoresDisponiveis,
+        contatos: contatosCarregados.filter((contato) => idsFornecedoresDisponiveis.has(contato.idFornecedor)),
         usuarios: usuariosCarregados,
         ramosAtividade: ramosCarregados,
-        vendedores: vendedoresCarregados,
+        compradores: compradoresCarregados,
         metodosPagamento: metodosCarregados,
         prazosPagamento: enriquecerPrazosPagamento(prazosCarregados, metodosCarregados),
-        etapasOrcamento: etapasCarregadasOrdenadas,
+        etapasCotacao: etapasCarregadasOrdenadas,
         produtos: produtosCarregados.filter((produto) => produto.status !== 0),
-        camposOrcamento: camposCarregados,
-        camposPedido: camposPedidoCarregados,
-        etapasPedido: etapasPedidoCarregadas,
-        tiposPedido: tiposPedidoCarregados,
+        camposCotacao: camposCarregados,
+        camposOrdemCompra: camposOrdemCompraCarregados,
+        etapasOrdemCompra: etapasOrdemCompraCarregadas,
+        tiposOrdemCompra: tiposOrdemCompraCarregados,
         empresa: empresasCarregadas[0] || null
       };
     } catch (_erro) {
-      definirMensagemErro('Nao foi possivel carregar os orcamentos.');
+      definirMensagemErro('Nao foi possivel carregar os cotacoes.');
       return null;
     } finally {
       definirCarregandoContexto(false);
     }
   }
 
-  async function carregarGradeOrcamentos(contextoAtual = null) {
+  async function carregarGradeCotacoes(contextoAtual = null) {
     definirCarregandoGrade(true);
     definirMensagemErro('');
 
     try {
-      const orcamentosCarregados = await listarOrcamentos({
+      const cotacoesCarregados = await listarCotacoes({
         search: pesquisa,
         ...filtros,
-        ...(usuarioSomenteVendedor
+        ...(usuarioSomenteComprador
           ? {
-            escopoIdVendedor: usuarioLogado?.idVendedor,
+            escopoIdComprador: usuarioLogado?.idComprador,
             escopoIdUsuario: usuarioLogado?.idUsuario
           }
           : {})
@@ -353,26 +353,26 @@ export function PaginaCotacoes({ usuarioLogado }) {
         fornecedores,
         contatos,
         usuarios,
-        vendedores,
+        compradores,
         prazosPagamento,
-        etapasOrcamento,
+        etapasCotacao,
         produtos
       };
 
-      definirOrcamentos(
-        enriquecerOrcamentos(
-          orcamentosCarregados,
+      definirCotacoes(
+        enriquecerCotacoes(
+          cotacoesCarregados,
           contexto.fornecedores,
           contexto.contatos,
           contexto.usuarios,
-          contexto.vendedores,
+          contexto.compradores,
           contexto.prazosPagamento,
-          contexto.etapasOrcamento,
+          contexto.etapasCotacao,
           contexto.produtos
         )
       );
     } catch (_erro) {
-      definirMensagemErro('Nao foi possivel carregar os orcamentos.');
+      definirMensagemErro('Nao foi possivel carregar os cotacoes.');
     } finally {
       definirCarregandoGrade(false);
     }
@@ -382,18 +382,18 @@ export function PaginaCotacoes({ usuarioLogado }) {
     const contextoAtual = await carregarContexto();
 
     if (contextoAtual) {
-      await carregarGradeOrcamentos(contextoAtual);
+      await carregarGradeCotacoes(contextoAtual);
     }
   }
 
-  async function salvarColunasGridOrcamentos(dadosColunas) {
+  async function salvarColunasGridCotacoes(dadosColunas) {
     if (!empresa?.idEmpresa) {
       throw new Error('Cadastre a empresa antes de configurar as colunas do grid.');
     }
 
     await atualizarEmpresa(
       empresa.idEmpresa,
-      criarPayloadAtualizacaoColunasGrid('colunasGridOrcamentos', dadosColunas.colunasGridOrcamentos)
+      criarPayloadAtualizacaoColunasGrid('colunasGridCotacoes', dadosColunas.colunasGridCotacoes)
     );
 
     const empresasAtualizadas = await listarEmpresas();
@@ -402,68 +402,68 @@ export function PaginaCotacoes({ usuarioLogado }) {
     definirModalColunasGridAberto(false);
   }
 
-  async function salvarOrcamento(dadosOrcamento) {
-    const payload = normalizarPayloadOrcamento(dadosOrcamento, usuarioLogado);
-    const etapaAnterior = orcamentoSelecionado?.idEtapaOrcamento || null;
-    const etapaAtual = dadosOrcamento.idEtapaOrcamento || null;
+  async function salvarCotacao(dadosCotacao) {
+    const payload = normalizarPayloadCotacao(dadosCotacao, usuarioLogado);
+    const etapaAnterior = cotacaoSelecionado?.idEtapaCotacao || null;
+    const etapaAtual = dadosCotacao.idEtapaCotacao || null;
     let registroSalvo = null;
 
-    if (orcamentoSelecionado?.idOrcamento) {
-      registroSalvo = await atualizarOrcamento(orcamentoSelecionado.idOrcamento, payload);
+    if (cotacaoSelecionado?.idCotacao) {
+      registroSalvo = await atualizarCotacao(cotacaoSelecionado.idCotacao, payload);
     } else {
-      registroSalvo = await incluirOrcamento(payload);
+      registroSalvo = await incluirCotacao(payload);
     }
 
     await recarregarPagina();
     fecharModal();
 
-    if (etapaAcabouDeFechar(etapaAnterior, etapaAtual, etapasOrcamento) && !registroSalvo?.idPedidoVinculado) {
-      const orcamentoEnriquecido = enriquecerOrcamentoParaPedido(
-        registroSalvo || { ...dadosOrcamento, idOrcamento: orcamentoSelecionado?.idOrcamento },
+    if (etapaAcabouDeFechar(etapaAnterior, etapaAtual, etapasCotacao) && !registroSalvo?.idOrdemCompraVinculado) {
+      const cotacaoEnriquecido = enriquecerCotacaoParaOrdemCompra(
+        registroSalvo || { ...dadosCotacao, idCotacao: cotacaoSelecionado?.idCotacao },
         {
           fornecedores,
           contatos,
           usuarios,
-          vendedores,
+          compradores,
           prazosPagamento,
-          etapasOrcamento,
+          etapasCotacao,
           produtos
         }
       );
 
-      const pendenciaPedido = {
-        dadosPedido: montarDadosIniciaisPedidoAPartirDoOrcamento(orcamentoEnriquecido),
-        idOrcamento: orcamentoEnriquecido.idOrcamento,
+      const pendenciaOrdemCompra = {
+        dadosOrdemCompra: montarDadosIniciaisOrdemCompraAPartirDoCotacao(cotacaoEnriquecido),
+        idCotacao: cotacaoEnriquecido.idCotacao,
         idEtapaAnterior: etapaAnterior,
         idEtapaDestino: etapaAtual,
         etapaJaAtualizada: true
       };
 
-      if (dadosOrcamento.solicitarPedidoAoSalvar) {
-        definirOrcamentoPedidoEmCriacao(pendenciaPedido);
-        definirDadosIniciaisPedido(pendenciaPedido.dadosPedido);
+      if (dadosCotacao.solicitarOrdemCompraAoSalvar) {
+        definirCotacaoOrdemCompraEmCriacao(pendenciaOrdemCompra);
+        definirDadosIniciaisOrdemCompra(pendenciaOrdemCompra.dadosOrdemCompra);
         definirModalOrdemCompraAberto(true);
         return;
       }
 
-      definirOrcamentoPedidoPendente(pendenciaPedido);
+      definirCotacaoOrdemCompraPendente(pendenciaOrdemCompra);
     }
   }
 
-  async function incluirClientePeloOrcamento(dadosCliente) {
-    const payload = normalizarPayloadClienteCadastro({
-      ...dadosCliente,
-      idVendedor: usuarioSomenteVendedor ? String(usuarioLogado.idVendedor) : dadosCliente.idVendedor
+  async function incluirFornecedorPeloCotacao(dadosFornecedor) {
+    const payload = normalizarPayloadFornecedorCadastro({
+      ...dadosFornecedor,
+      idComprador: usuarioSomenteComprador ? String(usuarioLogado.idComprador) : dadosFornecedor.idComprador
     });
 
-    const clienteSalvo = await incluirCliente(payload);
-    await salvarContatosClienteCadastro(clienteSalvo.idCliente, dadosCliente.contatos || []);
+    const fornecedorSalvo = await incluirFornecedor(payload);
+    await salvarContatosFornecedorCadastro(fornecedorSalvo.idFornecedor, dadosFornecedor.contatos || []);
     await recarregarPagina();
 
-    const clientesAtualizados = await listarClientes();
-    const clienteCompleto = clientesAtualizados.find((cliente) => cliente.idCliente === clienteSalvo.idCliente);
+    const fornecedoresAtualizados = await listarFornecedores();
+    const fornecedorCompleto = fornecedoresAtualizados.find((fornecedor) => fornecedor.idFornecedor === fornecedorSalvo.idFornecedor);
 
-    return clienteCompleto || clienteSalvo;
+    return fornecedorCompleto || fornecedorSalvo;
   }
 
   async function salvarPrazoPagamento(dadosPrazo) {
@@ -497,57 +497,57 @@ export function PaginaCotacoes({ usuarioLogado }) {
     return null;
   }
 
-  async function alterarEtapaRapidamente(orcamento, idEtapaOrcamento) {
-    const payload = normalizarPayloadOrcamento(
+  async function alterarEtapaRapidamente(cotacao, idEtapaCotacao) {
+    const payload = normalizarPayloadCotacao(
       {
-        ...orcamento,
-        idEtapaOrcamento,
-        dataFechamento: entrouEmEtapaFechada(orcamento.idEtapaOrcamento, idEtapaOrcamento)
+        ...cotacao,
+        idEtapaCotacao,
+        dataFechamento: entrouEmEtapaFechada(cotacao.idEtapaCotacao, idEtapaCotacao)
           ? obterDataAtualFormatoInput()
-          : orcamento.dataFechamento
+          : cotacao.dataFechamento
       },
       usuarioLogado
     );
 
-    const registroAtualizado = await atualizarOrcamento(orcamento.idOrcamento, payload);
+    const registroAtualizado = await atualizarCotacao(cotacao.idCotacao, payload);
     await recarregarPagina();
     return registroAtualizado;
   }
 
-  async function selecionarEtapaNoGrid(orcamento, proximoIdEtapa) {
-    if (orcamento.idPedidoVinculado) {
+  async function selecionarEtapaNoGrid(cotacao, proximoIdEtapa) {
+    if (cotacao.idOrdemCompraVinculado) {
       return;
     }
 
     const valorEtapa = String(proximoIdEtapa || '').trim();
 
-    if (!valorEtapa || String(orcamento.idEtapaOrcamento || '') === valorEtapa) {
+    if (!valorEtapa || String(cotacao.idEtapaCotacao || '') === valorEtapa) {
       return;
     }
 
-    const etapaSelecionada = etapasOrcamento.find(
-      (etapa) => String(etapa.idEtapaOrcamento) === valorEtapa
+    const etapaSelecionada = etapasCotacao.find(
+      (etapa) => String(etapa.idEtapaCotacao) === valorEtapa
     );
 
 
-    if (Number(valorEtapa) === ID_ETAPA_ORCAMENTO_FECHAMENTO) {
-      const orcamentoEnriquecido = enriquecerOrcamentoParaPedido(
-        orcamento,
+    if (Number(valorEtapa) === ID_ETAPA_COTACAO_FECHAMENTO) {
+      const cotacaoEnriquecido = enriquecerCotacaoParaOrdemCompra(
+        cotacao,
         {
           fornecedores,
           contatos,
           usuarios,
-          vendedores,
+          compradores,
           prazosPagamento,
-          etapasOrcamento,
+          etapasCotacao,
           produtos
         }
       );
 
-      definirOrcamentoPedidoPendente({
-        dadosPedido: montarDadosIniciaisPedidoAPartirDoOrcamento(orcamentoEnriquecido),
-        idOrcamento: orcamento.idOrcamento,
-        idEtapaAnterior: orcamento.idEtapaOrcamento || null,
+      definirCotacaoOrdemCompraPendente({
+        dadosOrdemCompra: montarDadosIniciaisOrdemCompraAPartirDoCotacao(cotacaoEnriquecido),
+        idCotacao: cotacao.idCotacao,
+        idEtapaAnterior: cotacao.idEtapaCotacao || null,
         idEtapaDestino: Number(valorEtapa),
         etapaJaAtualizada: false
       });
@@ -555,193 +555,193 @@ export function PaginaCotacoes({ usuarioLogado }) {
     }
 
     const registroAtualizado = await alterarEtapaRapidamente(
-      orcamento,
+      cotacao,
       Number(valorEtapa)
     );
 
-    if (etapaAcabouDeFechar(orcamento.idEtapaOrcamento, valorEtapa, etapasOrcamento) && !registroAtualizado?.idPedidoVinculado) {
-      const orcamentoEnriquecido = enriquecerOrcamentoParaPedido(
-        registroAtualizado || { ...orcamento, idEtapaOrcamento: Number(valorEtapa) },
+    if (etapaAcabouDeFechar(cotacao.idEtapaCotacao, valorEtapa, etapasCotacao) && !registroAtualizado?.idOrdemCompraVinculado) {
+      const cotacaoEnriquecido = enriquecerCotacaoParaOrdemCompra(
+        registroAtualizado || { ...cotacao, idEtapaCotacao: Number(valorEtapa) },
         {
           fornecedores,
           contatos,
           usuarios,
-          vendedores,
+          compradores,
           prazosPagamento,
-          etapasOrcamento,
+          etapasCotacao,
           produtos
         }
       );
 
-      definirOrcamentoPedidoPendente({
-        dadosPedido: montarDadosIniciaisPedidoAPartirDoOrcamento(orcamentoEnriquecido),
-        idOrcamento: orcamento.idOrcamento,
-        idEtapaAnterior: orcamento.idEtapaOrcamento || null,
+      definirCotacaoOrdemCompraPendente({
+        dadosOrdemCompra: montarDadosIniciaisOrdemCompraAPartirDoCotacao(cotacaoEnriquecido),
+        idCotacao: cotacao.idCotacao,
+        idEtapaAnterior: cotacao.idEtapaCotacao || null,
         idEtapaDestino: Number(valorEtapa),
         etapaJaAtualizada: true
       });
     }
   }
 
-  function abrirNovoOrcamento() {
-    definirOrcamentoSelecionado(null);
+  function abrirNovoCotacao() {
+    definirCotacaoSelecionado(null);
     definirModoModal('novo');
     definirModalAberto(true);
   }
 
-  function abrirEdicaoOrcamento(orcamento) {
-    if (orcamentoBloqueadoParaEdicao(orcamento, usuarioLogado)) {
-      abrirConsultaOrcamento(orcamento);
+  function abrirEdicaoCotacao(cotacao) {
+    if (cotacaoBloqueadoParaEdicao(cotacao, usuarioLogado)) {
+      abrirConsultaCotacao(cotacao);
       return;
     }
 
-    definirOrcamentoSelecionado(orcamento);
+    definirCotacaoSelecionado(cotacao);
     definirModoModal('edicao');
     definirModalAberto(true);
   }
 
-  function abrirConsultaOrcamento(orcamento) {
-    definirOrcamentoSelecionado(orcamento);
+  function abrirConsultaCotacao(cotacao) {
+    definirCotacaoSelecionado(cotacao);
     definirModoModal('consulta');
     definirModalAberto(true);
   }
 
   function fecharModal() {
     definirModalAberto(false);
-    definirOrcamentoSelecionado(null);
+    definirCotacaoSelecionado(null);
     definirModoModal('novo');
   }
 
-  function abrirModalFiltrosOrcamentos() {
+  function abrirModalFiltrosCotacoes() {
     definirFiltrosEmEdicao({
       ...filtros,
       idUsuario: Array.isArray(filtros.idUsuario) ? [...filtros.idUsuario] : [],
-      idVendedorFornecedor: Array.isArray(filtros.idVendedorFornecedor) ? [...filtros.idVendedorFornecedor] : [],
-      idVendedor: Array.isArray(filtros.idVendedor) ? [...filtros.idVendedor] : [],
-      idsEtapaOrcamento: Array.isArray(filtros.idsEtapaOrcamento) ? [...filtros.idsEtapaOrcamento] : []
+      idCompradorFornecedor: Array.isArray(filtros.idCompradorFornecedor) ? [...filtros.idCompradorFornecedor] : [],
+      idComprador: Array.isArray(filtros.idComprador) ? [...filtros.idComprador] : [],
+      idsEtapaCotacao: Array.isArray(filtros.idsEtapaCotacao) ? [...filtros.idsEtapaCotacao] : []
     });
     definirModalFiltrosAberto(true);
   }
 
-  function fecharModalFiltrosOrcamentos() {
+  function fecharModalFiltrosCotacoes() {
     definirModalFiltrosAberto(false);
     definirFiltrosEmEdicao(null);
   }
 
-  function abrirExclusaoOrcamento(orcamento) {
-    if (!permitirExcluir || orcamento.idPedidoVinculado) {
+  function abrirExclusaoCotacao(cotacao) {
+    if (!permitirExcluir || cotacao.idOrdemCompraVinculado) {
       return;
     }
 
-    definirOrcamentoExclusaoPendente(orcamento);
+    definirCotacaoExclusaoPendente(cotacao);
   }
 
-  function cancelarExclusaoOrcamento() {
-    definirOrcamentoExclusaoPendente(null);
+  function cancelarExclusaoCotacao() {
+    definirCotacaoExclusaoPendente(null);
   }
 
-  async function confirmarExclusaoOrcamento() {
-    if (!orcamentoExclusaoPendente) {
+  async function confirmarExclusaoCotacao() {
+    if (!cotacaoExclusaoPendente) {
       return;
     }
 
-    await excluirOrcamento(orcamentoExclusaoPendente.idOrcamento);
-    definirOrcamentoExclusaoPendente(null);
+    await excluirCotacao(cotacaoExclusaoPendente.idCotacao);
+    definirCotacaoExclusaoPendente(null);
     await recarregarPagina();
   }
 
-  async function abrirPedidoAPartirDoOrcamento() {
-    if (!orcamentoPedidoPendente) {
+  async function abrirOrdemCompraAPartirDoCotacao() {
+    if (!cotacaoOrdemCompraPendente) {
       return;
     }
 
-    let pendenciaPedido = orcamentoPedidoPendente;
+    let pendenciaOrdemCompra = cotacaoOrdemCompraPendente;
 
-    if (!pendenciaPedido.etapaJaAtualizada && pendenciaPedido.idOrcamento && pendenciaPedido.idEtapaDestino) {
-      const orcamentoAtual = orcamentos.find((item) => item.idOrcamento === pendenciaPedido.idOrcamento);
+    if (!pendenciaOrdemCompra.etapaJaAtualizada && pendenciaOrdemCompra.idCotacao && pendenciaOrdemCompra.idEtapaDestino) {
+      const cotacaoAtual = cotacoes.find((item) => item.idCotacao === pendenciaOrdemCompra.idCotacao);
 
-      if (!orcamentoAtual) {
+      if (!cotacaoAtual) {
         return;
       }
 
       const registroAtualizado = await alterarEtapaRapidamente(
-        orcamentoAtual,
-        Number(pendenciaPedido.idEtapaDestino)
+        cotacaoAtual,
+        Number(pendenciaOrdemCompra.idEtapaDestino)
       );
 
-      const orcamentoEnriquecido = enriquecerOrcamentoParaPedido(
+      const cotacaoEnriquecido = enriquecerCotacaoParaOrdemCompra(
         registroAtualizado || {
-          ...orcamentoAtual,
-          idEtapaOrcamento: Number(pendenciaPedido.idEtapaDestino)
+          ...cotacaoAtual,
+          idEtapaCotacao: Number(pendenciaOrdemCompra.idEtapaDestino)
         },
         {
           fornecedores,
           contatos,
           usuarios,
-          vendedores,
+          compradores,
           prazosPagamento,
-          etapasOrcamento,
+          etapasCotacao,
           produtos
         }
       );
 
-      pendenciaPedido = {
-        ...pendenciaPedido,
-        dadosPedido: montarDadosIniciaisPedidoAPartirDoOrcamento(orcamentoEnriquecido),
+      pendenciaOrdemCompra = {
+        ...pendenciaOrdemCompra,
+        dadosOrdemCompra: montarDadosIniciaisOrdemCompraAPartirDoCotacao(cotacaoEnriquecido),
         etapaJaAtualizada: true
       };
     }
 
-    definirOrcamentoPedidoEmCriacao(pendenciaPedido);
-    definirDadosIniciaisPedido(pendenciaPedido.dadosPedido);
+    definirCotacaoOrdemCompraEmCriacao(pendenciaOrdemCompra);
+    definirDadosIniciaisOrdemCompra(pendenciaOrdemCompra.dadosOrdemCompra);
     definirModalOrdemCompraAberto(true);
-    definirOrcamentoPedidoPendente(null);
+    definirCotacaoOrdemCompraPendente(null);
   }
 
-  async function cancelarCriacaoPedido() {
-    const pendencia = orcamentoPedidoPendente || orcamentoPedidoEmCriacao;
+  async function cancelarCriacaoOrdemCompra() {
+    const pendencia = cotacaoOrdemCompraPendente || cotacaoOrdemCompraEmCriacao;
 
-    if (!pendencia?.idOrcamento) {
-      definirOrcamentoPedidoPendente(null);
-      definirOrcamentoPedidoEmCriacao(null);
+    if (!pendencia?.idCotacao) {
+      definirCotacaoOrdemCompraPendente(null);
+      definirCotacaoOrdemCompraEmCriacao(null);
       return;
     }
 
-    const orcamentoAtual = orcamentos.find((item) => item.idOrcamento === pendencia.idOrcamento);
-    const etapaFechadoSemPedido = obterEtapaFechadoSemPedido(etapasOrcamento);
+    const cotacaoAtual = cotacoes.find((item) => item.idCotacao === pendencia.idCotacao);
+    const etapaFechadoSemOrdemCompra = obterEtapaFechadoSemOrdemCompra(etapasCotacao);
 
-    if (orcamentoAtual && etapaFechadoSemPedido?.idEtapaOrcamento) {
+    if (cotacaoAtual && etapaFechadoSemOrdemCompra?.idEtapaCotacao) {
       await alterarEtapaRapidamente(
-        orcamentoAtual,
-        Number(etapaFechadoSemPedido.idEtapaOrcamento)
+        cotacaoAtual,
+        Number(etapaFechadoSemOrdemCompra.idEtapaCotacao)
       );
     } else {
       await recarregarPagina();
     }
 
-    definirOrcamentoPedidoPendente(null);
-    definirOrcamentoPedidoEmCriacao(null);
+    definirCotacaoOrdemCompraPendente(null);
+    definirCotacaoOrdemCompraEmCriacao(null);
   }
 
   function fecharModalOrdemCompra() {
     definirModalOrdemCompraAberto(false);
-    definirDadosIniciaisPedido(null);
-    if (orcamentoPedidoEmCriacao) {
-      cancelarCriacaoPedido();
+    definirDadosIniciaisOrdemCompra(null);
+    if (cotacaoOrdemCompraEmCriacao) {
+      cancelarCriacaoOrdemCompra();
     }
   }
 
-  async function salvarPedido(dadosPedido) {
-    await incluirPedido(normalizarPayloadPedido(dadosPedido));
+  async function salvarOrdemCompra(dadosOrdemCompra) {
+    await incluirOrdemCompra(normalizarPayloadOrdemCompra(dadosOrdemCompra));
     await recarregarPagina();
-    definirOrcamentoPedidoEmCriacao(null);
+    definirCotacaoOrdemCompraEmCriacao(null);
     fecharModalOrdemCompra();
   }
 
   const carregando = carregandoContexto || carregandoGrade;
-  const colunasVisiveisOrcamentos = useMemo(
-    () => normalizarColunasGridOrcamentos(empresa?.colunasGridOrcamentos),
-    [empresa?.colunasGridOrcamentos]
+  const colunasVisiveisCotacoes = useMemo(
+    () => normalizarColunasGridCotacoes(empresa?.colunasGridCotacoes),
+    [empresa?.colunasGridCotacoes]
   );
   const filtrosAtivos = JSON.stringify(filtros) !== JSON.stringify(filtrosIniciais);
 
@@ -749,8 +749,8 @@ export function PaginaCotacoes({ usuarioLogado }) {
     <>
       <header className="cabecalhoPagina">
         <div>
-          <h1>Orcamentos</h1>
-          <p>Cadastre, acompanhe e organize as propostas comerciais do CRM.</p>
+          <h1>Cotacoes</h1>
+          <p>Cadastre, acompanhe e organize as propostas comerciais do SRM.</p>
         </div>
 
         <div className="acoesCabecalhoPagina">
@@ -766,7 +766,7 @@ export function PaginaCotacoes({ usuarioLogado }) {
             somenteIcone
             title="Filtrar"
             aria-label="Filtrar"
-            onClick={abrirModalFiltrosOrcamentos}
+            onClick={abrirModalFiltrosCotacoes}
           />
           <Botao
             variante="secundario"
@@ -783,7 +783,7 @@ export function PaginaCotacoes({ usuarioLogado }) {
             somenteIcone
             title="Nova cotacao"
             aria-label="Nova cotacao"
-            onClick={abrirNovoOrcamento}
+            onClick={abrirNovoCotacao}
           />
         </div>
       </header>
@@ -791,33 +791,33 @@ export function PaginaCotacoes({ usuarioLogado }) {
       <CorpoPagina>
         <GradePadrao
           modo="layout"
-          totalColunasLayout={TOTAL_COLUNAS_GRID_ORCAMENTOS}
-          cabecalho={<CabecalhoGradeOrcamentos colunas={colunasVisiveisOrcamentos} />}
+          totalColunasLayout={TOTAL_COLUNAS_GRID_COTACOES}
+          cabecalho={<CabecalhoGradeCotacoes colunas={colunasVisiveisCotacoes} />}
           carregando={carregando}
           mensagemErro={mensagemErro}
-          temItens={orcamentos.length > 0}
+          temItens={cotacoes.length > 0}
           mensagemCarregando="Carreganda cotacaos..."
-          mensagemVazia="Nenhum orcamento encontrado."
+          mensagemVazia="Nenhum cotacao encontrado."
         >
-          {orcamentos.map((orcamento) => (
-            <LinhaOrcamento
-              key={orcamento.idOrcamento}
-              orcamento={orcamento}
-              colunas={colunasVisiveisOrcamentos}
-              etapasOrcamento={etapasOrcamento}
+          {cotacoes.map((cotacao) => (
+            <LinhaCotacao
+              key={cotacao.idCotacao}
+              cotacao={cotacao}
+              colunas={colunasVisiveisCotacoes}
+              etapasCotacao={etapasCotacao}
               permitirExcluir={permitirExcluir}
               usuarioLogado={usuarioLogado}
               empresa={empresa}
-              clientes={fornecedores}
-              permitirEdicao={!orcamentoBloqueadoParaEdicao(orcamento, usuarioLogado)}
+              fornecedores={fornecedores}
+              permitirEdicao={!cotacaoBloqueadoParaEdicao(cotacao, usuarioLogado)}
               permitirAlteracaoEtapa={
-                !orcamentoBloqueadoParaEdicao(orcamento, usuarioLogado)
-                && !orcamento.idPedidoVinculado
+                !cotacaoBloqueadoParaEdicao(cotacao, usuarioLogado)
+                && !cotacao.idOrdemCompraVinculado
               }
-              aoAlterarEtapa={(idEtapaOrcamento) => selecionarEtapaNoGrid(orcamento, idEtapaOrcamento)}
-              aoConsultar={() => abrirConsultaOrcamento(orcamento)}
-              aoEditar={() => abrirEdicaoOrcamento(orcamento)}
-              aoExcluir={() => abrirExclusaoOrcamento(orcamento)}
+              aoAlterarEtapa={(idEtapaCotacao) => selecionarEtapaNoGrid(cotacao, idEtapaCotacao)}
+              aoConsultar={() => abrirConsultaCotacao(cotacao)}
+              aoEditar={() => abrirEdicaoCotacao(cotacao)}
+              aoExcluir={() => abrirExclusaoCotacao(cotacao)}
             />
           ))}
         </GradePadrao>
@@ -837,7 +837,7 @@ export function PaginaCotacoes({ usuarioLogado }) {
                 icone="pesquisa"
                 type="button"
                 className="botaoCampoAcao"
-                onClick={() => definirModalBuscaClienteFiltrosAberto(true)}
+                onClick={() => definirModalBuscaFornecedorFiltrosAberto(true)}
                 somenteIcone
                 title="Buscar fornecedor"
                 aria-label="Buscar fornecedor"
@@ -845,9 +845,9 @@ export function PaginaCotacoes({ usuarioLogado }) {
                 Buscar fornecedor
               </Botao>
             ),
-            options: fornecedores.map((cliente) => ({
-              valor: String(cliente.idCliente),
-              label: cliente.nomeFantasia || cliente.razaoSocial
+            options: fornecedores.map((fornecedor) => ({
+              valor: String(fornecedor.idFornecedor),
+              label: fornecedor.nomeFantasia || fornecedor.razaoSocial
             }))
           },
           {
@@ -861,38 +861,38 @@ export function PaginaCotacoes({ usuarioLogado }) {
             }))
           },
           {
-            name: 'idVendedorFornecedor',
+            name: 'idCompradorFornecedor',
             label: 'Fornecedores do comprador',
             multiple: true,
             placeholder: 'Todos os compradores',
-            options: vendedores.map((vendedor) => ({
-              valor: String(vendedor.idVendedor),
-              label: vendedor.nome
+            options: compradores.map((comprador) => ({
+              valor: String(comprador.idComprador),
+              label: comprador.nome
             }))
           },
           {
-            name: 'idVendedor',
+            name: 'idComprador',
             label: 'Comprador da cotacao',
             multiple: true,
-            disabled: Boolean(usuarioSomenteVendedor),
+            disabled: Boolean(usuarioSomenteComprador),
             placeholder: 'Todos os compradores',
-            options: vendedores.map((vendedor) => ({
-              valor: String(vendedor.idVendedor),
-              label: vendedor.nome
+            options: compradores.map((comprador) => ({
+              valor: String(comprador.idComprador),
+              label: comprador.nome
             }))
           },
           {
-            name: 'idsEtapaOrcamento',
+            name: 'idsEtapaCotacao',
             label: 'Status da cotacao',
             multiple: true,
             tituloSelecao: 'Status da cotacao',
-            options: etapasOrcamento.map((etapa) => ({
-              valor: String(etapa.idEtapaOrcamento),
+            options: etapasCotacao.map((etapa) => ({
+              valor: String(etapa.idEtapaCotacao),
               label: etapa.descricao
             }))
           },
           {
-            name: 'periodosDatasOrcamento',
+            name: 'periodosDatasCotacao',
             label: 'Datas',
             type: 'date-filters-modal',
             tituloSelecao: 'Filtros de datas da cotacao',
@@ -915,84 +915,84 @@ export function PaginaCotacoes({ usuarioLogado }) {
             ]
           }
         ]}
-        aoFechar={fecharModalFiltrosOrcamentos}
+        aoFechar={fecharModalFiltrosCotacoes}
         aoAplicar={(proximosFiltros) => {
           definirFiltros(proximosFiltros);
-          fecharModalFiltrosOrcamentos();
+          fecharModalFiltrosCotacoes();
         }}
         aoLimpar={() => {
-          const filtrosLimpos = criarFiltrosLimposOrcamentos(usuarioLogado, empresa);
+          const filtrosLimpos = criarFiltrosLimposCotacoes(usuarioLogado, empresa);
           definirFiltrosEmEdicao(filtrosLimpos);
           return filtrosLimpos;
         }}
       />
-      <ModalBuscaClientes
-        aberto={modalBuscaClienteFiltrosAberto}
+      <ModalBuscaFornecedores
+        aberto={modalBuscaFornecedorFiltrosAberto}
         empresa={empresa}
-        clientes={fornecedores}
+        fornecedores={fornecedores}
         placeholder="Pesquisar fornecedor no filtro"
         ariaLabelPesquisa="Pesquisar fornecedor no filtro"
-        aoSelecionar={(cliente) => {
+        aoSelecionar={(fornecedor) => {
           definirFiltrosEmEdicao((estadoAtual) => ({
-            ...(estadoAtual || criarFiltrosIniciaisOrcamentos(usuarioLogado, empresa)),
-            idFornecedor: String(cliente.idCliente || '')
+            ...(estadoAtual || criarFiltrosIniciaisCotacoes(usuarioLogado, empresa)),
+            idFornecedor: String(fornecedor.idFornecedor || '')
           }));
-          definirModalBuscaClienteFiltrosAberto(false);
+          definirModalBuscaFornecedorFiltrosAberto(false);
         }}
-        aoFechar={() => definirModalBuscaClienteFiltrosAberto(false)}
+        aoFechar={() => definirModalBuscaFornecedorFiltrosAberto(false)}
       />
 
       <ModalCotacao
         aberto={modalAberto}
-        orcamento={orcamentoSelecionado}
-        clientes={fornecedores}
+        cotacao={cotacaoSelecionado}
+        fornecedores={fornecedores}
         contatos={contatos}
         usuarios={usuarios}
-        vendedores={vendedores}
+        compradores={compradores}
         ramosAtividade={ramosAtividade}
-        conceitosCliente={conceitosCliente}
+        conceitosFornecedor={conceitosFornecedor}
         metodosPagamento={metodosPagamento}
         prazosPagamento={prazosPagamento}
-        etapasOrcamento={etapasOrcamento}
+        etapasCotacao={etapasCotacao}
         produtos={produtos}
-        camposOrcamento={camposOrcamento}
-        camposPedido={camposPedido}
+        camposCotacao={camposCotacao}
+        camposOrdemCompra={camposOrdemCompra}
         empresa={empresa}
         usuarioLogado={usuarioLogado}
         modo={modoModal}
-        idVendedorBloqueado={usuarioSomenteVendedor ? usuarioLogado.idVendedor : null}
+        idCompradorBloqueado={usuarioSomenteComprador ? usuarioLogado.idComprador : null}
         somenteConsultaPrazos={usuarioSomenteConsultaConfiguracao}
-        aoIncluirCliente={incluirClientePeloOrcamento}
+        aoIncluirFornecedor={incluirFornecedorPeloCotacao}
         aoFechar={fecharModal}
-        aoSalvar={salvarOrcamento}
+        aoSalvar={salvarCotacao}
         aoSalvarPrazoPagamento={salvarPrazoPagamento}
         aoInativarPrazoPagamento={inativarPrazoPagamento}
       />
 
       <ModalOrdemCompra
-        aberto={modalPedidoAberto}
-        pedido={null}
-        dadosIniciais={dadosIniciaisPedido}
-        clientes={fornecedores}
+        aberto={modalOrdemCompraAberto}
+        ordemCompra={null}
+        dadosIniciais={dadosIniciaisOrdemCompra}
+        fornecedores={fornecedores}
         contatos={contatos}
         usuarios={usuarios}
-        vendedores={vendedores}
+        compradores={compradores}
         ramosAtividade={ramosAtividade}
-        conceitosCliente={conceitosCliente}
+        conceitosFornecedor={conceitosFornecedor}
         metodosPagamento={metodosPagamento}
         prazosPagamento={prazosPagamento}
-        tiposPedido={tiposPedido}
-        etapasPedido={etapasPedido}
+        tiposOrdemCompra={tiposOrdemCompra}
+        etapasOrdemCompra={etapasOrdemCompra}
         produtos={produtos}
-        camposPedido={camposPedido}
+        camposOrdemCompra={camposOrdemCompra}
         empresa={empresa}
         usuarioLogado={usuarioLogado}
         modo="novo"
-        idVendedorBloqueado={usuarioSomenteVendedor ? usuarioLogado.idVendedor : null}
+        idCompradorBloqueado={usuarioSomenteComprador ? usuarioLogado.idComprador : null}
         somenteConsultaPrazos={usuarioSomenteConsultaConfiguracao}
-        aoIncluirCliente={incluirClientePeloOrcamento}
+        aoIncluirFornecedor={incluirFornecedorPeloCotacao}
         aoFechar={fecharModalOrdemCompra}
-        aoSalvar={salvarPedido}
+        aoSalvar={salvarOrdemCompra}
         aoSalvarPrazoPagamento={salvarPrazoPagamento}
         aoInativarPrazoPagamento={inativarPrazoPagamento}
       />
@@ -1000,31 +1000,31 @@ export function PaginaCotacoes({ usuarioLogado }) {
       <ModalManualCotacoes
         aberto={modalManualAberto}
         aoFechar={() => definirModalManualAberto(false)}
-        orcamentos={orcamentos}
-        etapasOrcamento={etapasOrcamento}
+        cotacoes={cotacoes}
+        etapasCotacao={etapasCotacao}
         prazosPagamento={prazosPagamento}
         filtros={filtros}
         empresa={empresa}
         usuarioLogado={usuarioLogado}
       />
-      <ModalColunasGridOrcamentos
+      <ModalColunasGridCotacoes
         aberto={modalColunasGridAberto}
         empresa={empresa}
         aoFechar={() => definirModalColunasGridAberto(false)}
-        aoSalvar={salvarColunasGridOrcamentos}
+        aoSalvar={salvarColunasGridCotacoes}
       />
 
-      {orcamentoExclusaoPendente ? (
-        <div className="camadaConfirmacaoModal" role="presentation" onMouseDown={cancelarExclusaoOrcamento}>
+      {cotacaoExclusaoPendente ? (
+        <div className="camadaConfirmacaoModal" role="presentation" onMouseDown={cancelarExclusaoCotacao}>
           <div
             className="modalConfirmacaoAgenda"
             role="alertdialog"
             aria-modal="true"
-            aria-labelledby="tituloConfirmacaoExclusaoOrcamento"
+            aria-labelledby="tituloConfirmacaoExclusaoCotacao"
             onMouseDown={(evento) => evento.stopPropagation()}
           >
             <div className="cabecalhoConfirmacaoModal">
-              <h4 id="tituloConfirmacaoExclusaoOrcamento">Excluir cotacao</h4>
+              <h4 id="tituloConfirmacaoExclusaoCotacao">Excluir cotacao</h4>
             </div>
 
             <div className="corpoConfirmacaoModal">
@@ -1032,10 +1032,10 @@ export function PaginaCotacoes({ usuarioLogado }) {
             </div>
 
             <div className="acoesConfirmacaoModal">
-              <Botao variante="secundario" type="button" onClick={cancelarExclusaoOrcamento}>
+              <Botao variante="secundario" type="button" onClick={cancelarExclusaoCotacao}>
                 Nao
               </Botao>
-              <Botao variante="perigo" type="button" onClick={confirmarExclusaoOrcamento}>
+              <Botao variante="perigo" type="button" onClick={confirmarExclusaoCotacao}>
                 Sim
               </Botao>
             </div>
@@ -1043,28 +1043,28 @@ export function PaginaCotacoes({ usuarioLogado }) {
         </div>
       ) : null}
 
-      {orcamentoPedidoPendente ? (
-        <div className="camadaConfirmacaoModal" role="presentation" onMouseDown={cancelarCriacaoPedido}>
+      {cotacaoOrdemCompraPendente ? (
+        <div className="camadaConfirmacaoModal" role="presentation" onMouseDown={cancelarCriacaoOrdemCompra}>
           <div
             className="modalConfirmacaoAgenda"
             role="dialog"
             aria-modal="true"
-            aria-labelledby="tituloConfirmacaoCriarPedido"
+            aria-labelledby="tituloConfirmacaoCriarOrdemCompra"
             onMouseDown={(evento) => evento.stopPropagation()}
           >
             <div className="cabecalhoConfirmacaoModal">
-              <h4 id="tituloConfirmacaoCriarPedido">Criar ordem de compra</h4>
+              <h4 id="tituloConfirmacaoCriarOrdemCompra">Criar ordem de compra</h4>
             </div>
 
             <div className="corpoConfirmacaoModal">
-              <p>Este orcamento foi fechado. Deseja criar um ordem de compra a partir dele?</p>
+              <p>Este cotacao foi fechado. Deseja criar um ordem de compra a partir dele?</p>
             </div>
 
             <div className="acoesConfirmacaoModal">
-              <Botao variante="secundario" type="button" onClick={cancelarCriacaoPedido}>
+              <Botao variante="secundario" type="button" onClick={cancelarCriacaoOrdemCompra}>
                 Nao
               </Botao>
-              <Botao variante="primario" type="button" onClick={abrirPedidoAPartirDoOrcamento}>
+              <Botao variante="primario" type="button" onClick={abrirOrdemCompraAPartirDoCotacao}>
                 Sim
               </Botao>
             </div>
@@ -1075,7 +1075,7 @@ export function PaginaCotacoes({ usuarioLogado }) {
   );
 }
 
-function CabecalhoGradeOrcamentos({ colunas }) {
+function CabecalhoGradeCotacoes({ colunas }) {
   return (
     <div className="cabecalhoLayoutGradePadrao cabecalhoGradeCotacoes">
       {colunas.map((coluna) => (
@@ -1087,10 +1087,10 @@ function CabecalhoGradeOrcamentos({ colunas }) {
   );
 }
 
-function LinhaOrcamento({
-  orcamento,
+function LinhaCotacao({
+  cotacao,
   colunas,
-  etapasOrcamento,
+  etapasCotacao,
   permitirExcluir,
   usuarioLogado,
   empresa,
@@ -1104,10 +1104,10 @@ function LinhaOrcamento({
 }) {
   return (
     <div className="linhaLayoutGradePadrao linhaCotacao">
-      {colunas.map((coluna) => renderizarCelulaOrcamento({
+      {colunas.map((coluna) => renderizarCelulaCotacao({
         coluna,
-        orcamento,
-        etapasOrcamento,
+        cotacao,
+        etapasCotacao,
         permitirExcluir,
         usuarioLogado,
         empresa,
@@ -1123,10 +1123,10 @@ function LinhaOrcamento({
   );
 }
 
-function renderizarCelulaOrcamento({
+function renderizarCelulaCotacao({
   coluna,
-  orcamento,
-  etapasOrcamento,
+  cotacao,
+  etapasCotacao,
   permitirExcluir,
   usuarioLogado,
   empresa,
@@ -1145,239 +1145,239 @@ function renderizarCelulaOrcamento({
 
   if (coluna.id === 'codigo') {
     return (
-      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
-        <CodigoRegistro valor={orcamento.idOrcamento} />
-      </CelulaLayoutOrcamento>
+      <CelulaLayoutCotacao key={coluna.id} coluna={coluna} {...propriedadesCelula}>
+        <CodigoRegistro valor={cotacao.idCotacao} />
+      </CelulaLayoutCotacao>
     );
   }
 
-  if (coluna.id === 'idOrcamento') {
+  if (coluna.id === 'idCotacao') {
     return (
-      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
-        <CodigoRegistro valor={orcamento.idOrcamento} />
-      </CelulaLayoutOrcamento>
+      <CelulaLayoutCotacao key={coluna.id} coluna={coluna} {...propriedadesCelula}>
+        <CodigoRegistro valor={cotacao.idCotacao} />
+      </CelulaLayoutCotacao>
     );
   }
 
-  if (coluna.id === 'cliente') {
+  if (coluna.id === 'fornecedor') {
     return (
-      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(orcamento.nomeCliente)}</TextoGradeClamp>
-      </CelulaLayoutOrcamento>
+      <CelulaLayoutCotacao key={coluna.id} coluna={coluna} {...propriedadesCelula}>
+        <TextoGradeClamp>{obterValorGrid(cotacao.nomeFornecedor)}</TextoGradeClamp>
+      </CelulaLayoutCotacao>
     );
   }
 
-  if (coluna.id === 'idCliente') {
-    const cliente = (Array.isArray(clientes) ? clientes : []).find(
-      (item) => String(item.idCliente) === String(orcamento.idCliente)
+  if (coluna.id === 'idFornecedor') {
+    const fornecedor = (Array.isArray(fornecedores) ? fornecedores : []).find(
+      (item) => String(item.idFornecedor) === String(cotacao.idFornecedor)
     );
 
     return (
-      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
-        {orcamento.idCliente
-          ? <CodigoRegistro valor={formatarCodigoCliente(cliente || { idFornecedor: orcamento.idCliente }, empresa).replace('#', '')} />
+      <CelulaLayoutCotacao key={coluna.id} coluna={coluna} {...propriedadesCelula}>
+        {cotacao.idFornecedor
+          ? <CodigoRegistro valor={formatarCodigoFornecedor(fornecedor || { idFornecedor: cotacao.idFornecedor }, empresa).replace('#', '')} />
           : '-'}
-      </CelulaLayoutOrcamento>
+      </CelulaLayoutCotacao>
     );
   }
 
   if (coluna.id === 'idConceito') {
-    const cliente = (Array.isArray(clientes) ? clientes : []).find(
-      (item) => String(item.idCliente) === String(orcamento.idCliente)
+    const fornecedor = (Array.isArray(fornecedores) ? fornecedores : []).find(
+      (item) => String(item.idFornecedor) === String(cotacao.idFornecedor)
     );
 
     return (
-      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(cliente?.nomeConceito)}</TextoGradeClamp>
-      </CelulaLayoutOrcamento>
+      <CelulaLayoutCotacao key={coluna.id} coluna={coluna} {...propriedadesCelula}>
+        <TextoGradeClamp>{obterValorGrid(fornecedor?.nomeConceito)}</TextoGradeClamp>
+      </CelulaLayoutCotacao>
     );
   }
 
   if (coluna.id === 'contato') {
     return (
-      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(orcamento.nomeContato)}</TextoGradeClamp>
-      </CelulaLayoutOrcamento>
+      <CelulaLayoutCotacao key={coluna.id} coluna={coluna} {...propriedadesCelula}>
+        <TextoGradeClamp>{obterValorGrid(cotacao.nomeContato)}</TextoGradeClamp>
+      </CelulaLayoutCotacao>
     );
   }
 
   if (coluna.id === 'idContato') {
     return (
-      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
-        {orcamento.idContato ? <CodigoRegistro valor={orcamento.idContato} /> : '-'}
-      </CelulaLayoutOrcamento>
+      <CelulaLayoutCotacao key={coluna.id} coluna={coluna} {...propriedadesCelula}>
+        {cotacao.idContato ? <CodigoRegistro valor={cotacao.idContato} /> : '-'}
+      </CelulaLayoutCotacao>
     );
   }
 
   if (coluna.id === 'usuario') {
     return (
-      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(orcamento.nomeUsuario)}</TextoGradeClamp>
-      </CelulaLayoutOrcamento>
+      <CelulaLayoutCotacao key={coluna.id} coluna={coluna} {...propriedadesCelula}>
+        <TextoGradeClamp>{obterValorGrid(cotacao.nomeUsuario)}</TextoGradeClamp>
+      </CelulaLayoutCotacao>
     );
   }
 
   if (coluna.id === 'idUsuario') {
     return (
-      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
-        {orcamento.idUsuario ? <CodigoRegistro valor={orcamento.idUsuario} /> : '-'}
-      </CelulaLayoutOrcamento>
+      <CelulaLayoutCotacao key={coluna.id} coluna={coluna} {...propriedadesCelula}>
+        {cotacao.idUsuario ? <CodigoRegistro valor={cotacao.idUsuario} /> : '-'}
+      </CelulaLayoutCotacao>
     );
   }
 
-  if (coluna.id === 'idPedidoVinculado') {
+  if (coluna.id === 'idOrdemCompraVinculado') {
     return (
-      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
-        {orcamento.idPedidoVinculado ? (
-          <CodigoRegistro valor={orcamento.idPedidoVinculado} />
+      <CelulaLayoutCotacao key={coluna.id} coluna={coluna} {...propriedadesCelula}>
+        {cotacao.idOrdemCompraVinculado ? (
+          <CodigoRegistro valor={cotacao.idOrdemCompraVinculado} />
         ) : (
           '-'
         )}
-      </CelulaLayoutOrcamento>
+      </CelulaLayoutCotacao>
     );
   }
 
-  if (coluna.id === 'idVendedor') {
+  if (coluna.id === 'idComprador') {
     return (
-      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
-        {orcamento.idVendedor ? <CodigoRegistro valor={orcamento.idVendedor} /> : '-'}
-      </CelulaLayoutOrcamento>
+      <CelulaLayoutCotacao key={coluna.id} coluna={coluna} {...propriedadesCelula}>
+        {cotacao.idComprador ? <CodigoRegistro valor={cotacao.idComprador} /> : '-'}
+      </CelulaLayoutCotacao>
     );
   }
 
   if (coluna.id === 'etapa') {
-    const etapasDisponiveisEscolhaManual = obterEtapasOrcamentoParaInputManual(
-      etapasOrcamento,
-      orcamento.idEtapaOrcamento
+    const etapasDisponiveisEscolhaManual = obterEtapasCotacaoParaInputManual(
+      etapasCotacao,
+      cotacao.idEtapaCotacao
     );
 
     return (
-      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
-        <div className="campoEtapaGridOrcamento">
+      <CelulaLayoutCotacao key={coluna.id} coluna={coluna} {...propriedadesCelula}>
+        <div className="campoEtapaGridCotacao">
           <select
-            className="selectEtapaGridOrcamento"
-            style={criarEstiloEtapaOrcamento(orcamento.corEtapaOrcamento)}
-            value={orcamento.idEtapaOrcamento ? String(orcamento.idEtapaOrcamento) : ''}
+            className="selectEtapaGridCotacao"
+            style={criarEstiloEtapaCotacao(cotacao.corEtapaCotacao)}
+            value={cotacao.idEtapaCotacao ? String(cotacao.idEtapaCotacao) : ''}
             onChange={(evento) => aoAlterarEtapa(evento.target.value)}
-            aria-label={`Alterar etapa da cotacao ${orcamento.idOrcamento}`}
+            aria-label={`Alterar etapa da cotacao ${cotacao.idCotacao}`}
             disabled={!permitirAlteracaoEtapa}
           >
             <option value="">Sem etapa</option>
             {etapasDisponiveisEscolhaManual.map((etapa) => (
-              <option key={etapa.idEtapaOrcamento} value={etapa.idEtapaOrcamento}>
+              <option key={etapa.idEtapaCotacao} value={etapa.idEtapaCotacao}>
                 {etapa.descricao}
               </option>
             ))}
           </select>
         </div>
-      </CelulaLayoutOrcamento>
+      </CelulaLayoutCotacao>
     );
   }
 
-  if (coluna.id === 'idEtapaOrcamento') {
+  if (coluna.id === 'idEtapaCotacao') {
     return (
-      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
-        {orcamento.idEtapaOrcamento ? <CodigoRegistro valor={orcamento.idEtapaOrcamento} /> : '-'}
-      </CelulaLayoutOrcamento>
+      <CelulaLayoutCotacao key={coluna.id} coluna={coluna} {...propriedadesCelula}>
+        {cotacao.idEtapaCotacao ? <CodigoRegistro valor={cotacao.idEtapaCotacao} /> : '-'}
+      </CelulaLayoutCotacao>
     );
   }
 
-  if (coluna.id === 'vendedor') {
+  if (coluna.id === 'comprador') {
     return (
-      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(orcamento.nomeVendedor)}</TextoGradeClamp>
-      </CelulaLayoutOrcamento>
+      <CelulaLayoutCotacao key={coluna.id} coluna={coluna} {...propriedadesCelula}>
+        <TextoGradeClamp>{obterValorGrid(cotacao.nomeComprador)}</TextoGradeClamp>
+      </CelulaLayoutCotacao>
     );
   }
 
 
   if (coluna.id === 'prazoPagamento') {
     return (
-      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(orcamento.nomePrazoPagamento)}</TextoGradeClamp>
-      </CelulaLayoutOrcamento>
+      <CelulaLayoutCotacao key={coluna.id} coluna={coluna} {...propriedadesCelula}>
+        <TextoGradeClamp>{obterValorGrid(cotacao.nomePrazoPagamento)}</TextoGradeClamp>
+      </CelulaLayoutCotacao>
     );
   }
 
   if (coluna.id === 'idPrazoPagamento') {
     return (
-      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
-        {orcamento.idPrazoPagamento ? <CodigoRegistro valor={orcamento.idPrazoPagamento} /> : '-'}
-      </CelulaLayoutOrcamento>
+      <CelulaLayoutCotacao key={coluna.id} coluna={coluna} {...propriedadesCelula}>
+        {cotacao.idPrazoPagamento ? <CodigoRegistro valor={cotacao.idPrazoPagamento} /> : '-'}
+      </CelulaLayoutCotacao>
     );
   }
 
   if (coluna.id === 'metodoPagamento') {
     return (
-      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(orcamento.nomeMetodoPagamento)}</TextoGradeClamp>
-      </CelulaLayoutOrcamento>
+      <CelulaLayoutCotacao key={coluna.id} coluna={coluna} {...propriedadesCelula}>
+        <TextoGradeClamp>{obterValorGrid(cotacao.nomeMetodoPagamento)}</TextoGradeClamp>
+      </CelulaLayoutCotacao>
     );
   }
 
 
   if (coluna.id === 'dataInclusao') {
     return (
-      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
-        {formatarDataGridOrcamento(orcamento.dataInclusao)}
-      </CelulaLayoutOrcamento>
+      <CelulaLayoutCotacao key={coluna.id} coluna={coluna} {...propriedadesCelula}>
+        {formatarDataGridCotacao(cotacao.dataInclusao)}
+      </CelulaLayoutCotacao>
     );
   }
 
   if (coluna.id === 'dataValidade') {
     return (
-      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
-        {formatarDataGridOrcamento(orcamento.dataValidade)}
-      </CelulaLayoutOrcamento>
+      <CelulaLayoutCotacao key={coluna.id} coluna={coluna} {...propriedadesCelula}>
+        {formatarDataGridCotacao(cotacao.dataValidade)}
+      </CelulaLayoutCotacao>
     );
   }
 
   if (coluna.id === 'dataFechamento') {
     return (
-      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
-        {formatarDataGridOrcamento(orcamento.dataFechamento)}
-      </CelulaLayoutOrcamento>
+      <CelulaLayoutCotacao key={coluna.id} coluna={coluna} {...propriedadesCelula}>
+        {formatarDataGridCotacao(cotacao.dataFechamento)}
+      </CelulaLayoutCotacao>
     );
   }
 
   if (coluna.id === 'observacao') {
     return (
-      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(orcamento.observacao)}</TextoGradeClamp>
-      </CelulaLayoutOrcamento>
+      <CelulaLayoutCotacao key={coluna.id} coluna={coluna} {...propriedadesCelula}>
+        <TextoGradeClamp>{obterValorGrid(cotacao.observacao)}</TextoGradeClamp>
+      </CelulaLayoutCotacao>
     );
   }
 
   if (coluna.id === 'total') {
     return (
-      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
-        {normalizarPreco(orcamento.totalOrcamento)}
-      </CelulaLayoutOrcamento>
+      <CelulaLayoutCotacao key={coluna.id} coluna={coluna} {...propriedadesCelula}>
+        {normalizarPreco(cotacao.totalCotacao)}
+      </CelulaLayoutCotacao>
     );
   }
 
   if (coluna.id === 'acoes') {
     return (
-      <CelulaLayoutOrcamento key={coluna.id} coluna={coluna} {...propriedadesCelula}>
+      <CelulaLayoutCotacao key={coluna.id} coluna={coluna} {...propriedadesCelula}>
         <AcoesRegistro
           rotuloConsulta="Consultar cotacao"
-          rotuloEdicao={permitirEdicao ? 'Editar cotacao' : obterRotuloBloqueioEdicaoOrcamento(orcamento, usuarioLogado)}
+          rotuloEdicao={permitirEdicao ? 'Editar cotacao' : obterRotuloBloqueioEdicaoCotacao(cotacao, usuarioLogado)}
           rotuloInativacao="Excluir cotacao"
           iconeInativacao="limpar"
-          exibirInativacao={permitirExcluir && !orcamento.idPedidoVinculado}
+          exibirInativacao={permitirExcluir && !cotacao.idOrdemCompraVinculado}
           desabilitarEdicao={!permitirEdicao}
           aoConsultar={aoConsultar}
           aoEditar={aoEditar}
           aoInativar={aoExcluir}
         />
-      </CelulaLayoutOrcamento>
+      </CelulaLayoutCotacao>
     );
   }
 
   return null;
 }
 
-function CelulaLayoutOrcamento({ coluna, children, ...propriedades }) {
+function CelulaLayoutCotacao({ coluna, children, ...propriedades }) {
   return (
     <div {...propriedades}>
       <span className="rotuloCelulaLayoutGradePadrao">{coluna.rotulo}</span>
@@ -1393,7 +1393,7 @@ function obterEstiloColunaLayout(coluna) {
   };
 }
 
-function formatarDataGridOrcamento(valor) {
+function formatarDataGridCotacao(valor) {
   if (!valor) {
     return '-';
   }
@@ -1408,18 +1408,18 @@ function formatarDataGridOrcamento(valor) {
   return `${dia}/${mes}/${ano}`;
 }
 
-function normalizarFiltrosOrcamentos(filtros, filtrosPadrao) {
+function normalizarFiltrosCotacoes(filtros, filtrosPadrao) {
   const filtrosNormalizados = normalizarFiltrosPorPadrao(filtros, filtrosPadrao);
-  const vendedorTravado = Array.isArray(filtrosPadrao.idVendedor) && filtrosPadrao.idVendedor.length > 0;
+  const compradorTravado = Array.isArray(filtrosPadrao.idComprador) && filtrosPadrao.idComprador.length > 0;
 
   return {
     ...filtrosNormalizados,
     idUsuario: normalizarListaFiltroPersistido(filtrosNormalizados.idUsuario),
-    idVendedorFornecedor: normalizarListaFiltroPersistido(filtros.idVendedorFornecedor || filtros.idVendedorCliente),
-    idVendedor: vendedorTravado
-      ? [...filtrosPadrao.idVendedor]
-      : normalizarListaFiltroPersistido(filtrosNormalizados.idVendedor),
-    idsEtapaOrcamento: normalizarListaFiltroPersistido(filtrosNormalizados.idsEtapaOrcamento),
+    idCompradorFornecedor: normalizarListaFiltroPersistido(filtros.idCompradorFornecedor || filtros.idCompradorFornecedor),
+    idComprador: compradorTravado
+      ? [...filtrosPadrao.idComprador]
+      : normalizarListaFiltroPersistido(filtrosNormalizados.idComprador),
+    idsEtapaCotacao: normalizarListaFiltroPersistido(filtrosNormalizados.idsEtapaCotacao),
     ...normalizarIntervaloDatasFiltros(
       filtrosNormalizados,
       filtrosPadrao,
@@ -1516,18 +1516,18 @@ function obterValorOrdemEtapa(ordem, fallback) {
   return Number.MAX_SAFE_INTEGER;
 }
 
-function enriquecerOrcamentos(
-  orcamentos,
+function enriquecerCotacoes(
+  cotacoes,
   fornecedores,
   contatos,
   usuarios,
-  vendedores,
+  compradores,
   prazosPagamento,
-  etapasOrcamento,
+  etapasCotacao,
   produtos
 ) {
-  const clientesPorId = new Map(
-    fornecedores.map((cliente) => [String(cliente.idCliente), cliente])
+  const fornecedoresPorId = new Map(
+    fornecedores.map((fornecedor) => [String(fornecedor.idFornecedor), fornecedor])
   );
   const contatosPorId = new Map(
     contatos.map((contato) => [String(contato.idContato), contato.nome])
@@ -1535,65 +1535,65 @@ function enriquecerOrcamentos(
   const usuariosPorId = new Map(
     usuarios.map((usuario) => [String(usuario.idUsuario), usuario.nome])
   );
-  const vendedoresPorId = new Map(
-    vendedores.map((vendedor) => [String(vendedor.idVendedor), vendedor.nome])
+  const compradoresPorId = new Map(
+    compradores.map((comprador) => [String(comprador.idComprador), comprador.nome])
   );
   const prazosPorId = new Map(
     prazosPagamento.map((prazo) => [String(prazo.idPrazoPagamento), prazo])
   );
   const etapasPorId = new Map(
-    etapasOrcamento.map((etapa) => [String(etapa.idEtapaOrcamento), etapa])
+    etapasCotacao.map((etapa) => [String(etapa.idEtapaCotacao), etapa])
   );
   const produtosPorId = new Map(
     produtos.map((produto) => [String(produto.idProduto), produto])
   );
 
-  return orcamentos.map((orcamento) => {
-    const cliente = clientesPorId.get(String(orcamento.idCliente));
-    const prazo = prazosPorId.get(String(orcamento.idPrazoPagamento));
-    const etapa = etapasPorId.get(String(orcamento.idEtapaOrcamento));
-    const totalOrcamento = Array.isArray(orcamento.itens)
-      ? orcamento.itens.reduce((total, item) => total + (Number(item.valorTotal) || 0), 0)
+  return cotacoes.map((cotacao) => {
+    const fornecedor = fornecedoresPorId.get(String(cotacao.idFornecedor));
+    const prazo = prazosPorId.get(String(cotacao.idPrazoPagamento));
+    const etapa = etapasPorId.get(String(cotacao.idEtapaCotacao));
+    const totalCotacao = Array.isArray(cotacao.itens)
+      ? cotacao.itens.reduce((total, item) => total + (Number(item.valorTotal) || 0), 0)
       : 0;
 
     return {
-      ...orcamento,
-      itens: Array.isArray(orcamento.itens) ? orcamento.itens.map((item) => ({
+      ...cotacao,
+      itens: Array.isArray(cotacao.itens) ? cotacao.itens.map((item) => ({
         ...item,
         nomeProduto: obterValorGrid(
           item.nomeProduto || produtosPorId.get(String(item.idProduto))?.descricao
         )
       })) : [],
       nomeFornecedor: obterValorGrid(
-        orcamento.nomeCliente || cliente?.nomeFantasia || cliente?.razaoSocial
+        cotacao.nomeFornecedor || fornecedor?.nomeFantasia || fornecedor?.razaoSocial
       ),
       nomeContato: obterValorGrid(
-        orcamento.nomeContato || contatosPorId.get(String(orcamento.idContato))
+        cotacao.nomeContato || contatosPorId.get(String(cotacao.idContato))
       ),
-      idVendedorFornecedor: cliente?.idVendedor || null,
-      nomeVendedorFornecedor: obterValorGrid(
-        orcamento.nomeVendedorCliente || vendedoresPorId.get(String(cliente?.idVendedor))
+      idCompradorFornecedor: fornecedor?.idComprador || null,
+      nomeCompradorFornecedor: obterValorGrid(
+        cotacao.nomeCompradorFornecedor || compradoresPorId.get(String(fornecedor?.idComprador))
       ),
       nomeUsuario: obterValorGrid(
-        orcamento.nomeUsuario || usuariosPorId.get(String(orcamento.idUsuario))
+        cotacao.nomeUsuario || usuariosPorId.get(String(cotacao.idUsuario))
       ),
-      nomeVendedor: obterValorGrid(
-        orcamento.nomeVendedor || vendedoresPorId.get(String(orcamento.idVendedor))
+      nomeComprador: obterValorGrid(
+        cotacao.nomeComprador || compradoresPorId.get(String(cotacao.idComprador))
       ),
       nomeMetodoPagamento: obterValorGrid(
-        orcamento.nomeMetodoPagamento || prazo?.nomeMetodoPagamento
+        cotacao.nomeMetodoPagamento || prazo?.nomeMetodoPagamento
       ),
       nomePrazoPagamento: obterValorGrid(
-        orcamento.nomePrazoPagamento || prazo?.descricaoFormatada
+        cotacao.nomePrazoPagamento || prazo?.descricaoFormatada
       ),
       nomePrazoPagamentoDias: obterValorGrid(
-        orcamento.nomePrazoPagamentoDias || prazo?.descricaoDias
+        cotacao.nomePrazoPagamentoDias || prazo?.descricaoDias
       ),
-      nomeEtapaOrcamento: obterValorGrid(
-        orcamento.nomeEtapaOrcamento || etapa?.descricao
+      nomeEtapaCotacao: obterValorGrid(
+        cotacao.nomeEtapaCotacao || etapa?.descricao
       ),
-      corEtapaOrcamento: orcamento.corEtapaOrcamento || etapa?.cor || '',
-      totalOrcamento
+      corEtapaCotacao: cotacao.corEtapaCotacao || etapa?.cor || '',
+      totalCotacao
     };
   });
 }
@@ -1642,19 +1642,19 @@ function normalizarPayloadPrazoPagamento(dadosPrazo) {
   return payload;
 }
 
-function normalizarPayloadOrcamento(dadosOrcamento, usuarioLogado) {
+function normalizarPayloadCotacao(dadosCotacao, usuarioLogado) {
   return {
-    idFornecedor: Number(dadosOrcamento.idCliente),
-    idContato: dadosOrcamento.idContato ? Number(dadosOrcamento.idContato) : null,
-    idUsuario: Number(dadosOrcamento.idUsuario || usuarioLogado.idUsuario),
-    idVendedor: Number(dadosOrcamento.idVendedor),
-    idPrazoPagamento: dadosOrcamento.idPrazoPagamento ? Number(dadosOrcamento.idPrazoPagamento) : null,
-    idEtapaOrcamento: dadosOrcamento.idEtapaOrcamento ? Number(dadosOrcamento.idEtapaOrcamento) : null,
-    dataInclusao: limparTextoOpcional(dadosOrcamento.dataInclusao),
-    dataValidade: limparTextoOpcional(dadosOrcamento.dataValidade),
-    dataFechamento: limparTextoOpcional(dadosOrcamento.dataFechamento),
-    observacao: limparTextoOpcional(dadosOrcamento.observacao),
-    itens: dadosOrcamento.itens.map((item) => ({
+    idFornecedor: Number(dadosCotacao.idFornecedor),
+    idContato: dadosCotacao.idContato ? Number(dadosCotacao.idContato) : null,
+    idUsuario: Number(dadosCotacao.idUsuario || usuarioLogado.idUsuario),
+    idComprador: Number(dadosCotacao.idComprador),
+    idPrazoPagamento: dadosCotacao.idPrazoPagamento ? Number(dadosCotacao.idPrazoPagamento) : null,
+    idEtapaCotacao: dadosCotacao.idEtapaCotacao ? Number(dadosCotacao.idEtapaCotacao) : null,
+    dataInclusao: limparTextoOpcional(dadosCotacao.dataInclusao),
+    dataValidade: limparTextoOpcional(dadosCotacao.dataValidade),
+    dataFechamento: limparTextoOpcional(dadosCotacao.dataFechamento),
+    observacao: limparTextoOpcional(dadosCotacao.observacao),
+    itens: dadosCotacao.itens.map((item) => ({
       idProduto: Number(item.idProduto),
       quantidade: normalizarNumeroDecimal(item.quantidade),
       valorUnitario: normalizarNumeroDecimal(item.valorUnitario),
@@ -1662,36 +1662,36 @@ function normalizarPayloadOrcamento(dadosOrcamento, usuarioLogado) {
       imagem: limparTextoOpcional(item.imagem),
       observacao: limparTextoOpcional(item.observacao)
     })),
-    camposExtras: dadosOrcamento.camposExtras.map((campo) => ({
-      idCampoOrcamento: Number(campo.idCampoOrcamento),
+    camposExtras: dadosCotacao.camposExtras.map((campo) => ({
+      idCampoCotacao: Number(campo.idCampoCotacao),
       valor: limparTextoOpcional(campo.valor)
     }))
   };
 }
 
-function normalizarPayloadPedido(dadosPedido) {
+function normalizarPayloadOrdemCompra(dadosOrdemCompra) {
   return {
-    idOrcamento: dadosPedido.idOrcamento ? Number(dadosPedido.idOrcamento) : null,
-    idFornecedor: dadosPedido.idCliente ? Number(dadosPedido.idCliente) : null,
-    idContato: dadosPedido.idContato ? Number(dadosPedido.idContato) : null,
-    idUsuario: dadosPedido.idUsuario ? Number(dadosPedido.idUsuario) : null,
-      idVendedor: dadosPedido.idVendedor ? Number(dadosPedido.idVendedor) : null,
-      idPrazoPagamento: dadosPedido.idPrazoPagamento ? Number(dadosPedido.idPrazoPagamento) : null,
-      idTipoPedido: dadosPedido.idTipoPedido ? Number(dadosPedido.idTipoPedido) : null,
-      idEtapaPedido: dadosPedido.idEtapaPedido ? Number(dadosPedido.idEtapaPedido) : null,
-    dataInclusao: limparTextoOpcional(dadosPedido.dataInclusao),
-    dataEntrega: limparTextoOpcional(dadosPedido.dataEntrega),
-    observacao: limparTextoOpcional(dadosPedido.observacao),
-    codigoOrcamentoOrigem: dadosPedido.codigoOrcamentoOrigem ? Number(dadosPedido.codigoOrcamentoOrigem) : null,
-    nomeClienteSnapshot: limparTextoOpcional(dadosPedido.nomeClienteSnapshot),
-    nomeContatoSnapshot: limparTextoOpcional(dadosPedido.nomeContatoSnapshot),
-    nomeUsuarioSnapshot: limparTextoOpcional(dadosPedido.nomeUsuarioSnapshot),
-      nomeVendedorSnapshot: limparTextoOpcional(dadosPedido.nomeVendedorSnapshot),
-      nomeMetodoPagamentoSnapshot: limparTextoOpcional(dadosPedido.nomeMetodoPagamentoSnapshot),
-      nomePrazoPagamentoSnapshot: limparTextoOpcional(dadosPedido.nomePrazoPagamentoSnapshot),
-      nomeTipoPedidoSnapshot: limparTextoOpcional(dadosPedido.nomeTipoPedidoSnapshot),
-      nomeEtapaPedidoSnapshot: limparTextoOpcional(dadosPedido.nomeEtapaPedidoSnapshot),
-    itens: Array.isArray(dadosPedido.itens) ? dadosPedido.itens.map((item) => ({
+    idCotacao: dadosOrdemCompra.idCotacao ? Number(dadosOrdemCompra.idCotacao) : null,
+    idFornecedor: dadosOrdemCompra.idFornecedor ? Number(dadosOrdemCompra.idFornecedor) : null,
+    idContato: dadosOrdemCompra.idContato ? Number(dadosOrdemCompra.idContato) : null,
+    idUsuario: dadosOrdemCompra.idUsuario ? Number(dadosOrdemCompra.idUsuario) : null,
+      idComprador: dadosOrdemCompra.idComprador ? Number(dadosOrdemCompra.idComprador) : null,
+      idPrazoPagamento: dadosOrdemCompra.idPrazoPagamento ? Number(dadosOrdemCompra.idPrazoPagamento) : null,
+      idTipoOrdemCompra: dadosOrdemCompra.idTipoOrdemCompra ? Number(dadosOrdemCompra.idTipoOrdemCompra) : null,
+      idEtapaOrdemCompra: dadosOrdemCompra.idEtapaOrdemCompra ? Number(dadosOrdemCompra.idEtapaOrdemCompra) : null,
+    dataInclusao: limparTextoOpcional(dadosOrdemCompra.dataInclusao),
+    dataEntrega: limparTextoOpcional(dadosOrdemCompra.dataEntrega),
+    observacao: limparTextoOpcional(dadosOrdemCompra.observacao),
+    codigoCotacaoOrigem: dadosOrdemCompra.codigoCotacaoOrigem ? Number(dadosOrdemCompra.codigoCotacaoOrigem) : null,
+    nomeFornecedorSnapshot: limparTextoOpcional(dadosOrdemCompra.nomeFornecedorSnapshot),
+    nomeContatoSnapshot: limparTextoOpcional(dadosOrdemCompra.nomeContatoSnapshot),
+    nomeUsuarioSnapshot: limparTextoOpcional(dadosOrdemCompra.nomeUsuarioSnapshot),
+      nomeCompradorSnapshot: limparTextoOpcional(dadosOrdemCompra.nomeCompradorSnapshot),
+      nomeMetodoPagamentoSnapshot: limparTextoOpcional(dadosOrdemCompra.nomeMetodoPagamentoSnapshot),
+      nomePrazoPagamentoSnapshot: limparTextoOpcional(dadosOrdemCompra.nomePrazoPagamentoSnapshot),
+      nomeTipoOrdemCompraSnapshot: limparTextoOpcional(dadosOrdemCompra.nomeTipoOrdemCompraSnapshot),
+      nomeEtapaOrdemCompraSnapshot: limparTextoOpcional(dadosOrdemCompra.nomeEtapaOrdemCompraSnapshot),
+    itens: Array.isArray(dadosOrdemCompra.itens) ? dadosOrdemCompra.itens.map((item) => ({
       idProduto: item.idProduto ? Number(item.idProduto) : null,
       quantidade: normalizarNumeroDecimal(item.quantidade),
       valorUnitario: normalizarNumeroDecimal(item.valorUnitario),
@@ -1702,54 +1702,54 @@ function normalizarPayloadPedido(dadosPedido) {
       descricaoProdutoSnapshot: limparTextoOpcional(item.descricaoProdutoSnapshot),
       unidadeProdutoSnapshot: limparTextoOpcional(item.unidadeProdutoSnapshot)
     })) : [],
-    camposExtras: Array.isArray(dadosPedido.camposExtras) ? dadosPedido.camposExtras.map((campo) => ({
-      idCampoPedido: campo.idCampoPedido ? Number(campo.idCampoPedido) : null,
+    camposExtras: Array.isArray(dadosOrdemCompra.camposExtras) ? dadosOrdemCompra.camposExtras.map((campo) => ({
+      idCampoOrdemCompra: campo.idCampoOrdemCompra ? Number(campo.idCampoOrdemCompra) : null,
       tituloSnapshot: limparTextoOpcional(campo.tituloSnapshot || campo.titulo),
       valor: limparTextoOpcional(campo.valor)
     })) : []
   };
 }
 
-async function salvarContatosClienteCadastro(idFornecedor, contatos) {
-  const contatosNormalizados = normalizarContatosClienteCadastro(contatos, idCliente);
+async function salvarContatosFornecedorCadastro(idFornecedor, contatos) {
+  const contatosNormalizados = normalizarContatosFornecedorCadastro(contatos, idFornecedor);
 
   for (const contato of contatosNormalizados) {
     await incluirContato(contato);
   }
 }
 
-function normalizarPayloadClienteCadastro(dadosCliente) {
+function normalizarPayloadFornecedorCadastro(dadosFornecedor) {
   return {
-    idVendedor: Number(dadosCliente.idVendedor),
-    idConceito: Number(dadosCliente.idConceito),
-    idRamo: Number(dadosCliente.idRamo),
-    razaoSocial: String(dadosCliente.razaoSocial || '').trim(),
-    nomeFantasia: String(dadosCliente.nomeFantasia || '').trim(),
-    tipo: String(dadosCliente.tipo || '').trim(),
-    cnpj: String(dadosCliente.cnpj || '').trim(),
-    inscricaoEstadual: limparTextoOpcional(dadosCliente.inscricaoEstadual),
-    status: dadosCliente.status ? 1 : 0,
-    email: limparTextoOpcional(dadosCliente.email),
-    telefone: limparTextoOpcional(dadosCliente.telefone),
-    logradouro: limparTextoOpcional(dadosCliente.logradouro),
-    numero: limparTextoOpcional(dadosCliente.numero),
-    complemento: limparTextoOpcional(dadosCliente.complemento),
-    bairro: limparTextoOpcional(dadosCliente.bairro),
-    cidade: limparTextoOpcional(dadosCliente.cidade),
-    estado: limparTextoOpcional(dadosCliente.estado)?.toUpperCase(),
-    cep: limparTextoOpcional(dadosCliente.cep),
-    observacao: limparTextoOpcional(dadosCliente.observacao),
-    imagem: limparTextoOpcional(dadosCliente.imagem)
+    idComprador: Number(dadosFornecedor.idComprador),
+    idConceito: Number(dadosFornecedor.idConceito),
+    idRamo: Number(dadosFornecedor.idRamo),
+    razaoSocial: String(dadosFornecedor.razaoSocial || '').trim(),
+    nomeFantasia: String(dadosFornecedor.nomeFantasia || '').trim(),
+    tipo: String(dadosFornecedor.tipo || '').trim(),
+    cnpj: String(dadosFornecedor.cnpj || '').trim(),
+    inscricaoEstadual: limparTextoOpcional(dadosFornecedor.inscricaoEstadual),
+    status: dadosFornecedor.status ? 1 : 0,
+    email: limparTextoOpcional(dadosFornecedor.email),
+    telefone: limparTextoOpcional(dadosFornecedor.telefone),
+    logradouro: limparTextoOpcional(dadosFornecedor.logradouro),
+    numero: limparTextoOpcional(dadosFornecedor.numero),
+    complemento: limparTextoOpcional(dadosFornecedor.complemento),
+    bairro: limparTextoOpcional(dadosFornecedor.bairro),
+    cidade: limparTextoOpcional(dadosFornecedor.cidade),
+    estado: limparTextoOpcional(dadosFornecedor.estado)?.toUpperCase(),
+    cep: limparTextoOpcional(dadosFornecedor.cep),
+    observacao: limparTextoOpcional(dadosFornecedor.observacao),
+    imagem: limparTextoOpcional(dadosFornecedor.imagem)
   };
 }
 
-function normalizarContatosClienteCadastro(contatos, idCliente) {
+function normalizarContatosFornecedorCadastro(contatos, idFornecedor) {
   if (!Array.isArray(contatos)) {
     return [];
   }
 
   return contatos.map((contato) => ({
-    idCliente,
+    idFornecedor,
     nome: String(contato.nome || '').trim(),
     cargo: limparTextoOpcional(contato.cargo),
     email: limparTextoOpcional(contato.email),
@@ -1782,7 +1782,7 @@ function normalizarNumeroDecimal(valor) {
   return Number.isNaN(numero) ? 0 : numero;
 }
 
-function criarEstiloEtapaOrcamento(cor) {
+function criarEstiloEtapaCotacao(cor) {
   const corBase = normalizarCorHexadecimal(cor || '#9506F4');
 
   return {
@@ -1791,100 +1791,100 @@ function criarEstiloEtapaOrcamento(cor) {
   };
 }
 
-function obterEtapasFiltroPadraoOrcamento(empresa) {
-  if (!empresa?.etapasFiltroPadraoOrcamento) {
+function obterEtapasFiltroPadraoCotacao(empresa) {
+  if (!empresa?.etapasFiltroPadraoCotacao) {
     return [];
   }
 
   try {
-    const lista = JSON.parse(empresa.etapasFiltroPadraoOrcamento);
+    const lista = JSON.parse(empresa.etapasFiltroPadraoCotacao);
     return Array.isArray(lista) ? lista.map(String) : [];
   } catch (_erro) {
-    return String(empresa.etapasFiltroPadraoOrcamento)
+    return String(empresa.etapasFiltroPadraoCotacao)
       .split(',')
       .map((item) => item.trim())
       .filter(Boolean);
   }
 }
 
-function etapaAcabouDeFechar(idEtapaAnterior, idEtapaAtual, etapasOrcamento) {
-  const etapaAnterior = etapasOrcamento.find((etapa) => String(etapa.idEtapaOrcamento) === String(idEtapaAnterior || ''));
-  const etapaAtual = etapasOrcamento.find((etapa) => String(etapa.idEtapaOrcamento) === String(idEtapaAtual || ''));
+function etapaAcabouDeFechar(idEtapaAnterior, idEtapaAtual, etapasCotacao) {
+  const etapaAnterior = etapasCotacao.find((etapa) => String(etapa.idEtapaCotacao) === String(idEtapaAnterior || ''));
+  const etapaAtual = etapasCotacao.find((etapa) => String(etapa.idEtapaCotacao) === String(idEtapaAtual || ''));
 
-  return !etapaOrcamentoEhFechamento(etapaAnterior) && etapaOrcamentoEhFechamento(etapaAtual);
+  return !etapaCotacaoEhFechamento(etapaAnterior) && etapaCotacaoEhFechamento(etapaAtual);
 }
 
-function etapaOrcamentoEhFechadoPorId(idEtapaOrcamento) {
+function etapaCotacaoEhFechadoPorId(idEtapaCotacao) {
   return [
-    ID_ETAPA_ORCAMENTO_FECHAMENTO,
-    ID_ETAPA_ORCAMENTO_FECHADO_SEM_PEDIDO,
-    ID_ETAPA_ORCAMENTO_PEDIDO_EXCLUIDO,
-    ID_ETAPA_ORCAMENTO_RECUSADO
-  ].includes(Number(idEtapaOrcamento));
+    ID_ETAPA_COTACAO_FECHAMENTO,
+    ID_ETAPA_COTACAO_FECHADO_SEM_ORDEM_COMPRA,
+    ID_ETAPA_COTACAO_ORDEM_COMPRA_EXCLUIDO,
+    ID_ETAPA_COTACAO_RECUSADO
+  ].includes(Number(idEtapaCotacao));
 }
 
 function entrouEmEtapaFechada(idEtapaAnterior, idEtapaAtual) {
-  return !etapaOrcamentoEhFechadoPorId(idEtapaAnterior) && etapaOrcamentoEhFechadoPorId(idEtapaAtual);
+  return !etapaCotacaoEhFechadoPorId(idEtapaAnterior) && etapaCotacaoEhFechadoPorId(idEtapaAtual);
 }
 
-function orcamentoBloqueadoParaUsuarioPadrao(orcamento, usuarioLogado) {
-  return usuarioLogado?.tipo === 'Usuario padrao' && etapaOrcamentoEhFechadoPorId(orcamento?.idEtapaOrcamento);
+function cotacaoBloqueadoParaUsuarioPadrao(cotacao, usuarioLogado) {
+  return usuarioLogado?.tipo === 'Usuario padrao' && etapaCotacaoEhFechadoPorId(cotacao?.idEtapaCotacao);
 }
 
-function orcamentoBloqueadoParaEdicao(orcamento, usuarioLogado) {
-  if (Number(orcamento?.idPedidoVinculado) > 0) {
+function cotacaoBloqueadoParaEdicao(cotacao, usuarioLogado) {
+  if (Number(cotacao?.idOrdemCompraVinculado) > 0) {
     return true;
   }
 
-  if (Number(orcamento?.idEtapaOrcamento) === ID_ETAPA_ORCAMENTO_RECUSADO) {
+  if (Number(cotacao?.idEtapaCotacao) === ID_ETAPA_COTACAO_RECUSADO) {
     return true;
   }
 
-  return orcamentoBloqueadoParaUsuarioPadrao(orcamento, usuarioLogado);
+  return cotacaoBloqueadoParaUsuarioPadrao(cotacao, usuarioLogado);
 }
 
-function obterRotuloBloqueioEdicaoOrcamento(orcamento, usuarioLogado) {
-  if (Number(orcamento?.idPedidoVinculado) > 0) {
-    return 'Orcamento com ordem de compra vinculado: consulta apenas.';
+function obterRotuloBloqueioEdicaoCotacao(cotacao, usuarioLogado) {
+  if (Number(cotacao?.idOrdemCompraVinculado) > 0) {
+    return 'Cotacao com ordem de compra vinculado: consulta apenas.';
   }
 
-  if (Number(orcamento?.idEtapaOrcamento) === ID_ETAPA_ORCAMENTO_RECUSADO) {
-    return 'Orcamento recusado: consulta apenas.';
+  if (Number(cotacao?.idEtapaCotacao) === ID_ETAPA_COTACAO_RECUSADO) {
+    return 'Cotacao recusado: consulta apenas.';
   }
 
-  if (orcamentoBloqueadoParaUsuarioPadrao(orcamento, usuarioLogado)) {
-    return 'Orcamento fechado: usuario padrao consulta apenas.';
+  if (cotacaoBloqueadoParaUsuarioPadrao(cotacao, usuarioLogado)) {
+    return 'Cotacao fechado: usuario padrao consulta apenas.';
   }
 
   return 'Editar cotacao';
 }
 
-function etapaOrcamentoEhFechamento(etapa) {
-  return Number(etapa?.idEtapaOrcamento) === ID_ETAPA_ORCAMENTO_FECHAMENTO;
+function etapaCotacaoEhFechamento(etapa) {
+  return Number(etapa?.idEtapaCotacao) === ID_ETAPA_COTACAO_FECHAMENTO;
 }
 
-function obterEtapaFechadoSemPedido(etapasOrcamento) {
-  return etapasOrcamento.find((etapa) => Number(etapa?.idEtapaOrcamento) === ID_ETAPA_ORCAMENTO_FECHADO_SEM_PEDIDO) || null;
+function obterEtapaFechadoSemOrdemCompra(etapasCotacao) {
+  return etapasCotacao.find((etapa) => Number(etapa?.idEtapaCotacao) === ID_ETAPA_COTACAO_FECHADO_SEM_ORDEM_COMPRA) || null;
 }
 
-function enriquecerOrcamentoParaPedido(orcamento, contexto) {
-  const cliente = contexto.fornecedores.find((item) => String(item.idCliente) === String(orcamento.idCliente));
-  const contato = contexto.contatos.find((item) => String(item.idContato) === String(orcamento.idContato));
-  const usuario = contexto.usuarios.find((item) => String(item.idUsuario) === String(orcamento.idUsuario));
-  const vendedor = contexto.vendedores.find((item) => String(item.idVendedor) === String(orcamento.idVendedor));
-  const prazo = contexto.prazosPagamento.find((item) => String(item.idPrazoPagamento) === String(orcamento.idPrazoPagamento));
-  const etapa = contexto.etapasOrcamento.find((item) => String(item.idEtapaOrcamento) === String(orcamento.idEtapaOrcamento));
+function enriquecerCotacaoParaOrdemCompra(cotacao, contexto) {
+  const fornecedor = contexto.fornecedores.find((item) => String(item.idFornecedor) === String(cotacao.idFornecedor));
+  const contato = contexto.contatos.find((item) => String(item.idContato) === String(cotacao.idContato));
+  const usuario = contexto.usuarios.find((item) => String(item.idUsuario) === String(cotacao.idUsuario));
+  const comprador = contexto.compradores.find((item) => String(item.idComprador) === String(cotacao.idComprador));
+  const prazo = contexto.prazosPagamento.find((item) => String(item.idPrazoPagamento) === String(cotacao.idPrazoPagamento));
+  const etapa = contexto.etapasCotacao.find((item) => String(item.idEtapaCotacao) === String(cotacao.idEtapaCotacao));
 
   return {
-    ...orcamento,
-    nomeFornecedor: orcamento.nomeCliente || cliente?.nomeFantasia || cliente?.razaoSocial || '',
-    nomeContato: orcamento.nomeContato || contato?.nome || '',
-    nomeUsuario: orcamento.nomeUsuario || usuario?.nome || '',
-    nomeVendedor: orcamento.nomeVendedor || vendedor?.nome || '',
-    nomePrazoPagamento: orcamento.nomePrazoPagamento || prazo?.descricaoFormatada || prazo?.descricao || '',
-    nomeMetodoPagamento: orcamento.nomeMetodoPagamento || prazo?.nomeMetodoPagamento || '',
-    nomeEtapaOrcamento: orcamento.nomeEtapaOrcamento || etapa?.descricao || '',
-    itens: Array.isArray(orcamento.itens) ? orcamento.itens.map((item) => {
+    ...cotacao,
+    nomeFornecedor: cotacao.nomeFornecedor || fornecedor?.nomeFantasia || fornecedor?.razaoSocial || '',
+    nomeContato: cotacao.nomeContato || contato?.nome || '',
+    nomeUsuario: cotacao.nomeUsuario || usuario?.nome || '',
+    nomeComprador: cotacao.nomeComprador || comprador?.nome || '',
+    nomePrazoPagamento: cotacao.nomePrazoPagamento || prazo?.descricaoFormatada || prazo?.descricao || '',
+    nomeMetodoPagamento: cotacao.nomeMetodoPagamento || prazo?.nomeMetodoPagamento || '',
+    nomeEtapaCotacao: cotacao.nomeEtapaCotacao || etapa?.descricao || '',
+    itens: Array.isArray(cotacao.itens) ? cotacao.itens.map((item) => {
       const produto = contexto.produtos.find((registro) => String(registro.idProduto) === String(item.idProduto));
       return {
         ...item,
@@ -1897,26 +1897,26 @@ function enriquecerOrcamentoParaPedido(orcamento, contexto) {
   };
 }
 
-function montarDadosIniciaisPedidoAPartirDoOrcamento(orcamento) {
+function montarDadosIniciaisOrdemCompraAPartirDoCotacao(cotacao) {
   return {
-    idOrcamento: orcamento.idOrcamento,
-    codigoOrcamentoOrigem: orcamento.idOrcamento,
-    idFornecedor: orcamento.idCliente,
-    idContato: orcamento.idContato,
-    idUsuario: orcamento.idUsuario,
-    idVendedor: orcamento.idVendedor,
-    idPrazoPagamento: orcamento.idPrazoPagamento,
-    idTipoPedido: ID_TIPO_PEDIDO_VENDA,
+    idCotacao: cotacao.idCotacao,
+    codigoCotacaoOrigem: cotacao.idCotacao,
+    idFornecedor: cotacao.idFornecedor,
+    idContato: cotacao.idContato,
+    idUsuario: cotacao.idUsuario,
+    idComprador: cotacao.idComprador,
+    idPrazoPagamento: cotacao.idPrazoPagamento,
+    idTipoOrdemCompra: ID_TIPO_ORDEM_COMPRA_VENDA,
     dataInclusao: obterDataAtualFormatoInput(),
-    nomeClienteSnapshot: orcamento.nomeCliente || '',
-    nomeContatoSnapshot: orcamento.nomeContato || '',
-    nomeUsuarioSnapshot: orcamento.nomeUsuario || '',
-    nomeVendedorSnapshot: orcamento.nomeVendedor || '',
-    nomeMetodoPagamentoSnapshot: orcamento.nomeMetodoPagamento || '',
-    nomePrazoPagamentoSnapshot: orcamento.nomePrazoPagamento || '',
-    nomeTipoPedidoSnapshot: 'Ordem de compra',
-    observacao: orcamento.observacao || '',
-    itens: Array.isArray(orcamento.itens) ? orcamento.itens.map((item) => ({
+    nomeFornecedorSnapshot: cotacao.nomeFornecedor || '',
+    nomeContatoSnapshot: cotacao.nomeContato || '',
+    nomeUsuarioSnapshot: cotacao.nomeUsuario || '',
+    nomeCompradorSnapshot: cotacao.nomeComprador || '',
+    nomeMetodoPagamentoSnapshot: cotacao.nomeMetodoPagamento || '',
+    nomePrazoPagamentoSnapshot: cotacao.nomePrazoPagamento || '',
+    nomeTipoOrdemCompraSnapshot: 'Ordem de compra',
+    observacao: cotacao.observacao || '',
+    itens: Array.isArray(cotacao.itens) ? cotacao.itens.map((item) => ({
       idProduto: item.idProduto,
       quantidade: item.quantidade,
       valorUnitario: item.valorUnitario,

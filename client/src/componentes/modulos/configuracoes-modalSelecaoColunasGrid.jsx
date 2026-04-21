@@ -11,10 +11,10 @@ const opcoesColunasGrid = [
     disponivel: true
   },
   {
-    id: 'clientes',
+    id: 'fornecedores',
     titulo: 'Fornecedores',
     descricao: 'Configurar a grade principal dos fornecedores.',
-    icone: 'clientes',
+    icone: 'fornecedores',
     disponivel: true
   },
   {
@@ -25,17 +25,17 @@ const opcoesColunasGrid = [
     disponivel: true
   },
   {
-    id: 'orcamentos',
-    titulo: 'Orcamentos',
+    id: 'cotacoes',
+    titulo: 'Cotacoes',
     descricao: 'Configurar a grade principal das cotacoes.',
-    icone: 'orcamento',
+    icone: 'cotacao',
     disponivel: true
   },
   {
-    id: 'pedidos',
+    id: 'ordensCompra',
     titulo: 'Ordens de Compra',
     descricao: 'Configurar a grade principal das ordens de compra.',
-    icone: 'pedido',
+    icone: 'ordemCompra',
     disponivel: true
   }
 ];
@@ -76,24 +76,24 @@ export function ModalSelecaoColunasGrid({
   return (
     <div className="camadaModal" role="presentation" onMouseDown={fecharAoClicarNoFundo}>
       <div
-        className="modalCliente modalSelecaoColunasGrid"
+        className="modalFornecedor modalSelecaoColunasGrid"
         role="dialog"
         aria-modal="true"
         aria-labelledby="tituloModalSelecaoColunasGrid"
         onMouseDown={(evento) => evento.stopPropagation()}
       >
-        <header className="cabecalhoModalCliente">
+        <header className="cabecalhoModalFornecedor">
           <h2 id="tituloModalSelecaoColunasGrid">Configurar Colunas do Grid</h2>
 
-          <div className="acoesCabecalhoModalCliente">
+          <div className="acoesCabecalhoModalFornecedor">
             <Botao variante="secundario" type="button" onClick={aoFechar}>
               Fechar
             </Botao>
           </div>
         </header>
 
-        <div className="corpoModalCliente">
-          <section className="gradeCamposModalCliente">
+        <div className="corpoModalFornecedor">
+          <section className="gradeCamposModalFornecedor">
             <div className="campoFormularioIntegral">
               <p className="descricaoOpcaoEmpresaPaginaInicial">
                 Escolha qual grade do sistema voce quer configurar.

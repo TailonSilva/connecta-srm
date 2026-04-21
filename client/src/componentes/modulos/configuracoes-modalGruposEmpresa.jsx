@@ -5,7 +5,7 @@ import { BotaoAcaoGrade } from '../comuns/botaoAcaoGrade';
 import { GradePadrao } from '../comuns/gradePadrao';
 import { normalizarTelefone } from '../../utilitarios/normalizarTelefone';
 import { normalizarValorEntradaFormulario } from '../../utilitarios/normalizarTextoFormulario';
-import { ModalContatoFornecedor as ModalContatoCliente } from './fornecedores-modalContatoFornecedor';
+import { ModalContatoFornecedor as ModalContatoFornecedor } from './fornecedores-modalContatoFornecedor';
 import { ModalCadastroConfiguracao } from './configuracoes-modalCadastroConfiguracao';
 
 const estadoInicialGrupoEmpresa = {
@@ -260,7 +260,7 @@ export function ModalGruposEmpresa({
         })}
         renderFormularioExtra={({ modoFormulario: modoAtual }) => (
           <>
-            <section className="painelContatosModalCliente painelContatosConfiguracao painelContatosGrupoEmpresaFormulario">
+            <section className="painelContatosModalFornecedor painelContatosConfiguracao painelContatosGrupoEmpresaFormulario">
               <div className="cabecalhoGradeContatosModal">
                 <div>
                   <h3>Contatos do grupo</h3>
@@ -324,7 +324,7 @@ export function ModalGruposEmpresa({
         )}
       />
 
-      <ModalContatoCliente
+      <ModalContatoFornecedor
         aberto={modalContatoAberto}
         modo={modoContato}
         formulario={formularioContato}

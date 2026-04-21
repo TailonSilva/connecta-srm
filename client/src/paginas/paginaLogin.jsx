@@ -41,7 +41,7 @@ export function PaginaLogin({ aoEntrar }) {
   }
 
   const logoExibida = empresa?.imagem || logoConnecta;
-  const rotuloLogo = empresa?.nomeFantasia || empresa?.razaoSocial || 'Connecta CRM';
+  const rotuloLogo = empresa?.nomeFantasia || empresa?.razaoSocial || 'Connecta SRM';
 
   return (
     <main className="paginaLogin">
@@ -56,7 +56,7 @@ export function PaginaLogin({ aoEntrar }) {
           </div>
 
           <div>
-            <strong>{empresa?.nomeFantasia || empresa?.razaoSocial || 'Connecta CRM'}</strong>
+            <strong>{empresa?.nomeFantasia || empresa?.razaoSocial || 'Connecta SRM'}</strong>
             <p>{empresa?.slogan || 'Acesse sua conta para continuar.'}</p>
           </div>
         </div>

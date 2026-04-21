@@ -6,7 +6,7 @@ import './recursos/estilos/app.css';
 
 // Importa o componente que encapsula a busca e a exibicao dos popups globais de aviso para nao deixar essa responsabilidade dentro do `App`.
 import { CentralAvisosGlobais } from './componentes/comuns/centralAvisosGlobais';
-// Importa o menu lateral principal, responsavel por exibir os atalhos de navegacao entre os modulos do CRM.
+// Importa o menu lateral principal, responsavel por exibir os atalhos de navegacao entre os modulos do SRM.
 import { BarraLateral } from './componentes/layout/barraLateral';
 // Importa o componente que decide qual pagina do sistema deve ser renderizada na area central com base em `paginaSelecionada`.
 import { ConteudoPainel } from './componentes/layout/conteudoPainel';
@@ -14,7 +14,7 @@ import { ConteudoPainel } from './componentes/layout/conteudoPainel';
 import { PaginaLogin } from './paginas/paginaLogin';
 // Importa o hook que registra o atalho global `PageDown`, usado para acionar salvar ou incluir no contexto atual.
 import { useAtalhoAcaoPrimaria } from './hooks/useAtalhoAcaoPrimaria';
-// Importa o hook que registra o atalho global `F8`, usado para abrir a busca contextual de cliente, contato ou produto no campo focado.
+// Importa o hook que registra o atalho global `F8`, usado para abrir a busca contextual de fornecedor, contato ou produto no campo focado.
 import { useAtalhoBuscaContextual } from './hooks/useAtalhoBuscaContextual';
 // Importa o hook que registra a navegacao de abas por `Alt + Seta`, padrao global dos modais com abas.
 import { useAtalhoNavegacaoAbasModal } from './hooks/useAtalhoNavegacaoAbasModal';
@@ -51,7 +51,7 @@ export default function App() {
   useAtalhoAcaoPrimaria();
 
   // Ativa o atalho global `F8` para abrir a busca contextual do campo focado em modais operacionais.
-  // Essa regra vale para campos de cliente, contato de cliente e produto marcados semanticamente na interface.
+  // Essa regra vale para campos de fornecedor, contato de fornecedor e produto marcados semanticamente na interface.
   useAtalhoBuscaContextual();
 
   // Ativa a navegacao entre abas de modal com `Alt + Seta`.

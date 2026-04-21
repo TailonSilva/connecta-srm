@@ -199,17 +199,17 @@ export function ModalColunasGridAtendimentos({
   return (
     <div className="camadaModal" role="presentation" onMouseDown={fecharAoClicarNoFundo}>
       <form
-        className="modalCliente"
+        className="modalFornecedor"
         role="dialog"
         aria-modal="true"
         aria-labelledby="tituloModalColunasGridAtendimentos"
         onMouseDown={(evento) => evento.stopPropagation()}
         onSubmit={submeterFormulario}
       >
-        <header className="cabecalhoModalCliente">
+        <header className="cabecalhoModalFornecedor">
           <h2 id="tituloModalColunasGridAtendimentos">Colunas do Grid de Atendimentos</h2>
 
-          <div className="acoesCabecalhoModalCliente">
+          <div className="acoesCabecalhoModalFornecedor">
             <Botao variante="secundario" type="button" onClick={aoFechar} disabled={salvando}>
               {somenteConsulta ? 'Fechar' : 'Cancelar'}
             </Botao>
@@ -221,8 +221,8 @@ export function ModalColunasGridAtendimentos({
           </div>
         </header>
 
-        <div className="corpoModalCliente">
-          <section className="gradeCamposModalCliente">
+        <div className="corpoModalFornecedor">
+          <section className="gradeCamposModalFornecedor">
             <div className="campoFormularioIntegral">
               <p className="descricaoOpcaoEmpresaPaginaInicial">
                 Marque as informacoes visiveis da grade principal e use editar para ajustar ordem e espaco. A lista se reorganiza automaticamente pela ordem real dos itens ativos; os desmarcados ficam no fim, sem ordem.
@@ -293,7 +293,7 @@ export function ModalColunasGridAtendimentos({
       {colunaEmEdicao ? (
         <div className="camadaModalContato camadaModalFiltroPeriodo" role="presentation" onMouseDown={fecharModalEdicao}>
           <form
-            className="modalContatoCliente modalFiltros modalEdicaoColunaGridAtendimentos"
+            className="modalContatoFornecedor modalFiltros modalEdicaoColunaGridAtendimentos"
             role="dialog"
             aria-modal="true"
             aria-labelledby="tituloModalEdicaoColunaGridAtendimentos"

@@ -5,7 +5,7 @@ const CAMPOS_SEM_CAPITALIZACAO = new Set([
   'cep',
   'telefone',
   'whatsapp',
-  'preco',
+  'custo',
   'valorUnitario',
   'valorTotal',
   'quantidade',

@@ -103,8 +103,8 @@ export const colunasGridProdutos = [
     visivelPadrao: true
   },
   {
-    id: 'preco',
-    rotulo: 'Preco',
+    id: 'custo',
+    rotulo: 'Custo',
     classe: 'colunaGradeValor',
     obrigatoria: false,
     ordemPadrao: 12,
@@ -135,13 +135,16 @@ const idsPermitidos = new Set(colunasGridProdutos.map((coluna) => coluna.id));
 const mapaColunasGridProdutos = new Map(
   colunasGridProdutos.map((coluna) => [coluna.id, coluna])
 );
+const aliasesColunasGridProdutos = {
+  preco: 'custo'
+};
 
 export function normalizarConfiguracoesColunasGridProdutos(valor) {
   const listaNormalizada = normalizarListaConfiguracoes(valor);
   const configuracoesPorId = new Map();
 
   listaNormalizada.forEach((item, indice) => {
-    const id = String(item?.id || '').trim();
+    const id = normalizarIdColunaProduto(item?.id);
 
     if (!idsPermitidos.has(id)) {
       return;
@@ -303,15 +306,25 @@ function normalizarItensConfiguracao(lista) {
       }
 
       return {
-        id: String(item.id || '').trim(),
+        id: normalizarIdColunaProduto(item.id),
         base: item.base,
-        rotulo: item.rotulo,
+        rotulo: normalizarRotuloLegadoColunaProduto(item.rotulo),
         visivel: item.visivel,
         ordem: item.ordem,
         span: item.span
       };
     })
     .filter(Boolean);
+}
+
+function normalizarIdColunaProduto(id) {
+  const valor = String(id || '').trim();
+  return aliasesColunasGridProdutos[valor] || valor;
+}
+
+function normalizarRotuloLegadoColunaProduto(rotulo) {
+  const valor = String(rotulo ?? '').trim();
+  return valor === 'Preco' ? 'Custo' : rotulo;
 }
 
 function ordenarColunasGridProdutos(colunaA, colunaB) {

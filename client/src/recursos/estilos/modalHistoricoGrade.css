@@ -7,7 +7,7 @@
   min-width: 0;
 }
 
-.modalHistoricoGrade .acoesCabecalhoModalCliente {
+.modalHistoricoGrade .acoesCabecalhoModalFornecedor {
   flex: 1 1 auto;
   flex-wrap: nowrap;
   justify-content: flex-end;
@@ -73,14 +73,14 @@
   overflow: visible;
 }
 
-.modalHistoricoGradeAbasCabecalho .abaModalCliente {
+.modalHistoricoGradeAbasCabecalho .abaModalFornecedor {
   flex: 0 0 auto;
   min-width: max-content;
   padding-block: 9px;
   padding-inline: 12px;
 }
 
-.modalHistoricoGrade .acoesCabecalhoModalCliente > .botao {
+.modalHistoricoGrade .acoesCabecalhoModalFornecedor > .botao {
   flex: 0 0 auto;
   white-space: nowrap;
 }
@@ -95,7 +95,7 @@
     max-height: calc(100vh - 12px);
   }
 
-  .modalHistoricoGrade .acoesCabecalhoModalCliente {
+  .modalHistoricoGrade .acoesCabecalhoModalFornecedor {
     flex-wrap: wrap;
   }
 

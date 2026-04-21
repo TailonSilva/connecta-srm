@@ -9,34 +9,34 @@ import { ModalFiltros } from '../componentes/comuns/modalFiltros';
 import { TextoGradeClamp } from '../componentes/comuns/textoGradeClamp';
 import { CorpoPagina } from '../componentes/layout/corpoPagina';
 import {
-  incluirCliente,
+  incluirFornecedor,
   incluirContato,
-  listarClientes,
-  listarConceitosCliente,
+  listarFornecedores,
+  listarConceitosFornecedor,
   listarContatos,
   listarRamosAtividade,
-  listarVendedores
-} from '../servicos/clientes';
+  listarCompradores
+} from '../servicos/fornecedores';
 import {
   atualizarPrazoPagamento,
   incluirPrazoPagamento,
-  listarCamposPedidoConfiguracao,
-  listarEtapasPedidoConfiguracao,
+  listarCamposOrdemCompraConfiguracao,
+  listarEtapasOrdemCompraConfiguracao,
   listarMetodosPagamentoConfiguracao,
   listarPrazosPagamentoConfiguracao,
-  listarTiposPedidoConfiguracao
+  listarTiposOrdemCompraConfiguracao
 } from '../servicos/configuracoes';
 import { atualizarEmpresa, criarPayloadAtualizacaoColunasGrid, listarEmpresas } from '../servicos/empresa';
-import { atualizarPedido, excluirPedido, incluirPedido, listarPedidos } from '../servicos/pedidos';
+import { atualizarOrdemCompra, excluirOrdemCompra, incluirOrdemCompra, listarOrdensCompra } from '../servicos/ordensCompra';
 import { listarProdutos } from '../servicos/produtos';
 import { listarUsuarios } from '../servicos/usuarios';
 import { normalizarPreco } from '../utilitarios/normalizarPreco';
-import { formatarCodigoCliente } from '../utilitarios/codigoCliente';
+import { formatarCodigoFornecedor } from '../utilitarios/codigoFornecedor';
 import { obterValorGrid } from '../utilitarios/valorPadraoGrid';
 import {
-  normalizarColunasGridPedidos,
-  TOTAL_COLUNAS_GRID_PEDIDOS
-} from '../dados/colunasGridPedidos';
+  normalizarColunasGridOrdensCompra,
+  TOTAL_COLUNAS_GRID_ORDENS_COMPRA
+} from '../dados/colunasGridOrdensCompra';
 import {
   normalizarFiltrosPorPadrao,
   normalizarListaFiltroPersistido,
@@ -44,18 +44,18 @@ import {
 } from '../hooks/useFiltrosPersistidos';
 import { ModalOrdemCompra } from '../componentes/modulos/ordensCompra-modalOrdemCompra';
 import { ModalManualOrdensCompra } from '../componentes/modulos/ordensCompra-modalManualOrdensCompra';
-import { ModalColunasGridPedidos } from '../componentes/modulos/configuracoes-modalColunasGridPedidos';
+import { ModalColunasGridOrdensCompra } from '../componentes/modulos/configuracoes-modalColunasGridOrdensCompra';
 
-const ID_ETAPA_PEDIDO_ENTREGUE = 5;
+const ID_ETAPA_ORDEM_COMPRA_ENTREGUE = 5;
 
-function criarFiltrosIniciaisPedidos(usuarioLogado) {
-  const vendedorTravado = usuarioLogado?.tipo === 'Usuario padrao' && usuarioLogado?.idVendedor;
+function criarFiltrosIniciaisOrdensCompra(usuarioLogado) {
+  const compradorTravado = usuarioLogado?.tipo === 'Usuario padrao' && usuarioLogado?.idComprador;
 
   return {
     idFornecedor: '',
     idUsuario: '',
-    idVendedor: vendedorTravado ? [String(usuarioLogado.idVendedor)] : [],
-    idEtapaPedido: [],
+    idComprador: compradorTravado ? [String(usuarioLogado.idComprador)] : [],
+    idEtapaOrdemCompra: [],
     dataInclusaoInicio: '',
     dataInclusaoFim: '',
     dataEntregaInicio: '',
@@ -63,18 +63,18 @@ function criarFiltrosIniciaisPedidos(usuarioLogado) {
   };
 }
 
-function normalizarEtapasPedido(etapasPedido) {
-  if (!Array.isArray(etapasPedido)) {
+function normalizarEtapasOrdemCompra(etapasOrdemCompra) {
+  if (!Array.isArray(etapasOrdemCompra)) {
     return [];
   }
 
-  return etapasPedido.map((etapa) => ({
+  return etapasOrdemCompra.map((etapa) => ({
     ...etapa,
-    idEtapaPedido: etapa.idEtapaPedido ?? etapa.idEtapa
+    idEtapaOrdemCompra: etapa.idEtapaOrdemCompra ?? etapa.idEtapa
   }));
 }
 
-function normalizarFiltrosPedidos(filtros, filtrosPadrao) {
+function normalizarFiltrosOrdensCompra(filtros, filtrosPadrao) {
   const filtrosNormalizados = normalizarFiltrosPorPadrao(filtros, filtrosPadrao);
   const periodoInclusao = normalizarIntervaloDatasFiltros(
     filtrosNormalizados,
@@ -93,18 +93,18 @@ function normalizarFiltrosPedidos(filtros, filtrosPadrao) {
     ...filtrosNormalizados,
     ...periodoInclusao,
     ...periodoEntrega,
-    idVendedor: Array.isArray(filtros?.idVendedor)
-      ? normalizarListaFiltroPersistido(filtros.idVendedor)
+    idComprador: Array.isArray(filtros?.idComprador)
+      ? normalizarListaFiltroPersistido(filtros.idComprador)
       : normalizarListaFiltroPersistido(
-        filtros?.idVendedor
-          ? [filtros.idVendedor]
+        filtros?.idComprador
+          ? [filtros.idComprador]
           : []
       ),
-    idEtapaPedido: Array.isArray(filtros?.idEtapaPedido)
-      ? normalizarListaFiltroPersistido(filtros.idEtapaPedido)
+    idEtapaOrdemCompra: Array.isArray(filtros?.idEtapaOrdemCompra)
+      ? normalizarListaFiltroPersistido(filtros.idEtapaOrdemCompra)
       : normalizarListaFiltroPersistido(
-        filtros?.idEtapaPedido
-          ? [filtros.idEtapaPedido]
+        filtros?.idEtapaOrdemCompra
+          ? [filtros.idEtapaOrdemCompra]
           : []
       )
   };
@@ -113,40 +113,40 @@ function normalizarFiltrosPedidos(filtros, filtrosPadrao) {
 export function PaginaOrdensCompra({ usuarioLogado }) {
   const [pesquisa, definirPesquisa] = useState('');
   const filtrosIniciais = useMemo(
-    () => criarFiltrosIniciaisPedidos(usuarioLogado),
-    [usuarioLogado?.idVendedor]
+    () => criarFiltrosIniciaisOrdensCompra(usuarioLogado),
+    [usuarioLogado?.idComprador]
   );
   const [filtros, definirFiltros] = useFiltrosPersistidos({
-    chave: 'paginaPedidos',
+    chave: 'paginaOrdensCompra',
     usuario: usuarioLogado,
     filtrosPadrao: filtrosIniciais,
-    normalizarFiltros: normalizarFiltrosPedidos
+    normalizarFiltros: normalizarFiltrosOrdensCompra
   });
-  const [pedidos, definirPedidos] = useState([]);
-  const [fornecedores, definirClientes] = useState([]);
+  const [ordensCompra, definirOrdensCompra] = useState([]);
+  const [fornecedores, definirFornecedores] = useState([]);
   const [contatos, definirContatos] = useState([]);
   const [usuarios, definirUsuarios] = useState([]);
   const [ramosAtividade, definirRamosAtividade] = useState([]);
-  const [conceitosCliente, definirConceitosCliente] = useState([]);
-  const [vendedores, definirVendedores] = useState([]);
+  const [conceitosFornecedor, definirConceitosFornecedor] = useState([]);
+  const [compradores, definirCompradores] = useState([]);
   const [metodosPagamento, definirMetodosPagamento] = useState([]);
   const [prazosPagamento, definirPrazosPagamento] = useState([]);
-  const [tiposPedido, definirTiposPedido] = useState([]);
+  const [tiposOrdemCompra, definirTiposOrdemCompra] = useState([]);
   const [produtos, definirProdutos] = useState([]);
-  const [camposPedido, definirCamposPedido] = useState([]);
-  const [etapasPedido, definirEtapasPedido] = useState([]);
+  const [camposOrdemCompra, definirCamposOrdemCompra] = useState([]);
+  const [etapasOrdemCompra, definirEtapasOrdemCompra] = useState([]);
   const [empresa, definirEmpresa] = useState(null);
   const [carregandoContexto, definirCarregandoContexto] = useState(true);
   const [carregandoGrade, definirCarregandoGrade] = useState(true);
   const [mensagemErro, definirMensagemErro] = useState('');
-  const [pedidoSelecionado, definirPedidoSelecionado] = useState(null);
+  const [ordemCompraSelecionado, definirOrdemCompraSelecionado] = useState(null);
   const [modoModal, definirModoModal] = useState('consulta');
   const [modalAberto, definirModalAberto] = useState(false);
   const [modalManualAberto, definirModalManualAberto] = useState(false);
   const [modalFiltrosAberto, definirModalFiltrosAberto] = useState(false);
   const [modalColunasGridAberto, definirModalColunasGridAberto] = useState(false);
-  const [pedidoExclusaoPendente, definirPedidoExclusaoPendente] = useState(null);
-  const usuarioSomenteVendedor = usuarioLogado?.tipo === 'Usuario padrao' && usuarioLogado?.idVendedor;
+  const [ordemCompraExclusaoPendente, definirOrdemCompraExclusaoPendente] = useState(null);
+  const usuarioSomenteComprador = usuarioLogado?.tipo === 'Usuario padrao' && usuarioLogado?.idComprador;
   const usuarioSomenteConsultaConfiguracao = usuarioLogado?.tipo === 'Usuario padrao';
   const permitirExcluir = usuarioLogado?.tipo !== 'Usuario padrao';
 
@@ -159,13 +159,13 @@ export function PaginaOrdensCompra({ usuarioLogado }) {
       return;
     }
 
-    carregarGradePedidos();
+    carregarGradeOrdensCompra();
   }, [carregandoContexto, pesquisa, JSON.stringify(filtros)]);
 
   useEffect(() => {
     function tratarGrupoEmpresaAtualizado() {
       carregarContexto();
-      carregarGradePedidos();
+      carregarGradeOrdensCompra();
     }
 
     window.addEventListener('grupo-empresa-atualizado', tratarGrupoEmpresaAtualizado);
@@ -178,7 +178,7 @@ export function PaginaOrdensCompra({ usuarioLogado }) {
   useEffect(() => {
     function tratarEmpresaAtualizada() {
       carregarContexto();
-      carregarGradePedidos();
+      carregarGradeOrdensCompra();
     }
 
     window.addEventListener('empresa-atualizada', tratarEmpresaAtualizada);
@@ -189,24 +189,24 @@ export function PaginaOrdensCompra({ usuarioLogado }) {
   }, [pesquisa, JSON.stringify(filtros)]);
 
   useEffect(() => {
-    function tratarAtalhosPedidos(evento) {
+    function tratarAtalhosOrdensCompra(evento) {
       if (evento.key !== 'F1') {
         return;
       }
 
       evento.preventDefault();
 
-      if (!modalAberto && !modalManualAberto && !modalFiltrosAberto && !pedidoExclusaoPendente) {
+      if (!modalAberto && !modalManualAberto && !modalFiltrosAberto && !ordemCompraExclusaoPendente) {
         definirModalManualAberto(true);
       }
     }
 
-    window.addEventListener('keydown', tratarAtalhosPedidos);
+    window.addEventListener('keydown', tratarAtalhosOrdensCompra);
 
     return () => {
-      window.removeEventListener('keydown', tratarAtalhosPedidos);
+      window.removeEventListener('keydown', tratarAtalhosOrdensCompra);
     };
-  }, [modalAberto, modalManualAberto, modalFiltrosAberto, pedidoExclusaoPendente]);
+  }, [modalAberto, modalManualAberto, modalFiltrosAberto, ordemCompraExclusaoPendente]);
 
   async function carregarContexto() {
     definirCarregandoContexto(true);
@@ -214,79 +214,79 @@ export function PaginaOrdensCompra({ usuarioLogado }) {
 
     try {
       const resultados = await Promise.allSettled([
-        listarEtapasPedidoConfiguracao(),
-        listarClientes(),
+        listarEtapasOrdemCompraConfiguracao(),
+        listarFornecedores(),
         listarContatos(),
         listarUsuarios(),
         listarRamosAtividade(),
-        listarConceitosCliente({ incluirInativos: true }),
-        listarVendedores(),
+        listarConceitosFornecedor({ incluirInativos: true }),
+        listarCompradores(),
         listarMetodosPagamentoConfiguracao(),
         listarPrazosPagamentoConfiguracao(),
-        listarTiposPedidoConfiguracao(),
+        listarTiposOrdemCompraConfiguracao(),
         listarProdutos(),
-        listarCamposPedidoConfiguracao(),
+        listarCamposOrdemCompraConfiguracao(),
         listarEmpresas()
       ]);
 
       const [
         etapasResultado,
-        clientesResultado,
+        fornecedoresResultado,
         contatosResultado,
         usuariosResultado,
         ramosResultado,
         conceitosResultado,
-        vendedoresResultado,
+        compradoresResultado,
         metodosResultado,
         prazosResultado,
-        tiposPedidoResultado,
+        tiposOrdemCompraResultado,
         produtosResultado,
         camposResultado,
         empresasResultado
       ] = resultados;
 
       const etapasCarregadas = etapasResultado.status === 'fulfilled' ? etapasResultado.value : [];
-      const clientesCarregados = clientesResultado.status === 'fulfilled' ? clientesResultado.value : [];
+      const fornecedoresCarregados = fornecedoresResultado.status === 'fulfilled' ? fornecedoresResultado.value : [];
       const contatosCarregados = contatosResultado.status === 'fulfilled' ? contatosResultado.value : [];
       const usuariosCarregados = usuariosResultado.status === 'fulfilled' ? usuariosResultado.value : [];
       const ramosCarregados = ramosResultado.status === 'fulfilled' ? ramosResultado.value : [];
       const conceitosCarregados = conceitosResultado.status === 'fulfilled' ? conceitosResultado.value : [];
-      const vendedoresCarregados = vendedoresResultado.status === 'fulfilled' ? vendedoresResultado.value : [];
+      const compradoresCarregados = compradoresResultado.status === 'fulfilled' ? compradoresResultado.value : [];
       const metodosCarregados = metodosResultado.status === 'fulfilled' ? metodosResultado.value : [];
       const prazosCarregados = prazosResultado.status === 'fulfilled' ? prazosResultado.value : [];
-      const tiposPedidoCarregados = tiposPedidoResultado.status === 'fulfilled' ? tiposPedidoResultado.value : [];
+      const tiposOrdemCompraCarregados = tiposOrdemCompraResultado.status === 'fulfilled' ? tiposOrdemCompraResultado.value : [];
       const produtosCarregados = produtosResultado.status === 'fulfilled' ? produtosResultado.value : [];
       const camposCarregados = camposResultado.status === 'fulfilled' ? camposResultado.value : [];
       const empresasCarregadas = empresasResultado.status === 'fulfilled' ? empresasResultado.value : [];
 
-      const etapasNormalizadas = normalizarEtapasPedido(etapasCarregadas);
+      const etapasNormalizadas = normalizarEtapasOrdemCompra(etapasCarregadas);
 
-      definirEtapasPedido(etapasNormalizadas);
-      definirClientes(clientesCarregados);
+      definirEtapasOrdemCompra(etapasNormalizadas);
+      definirFornecedores(fornecedoresCarregados);
       definirContatos(contatosCarregados);
       definirUsuarios(usuariosCarregados);
       definirRamosAtividade(ramosCarregados);
-      definirConceitosCliente(conceitosCarregados);
-      definirVendedores(vendedoresCarregados);
+      definirConceitosFornecedor(conceitosCarregados);
+      definirCompradores(compradoresCarregados);
       definirMetodosPagamento(metodosCarregados);
       definirPrazosPagamento(enriquecerPrazosPagamento(prazosCarregados, metodosCarregados));
-      definirTiposPedido(tiposPedidoCarregados);
+      definirTiposOrdemCompra(tiposOrdemCompraCarregados);
       definirProdutos(produtosCarregados);
-      definirCamposPedido(camposCarregados);
+      definirCamposOrdemCompra(camposCarregados);
       definirEmpresa(empresasCarregadas[0] || null);
 
       return {
-        etapasPedido: etapasNormalizadas,
-        fornecedores: clientesCarregados,
+        etapasOrdemCompra: etapasNormalizadas,
+        fornecedores: fornecedoresCarregados,
         contatos: contatosCarregados,
         usuarios: usuariosCarregados,
         ramosAtividade: ramosCarregados,
-        vendedores: vendedoresCarregados,
+        compradores: compradoresCarregados,
         metodosPagamento: metodosCarregados,
         prazosPagamento: prazosCarregados,
-        tiposPedido: tiposPedidoCarregados,
+        tiposOrdemCompra: tiposOrdemCompraCarregados,
         produtos: produtosCarregados,
-        camposPedido: camposCarregados,
+        camposOrdemCompra: camposCarregados,
         empresa: empresasCarregadas[0] || null
       };
     } catch (_erro) {
@@ -297,7 +297,7 @@ export function PaginaOrdensCompra({ usuarioLogado }) {
     }
   }
 
-  async function carregarGradePedidos(contextoAtual = null) {
+  async function carregarGradeOrdensCompra(contextoAtual = null) {
     if (!contextoAtual && carregandoContexto) {
       return;
     }
@@ -306,19 +306,19 @@ export function PaginaOrdensCompra({ usuarioLogado }) {
     definirMensagemErro('');
 
     try {
-      const pedidosCarregados = await listarPedidos({
+      const ordensCompraCarregados = await listarOrdensCompra({
         search: pesquisa,
         ...filtros,
-        ...(usuarioSomenteVendedor
+        ...(usuarioSomenteComprador
           ? {
-            escopoIdVendedor: usuarioLogado?.idVendedor
+            escopoIdComprador: usuarioLogado?.idComprador
           }
           : {})
       });
 
-      definirPedidos(enriquecerPedidos(
-        pedidosCarregados,
-        contextoAtual?.etapasPedido || etapasPedido
+      definirOrdensCompra(enriquecerOrdensCompra(
+        ordensCompraCarregados,
+        contextoAtual?.etapasOrdemCompra || etapasOrdemCompra
       ));
     } catch (_erro) {
       definirMensagemErro('Nao foi possivel carregar as ordens de compra.');
@@ -329,17 +329,17 @@ export function PaginaOrdensCompra({ usuarioLogado }) {
 
   async function recarregarPagina() {
     const contextoAtualizado = await carregarContexto();
-    await carregarGradePedidos(contextoAtualizado);
+    await carregarGradeOrdensCompra(contextoAtualizado);
   }
 
-  async function salvarColunasGridPedidos(dadosColunas) {
+  async function salvarColunasGridOrdensCompra(dadosColunas) {
     if (!empresa?.idEmpresa) {
       throw new Error('Cadastre a empresa antes de configurar as colunas do grid.');
     }
 
     await atualizarEmpresa(
       empresa.idEmpresa,
-      criarPayloadAtualizacaoColunasGrid('colunasGridPedidos', dadosColunas.colunasGridPedidos)
+      criarPayloadAtualizacaoColunasGrid('colunasGridOrdensCompra', dadosColunas.colunasGridOrdensCompra)
     );
 
     const empresasAtualizadas = await listarEmpresas();
@@ -348,62 +348,62 @@ export function PaginaOrdensCompra({ usuarioLogado }) {
     definirModalColunasGridAberto(false);
   }
 
-  function abrirNovoPedido() {
-    definirPedidoSelecionado(null);
+  function abrirNovoOrdemCompra() {
+    definirOrdemCompraSelecionado(null);
     definirModoModal('novo');
     definirModalAberto(true);
   }
 
-  function abrirConsultaPedido(pedido) {
-    definirPedidoSelecionado(pedido);
+  function abrirConsultaOrdemCompra(ordemCompra) {
+    definirOrdemCompraSelecionado(ordemCompra);
     definirModoModal('consulta');
     definirModalAberto(true);
   }
 
-  function abrirEdicaoPedido(pedido) {
-    if (pedidoBloqueadoParaUsuarioPadrao(pedido, usuarioLogado)) {
-      abrirConsultaPedido(pedido);
+  function abrirEdicaoOrdemCompra(ordemCompra) {
+    if (ordemCompraBloqueadoParaUsuarioPadrao(ordemCompra, usuarioLogado)) {
+      abrirConsultaOrdemCompra(ordemCompra);
       return;
     }
 
-    definirPedidoSelecionado(pedido);
+    definirOrdemCompraSelecionado(ordemCompra);
     definirModoModal('edicao');
     definirModalAberto(true);
   }
 
   function fecharModal() {
-    definirPedidoSelecionado(null);
+    definirOrdemCompraSelecionado(null);
     definirModoModal('consulta');
     definirModalAberto(false);
   }
 
-  async function salvarPedido(dadosPedido) {
-    const payload = normalizarPayloadPedido(dadosPedido);
+  async function salvarOrdemCompra(dadosOrdemCompra) {
+    const payload = normalizarPayloadOrdemCompra(dadosOrdemCompra);
 
-    if (pedidoSelecionado?.idPedido) {
-      await atualizarPedido(pedidoSelecionado.idPedido, payload);
+    if (ordemCompraSelecionado?.idOrdemCompra) {
+      await atualizarOrdemCompra(ordemCompraSelecionado.idOrdemCompra, payload);
     } else {
-      await incluirPedido(payload);
+      await incluirOrdemCompra(payload);
     }
 
     await recarregarPagina();
     fecharModal();
   }
 
-  async function incluirClientePeloPedido(dadosCliente) {
-    const payload = normalizarPayloadClienteCadastro({
-      ...dadosCliente,
-      idVendedor: usuarioSomenteVendedor ? String(usuarioLogado.idVendedor) : dadosCliente.idVendedor
+  async function incluirFornecedorPeloOrdemCompra(dadosFornecedor) {
+    const payload = normalizarPayloadFornecedorCadastro({
+      ...dadosFornecedor,
+      idComprador: usuarioSomenteComprador ? String(usuarioLogado.idComprador) : dadosFornecedor.idComprador
     });
 
-    const clienteSalvo = await incluirCliente(payload);
-    await salvarContatosClienteCadastro(clienteSalvo.idCliente, dadosCliente.contatos || []);
+    const fornecedorSalvo = await incluirFornecedor(payload);
+    await salvarContatosFornecedorCadastro(fornecedorSalvo.idFornecedor, dadosFornecedor.contatos || []);
     await recarregarPagina();
 
-    const clientesAtualizados = await listarClientes();
-    const clienteCompleto = clientesAtualizados.find((cliente) => cliente.idCliente === clienteSalvo.idCliente);
+    const fornecedoresAtualizados = await listarFornecedores();
+    const fornecedorCompleto = fornecedoresAtualizados.find((fornecedor) => fornecedor.idFornecedor === fornecedorSalvo.idFornecedor);
 
-    return clienteCompleto || clienteSalvo;
+    return fornecedorCompleto || fornecedorSalvo;
   }
 
   async function salvarPrazoPagamento(dadosPrazo) {
@@ -437,55 +437,55 @@ export function PaginaOrdensCompra({ usuarioLogado }) {
     return null;
   }
 
-  function abrirExclusaoPedido(pedido) {
+  function abrirExclusaoOrdemCompra(ordemCompra) {
     if (!permitirExcluir) {
       return;
     }
 
-    definirPedidoExclusaoPendente(pedido);
+    definirOrdemCompraExclusaoPendente(ordemCompra);
   }
 
-  function cancelarExclusaoPedido() {
-    definirPedidoExclusaoPendente(null);
+  function cancelarExclusaoOrdemCompra() {
+    definirOrdemCompraExclusaoPendente(null);
   }
 
-  async function confirmarExclusaoPedido() {
-    if (!pedidoExclusaoPendente) {
+  async function confirmarExclusaoOrdemCompra() {
+    if (!ordemCompraExclusaoPendente) {
       return;
     }
 
-    await excluirPedido(pedidoExclusaoPendente.idPedido);
-    definirPedidoExclusaoPendente(null);
+    await excluirOrdemCompra(ordemCompraExclusaoPendente.idOrdemCompra);
+    definirOrdemCompraExclusaoPendente(null);
     await recarregarPagina();
   }
 
-  async function alterarEtapaRapidamente(pedido, proximoIdEtapaPedido) {
-    const valorEtapa = String(proximoIdEtapaPedido || '').trim();
+  async function alterarEtapaRapidamente(ordemCompra, proximoIdEtapaOrdemCompra) {
+    const valorEtapa = String(proximoIdEtapaOrdemCompra || '').trim();
 
-    if (!pedido?.idPedido || String(pedido.idEtapaPedido || '') === valorEtapa) {
+    if (!ordemCompra?.idOrdemCompra || String(ordemCompra.idEtapaOrdemCompra || '') === valorEtapa) {
       return;
     }
 
-    const etapaSelecionada = etapasPedido.find(
-      (etapa) => String(etapa.idEtapaPedido) === valorEtapa
+    const etapaSelecionada = etapasOrdemCompra.find(
+      (etapa) => String(etapa.idEtapaOrdemCompra) === valorEtapa
     );
-    const payload = normalizarPayloadPedido({
-      ...pedido,
-      idEtapaPedido: valorEtapa,
-      nomeEtapaPedidoSnapshot: etapaSelecionada?.descricao || '',
-      dataEntrega: entrouNaEtapaEntregue(pedido.idEtapaPedido, valorEtapa)
+    const payload = normalizarPayloadOrdemCompra({
+      ...ordemCompra,
+      idEtapaOrdemCompra: valorEtapa,
+      nomeEtapaOrdemCompraSnapshot: etapaSelecionada?.descricao || '',
+      dataEntrega: entrouNaEtapaEntregue(ordemCompra.idEtapaOrdemCompra, valorEtapa)
         ? obterDataAtualFormatoInput()
-        : pedido.dataEntrega
+        : ordemCompra.dataEntrega
     });
 
-    await atualizarPedido(pedido.idPedido, payload);
+    await atualizarOrdemCompra(ordemCompra.idOrdemCompra, payload);
     await recarregarPagina();
   }
 
   const carregando = carregandoContexto || carregandoGrade;
-  const colunasVisiveisPedidos = useMemo(
-    () => normalizarColunasGridPedidos(empresa?.colunasGridPedidos),
-    [empresa?.colunasGridPedidos]
+  const colunasVisiveisOrdensCompra = useMemo(
+    () => normalizarColunasGridOrdensCompra(empresa?.colunasGridOrdensCompra),
+    [empresa?.colunasGridOrdensCompra]
   );
   const filtrosAtivos = JSON.stringify(filtros) !== JSON.stringify(filtrosIniciais);
 
@@ -494,7 +494,7 @@ export function PaginaOrdensCompra({ usuarioLogado }) {
       <header className="cabecalhoPagina">
         <div>
           <h1>Ordens de Compra</h1>
-          <p>Acompanhe as ordens de compra gerados a partir das propostas comerciais do CRM.</p>
+          <p>Acompanhe as ordens de compra gerados a partir das propostas comerciais do SRM.</p>
         </div>
 
         <div className="acoesCabecalhoPagina">
@@ -527,7 +527,7 @@ export function PaginaOrdensCompra({ usuarioLogado }) {
             somenteIcone
             title="Nova ordem de compra"
             aria-label="Nova ordem de compra"
-            onClick={abrirNovoPedido}
+            onClick={abrirNovoOrdemCompra}
           />
         </div>
       </header>
@@ -535,29 +535,29 @@ export function PaginaOrdensCompra({ usuarioLogado }) {
       <CorpoPagina>
         <GradePadrao
           modo="layout"
-          totalColunasLayout={TOTAL_COLUNAS_GRID_PEDIDOS}
-          cabecalho={<CabecalhoGradePedidos colunas={colunasVisiveisPedidos} />}
+          totalColunasLayout={TOTAL_COLUNAS_GRID_ORDENS_COMPRA}
+          cabecalho={<CabecalhoGradeOrdensCompra colunas={colunasVisiveisOrdensCompra} />}
           carregando={carregando}
           mensagemErro={mensagemErro}
-          temItens={pedidos.length > 0}
+          temItens={ordensCompra.length > 0}
           mensagemCarregando="Carregando ordens de compra..."
           mensagemVazia="Nenhum ordem de compra encontrado."
         >
-          {pedidos.map((pedido) => (
-            <LinhaPedido
-              key={pedido.idPedido}
-              pedido={pedido}
-              colunas={colunasVisiveisPedidos}
-              etapasPedido={etapasPedido}
+          {ordensCompra.map((ordemCompra) => (
+            <LinhaOrdemCompra
+              key={ordemCompra.idOrdemCompra}
+              ordemCompra={ordemCompra}
+              colunas={colunasVisiveisOrdensCompra}
+              etapasOrdemCompra={etapasOrdemCompra}
               empresa={empresa}
-              clientes={fornecedores}
+              fornecedores={fornecedores}
               permitirExcluir={permitirExcluir}
-              permitirEdicao={!pedidoBloqueadoParaUsuarioPadrao(pedido, usuarioLogado)}
-              permitirAlteracaoEtapa={!pedidoBloqueadoParaUsuarioPadrao(pedido, usuarioLogado)}
-              aoAlterarEtapa={(idEtapaPedido) => alterarEtapaRapidamente(pedido, idEtapaPedido)}
-              aoConsultar={() => abrirConsultaPedido(pedido)}
-              aoEditar={() => abrirEdicaoPedido(pedido)}
-              aoExcluir={() => abrirExclusaoPedido(pedido)}
+              permitirEdicao={!ordemCompraBloqueadoParaUsuarioPadrao(ordemCompra, usuarioLogado)}
+              permitirAlteracaoEtapa={!ordemCompraBloqueadoParaUsuarioPadrao(ordemCompra, usuarioLogado)}
+              aoAlterarEtapa={(idEtapaOrdemCompra) => alterarEtapaRapidamente(ordemCompra, idEtapaOrdemCompra)}
+              aoConsultar={() => abrirConsultaOrdemCompra(ordemCompra)}
+              aoEditar={() => abrirEdicaoOrdemCompra(ordemCompra)}
+              aoExcluir={() => abrirExclusaoOrdemCompra(ordemCompra)}
             />
           ))}
         </GradePadrao>
@@ -571,9 +571,9 @@ export function PaginaOrdensCompra({ usuarioLogado }) {
           {
             name: 'idFornecedor',
             label: 'Fornecedor',
-            options: fornecedores.map((cliente) => ({
-              valor: String(cliente.idCliente),
-              label: cliente.nomeFantasia || cliente.razaoSocial
+            options: fornecedores.map((fornecedor) => ({
+              valor: String(fornecedor.idFornecedor),
+              label: fornecedor.nomeFantasia || fornecedor.razaoSocial
             }))
           },
           {
@@ -585,28 +585,28 @@ export function PaginaOrdensCompra({ usuarioLogado }) {
             }))
           },
           {
-            name: 'idVendedor',
+            name: 'idComprador',
             label: 'Comprador',
             multiple: true,
             placeholder: 'Todos os compradores',
-            disabled: Boolean(usuarioSomenteVendedor),
-            options: vendedores.map((vendedor) => ({
-              valor: String(vendedor.idVendedor),
-              label: vendedor.nome
+            disabled: Boolean(usuarioSomenteComprador),
+            options: compradores.map((comprador) => ({
+              valor: String(comprador.idComprador),
+              label: comprador.nome
             }))
           },
           {
-            name: 'idEtapaPedido',
+            name: 'idEtapaOrdemCompra',
             label: 'Etapa',
             multiple: true,
             tituloSelecao: 'Selecionar etapas',
-            options: etapasPedido.map((etapa) => ({
-              valor: String(etapa.idEtapaPedido),
+            options: etapasOrdemCompra.map((etapa) => ({
+              valor: String(etapa.idEtapaOrdemCompra),
               label: etapa.descricao
             }))
           },
           {
-            name: 'periodosDatasPedido',
+            name: 'periodosDatasOrdemCompra',
             label: 'Datas',
             type: 'date-filters-modal',
             tituloSelecao: 'Filtros de datas da ordem de compra',
@@ -634,32 +634,32 @@ export function PaginaOrdensCompra({ usuarioLogado }) {
           definirFiltros(proximosFiltros);
           definirModalFiltrosAberto(false);
         }}
-        aoLimpar={() => definirFiltros(criarFiltrosIniciaisPedidos(usuarioLogado))}
+        aoLimpar={() => definirFiltros(criarFiltrosIniciaisOrdensCompra(usuarioLogado))}
       />
 
       <ModalOrdemCompra
         aberto={modalAberto}
-        pedido={pedidoSelecionado}
-        clientes={fornecedores}
+        ordemCompra={ordemCompraSelecionado}
+        fornecedores={fornecedores}
         contatos={contatos}
         usuarios={usuarios}
-        vendedores={vendedores}
+        compradores={compradores}
         ramosAtividade={ramosAtividade}
-        conceitosCliente={conceitosCliente}
+        conceitosFornecedor={conceitosFornecedor}
         metodosPagamento={metodosPagamento}
         prazosPagamento={prazosPagamento}
-        tiposPedido={tiposPedido}
-        etapasPedido={etapasPedido}
+        tiposOrdemCompra={tiposOrdemCompra}
+        etapasOrdemCompra={etapasOrdemCompra}
         produtos={produtos}
-        camposPedido={camposPedido}
+        camposOrdemCompra={camposOrdemCompra}
         empresa={empresa}
         usuarioLogado={usuarioLogado}
         modo={modoModal}
-        idVendedorBloqueado={usuarioSomenteVendedor ? usuarioLogado.idVendedor : null}
+        idCompradorBloqueado={usuarioSomenteComprador ? usuarioLogado.idComprador : null}
         somenteConsultaPrazos={usuarioSomenteConsultaConfiguracao}
-        aoIncluirCliente={incluirClientePeloPedido}
+        aoIncluirFornecedor={incluirFornecedorPeloOrdemCompra}
         aoFechar={fecharModal}
-        aoSalvar={salvarPedido}
+        aoSalvar={salvarOrdemCompra}
         aoSalvarPrazoPagamento={salvarPrazoPagamento}
         aoInativarPrazoPagamento={inativarPrazoPagamento}
       />
@@ -667,30 +667,30 @@ export function PaginaOrdensCompra({ usuarioLogado }) {
       <ModalManualOrdensCompra
         aberto={modalManualAberto}
         aoFechar={() => definirModalManualAberto(false)}
-        pedidos={pedidos}
-        etapasPedido={etapasPedido}
+        ordensCompra={ordensCompra}
+        etapasOrdemCompra={etapasOrdemCompra}
         prazosPagamento={prazosPagamento}
         filtros={filtros}
         usuarioLogado={usuarioLogado}
       />
-      <ModalColunasGridPedidos
+      <ModalColunasGridOrdensCompra
         aberto={modalColunasGridAberto}
         empresa={empresa}
         aoFechar={() => definirModalColunasGridAberto(false)}
-        aoSalvar={salvarColunasGridPedidos}
+        aoSalvar={salvarColunasGridOrdensCompra}
       />
 
-      {pedidoExclusaoPendente ? (
-        <div className="camadaConfirmacaoModal" role="presentation" onMouseDown={cancelarExclusaoPedido}>
+      {ordemCompraExclusaoPendente ? (
+        <div className="camadaConfirmacaoModal" role="presentation" onMouseDown={cancelarExclusaoOrdemCompra}>
           <div
             className="modalConfirmacaoAgenda"
             role="alertdialog"
             aria-modal="true"
-            aria-labelledby="tituloConfirmacaoExclusaoPedido"
+            aria-labelledby="tituloConfirmacaoExclusaoOrdemCompra"
             onMouseDown={(evento) => evento.stopPropagation()}
           >
             <div className="cabecalhoConfirmacaoModal">
-              <h4 id="tituloConfirmacaoExclusaoPedido">Excluir ordem de compra</h4>
+              <h4 id="tituloConfirmacaoExclusaoOrdemCompra">Excluir ordem de compra</h4>
             </div>
 
             <div className="corpoConfirmacaoModal">
@@ -698,10 +698,10 @@ export function PaginaOrdensCompra({ usuarioLogado }) {
             </div>
 
             <div className="acoesConfirmacaoModal">
-              <Botao variante="secundario" type="button" onClick={cancelarExclusaoPedido}>
+              <Botao variante="secundario" type="button" onClick={cancelarExclusaoOrdemCompra}>
                 Nao
               </Botao>
-              <Botao variante="perigo" type="button" onClick={confirmarExclusaoPedido}>
+              <Botao variante="perigo" type="button" onClick={confirmarExclusaoOrdemCompra}>
                 Sim
               </Botao>
             </div>
@@ -713,9 +713,9 @@ export function PaginaOrdensCompra({ usuarioLogado }) {
   );
 }
 
-function CabecalhoGradePedidos({ colunas }) {
+function CabecalhoGradeOrdensCompra({ colunas }) {
   return (
-    <div className="cabecalhoLayoutGradePadrao cabecalhoGradePedidos">
+    <div className="cabecalhoLayoutGradePadrao cabecalhoGradeOrdensCompra">
       {colunas.map((coluna) => (
         <div key={coluna.id} className={coluna.classe} style={obterEstiloColunaLayout(coluna)}>
           {coluna.rotulo}
@@ -725,10 +725,10 @@ function CabecalhoGradePedidos({ colunas }) {
   );
 }
 
-function LinhaPedido({
-  pedido,
+function LinhaOrdemCompra({
+  ordemCompra,
   colunas,
-  etapasPedido,
+  etapasOrdemCompra,
   empresa,
   fornecedores,
   permitirExcluir,
@@ -740,11 +740,11 @@ function LinhaPedido({
   aoExcluir
 }) {
   return (
-    <div className="linhaLayoutGradePadrao linhaPedido">
-      {colunas.map((coluna) => renderizarCelulaPedido({
+    <div className="linhaLayoutGradePadrao linhaOrdemCompra">
+      {colunas.map((coluna) => renderizarCelulaOrdemCompra({
         coluna,
-        pedido,
-        etapasPedido,
+        ordemCompra,
+        etapasOrdemCompra,
         empresa,
         fornecedores,
         permitirExcluir,
@@ -759,10 +759,10 @@ function LinhaPedido({
   );
 }
 
-function renderizarCelulaPedido({
+function renderizarCelulaOrdemCompra({
   coluna,
-  pedido,
-  etapasPedido,
+  ordemCompra,
+  etapasOrdemCompra,
   empresa,
   fornecedores,
   permitirExcluir,
@@ -779,213 +779,213 @@ function renderizarCelulaPedido({
     style: obterEstiloColunaLayout(coluna)
   };
 
-  if (coluna.id === 'codigo' || coluna.id === 'idPedido') {
+  if (coluna.id === 'codigo' || coluna.id === 'idOrdemCompra') {
     return (
-      <CelulaLayoutPedido coluna={coluna} {...propriedadesCelula}>
-        <CodigoRegistro valor={pedido.idPedido} />
-      </CelulaLayoutPedido>
+      <CelulaLayoutOrdemCompra coluna={coluna} {...propriedadesCelula}>
+        <CodigoRegistro valor={ordemCompra.idOrdemCompra} />
+      </CelulaLayoutOrdemCompra>
     );
   }
 
-  if (coluna.id === 'idOrcamento') {
+  if (coluna.id === 'idCotacao') {
     return (
-      <CelulaLayoutPedido coluna={coluna} {...propriedadesCelula}>
-        {pedido.idOrcamento ? <CodigoRegistro valor={pedido.idOrcamento} /> : '-'}
-      </CelulaLayoutPedido>
+      <CelulaLayoutOrdemCompra coluna={coluna} {...propriedadesCelula}>
+        {ordemCompra.idCotacao ? <CodigoRegistro valor={ordemCompra.idCotacao} /> : '-'}
+      </CelulaLayoutOrdemCompra>
     );
   }
 
-  if (coluna.id === 'codigoOrcamentoOrigem') {
+  if (coluna.id === 'codigoCotacaoOrigem') {
     return (
-      <CelulaLayoutPedido coluna={coluna} {...propriedadesCelula}>
-        {pedido.codigoOrcamentoOrigem ? <CodigoRegistro valor={pedido.codigoOrcamentoOrigem} /> : '-'}
-      </CelulaLayoutPedido>
+      <CelulaLayoutOrdemCompra coluna={coluna} {...propriedadesCelula}>
+        {ordemCompra.codigoCotacaoOrigem ? <CodigoRegistro valor={ordemCompra.codigoCotacaoOrigem} /> : '-'}
+      </CelulaLayoutOrdemCompra>
     );
   }
 
-  if (coluna.id === 'cliente') {
+  if (coluna.id === 'fornecedor') {
     return (
-      <CelulaLayoutPedido coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(pedido.nomeClienteSnapshot)}</TextoGradeClamp>
-      </CelulaLayoutPedido>
+      <CelulaLayoutOrdemCompra coluna={coluna} {...propriedadesCelula}>
+        <TextoGradeClamp>{obterValorGrid(ordemCompra.nomeFornecedorSnapshot)}</TextoGradeClamp>
+      </CelulaLayoutOrdemCompra>
     );
   }
 
-  if (coluna.id === 'idCliente') {
-    const cliente = (Array.isArray(clientes) ? clientes : []).find(
-      (item) => String(item.idCliente) === String(pedido.idCliente)
+  if (coluna.id === 'idFornecedor') {
+    const fornecedor = (Array.isArray(fornecedores) ? fornecedores : []).find(
+      (item) => String(item.idFornecedor) === String(ordemCompra.idFornecedor)
     );
 
     return (
-      <CelulaLayoutPedido coluna={coluna} {...propriedadesCelula}>
-        {pedido.idCliente
-          ? <CodigoRegistro valor={formatarCodigoCliente(cliente || { idFornecedor: pedido.idCliente }, empresa).replace('#', '')} />
+      <CelulaLayoutOrdemCompra coluna={coluna} {...propriedadesCelula}>
+        {ordemCompra.idFornecedor
+          ? <CodigoRegistro valor={formatarCodigoFornecedor(fornecedor || { idFornecedor: ordemCompra.idFornecedor }, empresa).replace('#', '')} />
           : '-'}
-      </CelulaLayoutPedido>
+      </CelulaLayoutOrdemCompra>
     );
   }
 
   if (coluna.id === 'idConceito') {
-    const cliente = (Array.isArray(clientes) ? clientes : []).find(
-      (item) => String(item.idCliente) === String(pedido.idCliente)
+    const fornecedor = (Array.isArray(fornecedores) ? fornecedores : []).find(
+      (item) => String(item.idFornecedor) === String(ordemCompra.idFornecedor)
     );
 
     return (
-      <CelulaLayoutPedido coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(cliente?.nomeConceito)}</TextoGradeClamp>
-      </CelulaLayoutPedido>
+      <CelulaLayoutOrdemCompra coluna={coluna} {...propriedadesCelula}>
+        <TextoGradeClamp>{obterValorGrid(fornecedor?.nomeConceito)}</TextoGradeClamp>
+      </CelulaLayoutOrdemCompra>
     );
   }
 
   if (coluna.id === 'contato') {
     return (
-      <CelulaLayoutPedido coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(pedido.nomeContatoSnapshot)}</TextoGradeClamp>
-      </CelulaLayoutPedido>
+      <CelulaLayoutOrdemCompra coluna={coluna} {...propriedadesCelula}>
+        <TextoGradeClamp>{obterValorGrid(ordemCompra.nomeContatoSnapshot)}</TextoGradeClamp>
+      </CelulaLayoutOrdemCompra>
     );
   }
 
   if (coluna.id === 'idContato') {
     return (
-      <CelulaLayoutPedido coluna={coluna} {...propriedadesCelula}>
-        {pedido.idContato ? <CodigoRegistro valor={pedido.idContato} /> : '-'}
-      </CelulaLayoutPedido>
+      <CelulaLayoutOrdemCompra coluna={coluna} {...propriedadesCelula}>
+        {ordemCompra.idContato ? <CodigoRegistro valor={ordemCompra.idContato} /> : '-'}
+      </CelulaLayoutOrdemCompra>
     );
   }
 
   if (coluna.id === 'usuario') {
     return (
-      <CelulaLayoutPedido coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(pedido.nomeUsuarioSnapshot)}</TextoGradeClamp>
-      </CelulaLayoutPedido>
+      <CelulaLayoutOrdemCompra coluna={coluna} {...propriedadesCelula}>
+        <TextoGradeClamp>{obterValorGrid(ordemCompra.nomeUsuarioSnapshot)}</TextoGradeClamp>
+      </CelulaLayoutOrdemCompra>
     );
   }
 
   if (coluna.id === 'idUsuario') {
     return (
-      <CelulaLayoutPedido coluna={coluna} {...propriedadesCelula}>
-        {pedido.idUsuario ? <CodigoRegistro valor={pedido.idUsuario} /> : '-'}
-      </CelulaLayoutPedido>
+      <CelulaLayoutOrdemCompra coluna={coluna} {...propriedadesCelula}>
+        {ordemCompra.idUsuario ? <CodigoRegistro valor={ordemCompra.idUsuario} /> : '-'}
+      </CelulaLayoutOrdemCompra>
     );
   }
 
-  if (coluna.id === 'vendedor') {
+  if (coluna.id === 'comprador') {
     return (
-      <CelulaLayoutPedido coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(pedido.nomeVendedorSnapshot)}</TextoGradeClamp>
-      </CelulaLayoutPedido>
+      <CelulaLayoutOrdemCompra coluna={coluna} {...propriedadesCelula}>
+        <TextoGradeClamp>{obterValorGrid(ordemCompra.nomeCompradorSnapshot)}</TextoGradeClamp>
+      </CelulaLayoutOrdemCompra>
     );
   }
 
-  if (coluna.id === 'idVendedor') {
+  if (coluna.id === 'idComprador') {
     return (
-      <CelulaLayoutPedido coluna={coluna} {...propriedadesCelula}>
-        {pedido.idVendedor ? <CodigoRegistro valor={pedido.idVendedor} /> : '-'}
-      </CelulaLayoutPedido>
+      <CelulaLayoutOrdemCompra coluna={coluna} {...propriedadesCelula}>
+        {ordemCompra.idComprador ? <CodigoRegistro valor={ordemCompra.idComprador} /> : '-'}
+      </CelulaLayoutOrdemCompra>
     );
   }
 
   if (coluna.id === 'etapa') {
     return (
-      <CelulaLayoutPedido coluna={coluna} {...propriedadesCelula}>
-        <div className="campoEtapaGridOrcamento">
+      <CelulaLayoutOrdemCompra coluna={coluna} {...propriedadesCelula}>
+        <div className="campoEtapaGridCotacao">
           <select
-            className="selectEtapaGridOrcamento"
-            style={criarEstiloEtapaPedido(pedido.corEtapaPedido)}
-            value={pedido.idEtapaPedido ? String(pedido.idEtapaPedido) : ''}
+            className="selectEtapaGridCotacao"
+            style={criarEstiloEtapaOrdemCompra(ordemCompra.corEtapaOrdemCompra)}
+            value={ordemCompra.idEtapaOrdemCompra ? String(ordemCompra.idEtapaOrdemCompra) : ''}
             onChange={(evento) => aoAlterarEtapa(evento.target.value)}
-            aria-label={`Alterar etapa da ordem de compra ${pedido.idPedido}`}
+            aria-label={`Alterar etapa da ordem de compra ${ordemCompra.idOrdemCompra}`}
             disabled={!permitirAlteracaoEtapa}
             title={!permitirAlteracaoEtapa ? 'Ordem de Compra entregue: usuario padrao consulta apenas.' : 'Alterar etapa da ordem de compra'}
           >
             <option value="">Sem etapa</option>
-            {etapasPedido.map((etapa) => (
-              <option key={etapa.idEtapaPedido} value={etapa.idEtapaPedido}>
+            {etapasOrdemCompra.map((etapa) => (
+              <option key={etapa.idEtapaOrdemCompra} value={etapa.idEtapaOrdemCompra}>
                 {etapa.descricao}
               </option>
             ))}
           </select>
         </div>
-      </CelulaLayoutPedido>
+      </CelulaLayoutOrdemCompra>
     );
   }
 
-  if (coluna.id === 'idEtapaPedido') {
+  if (coluna.id === 'idEtapaOrdemCompra') {
     return (
-      <CelulaLayoutPedido coluna={coluna} {...propriedadesCelula}>
-        {pedido.idEtapaPedido ? <CodigoRegistro valor={pedido.idEtapaPedido} /> : '-'}
-      </CelulaLayoutPedido>
+      <CelulaLayoutOrdemCompra coluna={coluna} {...propriedadesCelula}>
+        {ordemCompra.idEtapaOrdemCompra ? <CodigoRegistro valor={ordemCompra.idEtapaOrdemCompra} /> : '-'}
+      </CelulaLayoutOrdemCompra>
     );
   }
 
 
   if (coluna.id === 'prazoPagamento') {
     return (
-      <CelulaLayoutPedido coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(pedido.nomePrazoPagamentoSnapshot)}</TextoGradeClamp>
-      </CelulaLayoutPedido>
+      <CelulaLayoutOrdemCompra coluna={coluna} {...propriedadesCelula}>
+        <TextoGradeClamp>{obterValorGrid(ordemCompra.nomePrazoPagamentoSnapshot)}</TextoGradeClamp>
+      </CelulaLayoutOrdemCompra>
     );
   }
 
   if (coluna.id === 'idPrazoPagamento') {
     return (
-      <CelulaLayoutPedido coluna={coluna} {...propriedadesCelula}>
-        {pedido.idPrazoPagamento ? <CodigoRegistro valor={pedido.idPrazoPagamento} /> : '-'}
-      </CelulaLayoutPedido>
+      <CelulaLayoutOrdemCompra coluna={coluna} {...propriedadesCelula}>
+        {ordemCompra.idPrazoPagamento ? <CodigoRegistro valor={ordemCompra.idPrazoPagamento} /> : '-'}
+      </CelulaLayoutOrdemCompra>
     );
   }
 
   if (coluna.id === 'metodoPagamento') {
     return (
-      <CelulaLayoutPedido coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(pedido.nomeMetodoPagamentoSnapshot)}</TextoGradeClamp>
-      </CelulaLayoutPedido>
+      <CelulaLayoutOrdemCompra coluna={coluna} {...propriedadesCelula}>
+        <TextoGradeClamp>{obterValorGrid(ordemCompra.nomeMetodoPagamentoSnapshot)}</TextoGradeClamp>
+      </CelulaLayoutOrdemCompra>
     );
   }
 
   if (coluna.id === 'dataInclusao') {
     return (
-      <CelulaLayoutPedido coluna={coluna} {...propriedadesCelula}>
-        {formatarDataGridPedido(pedido.dataInclusao)}
-      </CelulaLayoutPedido>
+      <CelulaLayoutOrdemCompra coluna={coluna} {...propriedadesCelula}>
+        {formatarDataGridOrdemCompra(ordemCompra.dataInclusao)}
+      </CelulaLayoutOrdemCompra>
     );
   }
 
   if (coluna.id === 'dataEntrega') {
     return (
-      <CelulaLayoutPedido coluna={coluna} {...propriedadesCelula}>
-        {formatarDataGridPedido(pedido.dataEntrega)}
-      </CelulaLayoutPedido>
+      <CelulaLayoutOrdemCompra coluna={coluna} {...propriedadesCelula}>
+        {formatarDataGridOrdemCompra(ordemCompra.dataEntrega)}
+      </CelulaLayoutOrdemCompra>
     );
   }
 
   if (coluna.id === 'dataValidade') {
     return (
-      <CelulaLayoutPedido coluna={coluna} {...propriedadesCelula}>
-        {formatarDataGridPedido(pedido.dataValidade)}
-      </CelulaLayoutPedido>
+      <CelulaLayoutOrdemCompra coluna={coluna} {...propriedadesCelula}>
+        {formatarDataGridOrdemCompra(ordemCompra.dataValidade)}
+      </CelulaLayoutOrdemCompra>
     );
   }
 
   if (coluna.id === 'observacao') {
     return (
-      <CelulaLayoutPedido coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(pedido.observacao)}</TextoGradeClamp>
-      </CelulaLayoutPedido>
+      <CelulaLayoutOrdemCompra coluna={coluna} {...propriedadesCelula}>
+        <TextoGradeClamp>{obterValorGrid(ordemCompra.observacao)}</TextoGradeClamp>
+      </CelulaLayoutOrdemCompra>
     );
   }
 
   if (coluna.id === 'total') {
     return (
-      <CelulaLayoutPedido coluna={coluna} {...propriedadesCelula}>
-        {normalizarPreco(pedido.totalPedido)}
-      </CelulaLayoutPedido>
+      <CelulaLayoutOrdemCompra coluna={coluna} {...propriedadesCelula}>
+        {normalizarPreco(ordemCompra.totalOrdemCompra)}
+      </CelulaLayoutOrdemCompra>
     );
   }
 
   if (coluna.id === 'acoes') {
     return (
-      <CelulaLayoutPedido coluna={coluna} {...propriedadesCelula}>
+      <CelulaLayoutOrdemCompra coluna={coluna} {...propriedadesCelula}>
         <AcoesRegistro
           rotuloConsulta="Consultar ordem de compra"
           rotuloEdicao={permitirEdicao ? 'Editar ordem de compra' : 'Ordem de Compra entregue: usuario padrao consulta apenas.'}
@@ -997,14 +997,14 @@ function renderizarCelulaPedido({
           aoEditar={aoEditar}
           aoInativar={aoExcluir}
         />
-      </CelulaLayoutPedido>
+      </CelulaLayoutOrdemCompra>
     );
   }
 
   return null;
 }
 
-function CelulaLayoutPedido({ coluna, children, ...propriedades }) {
+function CelulaLayoutOrdemCompra({ coluna, children, ...propriedades }) {
   return (
     <div {...propriedades}>
       <span className="rotuloCelulaLayoutGradePadrao">{coluna.rotulo}</span>
@@ -1013,21 +1013,21 @@ function CelulaLayoutPedido({ coluna, children, ...propriedades }) {
   );
 }
 
-function enriquecerPedidos(pedidos, etapasPedido) {
+function enriquecerOrdensCompra(ordensCompra, etapasOrdemCompra) {
   const etapasPorId = new Map(
-    etapasPedido.map((etapa) => [etapa.idEtapaPedido, etapa])
+    etapasOrdemCompra.map((etapa) => [etapa.idEtapaOrdemCompra, etapa])
   );
 
-  return pedidos.map((pedido) => ({
-    ...pedido,
-    totalPedido: Array.isArray(pedido.itens)
-      ? pedido.itens.reduce((total, item) => total + (Number(item.valorTotal) || 0), 0)
+  return ordensCompra.map((ordemCompra) => ({
+    ...ordemCompra,
+    totalOrdemCompra: Array.isArray(ordemCompra.itens)
+      ? ordemCompra.itens.reduce((total, item) => total + (Number(item.valorTotal) || 0), 0)
       : 0,
-    nomeEtapaPedidoSnapshot:
-      pedido.nomeEtapaPedidoSnapshot
-      || etapasPorId.get(pedido.idEtapaPedido)?.descricao
+    nomeEtapaOrdemCompraSnapshot:
+      ordemCompra.nomeEtapaOrdemCompraSnapshot
+      || etapasPorId.get(ordemCompra.idEtapaOrdemCompra)?.descricao
       || '',
-    corEtapaPedido: etapasPorId.get(pedido.idEtapaPedido)?.cor || ''
+    corEtapaOrdemCompra: etapasPorId.get(ordemCompra.idEtapaOrdemCompra)?.cor || ''
   }));
 }
 
@@ -1038,7 +1038,7 @@ function obterEstiloColunaLayout(coluna) {
   };
 }
 
-function formatarDataGridPedido(valor) {
+function formatarDataGridOrdemCompra(valor) {
   if (!valor) {
     return '-';
   }
@@ -1053,42 +1053,42 @@ function formatarDataGridPedido(valor) {
   return `${dia}/${mes}/${ano}`;
 }
 
-function pedidoBloqueadoParaUsuarioPadrao(pedido, usuarioLogado) {
-  return usuarioLogado?.tipo === 'Usuario padrao' && etapaPedidoEhEntregue(pedido?.idEtapaPedido);
+function ordemCompraBloqueadoParaUsuarioPadrao(ordemCompra, usuarioLogado) {
+  return usuarioLogado?.tipo === 'Usuario padrao' && etapaOrdemCompraEhEntregue(ordemCompra?.idEtapaOrdemCompra);
 }
 
 function entrouNaEtapaEntregue(idEtapaAnterior, idEtapaAtual) {
-  return !etapaPedidoEhEntregue(idEtapaAnterior) && etapaPedidoEhEntregue(idEtapaAtual);
+  return !etapaOrdemCompraEhEntregue(idEtapaAnterior) && etapaOrdemCompraEhEntregue(idEtapaAtual);
 }
 
-function etapaPedidoEhEntregue(idEtapaPedido) {
-  return Number(idEtapaPedido) === ID_ETAPA_PEDIDO_ENTREGUE;
+function etapaOrdemCompraEhEntregue(idEtapaOrdemCompra) {
+  return Number(idEtapaOrdemCompra) === ID_ETAPA_ORDEM_COMPRA_ENTREGUE;
 }
 
-function normalizarPayloadPedido(dadosPedido) {
+function normalizarPayloadOrdemCompra(dadosOrdemCompra) {
   return {
-    idOrcamento: dadosPedido.idOrcamento ? Number(dadosPedido.idOrcamento) : null,
-    idFornecedor: dadosPedido.idCliente ? Number(dadosPedido.idCliente) : null,
-    idContato: dadosPedido.idContato ? Number(dadosPedido.idContato) : null,
-    idUsuario: dadosPedido.idUsuario ? Number(dadosPedido.idUsuario) : null,
-      idVendedor: dadosPedido.idVendedor ? Number(dadosPedido.idVendedor) : null,
-      idPrazoPagamento: dadosPedido.idPrazoPagamento ? Number(dadosPedido.idPrazoPagamento) : null,
-      idTipoPedido: dadosPedido.idTipoPedido ? Number(dadosPedido.idTipoPedido) : null,
-      idEtapaPedido: dadosPedido.idEtapaPedido ? Number(dadosPedido.idEtapaPedido) : null,
-    dataInclusao: limparTextoOpcional(dadosPedido.dataInclusao),
-    dataEntrega: limparTextoOpcional(dadosPedido.dataEntrega),
-    dataValidade: limparTextoOpcional(dadosPedido.dataValidade),
-    observacao: limparTextoOpcional(dadosPedido.observacao),
-    codigoOrcamentoOrigem: dadosPedido.codigoOrcamentoOrigem ? Number(dadosPedido.codigoOrcamentoOrigem) : null,
-    nomeClienteSnapshot: limparTextoOpcional(dadosPedido.nomeClienteSnapshot),
-    nomeContatoSnapshot: limparTextoOpcional(dadosPedido.nomeContatoSnapshot),
-    nomeUsuarioSnapshot: limparTextoOpcional(dadosPedido.nomeUsuarioSnapshot),
-      nomeVendedorSnapshot: limparTextoOpcional(dadosPedido.nomeVendedorSnapshot),
-      nomeMetodoPagamentoSnapshot: limparTextoOpcional(dadosPedido.nomeMetodoPagamentoSnapshot),
-      nomePrazoPagamentoSnapshot: limparTextoOpcional(dadosPedido.nomePrazoPagamentoSnapshot),
-      nomeTipoPedidoSnapshot: limparTextoOpcional(dadosPedido.nomeTipoPedidoSnapshot),
-      nomeEtapaPedidoSnapshot: limparTextoOpcional(dadosPedido.nomeEtapaPedidoSnapshot),
-    itens: Array.isArray(dadosPedido.itens) ? dadosPedido.itens.map((item) => ({
+    idCotacao: dadosOrdemCompra.idCotacao ? Number(dadosOrdemCompra.idCotacao) : null,
+    idFornecedor: dadosOrdemCompra.idFornecedor ? Number(dadosOrdemCompra.idFornecedor) : null,
+    idContato: dadosOrdemCompra.idContato ? Number(dadosOrdemCompra.idContato) : null,
+    idUsuario: dadosOrdemCompra.idUsuario ? Number(dadosOrdemCompra.idUsuario) : null,
+      idComprador: dadosOrdemCompra.idComprador ? Number(dadosOrdemCompra.idComprador) : null,
+      idPrazoPagamento: dadosOrdemCompra.idPrazoPagamento ? Number(dadosOrdemCompra.idPrazoPagamento) : null,
+      idTipoOrdemCompra: dadosOrdemCompra.idTipoOrdemCompra ? Number(dadosOrdemCompra.idTipoOrdemCompra) : null,
+      idEtapaOrdemCompra: dadosOrdemCompra.idEtapaOrdemCompra ? Number(dadosOrdemCompra.idEtapaOrdemCompra) : null,
+    dataInclusao: limparTextoOpcional(dadosOrdemCompra.dataInclusao),
+    dataEntrega: limparTextoOpcional(dadosOrdemCompra.dataEntrega),
+    dataValidade: limparTextoOpcional(dadosOrdemCompra.dataValidade),
+    observacao: limparTextoOpcional(dadosOrdemCompra.observacao),
+    codigoCotacaoOrigem: dadosOrdemCompra.codigoCotacaoOrigem ? Number(dadosOrdemCompra.codigoCotacaoOrigem) : null,
+    nomeFornecedorSnapshot: limparTextoOpcional(dadosOrdemCompra.nomeFornecedorSnapshot),
+    nomeContatoSnapshot: limparTextoOpcional(dadosOrdemCompra.nomeContatoSnapshot),
+    nomeUsuarioSnapshot: limparTextoOpcional(dadosOrdemCompra.nomeUsuarioSnapshot),
+      nomeCompradorSnapshot: limparTextoOpcional(dadosOrdemCompra.nomeCompradorSnapshot),
+      nomeMetodoPagamentoSnapshot: limparTextoOpcional(dadosOrdemCompra.nomeMetodoPagamentoSnapshot),
+      nomePrazoPagamentoSnapshot: limparTextoOpcional(dadosOrdemCompra.nomePrazoPagamentoSnapshot),
+      nomeTipoOrdemCompraSnapshot: limparTextoOpcional(dadosOrdemCompra.nomeTipoOrdemCompraSnapshot),
+      nomeEtapaOrdemCompraSnapshot: limparTextoOpcional(dadosOrdemCompra.nomeEtapaOrdemCompraSnapshot),
+    itens: Array.isArray(dadosOrdemCompra.itens) ? dadosOrdemCompra.itens.map((item) => ({
       idProduto: item.idProduto ? Number(item.idProduto) : null,
       quantidade: normalizarNumeroDecimal(item.quantidade),
       valorUnitario: normalizarNumeroDecimal(item.valorUnitario),
@@ -1099,8 +1099,8 @@ function normalizarPayloadPedido(dadosPedido) {
       descricaoProdutoSnapshot: limparTextoOpcional(item.descricaoProdutoSnapshot),
       unidadeProdutoSnapshot: limparTextoOpcional(item.unidadeProdutoSnapshot)
     })) : [],
-    camposExtras: Array.isArray(dadosPedido.camposExtras) ? dadosPedido.camposExtras.map((campo) => ({
-      idCampoPedido: campo.idCampoPedido ? Number(campo.idCampoPedido) : null,
+    camposExtras: Array.isArray(dadosOrdemCompra.camposExtras) ? dadosOrdemCompra.camposExtras.map((campo) => ({
+      idCampoOrdemCompra: campo.idCampoOrdemCompra ? Number(campo.idCampoOrdemCompra) : null,
       tituloSnapshot: limparTextoOpcional(campo.tituloSnapshot || campo.titulo),
       valor: limparTextoOpcional(campo.valor)
     })) : []
@@ -1206,46 +1206,46 @@ function enriquecerPrazoPagamento(prazo, metodosPagamento = []) {
   return enriquecerPrazosPagamento([prazo], metodosPagamento)[0] || null;
 }
 
-async function salvarContatosClienteCadastro(idFornecedor, contatos) {
-  const contatosNormalizados = normalizarContatosClienteCadastro(contatos, idCliente);
+async function salvarContatosFornecedorCadastro(idFornecedor, contatos) {
+  const contatosNormalizados = normalizarContatosFornecedorCadastro(contatos, idFornecedor);
 
   for (const contato of contatosNormalizados) {
     await incluirContato(contato);
   }
 }
 
-function normalizarPayloadClienteCadastro(dadosCliente) {
+function normalizarPayloadFornecedorCadastro(dadosFornecedor) {
   return {
-    idVendedor: Number(dadosCliente.idVendedor),
-    idConceito: Number(dadosCliente.idConceito),
-    idRamo: Number(dadosCliente.idRamo),
-    razaoSocial: String(dadosCliente.razaoSocial || '').trim(),
-    nomeFantasia: String(dadosCliente.nomeFantasia || '').trim(),
-    tipo: String(dadosCliente.tipo || '').trim(),
-    cnpj: String(dadosCliente.cnpj || '').trim(),
-    inscricaoEstadual: limparTextoOpcional(dadosCliente.inscricaoEstadual),
-    status: dadosCliente.status ? 1 : 0,
-    email: limparTextoOpcional(dadosCliente.email),
-    telefone: limparTextoOpcional(dadosCliente.telefone),
-    logradouro: limparTextoOpcional(dadosCliente.logradouro),
-    numero: limparTextoOpcional(dadosCliente.numero),
-    complemento: limparTextoOpcional(dadosCliente.complemento),
-    bairro: limparTextoOpcional(dadosCliente.bairro),
-    cidade: limparTextoOpcional(dadosCliente.cidade),
-    estado: limparTextoOpcional(dadosCliente.estado)?.toUpperCase(),
-    cep: limparTextoOpcional(dadosCliente.cep),
-    observacao: limparTextoOpcional(dadosCliente.observacao),
-    imagem: limparTextoOpcional(dadosCliente.imagem)
+    idComprador: Number(dadosFornecedor.idComprador),
+    idConceito: Number(dadosFornecedor.idConceito),
+    idRamo: Number(dadosFornecedor.idRamo),
+    razaoSocial: String(dadosFornecedor.razaoSocial || '').trim(),
+    nomeFantasia: String(dadosFornecedor.nomeFantasia || '').trim(),
+    tipo: String(dadosFornecedor.tipo || '').trim(),
+    cnpj: String(dadosFornecedor.cnpj || '').trim(),
+    inscricaoEstadual: limparTextoOpcional(dadosFornecedor.inscricaoEstadual),
+    status: dadosFornecedor.status ? 1 : 0,
+    email: limparTextoOpcional(dadosFornecedor.email),
+    telefone: limparTextoOpcional(dadosFornecedor.telefone),
+    logradouro: limparTextoOpcional(dadosFornecedor.logradouro),
+    numero: limparTextoOpcional(dadosFornecedor.numero),
+    complemento: limparTextoOpcional(dadosFornecedor.complemento),
+    bairro: limparTextoOpcional(dadosFornecedor.bairro),
+    cidade: limparTextoOpcional(dadosFornecedor.cidade),
+    estado: limparTextoOpcional(dadosFornecedor.estado)?.toUpperCase(),
+    cep: limparTextoOpcional(dadosFornecedor.cep),
+    observacao: limparTextoOpcional(dadosFornecedor.observacao),
+    imagem: limparTextoOpcional(dadosFornecedor.imagem)
   };
 }
 
-function normalizarContatosClienteCadastro(contatos, idCliente) {
+function normalizarContatosFornecedorCadastro(contatos, idFornecedor) {
   if (!Array.isArray(contatos)) {
     return [];
   }
 
   return contatos.map((contato) => ({
-    idCliente,
+    idFornecedor,
     nome: String(contato.nome || '').trim(),
     cargo: limparTextoOpcional(contato.cargo),
     email: limparTextoOpcional(contato.email),
@@ -1278,7 +1278,7 @@ function normalizarNumeroDecimal(valor) {
   return Number.isNaN(numero) ? 0 : numero;
 }
 
-function criarEstiloEtapaPedido(cor) {
+function criarEstiloEtapaOrdemCompra(cor) {
   const corBase = normalizarCorHexadecimal(cor || '#9506F4');
 
   return {

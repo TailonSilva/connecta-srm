@@ -1,20 +1,20 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Botao } from '../comuns/botao';
 import { MensagemErroPopup } from '../comuns/mensagemErroPopup';
-import { ModalBuscaClientes } from '../comuns/modalBuscaClientes';
+import { ModalBuscaFornecedores } from '../comuns/modalBuscaFornecedores';
 import { ModalBuscaContatos } from '../comuns/modalBuscaContatos';
-import { ModalFornecedor as ModalCliente } from './fornecedores-modalFornecedor';
+import { ModalFornecedor as ModalFornecedor } from './fornecedores-modalFornecedor';
 import { ModalCotacao } from './cotacoes-modalCotacao';
-import { formatarCodigoCliente } from '../../utilitarios/codigoCliente';
+import { formatarCodigoFornecedor } from '../../utilitarios/codigoFornecedor';
 import { formatarNomeContato } from '../../utilitarios/formatarNomeContato';
 import { normalizarValorEntradaFormulario } from '../../utilitarios/normalizarTextoFormulario';
-import { obterEtapasOrcamentoParaInputManual } from '../../utilitarios/etapasOrcamento';
+import { obterEtapasCotacaoParaInputManual } from '../../utilitarios/etapasCotacao';
 
 const estadoInicialFormulario = {
   idFornecedor: '',
   idContato: '',
-  idOrcamento: '',
-  idEtapaOrcamento: '',
+  idCotacao: '',
+  idEtapaCotacao: '',
   idUsuario: '',
   nomeUsuario: '',
   idTipoAtendimento: '',
@@ -27,46 +27,45 @@ const estadoInicialFormulario = {
   idOrigemAtendimento: ''
 };
 
-const ID_ETAPA_ORCAMENTO_FECHAMENTO = 1;
-const ID_ETAPA_ORCAMENTO_FECHADO_SEM_PEDIDO = 2;
-const ID_TIPO_PEDIDO_VENDA = 1;
+const ID_ETAPA_COTACAO_FECHAMENTO = 1;
+const ID_ETAPA_COTACAO_FECHADO_SEM_ORDEM_COMPRA = 2;
+const ID_TIPO_ORDEM_COMPRA_VENDA = 1;
 
 export function ModalAtendimento({
   aberto,
   atendimento,
-  fornecedores,
-  clientes = [],
+  fornecedores = [],
   contatos = [],
   usuarioLogado,
-  vendedores = [],
+  compradores = [],
   ramosAtividade = [],
-  conceitosCliente = [],
+  conceitosFornecedor = [],
   tiposAtendimento = [],
   canaisAtendimento = [],
   origensAtendimento = [],
   modo = 'novo',
   permitirExcluir = false,
-  idVendedorBloqueado = null,
-  aoIncluirCliente,
-  aoIncluirOrcamento,
-  aoAtualizarOrcamento,
-  aoAtualizarStatusOrcamento,
-  aoAbrirPedido,
-  dadosOrcamento,
-  clientesOrcamento = [],
-  contatosOrcamento = [],
-  usuariosOrcamento = [],
-  vendedoresOrcamento = [],
+  idCompradorBloqueado = null,
+  aoIncluirFornecedor,
+  aoIncluirCotacao,
+  aoAtualizarCotacao,
+  aoAtualizarStatusCotacao,
+  aoAbrirOrdemCompra,
+  dadosCotacao,
+  fornecedoresCotacao = [],
+  contatosCotacao = [],
+  usuariosCotacao = [],
+  compradoresCotacao = [],
   metodosPagamento = [],
   prazosPagamento = [],
-  etapasOrcamento = [],
-  orcamentos = [],
+  etapasCotacao = [],
+  cotacoes = [],
   produtos = [],
-  camposOrcamento = [],
-  camposPedido = [],
+  camposCotacao = [],
+  camposOrdemCompra = [],
   empresa,
   somenteConsultaPrazos = false,
-  etapaOrcamentoAtualizadaExternamente = null,
+  etapaCotacaoAtualizadaExternamente = null,
   classNameCamada = 'camadaModalContato camadaModalAtendimento',
   aoSalvarPrazoPagamento,
   aoInativarPrazoPagamento,
@@ -79,32 +78,32 @@ export function ModalAtendimento({
   const [mensagemErro, definirMensagemErro] = useState('');
   const [confirmandoExclusao, definirConfirmandoExclusao] = useState(false);
   const [confirmandoSaida, definirConfirmandoSaida] = useState(false);
-  const [modalClienteAberto, definirModalClienteAberto] = useState(false);
-  const [modalBuscaClienteAberto, definirModalBuscaClienteAberto] = useState(false);
+  const [modalFornecedorAberto, definirModalFornecedorAberto] = useState(false);
+  const [modalBuscaFornecedorAberto, definirModalBuscaFornecedorAberto] = useState(false);
   const [modalBuscaContatoAberto, definirModalBuscaContatoAberto] = useState(false);
-  const referenciaCampoCliente = useRef(null);
+  const referenciaCampoFornecedor = useRef(null);
   const referenciaCampoContato = useRef(null);
   const [contatosCriadosLocalmente, definirContatosCriadosLocalmente] = useState([]);
-  const [modalOrcamentoAberto, definirModalCotacaoAberto] = useState(false);
+  const [modalCotacaoAberto, definirModalCotacaoAberto] = useState(false);
   const [modoModalCotacao, definirModoModalCotacao] = useState('novo');
-  const [orcamentoSelecionado, definirOrcamentoSelecionado] = useState(null);
-  const [confirmandoPedidoOrcamento, definirConfirmandoPedidoOrcamento] = useState(null);
+  const [cotacaoSelecionado, definirCotacaoSelecionado] = useState(null);
+  const [confirmandoOrdemCompraCotacao, definirConfirmandoOrdemCompraCotacao] = useState(null);
   const somenteLeitura = modo === 'consulta';
   const modoInclusao = modo === 'novo';
   const modoEdicao = modo === 'edicao';
-  const listaFornecedores = Array.isArray(fornecedores) ? fornecedores : clientes;
-  const clientesAtivos = listaFornecedores.filter((cliente) => cliente.status !== 0);
+  const listaFornecedores = Array.isArray(fornecedores) ? fornecedores : fornecedores;
+  const fornecedoresAtivos = listaFornecedores.filter((fornecedor) => fornecedor.status !== 0);
   const contatosAtivos = contatos.filter((contato) => contato.status !== 0);
   const tiposAtendimentoAtivos = tiposAtendimento.filter((tipoAtendimento) => tipoAtendimento.status !== 0);
   const canaisAtivos = canaisAtendimento.filter((canal) => canal.status !== 0);
   const origensAtivas = origensAtendimento.filter((origem) => origem.status !== 0);
-  const etapasOrcamentoAtivas = useMemo(
-    () => ordenarEtapasPorOrdem(etapasOrcamento.filter((etapa) => etapa.status !== 0), 'idEtapaOrcamento'),
-    [etapasOrcamento]
+  const etapasCotacaoAtivas = useMemo(
+    () => ordenarEtapasPorOrdem(etapasCotacao.filter((etapa) => etapa.status !== 0), 'idEtapaCotacao'),
+    [etapasCotacao]
   );
-  const etapasOrcamentoDisponiveisEscolhaManual = useMemo(
-    () => obterEtapasOrcamentoParaInputManual(etapasOrcamentoAtivas, formulario.idEtapaOrcamento),
-    [etapasOrcamentoAtivas, formulario.idEtapaOrcamento]
+  const etapasCotacaoDisponiveisEscolhaManual = useMemo(
+    () => obterEtapasCotacaoParaInputManual(etapasCotacaoAtivas, formulario.idEtapaCotacao),
+    [etapasCotacaoAtivas, formulario.idEtapaCotacao]
   );
 
   useEffect(() => {
@@ -117,30 +116,30 @@ export function ModalAtendimento({
     definirMensagemErro('');
     definirConfirmandoExclusao(false);
     definirConfirmandoSaida(false);
-    definirModalClienteAberto(false);
-    definirModalBuscaClienteAberto(false);
+    definirModalFornecedorAberto(false);
+    definirModalBuscaFornecedorAberto(false);
     definirModalBuscaContatoAberto(false);
     definirContatosCriadosLocalmente([]);
     definirModalCotacaoAberto(false);
     definirModoModalCotacao('novo');
-    definirOrcamentoSelecionado(null);
-    definirConfirmandoPedidoOrcamento(null);
+    definirCotacaoSelecionado(null);
+    definirConfirmandoOrdemCompraCotacao(null);
   }, [aberto, atendimento, usuarioLogado]);
 
   useEffect(() => {
-    if (!etapaOrcamentoAtualizadaExternamente?.idOrcamento) {
+    if (!etapaCotacaoAtualizadaExternamente?.idCotacao) {
       return;
     }
 
     definirFormulario((estadoAtual) => (
-      String(estadoAtual.idOrcamento || '') === String(etapaOrcamentoAtualizadaExternamente.idOrcamento)
+      String(estadoAtual.idCotacao || '') === String(etapaCotacaoAtualizadaExternamente.idCotacao)
         ? {
           ...estadoAtual,
-          idEtapaOrcamento: String(etapaOrcamentoAtualizadaExternamente.idEtapaOrcamento || '')
+          idEtapaCotacao: String(etapaCotacaoAtualizadaExternamente.idEtapaCotacao || '')
         }
         : estadoAtual
     ));
-  }, [etapaOrcamentoAtualizadaExternamente]);
+  }, [etapaCotacaoAtualizadaExternamente]);
 
   useEffect(() => {
     if (!aberto) {
@@ -149,22 +148,22 @@ export function ModalAtendimento({
 
     function tratarTecla(evento) {
       if (evento.key === 'Escape' && !salvando) {
-        if (modalClienteAberto) {
+        if (modalFornecedorAberto) {
           return;
         }
 
-        if (modalOrcamentoAberto) {
+        if (modalCotacaoAberto) {
           return;
         }
 
 
-        if (confirmandoPedidoOrcamento) {
-          definirConfirmandoPedidoOrcamento(null);
+        if (confirmandoOrdemCompraCotacao) {
+          definirConfirmandoOrdemCompraCotacao(null);
           return;
         }
 
-        if (modalBuscaClienteAberto) {
-          fecharModalBuscaCliente();
+        if (modalBuscaFornecedorAberto) {
+          fecharModalBuscaFornecedor();
           return;
         }
 
@@ -192,31 +191,31 @@ export function ModalAtendimento({
     return () => {
       window.removeEventListener('keydown', tratarTecla);
     };
-  }, [aberto, aoFechar, confirmandoExclusao, confirmandoPedidoOrcamento, confirmandoSaida, salvando, modalBuscaClienteAberto, modalBuscaContatoAberto, modalClienteAberto, modalOrcamentoAberto]);
+  }, [aberto, aoFechar, confirmandoExclusao, confirmandoOrdemCompraCotacao, confirmandoSaida, salvando, modalBuscaFornecedorAberto, modalBuscaContatoAberto, modalFornecedorAberto, modalCotacaoAberto]);
 
   if (!aberto) {
     return null;
   }
 
-  const contatosDoCliente = combinarContatosDoCliente(
+  const contatosDoFornecedor = combinarContatosDoFornecedor(
     contatosAtivos,
     contatosCriadosLocalmente,
-    formulario.idCliente
+    formulario.idFornecedor
   );
-  const proximoCodigoCliente = obterProximoCodigoCliente(listaFornecedores);
-  const orcamentosAbertosDoFornecedor = orcamentos.filter(
-    (orcamento) => String(orcamento.idCliente) === String(formulario.idCliente)
+  const proximoCodigoFornecedor = obterProximoCodigoFornecedor(listaFornecedores);
+  const cotacoesAbertosDoFornecedor = cotacoes.filter(
+    (cotacao) => String(cotacao.idFornecedor) === String(formulario.idFornecedor)
   );
-  const orcamentoSelecionadoFormulario = orcamentos.find(
-    (orcamento) => String(orcamento.idOrcamento) === String(formulario.idOrcamento)
+  const cotacaoSelecionadoFormulario = cotacoes.find(
+    (cotacao) => String(cotacao.idCotacao) === String(formulario.idCotacao)
   );
-  const contatoSelecionado = contatosDoCliente.find(
+  const contatoSelecionado = contatosDoFornecedor.find(
     (contato) => String(contato.idContato) === String(formulario.idContato)
   );
-  const dadosOrcamentoAtendimento = montarDadosOrcamentoAPartirDoAtendimentoAtual(
+  const dadosCotacaoAtendimento = montarDadosCotacaoAPartirDoAtendimentoAtual(
     formulario,
-    clientesOrcamento,
-    vendedoresOrcamento,
+    fornecedoresCotacao,
+    compradoresCotacao,
     usuarioLogado
   );
 
@@ -227,57 +226,57 @@ export function ModalAtendimento({
     definirFormulario((estadoAtual) => {
       const proximoEstado = {
         ...estadoAtual,
-        ...(name === 'idCliente' ? { idContato: '', idOrcamento: '', idEtapaOrcamento: '' } : {}),
+        ...(name === 'idFornecedor' ? { idContato: '', idCotacao: '', idEtapaCotacao: '' } : {}),
         [name]: type === 'checkbox' ? checked : valorNormalizado
       };
 
-      if (name === 'idOrcamento') {
-        const orcamento = orcamentosAbertosDoFornecedor.find((item) => String(item.idOrcamento) === String(value));
-        proximoEstado.idEtapaOrcamento = orcamento?.idEtapaOrcamento ? String(orcamento.idEtapaOrcamento) : '';
+      if (name === 'idCotacao') {
+        const cotacao = cotacoesAbertosDoFornecedor.find((item) => String(item.idCotacao) === String(value));
+        proximoEstado.idEtapaCotacao = cotacao?.idEtapaCotacao ? String(cotacao.idEtapaCotacao) : '';
       }
 
-      if (name === 'idEtapaOrcamento' && !estadoAtual.idOrcamento) {
-        proximoEstado.idEtapaOrcamento = '';
+      if (name === 'idEtapaCotacao' && !estadoAtual.idCotacao) {
+        proximoEstado.idEtapaCotacao = '';
       }
 
       return proximoEstado;
     });
   }
 
-  function alterarStatusOrcamento(evento) {
+  function alterarStatusCotacao(evento) {
     const proximoValor = String(evento.target.value || '');
 
-    if (!formulario.idOrcamento) {
+    if (!formulario.idCotacao) {
       return;
     }
 
-    if (!proximoValor || String(formulario.idEtapaOrcamento || '') === proximoValor) {
+    if (!proximoValor || String(formulario.idEtapaCotacao || '') === proximoValor) {
       definirFormulario((estadoAtual) => ({
         ...estadoAtual,
-        idEtapaOrcamento: proximoValor
+        idEtapaCotacao: proximoValor
       }));
       return;
     }
 
-    if (precisaPerguntarGeracaoPedido(
+    if (precisaPerguntarGeracaoOrdemCompra(
       {
-        ...orcamentoSelecionadoFormulario,
-        idEtapaOrcamento: formulario.idEtapaOrcamento || orcamentoSelecionadoFormulario?.idEtapaOrcamento
+        ...cotacaoSelecionadoFormulario,
+        idEtapaCotacao: formulario.idEtapaCotacao || cotacaoSelecionadoFormulario?.idEtapaCotacao
       },
       proximoValor,
-      etapasOrcamento
+      etapasCotacao
     )) {
-      definirConfirmandoPedidoOrcamento({
+      definirConfirmandoOrdemCompraCotacao({
         origem: 'atendimento',
-        proximoIdEtapaOrcamento: proximoValor,
-        orcamento: orcamentoSelecionadoFormulario
+        proximoIdEtapaCotacao: proximoValor,
+        cotacao: cotacaoSelecionadoFormulario
       });
       return;
     }
 
     definirFormulario((estadoAtual) => ({
       ...estadoAtual,
-      idEtapaOrcamento: proximoValor
+      idEtapaCotacao: proximoValor
     }));
   }
 
@@ -289,7 +288,7 @@ export function ModalAtendimento({
     }
 
     const camposObrigatorios = [
-      ['idCliente', 'Selecione o fornecedor.'],
+      ['idFornecedor', 'Selecione o fornecedor.'],
       ['idTipoAtendimento', 'Selecione o tipo de atendimento.'],
       ['assunto', 'Informe o assunto do atendimento.'],
       ['data', 'Informe a data do atendimento.'],
@@ -316,10 +315,10 @@ export function ModalAtendimento({
     definirMensagemErro('');
 
     try {
-      if (formulario.idOrcamento && formulario.idEtapaOrcamento && aoAtualizarStatusOrcamento) {
-        await aoAtualizarStatusOrcamento({
-          idOrcamento: Number(formulario.idOrcamento),
-          idEtapaOrcamento: Number(formulario.idEtapaOrcamento)
+      if (formulario.idCotacao && formulario.idEtapaCotacao && aoAtualizarStatusCotacao) {
+        await aoAtualizarStatusCotacao({
+          idCotacao: Number(formulario.idCotacao),
+          idEtapaCotacao: Number(formulario.idEtapaCotacao)
         });
       }
 
@@ -390,32 +389,32 @@ export function ModalAtendimento({
     aoFechar();
   }
 
-  function abrirModalNovoCliente() {
-    if (somenteLeitura || salvando || !aoIncluirCliente) {
+  function abrirModalNovoFornecedor() {
+    if (somenteLeitura || salvando || !aoIncluirFornecedor) {
       return;
     }
 
-    definirModalClienteAberto(true);
+    definirModalFornecedorAberto(true);
   }
 
-  function fecharModalNovoCliente() {
-    definirModalClienteAberto(false);
+  function fecharModalNovoFornecedor() {
+    definirModalFornecedorAberto(false);
   }
 
-  function abrirModalBuscaCliente() {
+  function abrirModalBuscaFornecedor() {
     if (somenteLeitura || salvando) {
       return;
     }
 
-    definirModalBuscaClienteAberto(true);
+    definirModalBuscaFornecedorAberto(true);
   }
 
-  function fecharModalBuscaCliente() {
-    definirModalBuscaClienteAberto(false);
+  function fecharModalBuscaFornecedor() {
+    definirModalBuscaFornecedorAberto(false);
   }
 
   function abrirModalBuscaContato() {
-    if (somenteLeitura || salvando || !formulario.idCliente) {
+    if (somenteLeitura || salvando || !formulario.idFornecedor) {
       return;
     }
 
@@ -426,20 +425,20 @@ export function ModalAtendimento({
     definirModalBuscaContatoAberto(false);
   }
 
-  function selecionarCliente(cliente) {
-    if (!cliente) {
+  function selecionarFornecedor(fornecedor) {
+    if (!fornecedor) {
       return;
     }
 
     definirFormulario((estadoAtual) => ({
       ...estadoAtual,
-      idFornecedor: String(cliente.idCliente),
+      idFornecedor: String(fornecedor.idFornecedor),
       idContato: '',
-      idOrcamento: '',
-      idEtapaOrcamento: ''
+      idCotacao: '',
+      idEtapaCotacao: ''
     }));
-    fecharModalBuscaCliente();
-    agendarFocoCampo(referenciaCampoCliente);
+    fecharModalBuscaFornecedor();
+    agendarFocoCampo(referenciaCampoFornecedor);
   }
 
   function selecionarContato(contato) {
@@ -463,192 +462,192 @@ export function ModalAtendimento({
     definirContatosCriadosLocalmente((estadoAtual) => combinarContatosUnicos(estadoAtual, [contato]));
   }
 
-  async function salvarNovoCliente(dadosCliente) {
+  async function salvarNovoFornecedor(dadosFornecedor) {
     try {
-      const clienteCriado = await aoIncluirCliente(dadosCliente);
+      const fornecedorCriado = await aoIncluirFornecedor(dadosFornecedor);
 
-      selecionarCliente(clienteCriado);
-      definirModalClienteAberto(false);
+      selecionarFornecedor(fornecedorCriado);
+      definirModalFornecedorAberto(false);
     } catch (erro) {
       throw erro;
     }
   }
 
-  function abrirModalNovoOrcamento() {
-    if (somenteLeitura || salvando || !aoIncluirOrcamento) {
+  function abrirModalNovoCotacao() {
+    if (somenteLeitura || salvando || !aoIncluirCotacao) {
       return;
     }
 
     definirModoModalCotacao('novo');
-    definirOrcamentoSelecionado(null);
+    definirCotacaoSelecionado(null);
     definirModalCotacaoAberto(true);
   }
 
-  function abrirModalConsultaOrcamento() {
-    if (!orcamentoSelecionadoFormulario) {
+  function abrirModalConsultaCotacao() {
+    if (!cotacaoSelecionadoFormulario) {
       return;
     }
 
     definirModoModalCotacao('consulta');
-    definirOrcamentoSelecionado(orcamentoSelecionadoFormulario);
+    definirCotacaoSelecionado(cotacaoSelecionadoFormulario);
     definirModalCotacaoAberto(true);
   }
 
-  function abrirModalEdicaoOrcamento() {
-    if (somenteLeitura || !orcamentoSelecionadoFormulario) {
+  function abrirModalEdicaoCotacao() {
+    if (somenteLeitura || !cotacaoSelecionadoFormulario) {
       return;
     }
 
     definirModoModalCotacao('edicao');
-    definirOrcamentoSelecionado(orcamentoSelecionadoFormulario);
+    definirCotacaoSelecionado(cotacaoSelecionadoFormulario);
     definirModalCotacaoAberto(true);
   }
 
-  function fecharModalNovoOrcamento() {
+  function fecharModalNovoCotacao() {
     definirModalCotacaoAberto(false);
     definirModoModalCotacao('novo');
-    definirOrcamentoSelecionado(null);
+    definirCotacaoSelecionado(null);
   }
 
-  async function salvarNovoOrcamento(dadosNovoOrcamento) {
-    const orcamentoBase = modoModalCotacao === 'novo' ? null : orcamentoSelecionado;
-    const precisaConfirmarPedido = precisaPerguntarGeracaoPedido(
-      orcamentoBase,
-      dadosNovoOrcamento.idEtapaOrcamento,
-      etapasOrcamento
+  async function salvarNovoCotacao(dadosNovoCotacao) {
+    const cotacaoBase = modoModalCotacao === 'novo' ? null : cotacaoSelecionado;
+    const precisaConfirmarOrdemCompra = precisaPerguntarGeracaoOrdemCompra(
+      cotacaoBase,
+      dadosNovoCotacao.idEtapaCotacao,
+      etapasCotacao
     );
 
-    if (precisaConfirmarPedido) {
-      definirConfirmandoPedidoOrcamento({
-        origem: 'orcamento',
-        dadosOrcamento: dadosNovoOrcamento,
-        orcamento: orcamentoBase
+    if (precisaConfirmarOrdemCompra) {
+      definirConfirmandoOrdemCompraCotacao({
+        origem: 'cotacao',
+        dadosCotacao: dadosNovoCotacao,
+        cotacao: cotacaoBase
       });
       return;
     }
 
-    await persistirOrcamentoSemPedido(dadosNovoOrcamento);
+    await persistirCotacaoSemOrdemCompra(dadosNovoCotacao);
   }
 
-  async function persistirOrcamentoSemPedido(dadosNovoOrcamento) {
-    const orcamentoSalvo = modoModalCotacao === 'novo'
-      ? await aoIncluirOrcamento(dadosNovoOrcamento)
-      : await aoAtualizarOrcamento(dadosNovoOrcamento);
+  async function persistirCotacaoSemOrdemCompra(dadosNovoCotacao) {
+    const cotacaoSalvo = modoModalCotacao === 'novo'
+      ? await aoIncluirCotacao(dadosNovoCotacao)
+      : await aoAtualizarCotacao(dadosNovoCotacao);
 
-    if (orcamentoSalvo?.idOrcamento) {
+    if (cotacaoSalvo?.idCotacao) {
       definirFormulario((estadoAtual) => ({
         ...estadoAtual,
-        idOrcamento: String(orcamentoSalvo.idOrcamento),
-        idEtapaOrcamento: orcamentoSalvo.idEtapaOrcamento ? String(orcamentoSalvo.idEtapaOrcamento) : ''
+        idCotacao: String(cotacaoSalvo.idCotacao),
+        idEtapaCotacao: cotacaoSalvo.idEtapaCotacao ? String(cotacaoSalvo.idEtapaCotacao) : ''
       }));
     }
 
-    fecharModalNovoOrcamento();
+    fecharModalNovoCotacao();
   }
 
-  async function recusarGeracaoPedido() {
-    const confirmacao = confirmandoPedidoOrcamento;
-    definirConfirmandoPedidoOrcamento(null);
+  async function recusarGeracaoOrdemCompra() {
+    const confirmacao = confirmandoOrdemCompraCotacao;
+    definirConfirmandoOrdemCompraCotacao(null);
 
     if (!confirmacao) {
       return;
     }
 
-    const etapaFechadoSemPedido = obterEtapaFechadoSemPedido(etapasOrcamento);
+    const etapaFechadoSemOrdemCompra = obterEtapaFechadoSemOrdemCompra(etapasCotacao);
 
     if (confirmacao.origem === 'atendimento') {
-      if (etapaFechadoSemPedido?.idEtapaOrcamento && aoAtualizarStatusOrcamento) {
-        await aoAtualizarStatusOrcamento({
-          idOrcamento: Number(confirmacao.orcamento.idOrcamento),
-          idEtapaOrcamento: Number(etapaFechadoSemPedido.idEtapaOrcamento)
+      if (etapaFechadoSemOrdemCompra?.idEtapaCotacao && aoAtualizarStatusCotacao) {
+        await aoAtualizarStatusCotacao({
+          idCotacao: Number(confirmacao.cotacao.idCotacao),
+          idEtapaCotacao: Number(etapaFechadoSemOrdemCompra.idEtapaCotacao)
         });
       }
 
       definirFormulario((estadoAtual) => ({
         ...estadoAtual,
-        idEtapaOrcamento: etapaFechadoSemPedido?.idEtapaOrcamento
-          ? String(etapaFechadoSemPedido.idEtapaOrcamento)
-          : estadoAtual.idEtapaOrcamento
+        idEtapaCotacao: etapaFechadoSemOrdemCompra?.idEtapaCotacao
+          ? String(etapaFechadoSemOrdemCompra.idEtapaCotacao)
+          : estadoAtual.idEtapaCotacao
       }));
       return;
     }
 
-    if (confirmacao.origem === 'orcamento') {
+    if (confirmacao.origem === 'cotacao') {
       const dadosAjustados = {
-        ...confirmacao.dadosOrcamento,
-        idEtapaOrcamento: etapaFechadoSemPedido?.idEtapaOrcamento
-          ? String(etapaFechadoSemPedido.idEtapaOrcamento)
-          : String(confirmacao.orcamento?.idEtapaOrcamento || '')
+        ...confirmacao.dadosCotacao,
+        idEtapaCotacao: etapaFechadoSemOrdemCompra?.idEtapaCotacao
+          ? String(etapaFechadoSemOrdemCompra.idEtapaCotacao)
+          : String(confirmacao.cotacao?.idEtapaCotacao || '')
       };
 
-      if (confirmacao.orcamento?.idOrcamento || etapaFechadoSemPedido?.idEtapaOrcamento) {
-        await persistirOrcamentoSemPedido(dadosAjustados);
-      } else if (confirmacao.orcamento?.idEtapaOrcamento && aoAtualizarStatusOrcamento) {
-        await aoAtualizarStatusOrcamento({
-          idOrcamento: Number(confirmacao.orcamento.idOrcamento),
-          idEtapaOrcamento: Number(confirmacao.orcamento.idEtapaOrcamento)
+      if (confirmacao.cotacao?.idCotacao || etapaFechadoSemOrdemCompra?.idEtapaCotacao) {
+        await persistirCotacaoSemOrdemCompra(dadosAjustados);
+      } else if (confirmacao.cotacao?.idEtapaCotacao && aoAtualizarStatusCotacao) {
+        await aoAtualizarStatusCotacao({
+          idCotacao: Number(confirmacao.cotacao.idCotacao),
+          idEtapaCotacao: Number(confirmacao.cotacao.idEtapaCotacao)
         });
       }
     }
   }
 
-  async function confirmarGeracaoPedido() {
-    const confirmacao = confirmandoPedidoOrcamento;
-    definirConfirmandoPedidoOrcamento(null);
+  async function confirmarGeracaoOrdemCompra() {
+    const confirmacao = confirmandoOrdemCompraCotacao;
+    definirConfirmandoOrdemCompraCotacao(null);
 
     if (!confirmacao) {
       return;
     }
 
     if (confirmacao.origem === 'atendimento') {
-      const orcamentoAtualizado = await aoAtualizarStatusOrcamento?.({
-        idOrcamento: Number(confirmacao.orcamento.idOrcamento),
-        idEtapaOrcamento: Number(confirmacao.proximoIdEtapaOrcamento)
+      const cotacaoAtualizado = await aoAtualizarStatusCotacao?.({
+        idCotacao: Number(confirmacao.cotacao.idCotacao),
+        idEtapaCotacao: Number(confirmacao.proximoIdEtapaCotacao)
       });
 
       definirFormulario((estadoAtual) => ({
         ...estadoAtual,
-        idEtapaOrcamento: String(confirmacao.proximoIdEtapaOrcamento || '')
+        idEtapaCotacao: String(confirmacao.proximoIdEtapaCotacao || '')
       }));
 
-      if (aoAbrirPedido) {
-        const orcamentoBasePedido = enriquecerOrcamentoParaPedidoAtendimento(
-          orcamentoAtualizado || {
-            ...confirmacao.orcamento,
-            idEtapaOrcamento: Number(confirmacao.proximoIdEtapaOrcamento)
+      if (aoAbrirOrdemCompra) {
+        const cotacaoBaseOrdemCompra = enriquecerCotacaoParaOrdemCompraAtendimento(
+          cotacaoAtualizado || {
+            ...confirmacao.cotacao,
+            idEtapaCotacao: Number(confirmacao.proximoIdEtapaCotacao)
           },
           prazosPagamento,
           produtos
         );
-        aoAbrirPedido(
-          montarDadosIniciaisPedidoAPartirDoOrcamento(orcamentoBasePedido),
-          { idOrcamento: orcamentoBasePedido.idOrcamento, origem: 'atendimento' }
+        aoAbrirOrdemCompra(
+          montarDadosIniciaisOrdemCompraAPartirDoCotacao(cotacaoBaseOrdemCompra),
+          { idCotacao: cotacaoBaseOrdemCompra.idCotacao, origem: 'atendimento' }
         );
       }
       return;
     }
 
-    const orcamentoSalvo = modoModalCotacao === 'novo'
-      ? await aoIncluirOrcamento(confirmacao.dadosOrcamento)
-      : await aoAtualizarOrcamento(confirmacao.dadosOrcamento);
+    const cotacaoSalvo = modoModalCotacao === 'novo'
+      ? await aoIncluirCotacao(confirmacao.dadosCotacao)
+      : await aoAtualizarCotacao(confirmacao.dadosCotacao);
 
-    if (orcamentoSalvo?.idOrcamento) {
+    if (cotacaoSalvo?.idCotacao) {
       definirFormulario((estadoAtual) => ({
         ...estadoAtual,
-        idOrcamento: String(orcamentoSalvo.idOrcamento),
-        idEtapaOrcamento: orcamentoSalvo.idEtapaOrcamento ? String(orcamentoSalvo.idEtapaOrcamento) : ''
+        idCotacao: String(cotacaoSalvo.idCotacao),
+        idEtapaCotacao: cotacaoSalvo.idEtapaCotacao ? String(cotacaoSalvo.idEtapaCotacao) : ''
       }));
 
-      if (aoAbrirPedido) {
-        const orcamentoBasePedido = enriquecerOrcamentoParaPedidoAtendimento(orcamentoSalvo, prazosPagamento, produtos);
-        aoAbrirPedido(
-          montarDadosIniciaisPedidoAPartirDoOrcamento(orcamentoBasePedido),
-          { idOrcamento: orcamentoBasePedido.idOrcamento, origem: 'orcamento' }
+      if (aoAbrirOrdemCompra) {
+        const cotacaoBaseOrdemCompra = enriquecerCotacaoParaOrdemCompraAtendimento(cotacaoSalvo, prazosPagamento, produtos);
+        aoAbrirOrdemCompra(
+          montarDadosIniciaisOrdemCompraAPartirDoCotacao(cotacaoBaseOrdemCompra),
+          { idCotacao: cotacaoBaseOrdemCompra.idCotacao, origem: 'cotacao' }
         );
       }
     }
 
-    fecharModalNovoOrcamento();
+    fecharModalNovoCotacao();
   }
 
   function inserirMarcadorDescricao(evento) {
@@ -694,7 +693,7 @@ export function ModalAtendimento({
     <>
     <div className={classNameCamada} role="presentation" onMouseDown={fecharAoClicarNoFundo}>
       <form
-        className="modalContatoCliente modalAtendimento"
+        className="modalContatoFornecedor modalAtendimento"
         role="dialog"
         aria-modal="true"
         aria-labelledby="tituloModalAtendimento"
@@ -722,7 +721,7 @@ export function ModalAtendimento({
               </Botao>
             ) : null}
             {!somenteLeitura ? (
-              <Botao variante="secundario" type="button" onClick={abrirModalNovoOrcamento} disabled={salvando}>
+              <Botao variante="secundario" type="button" onClick={abrirModalNovoCotacao} disabled={salvando}>
                 Incluir cotacao
               </Botao>
             ) : null}
@@ -776,17 +775,17 @@ export function ModalAtendimento({
                 disabled={somenteLeitura}
                 required
               />
-              <div className="linhaClienteContatoAtendimento">
+              <div className="linhaFornecedorContatoAtendimento">
                 <CampoSelect
                   label="Fornecedor"
-                  name="idCliente"
-                  data-atalho-busca-id="cliente"
-                  referenciaCampo={referenciaCampoCliente}
-                  value={formulario.idCliente}
+                  name="idFornecedor"
+                  data-atalho-busca-id="fornecedor"
+                  referenciaCampo={referenciaCampoFornecedor}
+                  value={formulario.idFornecedor}
                   onChange={alterarCampo}
-                  options={clientesAtivos.map((cliente) => ({
-                    valor: String(cliente.idCliente),
-                    label: montarRotuloCliente(cliente, empresa)
+                  options={fornecedoresAtivos.map((fornecedor) => ({
+                    valor: String(fornecedor.idFornecedor),
+                    label: montarRotuloFornecedor(fornecedor, empresa)
                   }))}
                   disabled={somenteLeitura}
                   required
@@ -799,8 +798,8 @@ export function ModalAtendimento({
                       somenteIcone
                       title="Buscar fornecedor"
                       aria-label="Buscar fornecedor"
-                      data-atalho-busca-id="cliente"
-                      onClick={abrirModalBuscaCliente}
+                      data-atalho-busca-id="fornecedor"
+                      onClick={abrirModalBuscaFornecedor}
                     >
                       Buscar fornecedor
                     </Botao>
@@ -813,12 +812,12 @@ export function ModalAtendimento({
                   referenciaCampo={referenciaCampoContato}
                   value={formulario.idContato}
                   onChange={alterarCampo}
-                  options={contatosDoCliente.map((contato) => ({
+                  options={contatosDoFornecedor.map((contato) => ({
                     valor: String(contato.idContato),
                     label: formatarNomeContato(contato)
                   }))}
-                  disabled={somenteLeitura || !formulario.idCliente}
-                  acaoExtra={!somenteLeitura && formulario.idCliente ? (
+                  disabled={somenteLeitura || !formulario.idFornecedor}
+                  acaoExtra={!somenteLeitura && formulario.idFornecedor ? (
                     <Botao
                       variante="secundario"
                       type="button"
@@ -835,18 +834,18 @@ export function ModalAtendimento({
                   ) : null}
                 />
               </div>
-              <div className="linhaOrcamentoAtendimento">
+              <div className="linhaCotacaoAtendimento">
                 <CampoSelect
-                  label="Orcamento"
-                  name="idOrcamento"
-                  value={formulario.idOrcamento}
+                  label="Cotacao"
+                  name="idCotacao"
+                  value={formulario.idCotacao}
                   onChange={alterarCampo}
-                  options={orcamentosAbertosDoFornecedor.map((orcamento) => ({
-                    valor: String(orcamento.idOrcamento),
-                    label: montarRotuloOrcamento(orcamento)
+                  options={cotacoesAbertosDoFornecedor.map((cotacao) => ({
+                    valor: String(cotacao.idCotacao),
+                    label: montarRotuloCotacao(cotacao)
                   }))}
-                  disabled={somenteLeitura || !formulario.idCliente}
-                  acaoExtra={formulario.idOrcamento ? (
+                  disabled={somenteLeitura || !formulario.idFornecedor}
+                  acaoExtra={formulario.idCotacao ? (
                     <div className="acoesCampoSelect">
                       <Botao
                         variante="secundario"
@@ -856,7 +855,7 @@ export function ModalAtendimento({
                         somenteIcone
                         title="Consultar cotacao"
                         aria-label="Consultar cotacao"
-                        onClick={abrirModalConsultaOrcamento}
+                        onClick={abrirModalConsultaCotacao}
                       />
                       {!somenteLeitura ? (
                         <Botao
@@ -867,7 +866,7 @@ export function ModalAtendimento({
                           somenteIcone
                           title="Editar cotacao"
                           aria-label="Editar cotacao"
-                          onClick={abrirModalEdicaoOrcamento}
+                          onClick={abrirModalEdicaoCotacao}
                         />
                       ) : null}
                     </div>
@@ -875,14 +874,14 @@ export function ModalAtendimento({
                 />
                 <CampoSelect
                   label="Status da cotacao"
-                  name="idEtapaOrcamento"
-                  value={formulario.idEtapaOrcamento}
-                  onChange={alterarStatusOrcamento}
-                  options={etapasOrcamentoDisponiveisEscolhaManual.map((etapa) => ({
-                    valor: String(etapa.idEtapaOrcamento),
+                  name="idEtapaCotacao"
+                  value={formulario.idEtapaCotacao}
+                  onChange={alterarStatusCotacao}
+                  options={etapasCotacaoDisponiveisEscolhaManual.map((etapa) => ({
+                    valor: String(etapa.idEtapaCotacao),
                     label: etapa.descricao
                   }))}
-                  disabled={somenteLeitura || !formulario.idOrcamento}
+                  disabled={somenteLeitura || !formulario.idCotacao}
                 />
               </div>
               <div className="linhaUsuarioCanalOrigemAtendimento">
@@ -949,28 +948,28 @@ export function ModalAtendimento({
 
         <MensagemErroPopup mensagem={mensagemErro} titulo="Nao foi possivel salvar o atendimento." />
 
-        {confirmandoPedidoOrcamento ? (
-          <div className="camadaConfirmacaoModal" role="presentation" onMouseDown={recusarGeracaoPedido}>
+        {confirmandoOrdemCompraCotacao ? (
+          <div className="camadaConfirmacaoModal" role="presentation" onMouseDown={recusarGeracaoOrdemCompra}>
             <div
               className="modalConfirmacaoAgenda"
               role="dialog"
               aria-modal="true"
-              aria-labelledby="tituloConfirmacaoPedidoAtendimento"
+              aria-labelledby="tituloConfirmacaoOrdemCompraAtendimento"
               onMouseDown={(evento) => evento.stopPropagation()}
             >
               <div className="cabecalhoConfirmacaoModal">
-                <h4 id="tituloConfirmacaoPedidoAtendimento">Criar ordem de compra</h4>
+                <h4 id="tituloConfirmacaoOrdemCompraAtendimento">Criar ordem de compra</h4>
               </div>
 
               <div className="corpoConfirmacaoModal">
-                <p>Este orcamento esta sendo fechado. Deseja gerar um ordem de compra a partir dele?</p>
+                <p>Este cotacao esta sendo fechado. Deseja gerar um ordem de compra a partir dele?</p>
               </div>
 
               <div className="acoesConfirmacaoModal">
-                <Botao variante="secundario" type="button" onClick={recusarGeracaoPedido} disabled={salvando}>
+                <Botao variante="secundario" type="button" onClick={recusarGeracaoOrdemCompra} disabled={salvando}>
                   Nao
                 </Botao>
-                <Botao variante="primario" type="button" onClick={confirmarGeracaoPedido} disabled={salvando}>
+                <Botao variante="primario" type="button" onClick={confirmarGeracaoOrdemCompra} disabled={salvando}>
                   Sim
                 </Botao>
               </div>
@@ -1048,43 +1047,43 @@ export function ModalAtendimento({
       </form>
     </div>
 
-    <ModalCliente
-      aberto={modalClienteAberto}
-      cliente={null}
+    <ModalFornecedor
+      aberto={modalFornecedorAberto}
+      fornecedor={null}
       empresa={empresa}
-      codigoSugerido={proximoCodigoCliente}
+      codigoSugerido={proximoCodigoFornecedor}
       contatos={[]}
-      vendedores={vendedores}
+      compradores={compradores}
       ramosAtividade={ramosAtividade}
-      conceitosCliente={conceitosCliente}
+      conceitosFornecedor={conceitosFornecedor}
       modo="novo"
       classNameCamada="camadaModal camadaModalSecundaria"
-      idVendedorBloqueado={idVendedorBloqueado}
-      aoFechar={fecharModalNovoCliente}
-      aoSalvar={salvarNovoCliente}
+      idCompradorBloqueado={idCompradorBloqueado}
+      aoFechar={fecharModalNovoFornecedor}
+      aoSalvar={salvarNovoFornecedor}
     />
 
-    <ModalBuscaClientes
-      aberto={modalBuscaClienteAberto}
+    <ModalBuscaFornecedores
+      aberto={modalBuscaFornecedorAberto}
       empresa={empresa}
-      clientes={clientesAtivos}
+      fornecedores={fornecedoresAtivos}
       placeholder="Pesquisar fornecedor no grid"
       ariaLabelPesquisa="Pesquisar fornecedor no grid"
       rotuloAcaoPrimaria="Incluir fornecedor"
       tituloAcaoPrimaria="Incluir fornecedor"
       iconeAcaoPrimaria="adicionar"
       aoAcionarPrimaria={() => {
-        fecharModalBuscaCliente();
-        abrirModalNovoCliente();
+        fecharModalBuscaFornecedor();
+        abrirModalNovoFornecedor();
       }}
-      aoSelecionar={selecionarCliente}
-      aoFechar={fecharModalBuscaCliente}
+      aoSelecionar={selecionarFornecedor}
+      aoFechar={fecharModalBuscaFornecedor}
     />
 
     <ModalBuscaContatos
       aberto={modalBuscaContatoAberto}
-      idCliente={formulario.idCliente}
-      contatos={contatosDoCliente}
+      idFornecedor={formulario.idFornecedor}
+      contatos={contatosDoFornecedor}
       placeholder="Pesquisar contatos do fornecedor"
       ariaLabelPesquisa="Pesquisar contatos do fornecedor"
       aoCriarContato={registrarContatoCriado}
@@ -1093,27 +1092,27 @@ export function ModalAtendimento({
     />
 
     <ModalCotacao
-      aberto={modalOrcamentoAberto}
-      orcamento={modoModalCotacao === 'novo' ? (dadosOrcamentoAtendimento || dadosOrcamento) : orcamentoSelecionado}
-      clientes={clientesOrcamento}
-      contatos={contatosOrcamento}
-      usuarios={usuariosOrcamento}
-      vendedores={vendedoresOrcamento}
+      aberto={modalCotacaoAberto}
+      cotacao={modoModalCotacao === 'novo' ? (dadosCotacaoAtendimento || dadosCotacao) : cotacaoSelecionado}
+      fornecedores={fornecedoresCotacao}
+      contatos={contatosCotacao}
+      usuarios={usuariosCotacao}
+      compradores={compradoresCotacao}
       ramosAtividade={ramosAtividade}
       metodosPagamento={metodosPagamento}
       prazosPagamento={prazosPagamento}
-      etapasOrcamento={etapasOrcamento}
+      etapasCotacao={etapasCotacao}
       produtos={produtos}
-      camposOrcamento={camposOrcamento}
-      camposPedido={camposPedido}
+      camposCotacao={camposCotacao}
+      camposOrdemCompra={camposOrdemCompra}
       empresa={empresa}
       usuarioLogado={usuarioLogado}
       modo={modoModalCotacao}
-      idVendedorBloqueado={idVendedorBloqueado}
+      idCompradorBloqueado={idCompradorBloqueado}
       somenteConsultaPrazos={somenteConsultaPrazos}
-      aoIncluirCliente={aoIncluirCliente}
-      aoFechar={fecharModalNovoOrcamento}
-      aoSalvar={salvarNovoOrcamento}
+      aoIncluirFornecedor={aoIncluirFornecedor}
+      aoFechar={fecharModalNovoCotacao}
+      aoSalvar={salvarNovoCotacao}
       aoSalvarPrazoPagamento={aoSalvarPrazoPagamento}
       aoInativarPrazoPagamento={aoInativarPrazoPagamento}
     />
@@ -1165,10 +1164,10 @@ function criarFormularioInicial(atendimento, usuarioLogado) {
     data: atendimento?.data || dataPadrao,
     horaInicio: atendimento?.horaInicio || horaPadrao,
     horaFim: atendimento?.horaFim || '',
-    idFornecedor: normalizarValorFormulario(atendimento?.idCliente),
+    idFornecedor: normalizarValorFormulario(atendimento?.idFornecedor),
     idContato: normalizarValorFormulario(atendimento?.idContato),
-    idOrcamento: '',
-    idEtapaOrcamento: '',
+    idCotacao: '',
+    idEtapaCotacao: '',
     idUsuario: normalizarValorFormulario(atendimento?.idUsuario || usuarioLogado?.idUsuario),
     nomeUsuario: atendimento?.nomeUsuario || usuarioLogado?.nome || '',
     idTipoAtendimento: normalizarValorFormulario(atendimento?.idTipoAtendimento),
@@ -1217,18 +1216,18 @@ function obterValorOrdemEtapa(ordem, fallback) {
   return Number.MAX_SAFE_INTEGER;
 }
 
-function montarRotuloCliente(cliente, empresa) {
-  const codigo = formatarCodigoCliente(cliente, empresa);
-  const nome = cliente.nomeFantasia || cliente.razaoSocial || 'Fornecedor sem nome';
-  const localizacao = [cliente.cidade, cliente.estado].filter(Boolean).join('/');
+function montarRotuloFornecedor(fornecedor, empresa) {
+  const codigo = formatarCodigoFornecedor(fornecedor, empresa);
+  const nome = fornecedor.nomeFantasia || fornecedor.razaoSocial || 'Fornecedor sem nome';
+  const localizacao = [fornecedor.cidade, fornecedor.estado].filter(Boolean).join('/');
 
   return localizacao ? `${codigo} - ${nome} - ${localizacao}` : `${codigo} - ${nome}`;
 }
 
-function montarRotuloOrcamento(orcamento) {
-  const codigo = `#${String(orcamento.idOrcamento || '').padStart(4, '0')}`;
-  const total = Array.isArray(orcamento?.itens)
-    ? orcamento.itens.reduce((acumulado, item) => {
+function montarRotuloCotacao(cotacao) {
+  const codigo = `#${String(cotacao.idCotacao || '').padStart(4, '0')}`;
+  const total = Array.isArray(cotacao?.itens)
+    ? cotacao.itens.reduce((acumulado, item) => {
       const valor = Number(String(item.valorTotal ?? 0).replace(/[^\d,.-]/g, '').replace(/\.(?=\d{3}(?:\D|$))/g, '').replace(',', '.'));
       return acumulado + (Number.isNaN(valor) ? 0 : valor);
     }, 0)
@@ -1257,60 +1256,60 @@ function obterHoraAtualFormatoInput() {
   return `${horas}:${minutos}`;
 }
 
-function montarDadosOrcamentoAPartirDoAtendimentoAtual(formulario, fornecedores, vendedores, usuarioLogado) {
-  const vendedor = vendedores.find((item) => String(item.idVendedor) === String(usuarioLogado?.idVendedor || ''));
+function montarDadosCotacaoAPartirDoAtendimentoAtual(formulario, fornecedores, compradores, usuarioLogado) {
+  const comprador = compradores.find((item) => String(item.idComprador) === String(usuarioLogado?.idComprador || ''));
 
   return {
-    idFornecedor: formulario?.idCliente || '',
+    idFornecedor: formulario?.idFornecedor || '',
     idContato: formulario?.idContato || '',
     idUsuario: formulario?.idUsuario || usuarioLogado?.idUsuario || '',
     nomeUsuario: formulario?.nomeUsuario || usuarioLogado?.nome || '',
-    idVendedor: usuarioLogado?.idVendedor || '',
+    idComprador: usuarioLogado?.idComprador || '',
     observacao: formulario?.descricao || ''
   };
 }
 
-function precisaPerguntarGeracaoPedido(orcamento, idEtapaOrcamento, etapasOrcamento) {
-  if (!orcamento || orcamento.idPedidoVinculado || !idEtapaOrcamento) {
+function precisaPerguntarGeracaoOrdemCompra(cotacao, idEtapaCotacao, etapasCotacao) {
+  if (!cotacao || cotacao.idOrdemCompraVinculado || !idEtapaCotacao) {
     return false;
   }
 
-  return etapaAcabouDeFechar(orcamento.idEtapaOrcamento, idEtapaOrcamento, etapasOrcamento);
+  return etapaAcabouDeFechar(cotacao.idEtapaCotacao, idEtapaCotacao, etapasCotacao);
 }
 
-function etapaAcabouDeFechar(idEtapaAnterior, idEtapaAtual, etapasOrcamento) {
-  const etapaAnterior = etapasOrcamento.find((etapa) => String(etapa.idEtapaOrcamento) === String(idEtapaAnterior || ''));
-  const etapaAtual = etapasOrcamento.find((etapa) => String(etapa.idEtapaOrcamento) === String(idEtapaAtual || ''));
+function etapaAcabouDeFechar(idEtapaAnterior, idEtapaAtual, etapasCotacao) {
+  const etapaAnterior = etapasCotacao.find((etapa) => String(etapa.idEtapaCotacao) === String(idEtapaAnterior || ''));
+  const etapaAtual = etapasCotacao.find((etapa) => String(etapa.idEtapaCotacao) === String(idEtapaAtual || ''));
 
-  return !etapaOrcamentoEhFechamento(etapaAnterior) && etapaOrcamentoEhFechamento(etapaAtual);
+  return !etapaCotacaoEhFechamento(etapaAnterior) && etapaCotacaoEhFechamento(etapaAtual);
 }
 
-function etapaOrcamentoEhFechamento(etapa) {
-  return Number(etapa?.idEtapaOrcamento) === ID_ETAPA_ORCAMENTO_FECHAMENTO;
+function etapaCotacaoEhFechamento(etapa) {
+  return Number(etapa?.idEtapaCotacao) === ID_ETAPA_COTACAO_FECHAMENTO;
 }
 
-function obterEtapaFechadoSemPedido(etapasOrcamento) {
-  return etapasOrcamento.find((etapa) => Number(etapa?.idEtapaOrcamento) === ID_ETAPA_ORCAMENTO_FECHADO_SEM_PEDIDO) || null;
+function obterEtapaFechadoSemOrdemCompra(etapasCotacao) {
+  return etapasCotacao.find((etapa) => Number(etapa?.idEtapaCotacao) === ID_ETAPA_COTACAO_FECHADO_SEM_ORDEM_COMPRA) || null;
 }
 
-function combinarContatosDoCliente(contatosBase, contatosLocais, idCliente) {
+function combinarContatosDoFornecedor(contatosBase, contatosLocais, idFornecedor) {
   return combinarContatosUnicos(
     (Array.isArray(contatosBase) ? contatosBase : []).filter(
-      (contato) => String(contato.idCliente) === String(idCliente)
+      (contato) => String(contato.idFornecedor) === String(idFornecedor)
     ),
     (Array.isArray(contatosLocais) ? contatosLocais : []).filter(
-      (contato) => String(contato.idCliente) === String(idCliente)
+      (contato) => String(contato.idFornecedor) === String(idFornecedor)
     )
   );
 }
 
-function obterProximoCodigoCliente(clientes) {
-  if (!Array.isArray(clientes) || clientes.length === 0) {
+function obterProximoCodigoFornecedor(fornecedores) {
+  if (!Array.isArray(fornecedores) || fornecedores.length === 0) {
     return 1;
   }
 
-  const maiorCodigo = clientes.reduce((maior, cliente) => {
-    const codigoAtual = Number(cliente?.idCliente);
+  const maiorCodigo = fornecedores.reduce((maior, fornecedor) => {
+    const codigoAtual = Number(fornecedor?.idFornecedor);
     return Number.isFinite(codigoAtual) && codigoAtual > maior ? codigoAtual : maior;
   }, 0);
 
@@ -1332,14 +1331,14 @@ function combinarContatosUnicos(contatosBase, contatosExtras) {
   return Array.from(mapa.values());
 }
 
-function enriquecerOrcamentoParaPedidoAtendimento(orcamento, prazosPagamento, produtos) {
-  const prazo = prazosPagamento.find((item) => String(item.idPrazoPagamento) === String(orcamento.idPrazoPagamento));
+function enriquecerCotacaoParaOrdemCompraAtendimento(cotacao, prazosPagamento, produtos) {
+  const prazo = prazosPagamento.find((item) => String(item.idPrazoPagamento) === String(cotacao.idPrazoPagamento));
 
   return {
-    ...orcamento,
-    nomePrazoPagamento: orcamento.nomePrazoPagamento || prazo?.descricaoFormatada || prazo?.descricao || '',
-    nomeMetodoPagamento: orcamento.nomeMetodoPagamento || prazo?.nomeMetodoPagamento || '',
-    itens: Array.isArray(orcamento.itens) ? orcamento.itens.map((item) => {
+    ...cotacao,
+    nomePrazoPagamento: cotacao.nomePrazoPagamento || prazo?.descricaoFormatada || prazo?.descricao || '',
+    nomeMetodoPagamento: cotacao.nomeMetodoPagamento || prazo?.nomeMetodoPagamento || '',
+    itens: Array.isArray(cotacao.itens) ? cotacao.itens.map((item) => {
       const produto = produtos.find((registro) => String(registro.idProduto) === String(item.idProduto));
       return {
         ...item,
@@ -1352,26 +1351,26 @@ function enriquecerOrcamentoParaPedidoAtendimento(orcamento, prazosPagamento, pr
   };
 }
 
-function montarDadosIniciaisPedidoAPartirDoOrcamento(orcamento) {
+function montarDadosIniciaisOrdemCompraAPartirDoCotacao(cotacao) {
   return {
-    idOrcamento: orcamento.idOrcamento,
-    codigoOrcamentoOrigem: orcamento.idOrcamento,
-    idFornecedor: orcamento.idCliente,
-    idContato: orcamento.idContato,
-    idUsuario: orcamento.idUsuario,
-    idVendedor: orcamento.idVendedor,
-    idPrazoPagamento: orcamento.idPrazoPagamento,
-    idTipoPedido: ID_TIPO_PEDIDO_VENDA,
+    idCotacao: cotacao.idCotacao,
+    codigoCotacaoOrigem: cotacao.idCotacao,
+    idFornecedor: cotacao.idFornecedor,
+    idContato: cotacao.idContato,
+    idUsuario: cotacao.idUsuario,
+    idComprador: cotacao.idComprador,
+    idPrazoPagamento: cotacao.idPrazoPagamento,
+    idTipoOrdemCompra: ID_TIPO_ORDEM_COMPRA_VENDA,
     dataInclusao: obterDataAtualFormatoInput(),
-    nomeClienteSnapshot: orcamento.nomeFornecedor || '',
-    nomeContatoSnapshot: orcamento.nomeContato || '',
-    nomeUsuarioSnapshot: orcamento.nomeUsuario || '',
-    nomeVendedorSnapshot: orcamento.nomeVendedor || '',
-    nomeMetodoPagamentoSnapshot: orcamento.nomeMetodoPagamento || '',
-    nomePrazoPagamentoSnapshot: orcamento.nomePrazoPagamento || '',
-    nomeTipoPedidoSnapshot: 'Ordem de compra',
-    observacao: orcamento.observacao || '',
-    itens: Array.isArray(orcamento.itens) ? orcamento.itens.map((item) => ({
+    nomeFornecedorSnapshot: cotacao.nomeFornecedor || '',
+    nomeContatoSnapshot: cotacao.nomeContato || '',
+    nomeUsuarioSnapshot: cotacao.nomeUsuario || '',
+    nomeCompradorSnapshot: cotacao.nomeComprador || '',
+    nomeMetodoPagamentoSnapshot: cotacao.nomeMetodoPagamento || '',
+    nomePrazoPagamentoSnapshot: cotacao.nomePrazoPagamento || '',
+    nomeTipoOrdemCompraSnapshot: 'Ordem de compra',
+    observacao: cotacao.observacao || '',
+    itens: Array.isArray(cotacao.itens) ? cotacao.itens.map((item) => ({
       idProduto: item.idProduto,
       quantidade: item.quantidade,
       valorUnitario: item.valorUnitario,

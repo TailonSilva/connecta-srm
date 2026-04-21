@@ -5,7 +5,7 @@ import { Botao } from '../componentes/comuns/botao';
 import { CampoPesquisa } from '../componentes/comuns/campoPesquisa';
 import { CodigoRegistro } from '../componentes/comuns/codigoRegistro';
 import { GradePadrao } from '../componentes/comuns/gradePadrao';
-import { ModalBuscaClientes } from '../componentes/comuns/modalBuscaClientes';
+import { ModalBuscaFornecedores } from '../componentes/comuns/modalBuscaFornecedores';
 import { ModalFiltros } from '../componentes/comuns/modalFiltros';
 import { TextoGradeClamp } from '../componentes/comuns/textoGradeClamp';
 import { CorpoPagina } from '../componentes/layout/corpoPagina';
@@ -19,32 +19,32 @@ import {
   listarTiposAtendimento
 } from '../servicos/atendimentos';
 import {
-  incluirCliente,
+  incluirFornecedor,
   incluirContato,
-  listarClientes,
-  listarConceitosCliente,
+  listarFornecedores,
+  listarConceitosFornecedor,
   listarContatos,
   listarRamosAtividade,
-  listarVendedores
-} from '../servicos/clientes';
+  listarCompradores
+} from '../servicos/fornecedores';
 import {
   atualizarPrazoPagamento,
   incluirPrazoPagamento,
-  listarCamposPedidoConfiguracao,
-  listarCamposOrcamentoConfiguracao,
-  listarEtapasPedidoConfiguracao,
-  listarEtapasOrcamentoConfiguracao,
+  listarCamposOrdemCompraConfiguracao,
+  listarCamposCotacaoConfiguracao,
+  listarEtapasOrdemCompraConfiguracao,
+  listarEtapasCotacaoConfiguracao,
   listarMetodosPagamentoConfiguracao,
   listarPrazosPagamentoConfiguracao,
-  listarTiposPedidoConfiguracao
+  listarTiposOrdemCompraConfiguracao
 } from '../servicos/configuracoes';
 import { atualizarEmpresa, criarPayloadAtualizacaoColunasGrid, listarEmpresas } from '../servicos/empresa';
 import {
-  atualizarOrcamento,
-  incluirOrcamento,
-  listarOrcamentos
-} from '../servicos/orcamentos';
-import { incluirPedido } from '../servicos/pedidos';
+  atualizarCotacao,
+  incluirCotacao,
+  listarCotacoes
+} from '../servicos/cotacoes';
+import { incluirOrdemCompra } from '../servicos/ordensCompra';
 import { listarProdutos } from '../servicos/produtos';
 import { listarUsuarios } from '../servicos/usuarios';
 import {
@@ -70,7 +70,7 @@ function criarFiltrosIniciaisAtendimentos(usuarioLogado) {
   return {
     idFornecedor: '',
     idUsuario: idUsuarioPadrao,
-    idVendedorFornecedor: [],
+    idCompradorFornecedor: [],
     idTipoAtendimento: [],
     idCanalAtendimento: [],
     idOrigemAtendimento: [],
@@ -85,7 +85,7 @@ function criarFiltrosLimposAtendimentos() {
   return {
     idFornecedor: '',
     idUsuario: [],
-    idVendedorFornecedor: [],
+    idCompradorFornecedor: [],
     idTipoAtendimento: [],
     idCanalAtendimento: [],
     idOrigemAtendimento: [],
@@ -96,33 +96,33 @@ function criarFiltrosLimposAtendimentos() {
   };
 }
 
-const ID_ETAPA_ORCAMENTO_FECHAMENTO = 1;
-const ID_ETAPA_ORCAMENTO_FECHADO_SEM_PEDIDO = 2;
-const ID_ETAPA_ORCAMENTO_PEDIDO_EXCLUIDO = 3;
-const ID_ETAPA_ORCAMENTO_RECUSADO = 4;
-const ID_TIPO_PEDIDO_VENDA = 1;
+const ID_ETAPA_COTACAO_FECHAMENTO = 1;
+const ID_ETAPA_COTACAO_FECHADO_SEM_ORDEM_COMPRA = 2;
+const ID_ETAPA_COTACAO_ORDEM_COMPRA_EXCLUIDO = 3;
+const ID_ETAPA_COTACAO_RECUSADO = 4;
+const ID_TIPO_ORDEM_COMPRA_VENDA = 1;
 
 export function PaginaAtendimentos({ usuarioLogado }) {
   const [pesquisa, definirPesquisa] = useState('');
   const [atendimentos, definirAtendimentos] = useState([]);
-  const [fornecedores, definirClientes] = useState([]);
+  const [fornecedores, definirFornecedores] = useState([]);
   const [contatos, definirContatos] = useState([]);
   const [usuarios, definirUsuarios] = useState([]);
-  const [vendedores, definirVendedores] = useState([]);
-  const [orcamentos, definirOrcamentos] = useState([]);
+  const [compradores, definirCompradores] = useState([]);
+  const [cotacoes, definirCotacoes] = useState([]);
   const [metodosPagamento, definirMetodosPagamento] = useState([]);
   const [ramosAtividade, definirRamosAtividade] = useState([]);
-  const [conceitosCliente, definirConceitosCliente] = useState([]);
+  const [conceitosFornecedor, definirConceitosFornecedor] = useState([]);
   const [tiposAtendimento, definirTiposAtendimento] = useState([]);
   const [canaisAtendimento, definirCanaisAtendimento] = useState([]);
   const [origensAtendimento, definirOrigensAtendimento] = useState([]);
   const [prazosPagamento, definirPrazosPagamento] = useState([]);
-  const [etapasOrcamento, definirEtapasOrcamento] = useState([]);
-  const [etapasPedido, definirEtapasPedido] = useState([]);
-  const [tiposPedido, definirTiposPedido] = useState([]);
+  const [etapasCotacao, definirEtapasCotacao] = useState([]);
+  const [etapasOrdemCompra, definirEtapasOrdemCompra] = useState([]);
+  const [tiposOrdemCompra, definirTiposOrdemCompra] = useState([]);
   const [produtos, definirProdutos] = useState([]);
-  const [camposOrcamento, definirCamposOrcamento] = useState([]);
-  const [camposPedido, definirCamposPedido] = useState([]);
+  const [camposCotacao, definirCamposCotacao] = useState([]);
+  const [camposOrdemCompra, definirCamposOrdemCompra] = useState([]);
   const [empresa, definirEmpresa] = useState(null);
   const [carregando, definirCarregando] = useState(true);
   const [mensagemErro, definirMensagemErro] = useState('');
@@ -130,15 +130,15 @@ export function PaginaAtendimentos({ usuarioLogado }) {
   const [modalManualAberto, definirModalManualAberto] = useState(false);
   const [modalFiltrosAberto, definirModalFiltrosAberto] = useState(false);
   const [modalColunasGridAberto, definirModalColunasGridAberto] = useState(false);
-  const [modalBuscaClienteFiltrosAberto, definirModalBuscaClienteFiltrosAberto] = useState(false);
+  const [modalBuscaFornecedorFiltrosAberto, definirModalBuscaFornecedorFiltrosAberto] = useState(false);
   const [filtrosEmEdicao, definirFiltrosEmEdicao] = useState(null);
-  const [modalPedidoAberto, definirModalOrdemCompraAberto] = useState(false);
+  const [modalOrdemCompraAberto, definirModalOrdemCompraAberto] = useState(false);
   const [atendimentoSelecionado, definirAtendimentoSelecionado] = useState(null);
-  const [dadosIniciaisPedido, definirDadosIniciaisPedido] = useState(null);
-  const [orcamentoPedidoEmCriacao, definirOrcamentoPedidoEmCriacao] = useState(null);
-  const [etapaOrcamentoAtualizadaExternamente, definirEtapaOrcamentoAtualizadaExternamente] = useState(null);
+  const [dadosIniciaisOrdemCompra, definirDadosIniciaisOrdemCompra] = useState(null);
+  const [cotacaoOrdemCompraEmCriacao, definirCotacaoOrdemCompraEmCriacao] = useState(null);
+  const [etapaCotacaoAtualizadaExternamente, definirEtapaCotacaoAtualizadaExternamente] = useState(null);
   const [modoModal, definirModoModal] = useState('novo');
-  const usuarioSomenteVendedor = usuarioLogado?.tipo === 'Usuario padrao' && usuarioLogado?.idVendedor;
+  const usuarioSomenteComprador = usuarioLogado?.tipo === 'Usuario padrao' && usuarioLogado?.idComprador;
   const usuarioSomenteConsultaConfiguracao = usuarioLogado?.tipo === 'Usuario padrao';
   const filtrosIniciais = useMemo(
     () => criarFiltrosIniciaisAtendimentos(usuarioLogado),
@@ -153,11 +153,11 @@ export function PaginaAtendimentos({ usuarioLogado }) {
 
   useEffect(() => {
     carregarContexto();
-  }, [usuarioSomenteVendedor, usuarioLogado?.idVendedor]);
+  }, [usuarioSomenteComprador, usuarioLogado?.idComprador]);
 
   useEffect(() => {
     carregarGradeAtendimentos();
-  }, [usuarioSomenteVendedor, usuarioLogado?.idVendedor, usuarioLogado?.idUsuario, pesquisa, JSON.stringify(filtros)]);
+  }, [usuarioSomenteComprador, usuarioLogado?.idComprador, usuarioLogado?.idUsuario, pesquisa, JSON.stringify(filtros)]);
 
   useEffect(() => {
     function tratarEmpresaAtualizada() {
@@ -170,14 +170,14 @@ export function PaginaAtendimentos({ usuarioLogado }) {
     return () => {
       window.removeEventListener('empresa-atualizada', tratarEmpresaAtualizada);
     };
-  }, [usuarioSomenteVendedor, usuarioLogado?.idVendedor, usuarioLogado?.idUsuario, pesquisa, JSON.stringify(filtros)]);
+  }, [usuarioSomenteComprador, usuarioLogado?.idComprador, usuarioLogado?.idUsuario, pesquisa, JSON.stringify(filtros)]);
 
   useEffect(() => {
     function tratarAtalhosAtendimentos(evento) {
       if (evento.key === 'F1') {
         evento.preventDefault();
 
-        if (!modalAberto && !modalManualAberto && !modalFiltrosAberto && !modalPedidoAberto) {
+        if (!modalAberto && !modalManualAberto && !modalFiltrosAberto && !modalOrdemCompraAberto) {
           definirModalManualAberto(true);
         }
       }
@@ -188,7 +188,7 @@ export function PaginaAtendimentos({ usuarioLogado }) {
     return () => {
       window.removeEventListener('keydown', tratarAtalhosAtendimentos);
     };
-  }, [modalAberto, modalManualAberto, modalFiltrosAberto, modalPedidoAberto]);
+  }, [modalAberto, modalManualAberto, modalFiltrosAberto, modalOrdemCompraAberto]);
 
   async function carregarContexto() {
     definirCarregando(true);
@@ -196,33 +196,33 @@ export function PaginaAtendimentos({ usuarioLogado }) {
 
     try {
       const resultados = await Promise.allSettled([
-        listarClientes(),
+        listarFornecedores(),
         listarContatos(),
         listarUsuarios(),
-        listarVendedores(),
-        listarOrcamentos(),
+        listarCompradores(),
+        listarCotacoes(),
         listarRamosAtividade(),
-        listarConceitosCliente({ incluirInativos: true }),
+        listarConceitosFornecedor({ incluirInativos: true }),
         listarTiposAtendimento(),
         listarCanaisAtendimento(),
         listarOrigensAtendimento(),
         listarMetodosPagamentoConfiguracao(),
         listarPrazosPagamentoConfiguracao(),
-        listarEtapasOrcamentoConfiguracao(),
-        listarEtapasPedidoConfiguracao(),
-        listarTiposPedidoConfiguracao(),
+        listarEtapasCotacaoConfiguracao(),
+        listarEtapasOrdemCompraConfiguracao(),
+        listarTiposOrdemCompraConfiguracao(),
         listarProdutos(),
-        listarCamposOrcamentoConfiguracao(),
-        listarCamposPedidoConfiguracao(),
+        listarCamposCotacaoConfiguracao(),
+        listarCamposOrdemCompraConfiguracao(),
         listarEmpresas()
       ]);
 
       const [
-        clientesResultado,
+        fornecedoresResultado,
         contatosResultado,
         usuariosResultado,
-        vendedoresResultado,
-        orcamentosResultado,
+        compradoresResultado,
+        cotacoesResultado,
         ramosResultado,
         conceitosResultado,
         tiposAtendimentoResultado,
@@ -230,20 +230,20 @@ export function PaginaAtendimentos({ usuarioLogado }) {
         origensResultado,
         metodosResultado,
         prazosResultado,
-        etapasOrcamentoResultado,
-        etapasPedidoResultado,
-        tiposPedidoResultado,
+        etapasCotacaoResultado,
+        etapasOrdemCompraResultado,
+        tiposOrdemCompraResultado,
         produtosResultado,
-        camposOrcamentoResultado,
-        camposPedidoResultado,
+        camposCotacaoResultado,
+        camposOrdemCompraResultado,
         empresasResultado
       ] = resultados;
 
-      const clientesCarregados = clientesResultado.status === 'fulfilled' ? clientesResultado.value : [];
+      const fornecedoresCarregados = fornecedoresResultado.status === 'fulfilled' ? fornecedoresResultado.value : [];
       const contatosCarregados = contatosResultado.status === 'fulfilled' ? contatosResultado.value : [];
       const usuariosCarregados = usuariosResultado.status === 'fulfilled' ? usuariosResultado.value : [];
-      const vendedoresCarregados = vendedoresResultado.status === 'fulfilled' ? vendedoresResultado.value : [];
-      const orcamentosCarregados = orcamentosResultado.status === 'fulfilled' ? orcamentosResultado.value : [];
+      const compradoresCarregados = compradoresResultado.status === 'fulfilled' ? compradoresResultado.value : [];
+      const cotacoesCarregados = cotacoesResultado.status === 'fulfilled' ? cotacoesResultado.value : [];
       const ramosCarregados = ramosResultado.status === 'fulfilled' ? ramosResultado.value : [];
       const conceitosCarregados = conceitosResultado.status === 'fulfilled' ? conceitosResultado.value : [];
       const tiposAtendimentoCarregados = tiposAtendimentoResultado.status === 'fulfilled' ? tiposAtendimentoResultado.value : [];
@@ -251,51 +251,51 @@ export function PaginaAtendimentos({ usuarioLogado }) {
       const origensCarregadas = origensResultado.status === 'fulfilled' ? origensResultado.value : [];
       const metodosCarregados = metodosResultado.status === 'fulfilled' ? metodosResultado.value : [];
       const prazosCarregados = prazosResultado.status === 'fulfilled' ? prazosResultado.value : [];
-      const etapasOrcamentoCarregadas = etapasOrcamentoResultado.status === 'fulfilled' ? etapasOrcamentoResultado.value : [];
-      const etapasPedidoCarregadas = etapasPedidoResultado.status === 'fulfilled' ? etapasPedidoResultado.value : [];
-      const tiposPedidoCarregados = tiposPedidoResultado.status === 'fulfilled' ? tiposPedidoResultado.value : [];
+      const etapasCotacaoCarregadas = etapasCotacaoResultado.status === 'fulfilled' ? etapasCotacaoResultado.value : [];
+      const etapasOrdemCompraCarregadas = etapasOrdemCompraResultado.status === 'fulfilled' ? etapasOrdemCompraResultado.value : [];
+      const tiposOrdemCompraCarregados = tiposOrdemCompraResultado.status === 'fulfilled' ? tiposOrdemCompraResultado.value : [];
       const produtosCarregados = produtosResultado.status === 'fulfilled' ? produtosResultado.value : [];
-      const camposOrcamentoCarregados = camposOrcamentoResultado.status === 'fulfilled' ? camposOrcamentoResultado.value : [];
-      const camposPedidoCarregados = camposPedidoResultado.status === 'fulfilled' ? camposPedidoResultado.value : [];
+      const camposCotacaoCarregados = camposCotacaoResultado.status === 'fulfilled' ? camposCotacaoResultado.value : [];
+      const camposOrdemCompraCarregados = camposOrdemCompraResultado.status === 'fulfilled' ? camposOrdemCompraResultado.value : [];
       const empresasCarregadas = empresasResultado.status === 'fulfilled' ? empresasResultado.value : [];
 
-      const clientesCarteira = usuarioSomenteVendedor
-        ? clientesCarregados.filter((cliente) => cliente.idVendedor === usuarioLogado.idVendedor)
-        : clientesCarregados;
-      const idsClientesCarteira = new Set(clientesCarteira.map((cliente) => cliente.idCliente));
-      const contatosCarteira = contatosCarregados.filter((contato) => idsClientesCarteira.has(contato.idCliente));
-      definirClientes(clientesCarteira);
+      const fornecedoresCarteira = usuarioSomenteComprador
+        ? fornecedoresCarregados.filter((fornecedor) => fornecedor.idComprador === usuarioLogado.idComprador)
+        : fornecedoresCarregados;
+      const idsFornecedoresCarteira = new Set(fornecedoresCarteira.map((fornecedor) => fornecedor.idFornecedor));
+      const contatosCarteira = contatosCarregados.filter((contato) => idsFornecedoresCarteira.has(contato.idFornecedor));
+      definirFornecedores(fornecedoresCarteira);
       definirContatos(contatosCarteira);
       definirUsuarios(usuariosCarregados);
-      definirVendedores(vendedoresCarregados);
-      definirOrcamentos(
-        enriquecerOrcamentosAtendimento(
-          orcamentosCarregados,
-          clientesCarregados,
+      definirCompradores(compradoresCarregados);
+      definirCotacoes(
+        enriquecerCotacoesAtendimento(
+          cotacoesCarregados,
+          fornecedoresCarregados,
           contatosCarregados,
           usuariosCarregados,
-          vendedoresCarregados,
+          compradoresCarregados,
           enriquecerPrazosPagamento(prazosCarregados, metodosCarregados),
-          etapasOrcamentoCarregadas,
+          etapasCotacaoCarregadas,
           produtosCarregados
-        ).filter((orcamento) => orcamentoEstaAberto(orcamento))
+        ).filter((cotacao) => cotacaoEstaAberto(cotacao))
       );
       definirMetodosPagamento(metodosCarregados);
       definirRamosAtividade(ramosCarregados);
-      definirConceitosCliente(conceitosCarregados);
+      definirConceitosFornecedor(conceitosCarregados);
       definirTiposAtendimento(tiposAtendimentoCarregados);
       definirCanaisAtendimento(canaisCarregados);
       definirOrigensAtendimento(origensCarregadas);
       definirPrazosPagamento(enriquecerPrazosPagamento(prazosCarregados, metodosCarregados));
-      definirEtapasOrcamento(etapasOrcamentoCarregadas);
-      definirEtapasPedido(etapasPedidoCarregadas.map((etapa) => ({
+      definirEtapasCotacao(etapasCotacaoCarregadas);
+      definirEtapasOrdemCompra(etapasOrdemCompraCarregadas.map((etapa) => ({
         ...etapa,
-        idEtapaPedido: etapa.idEtapaPedido ?? etapa.idEtapa
+        idEtapaOrdemCompra: etapa.idEtapaOrdemCompra ?? etapa.idEtapa
       })));
-      definirTiposPedido(tiposPedidoCarregados);
+      definirTiposOrdemCompra(tiposOrdemCompraCarregados);
       definirProdutos(produtosCarregados.filter((produto) => produto.status !== 0));
-      definirCamposOrcamento(camposOrcamentoCarregados);
-      definirCamposPedido(camposPedidoCarregados);
+      definirCamposCotacao(camposCotacaoCarregados);
+      definirCamposOrdemCompra(camposOrdemCompraCarregados);
       definirEmpresa(empresasCarregadas[0] || null);
     } catch (_erro) {
       definirMensagemErro('Nao foi possivel carregar os atendimentos.');
@@ -313,9 +313,9 @@ export function PaginaAtendimentos({ usuarioLogado }) {
         pesquisa,
         filtros: {
           ...filtros,
-          ...(usuarioSomenteVendedor
+          ...(usuarioSomenteComprador
             ? {
-              escopoIdVendedor: usuarioLogado?.idVendedor,
+              escopoIdComprador: usuarioLogado?.idComprador,
               escopoIdUsuario: usuarioLogado?.idUsuario
             }
             : {})
@@ -370,38 +370,38 @@ export function PaginaAtendimentos({ usuarioLogado }) {
     fecharModal();
   }
 
-  async function incluirClientePeloAtendimento(dadosCliente) {
-    const payload = normalizarPayloadClienteAtendimento({
-      ...dadosCliente,
-      idVendedor: usuarioSomenteVendedor ? String(usuarioLogado.idVendedor) : dadosCliente.idVendedor
+  async function incluirFornecedorPeloAtendimento(dadosFornecedor) {
+    const payload = normalizarPayloadFornecedorAtendimento({
+      ...dadosFornecedor,
+      idComprador: usuarioSomenteComprador ? String(usuarioLogado.idComprador) : dadosFornecedor.idComprador
     });
 
-    const clienteSalvo = await incluirCliente(payload);
-    await salvarContatosClienteAtendimento(clienteSalvo.idCliente, dadosCliente.contatos || []);
+    const fornecedorSalvo = await incluirFornecedor(payload);
+    await salvarContatosFornecedorAtendimento(fornecedorSalvo.idFornecedor, dadosFornecedor.contatos || []);
     await recarregarPagina();
 
-    const clientesAtualizados = await listarClientes();
-    const clienteCompleto = clientesAtualizados.find((cliente) => cliente.idCliente === clienteSalvo.idCliente);
+    const fornecedoresAtualizados = await listarFornecedores();
+    const fornecedorCompleto = fornecedoresAtualizados.find((fornecedor) => fornecedor.idFornecedor === fornecedorSalvo.idFornecedor);
 
-    return clienteCompleto || clienteSalvo;
+    return fornecedorCompleto || fornecedorSalvo;
   }
 
-  async function incluirOrcamentoPeloAtendimento(dadosOrcamento) {
-    const orcamentoSalvo = await incluirOrcamento(normalizarPayloadOrcamento(dadosOrcamento, usuarioLogado));
+  async function incluirCotacaoPeloAtendimento(dadosCotacao) {
+    const cotacaoSalvo = await incluirCotacao(normalizarPayloadCotacao(dadosCotacao, usuarioLogado));
     await recarregarPagina();
-    return orcamentoSalvo;
+    return cotacaoSalvo;
   }
 
-  async function atualizarOrcamentoPeloAtendimento(dadosOrcamento) {
-    const payload = normalizarPayloadOrcamento(dadosOrcamento, usuarioLogado);
+  async function atualizarCotacaoPeloAtendimento(dadosCotacao) {
+    const payload = normalizarPayloadCotacao(dadosCotacao, usuarioLogado);
 
-    if (!dadosOrcamento?.idOrcamento) {
+    if (!dadosCotacao?.idCotacao) {
       return null;
     }
 
-    const orcamentoSalvo = await atualizarOrcamento(dadosOrcamento.idOrcamento, payload);
+    const cotacaoSalvo = await atualizarCotacao(dadosCotacao.idCotacao, payload);
     await recarregarPagina();
-    return orcamentoSalvo;
+    return cotacaoSalvo;
   }
 
   async function salvarPrazoPagamentoPeloAtendimento(dadosPrazo) {
@@ -435,62 +435,62 @@ export function PaginaAtendimentos({ usuarioLogado }) {
     return null;
   }
 
-  async function atualizarStatusOrcamentoPeloAtendimento({ idOrcamento, idEtapaOrcamento }) {
-    const orcamentoAtual = orcamentos.find((item) => item.idOrcamento === idOrcamento);
+  async function atualizarStatusCotacaoPeloAtendimento({ idCotacao, idEtapaCotacao }) {
+    const cotacaoAtual = cotacoes.find((item) => item.idCotacao === idCotacao);
 
-    if (!orcamentoAtual || !idEtapaOrcamento || String(orcamentoAtual.idEtapaOrcamento) === String(idEtapaOrcamento)) {
-      return orcamentoAtual || null;
+    if (!cotacaoAtual || !idEtapaCotacao || String(cotacaoAtual.idEtapaCotacao) === String(idEtapaCotacao)) {
+      return cotacaoAtual || null;
     }
 
-    const orcamentoSalvo = await atualizarOrcamento(
-      idOrcamento,
-      normalizarPayloadOrcamento(
+    const cotacaoSalvo = await atualizarCotacao(
+      idCotacao,
+      normalizarPayloadCotacao(
         {
-          ...orcamentoAtual,
-          idEtapaOrcamento
+          ...cotacaoAtual,
+          idEtapaCotacao
         },
         usuarioLogado
       )
     );
 
     await recarregarPagina();
-    return orcamentoSalvo;
+    return cotacaoSalvo;
   }
 
-  function abrirPedidoPeloAtendimento(dadosPedido, contexto = null) {
-    definirOrcamentoPedidoEmCriacao(contexto);
-    definirDadosIniciaisPedido(dadosPedido);
+  function abrirOrdemCompraPeloAtendimento(dadosOrdemCompra, contexto = null) {
+    definirCotacaoOrdemCompraEmCriacao(contexto);
+    definirDadosIniciaisOrdemCompra(dadosOrdemCompra);
     definirModalOrdemCompraAberto(true);
   }
 
   async function fecharModalOrdemCompra() {
-    if (orcamentoPedidoEmCriacao?.idOrcamento) {
-      const etapaFechadoSemPedido = obterEtapaFechadoSemPedido(etapasOrcamento);
+    if (cotacaoOrdemCompraEmCriacao?.idCotacao) {
+      const etapaFechadoSemOrdemCompra = obterEtapaFechadoSemOrdemCompra(etapasCotacao);
 
-      if (etapaFechadoSemPedido?.idEtapaOrcamento) {
-        await atualizarStatusOrcamentoPeloAtendimento({
-          idOrcamento: Number(orcamentoPedidoEmCriacao.idOrcamento),
-          idEtapaOrcamento: Number(etapaFechadoSemPedido.idEtapaOrcamento)
+      if (etapaFechadoSemOrdemCompra?.idEtapaCotacao) {
+        await atualizarStatusCotacaoPeloAtendimento({
+          idCotacao: Number(cotacaoOrdemCompraEmCriacao.idCotacao),
+          idEtapaCotacao: Number(etapaFechadoSemOrdemCompra.idEtapaCotacao)
         });
-        definirEtapaOrcamentoAtualizadaExternamente({
-          idOrcamento: Number(orcamentoPedidoEmCriacao.idOrcamento),
-          idEtapaOrcamento: String(etapaFechadoSemPedido.idEtapaOrcamento)
+        definirEtapaCotacaoAtualizadaExternamente({
+          idCotacao: Number(cotacaoOrdemCompraEmCriacao.idCotacao),
+          idEtapaCotacao: String(etapaFechadoSemOrdemCompra.idEtapaCotacao)
         });
       }
     }
 
     definirModalOrdemCompraAberto(false);
-    definirDadosIniciaisPedido(null);
-    definirOrcamentoPedidoEmCriacao(null);
+    definirDadosIniciaisOrdemCompra(null);
+    definirCotacaoOrdemCompraEmCriacao(null);
   }
 
-  async function salvarPedidoPeloAtendimento(dadosPedido) {
-    await incluirPedido(normalizarPayloadPedido(dadosPedido));
+  async function salvarOrdemCompraPeloAtendimento(dadosOrdemCompra) {
+    await incluirOrdemCompra(normalizarPayloadOrdemCompra(dadosOrdemCompra));
     await recarregarPagina();
     definirModalOrdemCompraAberto(false);
-    definirDadosIniciaisPedido(null);
-    definirOrcamentoPedidoEmCriacao(null);
-    definirEtapaOrcamentoAtualizadaExternamente(null);
+    definirDadosIniciaisOrdemCompra(null);
+    definirCotacaoOrdemCompraEmCriacao(null);
+    definirEtapaCotacaoAtualizadaExternamente(null);
   }
 
   function abrirNovoAtendimento() {
@@ -537,7 +537,7 @@ export function PaginaAtendimentos({ usuarioLogado }) {
     definirFiltrosEmEdicao({
       ...filtros,
       idUsuario: Array.isArray(filtros.idUsuario) ? [...filtros.idUsuario] : [],
-      idVendedorFornecedor: Array.isArray(filtros.idVendedorFornecedor) ? [...filtros.idVendedorFornecedor] : [],
+      idCompradorFornecedor: Array.isArray(filtros.idCompradorFornecedor) ? [...filtros.idCompradorFornecedor] : [],
       idTipoAtendimento: Array.isArray(filtros.idTipoAtendimento) ? [...filtros.idTipoAtendimento] : [],
       idCanalAtendimento: Array.isArray(filtros.idCanalAtendimento) ? [...filtros.idCanalAtendimento] : [],
       idOrigemAtendimento: Array.isArray(filtros.idOrigemAtendimento) ? [...filtros.idOrigemAtendimento] : []
@@ -561,7 +561,7 @@ export function PaginaAtendimentos({ usuarioLogado }) {
       <header className="cabecalhoPagina">
         <div>
           <h1>Atendimentos</h1>
-          <p>Registre e acompanhe os atendimentos comerciais e operacionais do CRM.</p>
+          <p>Registre e acompanhe os atendimentos comerciais e operacionais do SRM.</p>
         </div>
 
         <div className="acoesCabecalhoPagina">
@@ -640,7 +640,7 @@ export function PaginaAtendimentos({ usuarioLogado }) {
                 icone="pesquisa"
                 type="button"
                 className="botaoCampoAcao"
-                onClick={() => definirModalBuscaClienteFiltrosAberto(true)}
+                onClick={() => definirModalBuscaFornecedorFiltrosAberto(true)}
                 somenteIcone
                 title="Buscar fornecedor"
                 aria-label="Buscar fornecedor"
@@ -648,9 +648,9 @@ export function PaginaAtendimentos({ usuarioLogado }) {
                 Buscar fornecedor
               </Botao>
             ),
-            options: fornecedores.map((cliente) => ({
-              valor: String(cliente.idCliente),
-              label: cliente.nomeFantasia || cliente.razaoSocial
+            options: fornecedores.map((fornecedor) => ({
+              valor: String(fornecedor.idFornecedor),
+              label: fornecedor.nomeFantasia || fornecedor.razaoSocial
             }))
           },
           {
@@ -664,13 +664,13 @@ export function PaginaAtendimentos({ usuarioLogado }) {
             }))
           },
           {
-            name: 'idVendedorFornecedor',
+            name: 'idCompradorFornecedor',
             label: 'Fornecedores do comprador',
             multiple: true,
             placeholder: 'Todos os compradores',
-            options: vendedores.map((vendedor) => ({
-              valor: String(vendedor.idVendedor),
-              label: vendedor.nome
+            options: compradores.map((comprador) => ({
+              valor: String(comprador.idComprador),
+              label: comprador.nome
             }))
           },
           {
@@ -740,20 +740,20 @@ export function PaginaAtendimentos({ usuarioLogado }) {
           return filtrosLimpos;
         }}
       />
-      <ModalBuscaClientes
-        aberto={modalBuscaClienteFiltrosAberto}
+      <ModalBuscaFornecedores
+        aberto={modalBuscaFornecedorFiltrosAberto}
         empresa={empresa}
-        clientes={fornecedores}
+        fornecedores={fornecedores}
         placeholder="Pesquisar fornecedor no filtro"
         ariaLabelPesquisa="Pesquisar fornecedor no filtro"
-        aoSelecionar={(cliente) => {
+        aoSelecionar={(fornecedor) => {
           definirFiltrosEmEdicao((estadoAtual) => ({
             ...(estadoAtual || criarFiltrosIniciaisAtendimentos(usuarioLogado)),
-            idFornecedor: String(cliente.idCliente || '')
+            idFornecedor: String(fornecedor.idFornecedor || '')
           }));
-          definirModalBuscaClienteFiltrosAberto(false);
+          definirModalBuscaFornecedorFiltrosAberto(false);
         }}
-        aoFechar={() => definirModalBuscaClienteFiltrosAberto(false)}
+        aoFechar={() => definirModalBuscaFornecedorFiltrosAberto(false)}
       />
 
       <ModalManualAtendimento
@@ -763,7 +763,7 @@ export function PaginaAtendimentos({ usuarioLogado }) {
         tiposAtendimento={tiposAtendimento}
         canaisAtendimento={canaisAtendimento}
         origensAtendimento={origensAtendimento}
-        orcamentos={orcamentos}
+        cotacoes={cotacoes}
         filtros={filtros}
         usuarioLogado={usuarioLogado}
       />
@@ -777,39 +777,39 @@ export function PaginaAtendimentos({ usuarioLogado }) {
       <ModalAtendimento
         aberto={modalAberto}
         atendimento={atendimentoSelecionado}
-        clientes={fornecedores}
+        fornecedores={fornecedores}
         contatos={contatos}
         usuarioLogado={usuarioLogado}
-        vendedores={vendedores}
+        compradores={compradores}
         ramosAtividade={ramosAtividade}
-        conceitosCliente={conceitosCliente}
+        conceitosFornecedor={conceitosFornecedor}
         tiposAtendimento={tiposAtendimento}
         canaisAtendimento={canaisAtendimento}
         origensAtendimento={origensAtendimento}
         modo={modoModal}
         permitirExcluir={usuarioLogado?.tipo === 'Administrador'}
-        idVendedorBloqueado={usuarioSomenteVendedor ? usuarioLogado.idVendedor : null}
-        aoIncluirCliente={incluirClientePeloAtendimento}
-        aoIncluirOrcamento={incluirOrcamentoPeloAtendimento}
-        aoAtualizarOrcamento={atualizarOrcamentoPeloAtendimento}
-        dadosOrcamento={montarDadosIniciaisOrcamentoPeloAtendimento(atendimentoSelecionado, fornecedores, vendedores, usuarioLogado)}
-        clientesOrcamento={fornecedores}
-        contatosOrcamento={contatos}
-        usuariosOrcamento={usuarios}
-        vendedoresOrcamento={vendedores}
+        idCompradorBloqueado={usuarioSomenteComprador ? usuarioLogado.idComprador : null}
+        aoIncluirFornecedor={incluirFornecedorPeloAtendimento}
+        aoIncluirCotacao={incluirCotacaoPeloAtendimento}
+        aoAtualizarCotacao={atualizarCotacaoPeloAtendimento}
+        dadosCotacao={montarDadosIniciaisCotacaoPeloAtendimento(atendimentoSelecionado, fornecedores, compradores, usuarioLogado)}
+        fornecedoresCotacao={fornecedores}
+        contatosCotacao={contatos}
+        usuariosCotacao={usuarios}
+        compradoresCotacao={compradores}
         metodosPagamento={metodosPagamento}
         prazosPagamento={prazosPagamento}
-        etapasOrcamento={etapasOrcamento}
-        orcamentos={orcamentos}
+        etapasCotacao={etapasCotacao}
+        cotacoes={cotacoes}
         produtos={produtos}
-        camposOrcamento={camposOrcamento}
-        camposPedido={camposPedido}
-        etapasPedido={etapasPedido}
+        camposCotacao={camposCotacao}
+        camposOrdemCompra={camposOrdemCompra}
+        etapasOrdemCompra={etapasOrdemCompra}
         empresa={empresa}
         somenteConsultaPrazos={usuarioSomenteConsultaConfiguracao}
-        etapaOrcamentoAtualizadaExternamente={etapaOrcamentoAtualizadaExternamente}
-        aoAtualizarStatusOrcamento={atualizarStatusOrcamentoPeloAtendimento}
-        aoAbrirPedido={abrirPedidoPeloAtendimento}
+        etapaCotacaoAtualizadaExternamente={etapaCotacaoAtualizadaExternamente}
+        aoAtualizarStatusCotacao={atualizarStatusCotacaoPeloAtendimento}
+        aoAbrirOrdemCompra={abrirOrdemCompraPeloAtendimento}
         aoSalvarPrazoPagamento={salvarPrazoPagamentoPeloAtendimento}
         aoInativarPrazoPagamento={inativarPrazoPagamentoPeloAtendimento}
         aoFechar={fecharModal}
@@ -818,30 +818,30 @@ export function PaginaAtendimentos({ usuarioLogado }) {
       />
 
       <ModalOrdemCompra
-        aberto={modalPedidoAberto}
-        pedido={null}
-        dadosIniciais={dadosIniciaisPedido}
-        clientes={fornecedores}
+        aberto={modalOrdemCompraAberto}
+        ordemCompra={null}
+        dadosIniciais={dadosIniciaisOrdemCompra}
+        fornecedores={fornecedores}
         contatos={contatos}
         usuarios={usuarios}
-        vendedores={vendedores}
+        compradores={compradores}
         ramosAtividade={ramosAtividade}
-        conceitosCliente={conceitosCliente}
+        conceitosFornecedor={conceitosFornecedor}
         metodosPagamento={metodosPagamento}
         prazosPagamento={prazosPagamento}
-        tiposPedido={tiposPedido}
-        etapasPedido={etapasPedido}
+        tiposOrdemCompra={tiposOrdemCompra}
+        etapasOrdemCompra={etapasOrdemCompra}
         produtos={produtos}
-        camposPedido={camposPedido}
+        camposOrdemCompra={camposOrdemCompra}
         empresa={empresa}
         usuarioLogado={usuarioLogado}
         modo="novo"
-        idVendedorBloqueado={usuarioSomenteVendedor ? usuarioLogado.idVendedor : null}
+        idCompradorBloqueado={usuarioSomenteComprador ? usuarioLogado.idComprador : null}
         camadaSecundaria={modalAberto}
         somenteConsultaPrazos={usuarioSomenteConsultaConfiguracao}
-        aoIncluirCliente={incluirClientePeloAtendimento}
+        aoIncluirFornecedor={incluirFornecedorPeloAtendimento}
         aoFechar={fecharModalOrdemCompra}
-        aoSalvar={salvarPedidoPeloAtendimento}
+        aoSalvar={salvarOrdemCompraPeloAtendimento}
         aoSalvarPrazoPagamento={salvarPrazoPagamentoPeloAtendimento}
         aoInativarPrazoPagamento={inativarPrazoPagamentoPeloAtendimento}
       />
@@ -927,10 +927,10 @@ function renderizarCelulaAtendimento({ coluna, atendimento, permitirExcluir, aoC
     );
   }
 
-  if (coluna.id === 'cliente') {
+  if (coluna.id === 'fornecedor') {
     return (
       <CelulaLayoutAtendimento coluna={coluna} {...propriedadesCelula}>
-        <TextoGradeClamp>{obterValorGrid(atendimento.nomeCliente)}</TextoGradeClamp>
+        <TextoGradeClamp>{obterValorGrid(atendimento.nomeFornecedor)}</TextoGradeClamp>
       </CelulaLayoutAtendimento>
     );
   }
@@ -1034,7 +1034,7 @@ function normalizarFiltrosAtendimentos(filtros, filtrosPadrao) {
   return {
     ...filtrosNormalizados,
     idUsuario: normalizarListaFiltroPersistido(filtrosNormalizados.idUsuario),
-    idVendedorFornecedor: normalizarListaFiltroPersistido(filtros.idVendedorFornecedor || filtros.idVendedorCliente),
+    idCompradorFornecedor: normalizarListaFiltroPersistido(filtros.idCompradorFornecedor || filtros.idCompradorFornecedor),
     idTipoAtendimento: normalizarListaFiltroPersistido(filtrosNormalizados.idTipoAtendimento),
     idCanalAtendimento: normalizarListaFiltroPersistido(filtrosNormalizados.idCanalAtendimento),
     idOrigemAtendimento: normalizarListaFiltroPersistido(filtrosNormalizados.idOrigemAtendimento),
@@ -1048,16 +1048,16 @@ function enriquecerAtendimentos(
   fornecedores,
   contatos,
   usuarios,
-  vendedores,
+  compradores,
   canaisAtendimento,
   origensAtendimento
 ) {
-  const clientesPorId = new Map(
-    fornecedores.map((cliente) => [
-      cliente.idCliente,
+  const fornecedoresPorId = new Map(
+    fornecedores.map((fornecedor) => [
+      fornecedor.idFornecedor,
       {
-        nome: cliente.nomeFantasia || cliente.razaoSocial,
-        idVendedor: cliente.idVendedor
+        nome: fornecedor.nomeFantasia || fornecedor.razaoSocial,
+        idComprador: fornecedor.idComprador
       }
     ])
   );
@@ -1067,8 +1067,8 @@ function enriquecerAtendimentos(
   const usuariosPorId = new Map(
     usuarios.map((usuario) => [usuario.idUsuario, usuario.nome])
   );
-  const vendedoresPorId = new Map(
-    vendedores.map((vendedor) => [vendedor.idVendedor, vendedor.nome])
+  const compradoresPorId = new Map(
+    compradores.map((comprador) => [comprador.idComprador, comprador.nome])
   );
   const canaisPorId = new Map(
     canaisAtendimento.map((canal) => [canal.idCanalAtendimento, canal.descricao])
@@ -1079,11 +1079,11 @@ function enriquecerAtendimentos(
 
   return atendimentos.map((atendimento) => ({
     ...atendimento,
-    nomeFornecedor: obterValorGrid(clientesPorId.get(atendimento.idCliente)?.nome),
-    idVendedorFornecedor: clientesPorId.get(atendimento.idCliente)?.idVendedor || null,
+    nomeFornecedor: obterValorGrid(fornecedoresPorId.get(atendimento.idFornecedor)?.nome),
+    idCompradorFornecedor: fornecedoresPorId.get(atendimento.idFornecedor)?.idComprador || null,
     nomeContato: obterValorGrid(contatosPorId.get(atendimento.idContato)),
     nomeUsuario: obterValorGrid(usuariosPorId.get(atendimento.idUsuario)),
-    nomeVendedorFornecedor: obterValorGrid(vendedoresPorId.get(clientesPorId.get(atendimento.idCliente)?.idVendedor)),
+    nomeCompradorFornecedor: obterValorGrid(compradoresPorId.get(fornecedoresPorId.get(atendimento.idFornecedor)?.idComprador)),
     nomeCanalAtendimento: obterValorGrid(canaisPorId.get(atendimento.idCanalAtendimento)),
     nomeOrigemAtendimento: obterValorGrid(origensPorId.get(atendimento.idOrigemAtendimento))
   }));
@@ -1091,7 +1091,7 @@ function enriquecerAtendimentos(
 
 function normalizarPayloadAtendimento(dadosAtendimento) {
   return {
-    idFornecedor: Number(dadosAtendimento.idCliente),
+    idFornecedor: Number(dadosAtendimento.idFornecedor),
     idContato: dadosAtendimento.idContato ? Number(dadosAtendimento.idContato) : null,
     idUsuario: Number(dadosAtendimento.idUsuario),
     idTipoAtendimento: Number(dadosAtendimento.idTipoAtendimento),
@@ -1110,42 +1110,42 @@ function limparTextoOpcional(valor) {
   return texto || null;
 }
 
-async function salvarContatosClienteAtendimento(idFornecedor, contatos) {
-  const contatosNormalizados = normalizarContatosClienteAtendimento(contatos, idCliente);
+async function salvarContatosFornecedorAtendimento(idFornecedor, contatos) {
+  const contatosNormalizados = normalizarContatosFornecedorAtendimento(contatos, idFornecedor);
 
   for (const contato of contatosNormalizados) {
     await incluirContato(contato);
   }
 }
 
-function normalizarPayloadClienteAtendimento(dadosCliente) {
+function normalizarPayloadFornecedorAtendimento(dadosFornecedor) {
   return {
-    idVendedor: Number(dadosCliente.idVendedor),
-    idConceito: Number(dadosCliente.idConceito),
-    idRamo: Number(dadosCliente.idRamo),
-    razaoSocial: String(dadosCliente.razaoSocial || '').trim(),
-    nomeFantasia: String(dadosCliente.nomeFantasia || '').trim(),
-    tipo: String(dadosCliente.tipo || '').trim(),
-    cnpj: String(dadosCliente.cnpj || '').trim(),
-    inscricaoEstadual: limparTextoOpcional(dadosCliente.inscricaoEstadual),
-    status: dadosCliente.status ? 1 : 0,
-    email: limparTextoOpcional(dadosCliente.email),
-    telefone: limparTextoOpcional(dadosCliente.telefone),
-    logradouro: limparTextoOpcional(dadosCliente.logradouro),
-    numero: limparTextoOpcional(dadosCliente.numero),
-    complemento: limparTextoOpcional(dadosCliente.complemento),
-    bairro: limparTextoOpcional(dadosCliente.bairro),
-    cidade: limparTextoOpcional(dadosCliente.cidade),
-    estado: limparTextoOpcional(dadosCliente.estado)?.toUpperCase(),
-    cep: limparTextoOpcional(dadosCliente.cep),
-    observacao: limparTextoOpcional(dadosCliente.observacao),
-    imagem: limparTextoOpcional(dadosCliente.imagem)
+    idComprador: Number(dadosFornecedor.idComprador),
+    idConceito: Number(dadosFornecedor.idConceito),
+    idRamo: Number(dadosFornecedor.idRamo),
+    razaoSocial: String(dadosFornecedor.razaoSocial || '').trim(),
+    nomeFantasia: String(dadosFornecedor.nomeFantasia || '').trim(),
+    tipo: String(dadosFornecedor.tipo || '').trim(),
+    cnpj: String(dadosFornecedor.cnpj || '').trim(),
+    inscricaoEstadual: limparTextoOpcional(dadosFornecedor.inscricaoEstadual),
+    status: dadosFornecedor.status ? 1 : 0,
+    email: limparTextoOpcional(dadosFornecedor.email),
+    telefone: limparTextoOpcional(dadosFornecedor.telefone),
+    logradouro: limparTextoOpcional(dadosFornecedor.logradouro),
+    numero: limparTextoOpcional(dadosFornecedor.numero),
+    complemento: limparTextoOpcional(dadosFornecedor.complemento),
+    bairro: limparTextoOpcional(dadosFornecedor.bairro),
+    cidade: limparTextoOpcional(dadosFornecedor.cidade),
+    estado: limparTextoOpcional(dadosFornecedor.estado)?.toUpperCase(),
+    cep: limparTextoOpcional(dadosFornecedor.cep),
+    observacao: limparTextoOpcional(dadosFornecedor.observacao),
+    imagem: limparTextoOpcional(dadosFornecedor.imagem)
   };
 }
 
-function normalizarContatosClienteAtendimento(contatos, idCliente) {
+function normalizarContatosFornecedorAtendimento(contatos, idFornecedor) {
   return contatos.map((contato) => ({
-    idCliente,
+    idFornecedor,
     nome: String(contato.nome || '').trim(),
     cargo: limparTextoOpcional(contato.cargo),
     email: limparTextoOpcional(contato.email),
@@ -1242,40 +1242,40 @@ function obterHoraAtualFormatoInput() {
   return `${horas}:${minutos}`;
 }
 
-function montarDadosIniciaisOrcamentoPeloAtendimento(atendimento, fornecedores, vendedores, usuarioLogado) {
-  const vendedor = vendedores.find((item) => String(item.idVendedor) === String(usuarioLogado?.idVendedor || ''));
+function montarDadosIniciaisCotacaoPeloAtendimento(atendimento, fornecedores, compradores, usuarioLogado) {
+  const comprador = compradores.find((item) => String(item.idComprador) === String(usuarioLogado?.idComprador || ''));
 
   return {
-    idFornecedor: atendimento?.idCliente || '',
+    idFornecedor: atendimento?.idFornecedor || '',
     idContato: atendimento?.idContato || '',
     idUsuario: atendimento?.idUsuario || usuarioLogado?.idUsuario || '',
     nomeUsuario: atendimento?.nomeUsuario || usuarioLogado?.nome || '',
-    idVendedor: usuarioLogado?.idVendedor || '',
+    idComprador: usuarioLogado?.idComprador || '',
     observacao: atendimento?.descricao || ''
   };
 }
 
-function enriquecerOrcamentosAtendimento(orcamentos, fornecedores, contatos, usuarios, vendedores, prazosPagamento, etapasOrcamento, produtos) {
-  const clientesPorId = new Map(fornecedores.map((cliente) => [cliente.idCliente, cliente]));
+function enriquecerCotacoesAtendimento(cotacoes, fornecedores, contatos, usuarios, compradores, prazosPagamento, etapasCotacao, produtos) {
+  const fornecedoresPorId = new Map(fornecedores.map((fornecedor) => [fornecedor.idFornecedor, fornecedor]));
   const contatosPorId = new Map(contatos.map((contato) => [contato.idContato, contato.nome]));
   const usuariosPorId = new Map(usuarios.map((usuario) => [usuario.idUsuario, usuario.nome]));
-  const vendedoresPorId = new Map(vendedores.map((vendedor) => [vendedor.idVendedor, vendedor.nome]));
+  const compradoresPorId = new Map(compradores.map((comprador) => [comprador.idComprador, comprador.nome]));
   const prazosPorId = new Map(prazosPagamento.map((prazo) => [prazo.idPrazoPagamento, prazo]));
-  const etapasPorId = new Map(etapasOrcamento.map((etapa) => [etapa.idEtapaOrcamento, etapa]));
+  const etapasPorId = new Map(etapasCotacao.map((etapa) => [etapa.idEtapaCotacao, etapa]));
   const produtosPorId = new Map(produtos.map((produto) => [produto.idProduto, produto]));
 
-  return orcamentos.map((orcamento) => {
-    const cliente = clientesPorId.get(orcamento.idCliente);
+  return cotacoes.map((cotacao) => {
+    const fornecedor = fornecedoresPorId.get(cotacao.idFornecedor);
 
     return {
-      ...orcamento,
-      nomeFornecedor: obterValorGrid(cliente?.nomeFantasia || cliente?.razaoSocial),
-      nomeContato: obterValorGrid(contatosPorId.get(orcamento.idContato)),
-      nomeUsuario: obterValorGrid(usuariosPorId.get(orcamento.idUsuario)),
-      nomeVendedor: obterValorGrid(vendedoresPorId.get(orcamento.idVendedor)),
-      nomePrazoPagamento: obterValorGrid(prazosPorId.get(orcamento.idPrazoPagamento)?.descricaoFormatada),
-      nomeEtapaOrcamento: obterValorGrid(etapasPorId.get(orcamento.idEtapaOrcamento)?.descricao),
-      itens: Array.isArray(orcamento.itens) ? orcamento.itens.map((item) => ({
+      ...cotacao,
+      nomeFornecedor: obterValorGrid(fornecedor?.nomeFantasia || fornecedor?.razaoSocial),
+      nomeContato: obterValorGrid(contatosPorId.get(cotacao.idContato)),
+      nomeUsuario: obterValorGrid(usuariosPorId.get(cotacao.idUsuario)),
+      nomeComprador: obterValorGrid(compradoresPorId.get(cotacao.idComprador)),
+      nomePrazoPagamento: obterValorGrid(prazosPorId.get(cotacao.idPrazoPagamento)?.descricaoFormatada),
+      nomeEtapaCotacao: obterValorGrid(etapasPorId.get(cotacao.idEtapaCotacao)?.descricao),
+      itens: Array.isArray(cotacao.itens) ? cotacao.itens.map((item) => ({
         ...item,
         nomeProduto: obterValorGrid(produtosPorId.get(item.idProduto)?.descricao || item.nomeProduto)
       })) : []
@@ -1283,44 +1283,44 @@ function enriquecerOrcamentosAtendimento(orcamentos, fornecedores, contatos, usu
   });
 }
 
-function orcamentoEstaAberto(orcamento) {
-  const idEtapa = Number(orcamento?.idEtapaOrcamento);
+function cotacaoEstaAberto(cotacao) {
+  const idEtapa = Number(cotacao?.idEtapaCotacao);
 
   return ![
-    ID_ETAPA_ORCAMENTO_FECHAMENTO,
-    ID_ETAPA_ORCAMENTO_FECHADO_SEM_PEDIDO,
-    ID_ETAPA_ORCAMENTO_PEDIDO_EXCLUIDO,
-    ID_ETAPA_ORCAMENTO_RECUSADO
+    ID_ETAPA_COTACAO_FECHAMENTO,
+    ID_ETAPA_COTACAO_FECHADO_SEM_ORDEM_COMPRA,
+    ID_ETAPA_COTACAO_ORDEM_COMPRA_EXCLUIDO,
+    ID_ETAPA_COTACAO_RECUSADO
   ].includes(idEtapa);
 }
 
-function etapaAcabouDeFechar(idEtapaAnterior, idEtapaAtual, etapasOrcamento) {
-  const etapaAnterior = etapasOrcamento.find((etapa) => String(etapa.idEtapaOrcamento) === String(idEtapaAnterior || ''));
-  const etapaAtual = etapasOrcamento.find((etapa) => String(etapa.idEtapaOrcamento) === String(idEtapaAtual || ''));
+function etapaAcabouDeFechar(idEtapaAnterior, idEtapaAtual, etapasCotacao) {
+  const etapaAnterior = etapasCotacao.find((etapa) => String(etapa.idEtapaCotacao) === String(idEtapaAnterior || ''));
+  const etapaAtual = etapasCotacao.find((etapa) => String(etapa.idEtapaCotacao) === String(idEtapaAtual || ''));
 
-  return !etapaOrcamentoEhFechamento(etapaAnterior) && etapaOrcamentoEhFechamento(etapaAtual);
+  return !etapaCotacaoEhFechamento(etapaAnterior) && etapaCotacaoEhFechamento(etapaAtual);
 }
 
-function etapaOrcamentoEhFechamento(etapa) {
-  return Number(etapa?.idEtapaOrcamento) === ID_ETAPA_ORCAMENTO_FECHAMENTO;
+function etapaCotacaoEhFechamento(etapa) {
+  return Number(etapa?.idEtapaCotacao) === ID_ETAPA_COTACAO_FECHAMENTO;
 }
 
-function obterEtapaFechadoSemPedido(etapasOrcamento) {
-  return etapasOrcamento.find((etapa) => Number(etapa?.idEtapaOrcamento) === ID_ETAPA_ORCAMENTO_FECHADO_SEM_PEDIDO) || null;
+function obterEtapaFechadoSemOrdemCompra(etapasCotacao) {
+  return etapasCotacao.find((etapa) => Number(etapa?.idEtapaCotacao) === ID_ETAPA_COTACAO_FECHADO_SEM_ORDEM_COMPRA) || null;
 }
 
-function normalizarPayloadOrcamento(dadosOrcamento, usuarioLogado) {
+function normalizarPayloadCotacao(dadosCotacao, usuarioLogado) {
   return {
-    idFornecedor: Number(dadosOrcamento.idCliente),
-    idContato: dadosOrcamento.idContato ? Number(dadosOrcamento.idContato) : null,
-    idUsuario: Number(dadosOrcamento.idUsuario || usuarioLogado.idUsuario),
-    idVendedor: Number(dadosOrcamento.idVendedor),
-    idPrazoPagamento: dadosOrcamento.idPrazoPagamento ? Number(dadosOrcamento.idPrazoPagamento) : null,
-    idEtapaOrcamento: dadosOrcamento.idEtapaOrcamento ? Number(dadosOrcamento.idEtapaOrcamento) : null,
-    dataInclusao: limparTextoOpcional(dadosOrcamento.dataInclusao),
-    dataValidade: limparTextoOpcional(dadosOrcamento.dataValidade),
-    observacao: limparTextoOpcional(dadosOrcamento.observacao),
-    itens: Array.isArray(dadosOrcamento.itens) ? dadosOrcamento.itens.map((item) => ({
+    idFornecedor: Number(dadosCotacao.idFornecedor),
+    idContato: dadosCotacao.idContato ? Number(dadosCotacao.idContato) : null,
+    idUsuario: Number(dadosCotacao.idUsuario || usuarioLogado.idUsuario),
+    idComprador: Number(dadosCotacao.idComprador),
+    idPrazoPagamento: dadosCotacao.idPrazoPagamento ? Number(dadosCotacao.idPrazoPagamento) : null,
+    idEtapaCotacao: dadosCotacao.idEtapaCotacao ? Number(dadosCotacao.idEtapaCotacao) : null,
+    dataInclusao: limparTextoOpcional(dadosCotacao.dataInclusao),
+    dataValidade: limparTextoOpcional(dadosCotacao.dataValidade),
+    observacao: limparTextoOpcional(dadosCotacao.observacao),
+    itens: Array.isArray(dadosCotacao.itens) ? dadosCotacao.itens.map((item) => ({
       idProduto: Number(item.idProduto),
       quantidade: normalizarNumeroDecimal(item.quantidade),
       valorUnitario: normalizarNumeroDecimal(item.valorUnitario),
@@ -1328,8 +1328,8 @@ function normalizarPayloadOrcamento(dadosOrcamento, usuarioLogado) {
       imagem: limparTextoOpcional(item.imagem),
       observacao: limparTextoOpcional(item.observacao)
     })) : [],
-    camposExtras: Array.isArray(dadosOrcamento.camposExtras) ? dadosOrcamento.camposExtras.map((campo) => ({
-      idCampoOrcamento: Number(campo.idCampoOrcamento),
+    camposExtras: Array.isArray(dadosCotacao.camposExtras) ? dadosCotacao.camposExtras.map((campo) => ({
+      idCampoCotacao: Number(campo.idCampoCotacao),
       valor: limparTextoOpcional(campo.valor)
     })) : []
   };
@@ -1393,29 +1393,29 @@ function normalizarNumeroDecimal(valor) {
   return Number.isNaN(numero) ? 0 : numero;
 }
 
-function normalizarPayloadPedido(dadosPedido) {
+function normalizarPayloadOrdemCompra(dadosOrdemCompra) {
   return {
-    idOrcamento: dadosPedido.idOrcamento ? Number(dadosPedido.idOrcamento) : null,
-    idFornecedor: dadosPedido.idCliente ? Number(dadosPedido.idCliente) : null,
-    idContato: dadosPedido.idContato ? Number(dadosPedido.idContato) : null,
-    idUsuario: dadosPedido.idUsuario ? Number(dadosPedido.idUsuario) : null,
-      idVendedor: dadosPedido.idVendedor ? Number(dadosPedido.idVendedor) : null,
-      idPrazoPagamento: dadosPedido.idPrazoPagamento ? Number(dadosPedido.idPrazoPagamento) : null,
-      idTipoPedido: dadosPedido.idTipoPedido ? Number(dadosPedido.idTipoPedido) : null,
-      idEtapaPedido: dadosPedido.idEtapaPedido ? Number(dadosPedido.idEtapaPedido) : null,
-    dataInclusao: limparTextoOpcional(dadosPedido.dataInclusao),
-    dataEntrega: limparTextoOpcional(dadosPedido.dataEntrega),
-    observacao: limparTextoOpcional(dadosPedido.observacao),
-    codigoOrcamentoOrigem: dadosPedido.codigoOrcamentoOrigem ? Number(dadosPedido.codigoOrcamentoOrigem) : null,
-    nomeClienteSnapshot: limparTextoOpcional(dadosPedido.nomeClienteSnapshot),
-    nomeContatoSnapshot: limparTextoOpcional(dadosPedido.nomeContatoSnapshot),
-    nomeUsuarioSnapshot: limparTextoOpcional(dadosPedido.nomeUsuarioSnapshot),
-      nomeVendedorSnapshot: limparTextoOpcional(dadosPedido.nomeVendedorSnapshot),
-      nomeMetodoPagamentoSnapshot: limparTextoOpcional(dadosPedido.nomeMetodoPagamentoSnapshot),
-      nomePrazoPagamentoSnapshot: limparTextoOpcional(dadosPedido.nomePrazoPagamentoSnapshot),
-      nomeTipoPedidoSnapshot: limparTextoOpcional(dadosPedido.nomeTipoPedidoSnapshot),
-      nomeEtapaPedidoSnapshot: limparTextoOpcional(dadosPedido.nomeEtapaPedidoSnapshot),
-    itens: Array.isArray(dadosPedido.itens) ? dadosPedido.itens.map((item) => ({
+    idCotacao: dadosOrdemCompra.idCotacao ? Number(dadosOrdemCompra.idCotacao) : null,
+    idFornecedor: dadosOrdemCompra.idFornecedor ? Number(dadosOrdemCompra.idFornecedor) : null,
+    idContato: dadosOrdemCompra.idContato ? Number(dadosOrdemCompra.idContato) : null,
+    idUsuario: dadosOrdemCompra.idUsuario ? Number(dadosOrdemCompra.idUsuario) : null,
+      idComprador: dadosOrdemCompra.idComprador ? Number(dadosOrdemCompra.idComprador) : null,
+      idPrazoPagamento: dadosOrdemCompra.idPrazoPagamento ? Number(dadosOrdemCompra.idPrazoPagamento) : null,
+      idTipoOrdemCompra: dadosOrdemCompra.idTipoOrdemCompra ? Number(dadosOrdemCompra.idTipoOrdemCompra) : null,
+      idEtapaOrdemCompra: dadosOrdemCompra.idEtapaOrdemCompra ? Number(dadosOrdemCompra.idEtapaOrdemCompra) : null,
+    dataInclusao: limparTextoOpcional(dadosOrdemCompra.dataInclusao),
+    dataEntrega: limparTextoOpcional(dadosOrdemCompra.dataEntrega),
+    observacao: limparTextoOpcional(dadosOrdemCompra.observacao),
+    codigoCotacaoOrigem: dadosOrdemCompra.codigoCotacaoOrigem ? Number(dadosOrdemCompra.codigoCotacaoOrigem) : null,
+    nomeFornecedorSnapshot: limparTextoOpcional(dadosOrdemCompra.nomeFornecedorSnapshot),
+    nomeContatoSnapshot: limparTextoOpcional(dadosOrdemCompra.nomeContatoSnapshot),
+    nomeUsuarioSnapshot: limparTextoOpcional(dadosOrdemCompra.nomeUsuarioSnapshot),
+      nomeCompradorSnapshot: limparTextoOpcional(dadosOrdemCompra.nomeCompradorSnapshot),
+      nomeMetodoPagamentoSnapshot: limparTextoOpcional(dadosOrdemCompra.nomeMetodoPagamentoSnapshot),
+      nomePrazoPagamentoSnapshot: limparTextoOpcional(dadosOrdemCompra.nomePrazoPagamentoSnapshot),
+      nomeTipoOrdemCompraSnapshot: limparTextoOpcional(dadosOrdemCompra.nomeTipoOrdemCompraSnapshot),
+      nomeEtapaOrdemCompraSnapshot: limparTextoOpcional(dadosOrdemCompra.nomeEtapaOrdemCompraSnapshot),
+    itens: Array.isArray(dadosOrdemCompra.itens) ? dadosOrdemCompra.itens.map((item) => ({
       idProduto: item.idProduto ? Number(item.idProduto) : null,
       quantidade: normalizarNumeroDecimal(item.quantidade),
       valorUnitario: normalizarNumeroDecimal(item.valorUnitario),
@@ -1426,30 +1426,30 @@ function normalizarPayloadPedido(dadosPedido) {
       descricaoProdutoSnapshot: limparTextoOpcional(item.descricaoProdutoSnapshot),
       unidadeProdutoSnapshot: limparTextoOpcional(item.unidadeProdutoSnapshot)
     })) : [],
-    camposExtras: Array.isArray(dadosPedido.camposExtras) ? dadosPedido.camposExtras.map((campo) => ({
-      idCampoPedido: campo.idCampoPedido ? Number(campo.idCampoPedido) : null,
+    camposExtras: Array.isArray(dadosOrdemCompra.camposExtras) ? dadosOrdemCompra.camposExtras.map((campo) => ({
+      idCampoOrdemCompra: campo.idCampoOrdemCompra ? Number(campo.idCampoOrdemCompra) : null,
       tituloSnapshot: limparTextoOpcional(campo.tituloSnapshot || campo.titulo),
       valor: limparTextoOpcional(campo.valor)
     })) : []
   };
 }
 
-function enriquecerOrcamentoParaPedido(orcamento, contexto) {
-  const cliente = contexto.fornecedores.find((item) => String(item.idCliente) === String(orcamento.idCliente));
-  const contato = contexto.contatos.find((item) => String(item.idContato) === String(orcamento.idContato));
-  const usuario = contexto.usuarios.find((item) => String(item.idUsuario) === String(orcamento.idUsuario));
-  const vendedor = contexto.vendedores.find((item) => String(item.idVendedor) === String(orcamento.idVendedor));
-  const prazo = contexto.prazosPagamento.find((item) => String(item.idPrazoPagamento) === String(orcamento.idPrazoPagamento));
+function enriquecerCotacaoParaOrdemCompra(cotacao, contexto) {
+  const fornecedor = contexto.fornecedores.find((item) => String(item.idFornecedor) === String(cotacao.idFornecedor));
+  const contato = contexto.contatos.find((item) => String(item.idContato) === String(cotacao.idContato));
+  const usuario = contexto.usuarios.find((item) => String(item.idUsuario) === String(cotacao.idUsuario));
+  const comprador = contexto.compradores.find((item) => String(item.idComprador) === String(cotacao.idComprador));
+  const prazo = contexto.prazosPagamento.find((item) => String(item.idPrazoPagamento) === String(cotacao.idPrazoPagamento));
 
   return {
-    ...orcamento,
-    nomeFornecedor: orcamento.nomeCliente || cliente?.nomeFantasia || cliente?.razaoSocial || '',
-    nomeContato: orcamento.nomeContato || contato?.nome || '',
-    nomeUsuario: orcamento.nomeUsuario || usuario?.nome || '',
-    nomeVendedor: orcamento.nomeVendedor || vendedor?.nome || '',
-    nomePrazoPagamento: orcamento.nomePrazoPagamento || prazo?.descricaoFormatada || prazo?.descricao || '',
-    nomeMetodoPagamento: orcamento.nomeMetodoPagamento || prazo?.nomeMetodoPagamento || '',
-    itens: Array.isArray(orcamento.itens) ? orcamento.itens.map((item) => {
+    ...cotacao,
+    nomeFornecedor: cotacao.nomeFornecedor || fornecedor?.nomeFantasia || fornecedor?.razaoSocial || '',
+    nomeContato: cotacao.nomeContato || contato?.nome || '',
+    nomeUsuario: cotacao.nomeUsuario || usuario?.nome || '',
+    nomeComprador: cotacao.nomeComprador || comprador?.nome || '',
+    nomePrazoPagamento: cotacao.nomePrazoPagamento || prazo?.descricaoFormatada || prazo?.descricao || '',
+    nomeMetodoPagamento: cotacao.nomeMetodoPagamento || prazo?.nomeMetodoPagamento || '',
+    itens: Array.isArray(cotacao.itens) ? cotacao.itens.map((item) => {
       const produto = contexto.produtos.find((registro) => String(registro.idProduto) === String(item.idProduto));
       return {
         ...item,
@@ -1462,26 +1462,26 @@ function enriquecerOrcamentoParaPedido(orcamento, contexto) {
   };
 }
 
-function montarDadosIniciaisPedidoAPartirDoOrcamento(orcamento) {
+function montarDadosIniciaisOrdemCompraAPartirDoCotacao(cotacao) {
   return {
-    idOrcamento: orcamento.idOrcamento,
-    codigoOrcamentoOrigem: orcamento.idOrcamento,
-    idFornecedor: orcamento.idCliente,
-    idContato: orcamento.idContato,
-    idUsuario: orcamento.idUsuario,
-    idVendedor: orcamento.idVendedor,
-    idPrazoPagamento: orcamento.idPrazoPagamento,
-    idTipoPedido: ID_TIPO_PEDIDO_VENDA,
+    idCotacao: cotacao.idCotacao,
+    codigoCotacaoOrigem: cotacao.idCotacao,
+    idFornecedor: cotacao.idFornecedor,
+    idContato: cotacao.idContato,
+    idUsuario: cotacao.idUsuario,
+    idComprador: cotacao.idComprador,
+    idPrazoPagamento: cotacao.idPrazoPagamento,
+    idTipoOrdemCompra: ID_TIPO_ORDEM_COMPRA_VENDA,
     dataInclusao: obterDataAtualFormatoInput(),
-    nomeClienteSnapshot: orcamento.nomeCliente || '',
-    nomeContatoSnapshot: orcamento.nomeContato || '',
-    nomeUsuarioSnapshot: orcamento.nomeUsuario || '',
-    nomeVendedorSnapshot: orcamento.nomeVendedor || '',
-    nomeMetodoPagamentoSnapshot: orcamento.nomeMetodoPagamento || '',
-    nomePrazoPagamentoSnapshot: orcamento.nomePrazoPagamento || '',
-    nomeTipoPedidoSnapshot: 'Ordem de compra',
-    observacao: orcamento.observacao || '',
-    itens: Array.isArray(orcamento.itens) ? orcamento.itens.map((item) => ({
+    nomeFornecedorSnapshot: cotacao.nomeFornecedor || '',
+    nomeContatoSnapshot: cotacao.nomeContato || '',
+    nomeUsuarioSnapshot: cotacao.nomeUsuario || '',
+    nomeCompradorSnapshot: cotacao.nomeComprador || '',
+    nomeMetodoPagamentoSnapshot: cotacao.nomeMetodoPagamento || '',
+    nomePrazoPagamentoSnapshot: cotacao.nomePrazoPagamento || '',
+    nomeTipoOrdemCompraSnapshot: 'Ordem de compra',
+    observacao: cotacao.observacao || '',
+    itens: Array.isArray(cotacao.itens) ? cotacao.itens.map((item) => ({
       idProduto: item.idProduto,
       quantidade: item.quantidade,
       valorUnitario: item.valorUnitario,

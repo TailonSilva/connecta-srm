@@ -27,7 +27,7 @@ export function ModalItemProduto({
   return (
     <div className="camadaModalContato" role="presentation" onMouseDown={onFechar}>
       <div
-        className="modalContatoCliente modalItemCotacao modalItemProduto"
+        className="modalContatoFornecedor modalItemCotacao modalItemProduto"
         role="dialog"
         aria-modal="true"
         aria-labelledby="tituloModalItemProduto"
@@ -49,7 +49,7 @@ export function ModalItemProduto({
         </div>
 
         <div className="corpoModalContato">
-          <div className="layoutModalItemOrcamento">
+          <div className="layoutModalItemCotacao">
             <CampoImagemPadrao
               valor={itemFormulario.imagem}
               alt={itemFormulario.descricaoProdutoSnapshot || 'Item do produto'}

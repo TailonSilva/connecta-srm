@@ -15,7 +15,7 @@ function IconeMenu({ tipo }) {
     atendimentos: (
       <path d="M7 5.5h10A1.5 1.5 0 0 1 18.5 7v12L15 16.5H7A1.5 1.5 0 0 1 5.5 15V7A1.5 1.5 0 0 1 7 5.5Zm2.5 3h5m-5 3h6m-6 3h3" />
     ),
-    clientes: (
+    fornecedores: (
       <path d="M12 12.5a4.25 4.25 0 1 0-4.25-4.25A4.25 4.25 0 0 0 12 12.5Zm0 2c-4.7 0-8.5 2.35-8.5 5.25V21h17v-1.25c0-2.9-3.8-5.25-8.5-5.25Z" />
     ),
     produtos: (
@@ -24,7 +24,7 @@ function IconeMenu({ tipo }) {
     cotacoes: (
       <path d="M6.5 4h8l4 4v10.5A1.5 1.5 0 0 1 17 20h-10A1.5 1.5 0 0 1 5.5 18.5v-13A1.5 1.5 0 0 1 7 4Zm7.5 1.5V9h3.5M8 12h8m-8 3h8" />
     ),
-    pedidos: (
+    ordensCompra: (
       <path d="M7 5h10l1.5 4.5-2 8.5H7.5L5.5 9.5Zm2 15a1.5 1.5 0 1 0 0 .01Zm7 0a1.5 1.5 0 1 0 0 .01ZM8.5 8.5h7" />
     ),
     configuracoes: (
@@ -33,11 +33,9 @@ function IconeMenu({ tipo }) {
   };
   const aliases = {
     cotacao: 'cotacoes',
-    orcamento: 'cotacoes',
-    orcamentos: 'cotacoes',
-    pedido: 'pedidos',
-    ordemCompra: 'pedidos',
-    ordensCompra: 'pedidos'
+    cotacoes: 'cotacoes',
+    ordemCompra: 'ordensCompra',
+    ordensCompra: 'ordensCompra'
   };
   const icone = icones[tipo] || icones[aliases[tipo]];
 
@@ -96,7 +94,7 @@ export function BarraLateral({
         </div>
         <div className="textoMarcaLateral">
           <strong>{empresa?.nomeFantasia || empresa?.razaoSocial || 'Nome da Empresa'}</strong>
-          <p>{empresa?.slogan || 'Gestao simples para vendas inteligentes'}</p>
+          <p>{empresa?.slogan || 'Gestao simples para ordens de compra inteligentes'}</p>
         </div>
       </div>
 

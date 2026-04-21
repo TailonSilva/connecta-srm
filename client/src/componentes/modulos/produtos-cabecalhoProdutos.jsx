@@ -17,7 +17,7 @@ export function CabecalhoProdutos({
     <header className="cabecalhoPagina">
       <div>
         <h1>Produtos</h1>
-        <p>Gerencie o catalogo e a consulta dos produtos do CRM.</p>
+        <p>Gerencie o catalogo e a consulta dos produtos do SRM.</p>
       </div>
 
       <div className="acoesCabecalhoPagina">

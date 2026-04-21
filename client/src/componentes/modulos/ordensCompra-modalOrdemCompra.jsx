@@ -2,14 +2,14 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Botao } from '../comuns/botao';
 import { CodigoRegistro } from '../comuns/codigoRegistro';
 import { GradePadrao } from '../comuns/gradePadrao';
-import { ModalBuscaClientes } from '../comuns/modalBuscaClientes';
+import { ModalBuscaFornecedores } from '../comuns/modalBuscaFornecedores';
 import { ModalBuscaContatos } from '../comuns/modalBuscaContatos';
 import { MensagemErroPopup } from '../comuns/mensagemErroPopup';
 import { ModalItemProduto } from '../comuns/modalItemProduto';
 import { ModalPrazosPagamento } from './configuracoes-modalPrazosPagamento';
-import { ModalFornecedor as ModalCliente } from './fornecedores-modalFornecedor';
+import { ModalFornecedor as ModalFornecedor } from './fornecedores-modalFornecedor';
 import { formatarNomeContato } from '../../utilitarios/formatarNomeContato';
-import { formatarCodigoCliente } from '../../utilitarios/codigoCliente';
+import { formatarCodigoFornecedor } from '../../utilitarios/codigoFornecedor';
 import { useFormularioItemProduto } from '../../hooks/useFormularioItemProduto';
 import {
   converterPrecoParaNumero,
@@ -25,32 +25,32 @@ const abasModalOrdemCompra = [
   { id: 'campos', label: 'Campos da ordem de compra' }
 ];
 
-const ID_ETAPA_PEDIDO_ENTREGUE = 5;
-const ID_TIPO_PEDIDO_VENDA = 1;
+const ID_ETAPA_ORDEM_COMPRA_ENTREGUE = 5;
+const ID_TIPO_ORDEM_COMPRA_VENDA = 1;
 
 const estadoInicialFormulario = {
-  idOrcamento: '',
+  idCotacao: '',
   idFornecedor: '',
   idContato: '',
   idUsuario: '',
-  idVendedor: '',
+  idComprador: '',
   idPrazoPagamento: '',
-  idTipoPedido: '',
+  idTipoOrdemCompra: '',
   dataInclusao: '',
   dataEntrega: '',
-  nomeClienteSnapshot: '',
+  nomeFornecedorSnapshot: '',
   nomeContatoSnapshot: '',
   nomeUsuarioSnapshot: '',
-  nomeVendedorSnapshot: '',
+  nomeCompradorSnapshot: '',
   nomeMetodoPagamentoSnapshot: '',
   nomePrazoPagamentoSnapshot: '',
-  nomeTipoPedidoSnapshot: '',
-  idEtapaPedido: '',
-  nomeEtapaPedidoSnapshot: '',
+  nomeTipoOrdemCompraSnapshot: '',
+  idEtapaOrdemCompra: '',
+  nomeEtapaOrdemCompraSnapshot: '',
   observacao: '',
   itens: [],
   camposExtras: [],
-  codigoOrcamentoOrigem: ''
+  codigoCotacaoOrigem: ''
 };
 
 const estadoInicialItem = {
@@ -65,25 +65,25 @@ const estadoInicialItem = {
   observacao: ''
 };
 
-function normalizarEtapasPedido(etapasPedido) {
-  if (!Array.isArray(etapasPedido)) {
+function normalizarEtapasOrdemCompra(etapasOrdemCompra) {
+  if (!Array.isArray(etapasOrdemCompra)) {
     return [];
   }
 
-  return etapasPedido
+  return etapasOrdemCompra
     .map((etapa) => ({
       ...etapa,
-      idEtapaPedido: etapa.idEtapaPedido ?? etapa.idEtapa
+      idEtapaOrdemCompra: etapa.idEtapaOrdemCompra ?? etapa.idEtapa
     }))
     .sort((etapaA, etapaB) => {
-      const ordemA = obterValorOrdemEtapa(etapaA?.ordem, etapaA?.idEtapaPedido);
-      const ordemB = obterValorOrdemEtapa(etapaB?.ordem, etapaB?.idEtapaPedido);
+      const ordemA = obterValorOrdemEtapa(etapaA?.ordem, etapaA?.idEtapaOrdemCompra);
+      const ordemB = obterValorOrdemEtapa(etapaB?.ordem, etapaB?.idEtapaOrdemCompra);
 
       if (ordemA !== ordemB) {
         return ordemA - ordemB;
       }
 
-      return Number(etapaA?.idEtapaPedido || 0) - Number(etapaB?.idEtapaPedido || 0);
+      return Number(etapaA?.idEtapaOrdemCompra || 0) - Number(etapaB?.idEtapaOrdemCompra || 0);
     });
 }
 
@@ -104,28 +104,27 @@ function obterValorOrdemEtapa(ordem, fallback) {
 
 export function ModalOrdemCompra({
   aberto,
-  pedido,
+  ordemCompra,
   dadosIniciais,
-  fornecedores,
-  clientes = [],
+  fornecedores = [],
   contatos = [],
   usuarios = [],
-  vendedores = [],
+  compradores = [],
   ramosAtividade = [],
-  conceitosCliente = [],
+  conceitosFornecedor = [],
   metodosPagamento = [],
   prazosPagamento = [],
-  tiposPedido = [],
-  etapasPedido = [],
+  tiposOrdemCompra = [],
+  etapasOrdemCompra = [],
   produtos = [],
-  camposPedido = [],
+  camposOrdemCompra = [],
   empresa,
   usuarioLogado,
   modo = 'consulta',
-  idVendedorBloqueado = null,
+  idCompradorBloqueado = null,
   somenteConsultaPrazos = false,
   camadaSecundaria = false,
-  aoIncluirCliente,
+  aoIncluirFornecedor,
   aoFechar,
   aoSalvar,
   aoSalvarPrazoPagamento,
@@ -136,47 +135,47 @@ export function ModalOrdemCompra({
   const [salvando, definirSalvando] = useState(false);
   const [mensagemErro, definirMensagemErro] = useState('');
   const [confirmandoSaida, definirConfirmandoSaida] = useState(false);
-  const [modalBuscaClienteAberto, definirModalBuscaClienteAberto] = useState(false);
-  const [modalClienteAberto, definirModalClienteAberto] = useState(false);
+  const [modalBuscaFornecedorAberto, definirModalBuscaFornecedorAberto] = useState(false);
+  const [modalFornecedorAberto, definirModalFornecedorAberto] = useState(false);
   const [modalBuscaContatoAberto, definirModalBuscaContatoAberto] = useState(false);
-  const referenciaCampoCliente = useRef(null);
+  const referenciaCampoFornecedor = useRef(null);
   const referenciaCampoContato = useRef(null);
   const [contatosCriadosLocalmente, definirContatosCriadosLocalmente] = useState([]);
   const [modalPrazosPagamentoAberto, definirModalPrazosPagamentoAberto] = useState(false);
-  const vendedorBloqueado = Boolean(idVendedorBloqueado);
+  const compradorBloqueado = Boolean(idCompradorBloqueado);
   const somenteLeitura = modo === 'consulta';
-  const modoInclusao = !pedido;
-  const registroBase = pedido || dadosIniciais || null;
-  const pedidoOriginadoDeOrcamento = Boolean(!pedido && (dadosIniciais?.idOrcamento || registroBase?.idOrcamento));
-  const listaFornecedores = Array.isArray(fornecedores) ? fornecedores : clientes;
-  const clientesAtivos = listaFornecedores.filter((cliente) => cliente.status !== 0);
+  const modoInclusao = !ordemCompra;
+  const registroBase = ordemCompra || dadosIniciais || null;
+  const ordemCompraOriginadoDeCotacao = Boolean(!ordemCompra && (dadosIniciais?.idCotacao || registroBase?.idCotacao));
+  const listaFornecedores = Array.isArray(fornecedores) ? fornecedores : fornecedores;
+  const fornecedoresAtivos = listaFornecedores.filter((fornecedor) => fornecedor.status !== 0);
   const contatosAtivos = contatos.filter((contato) => contato.status !== 0);
   const usuariosAtivos = usuarios.filter((usuario) => usuario.ativo !== 0);
-  const vendedoresAtivos = vendedores.filter((vendedor) => vendedor.status !== 0);
+  const compradoresAtivos = compradores.filter((comprador) => comprador.status !== 0);
   const prazosAtivos = prazosPagamento.filter((prazo) => prazo.status !== 0);
-  const tiposPedidoAtivos = tiposPedido.filter((tipoPedido) => tipoPedido.status !== 0);
+  const tiposOrdemCompraAtivos = tiposOrdemCompra.filter((tipoOrdemCompra) => tipoOrdemCompra.status !== 0);
   const produtosAtivos = produtos.filter((produto) => produto.status !== 0);
-  const etapasPedidoNormalizadas = useMemo(
-    () => normalizarEtapasPedido(etapasPedido).filter((etapa) => etapa.status !== 0),
-    [etapasPedido]
+  const etapasOrdemCompraNormalizadas = useMemo(
+    () => normalizarEtapasOrdemCompra(etapasOrdemCompra).filter((etapa) => etapa.status !== 0),
+    [etapasOrdemCompra]
   );
-  const chaveRegistroBase = pedido?.idPedido || dadosIniciais?.idOrcamento || 'novo';
-  const chaveEmpresa = empresa?.diasEntregaPedido ?? '';
-  const quantidadeCamposPedido = Array.isArray(camposPedido) ? camposPedido.length : 0;
-  const totalPedido = useMemo(
+  const chaveRegistroBase = ordemCompra?.idOrdemCompra || dadosIniciais?.idCotacao || 'novo';
+  const chaveEmpresa = empresa?.diasEntregaOrdemCompra ?? '';
+  const quantidadeCamposOrdemCompra = Array.isArray(camposOrdemCompra) ? camposOrdemCompra.length : 0;
+  const totalOrdemCompra = useMemo(
     () => formulario.itens.reduce((total, item) => total + (converterPrecoParaNumero(item.valorTotal) || 0), 0),
     [formulario.itens]
   );
-  const nomeVendedorSelecionado = useMemo(
-    () => vendedoresAtivos.find((item) => String(item.idVendedor) === String(formulario.idVendedor || ''))?.nome || formulario.nomeVendedorSnapshot || '',
-    [vendedoresAtivos, formulario.idVendedor, formulario.nomeVendedorSnapshot]
+  const nomeCompradorSelecionado = useMemo(
+    () => compradoresAtivos.find((item) => String(item.idComprador) === String(formulario.idComprador || ''))?.nome || formulario.nomeCompradorSnapshot || '',
+    [compradoresAtivos, formulario.idComprador, formulario.nomeCompradorSnapshot]
   );
-  const contatosDoCliente = useMemo(
-    () => combinarContatosDoCliente(contatosAtivos, contatosCriadosLocalmente, formulario.idCliente),
-    [contatosAtivos, contatosCriadosLocalmente, formulario.idCliente]
+  const contatosDoFornecedor = useMemo(
+    () => combinarContatosDoFornecedor(contatosAtivos, contatosCriadosLocalmente, formulario.idFornecedor),
+    [contatosAtivos, contatosCriadosLocalmente, formulario.idFornecedor]
   );
-  const proximoCodigoCliente = useMemo(
-    () => obterProximoCodigoCliente(listaFornecedores),
+  const proximoCodigoFornecedor = useMemo(
+    () => obterProximoCodigoFornecedor(listaFornecedores),
     [listaFornecedores]
   );
   const {
@@ -222,16 +221,16 @@ export function ModalOrdemCompra({
     }
 
     definirFormulario(
-      criarFormularioInicialPedido(
+      criarFormularioInicialOrdemCompra(
         registroBase,
         usuarioLogado,
-        camposPedido,
+        camposOrdemCompra,
         empresa,
         usuariosAtivos,
-        vendedoresAtivos,
+        compradoresAtivos,
         {
-          novo: !pedido,
-          idVendedorBloqueado
+          novo: !ordemCompra,
+          idCompradorBloqueado
         }
       )
     );
@@ -239,12 +238,12 @@ export function ModalOrdemCompra({
     definirSalvando(false);
     definirMensagemErro('');
     definirConfirmandoSaida(false);
-    definirModalBuscaClienteAberto(false);
+    definirModalBuscaFornecedorAberto(false);
     definirModalBuscaContatoAberto(false);
     definirContatosCriadosLocalmente([]);
     definirModalPrazosPagamentoAberto(false);
     redefinirItemModal();
-  }, [aberto, chaveRegistroBase, usuarioLogado?.idUsuario, quantidadeCamposPedido, chaveEmpresa]);
+  }, [aberto, chaveRegistroBase, usuarioLogado?.idUsuario, quantidadeCamposOrdemCompra, chaveEmpresa]);
 
   useEffect(() => {
     if (!aberto) {
@@ -266,13 +265,13 @@ export function ModalOrdemCompra({
         return;
       }
 
-      if (modalBuscaClienteAberto) {
-        fecharModalBuscaCliente();
+      if (modalBuscaFornecedorAberto) {
+        fecharModalBuscaFornecedor();
         return;
       }
 
-      if (modalClienteAberto) {
-        fecharModalNovoCliente();
+      if (modalFornecedorAberto) {
+        fecharModalNovoFornecedor();
         return;
       }
 
@@ -299,7 +298,7 @@ export function ModalOrdemCompra({
     return () => {
       window.removeEventListener('keydown', tratarTecla);
     };
-  }, [aberto, confirmandoSaida, modalBuscaClienteAberto, modalBuscaContatoAberto, modalBuscaProdutoAberto, modalClienteAberto, modalItemAberto, modalPrazosPagamentoAberto, salvando]);
+  }, [aberto, confirmandoSaida, modalBuscaFornecedorAberto, modalBuscaContatoAberto, modalBuscaProdutoAberto, modalFornecedorAberto, modalItemAberto, modalPrazosPagamentoAberto, salvando]);
 
   if (!aberto) {
     return null;
@@ -310,25 +309,25 @@ export function ModalOrdemCompra({
     const valorNormalizado = normalizarValorEntradaFormulario(evento);
 
     definirFormulario((estadoAtual) => {
-      const mudouParaEntregue = name === 'idEtapaPedido'
-        && !etapaPedidoEhEntregue(estadoAtual.idEtapaPedido)
-        && etapaPedidoEhEntregue(value);
+      const mudouParaEntregue = name === 'idEtapaOrdemCompra'
+        && !etapaOrdemCompraEhEntregue(estadoAtual.idEtapaOrdemCompra)
+        && etapaOrdemCompraEhEntregue(value);
       const proximoEstado = {
         ...estadoAtual,
-        ...(name === 'idCliente' ? { idContato: '' } : {}),
+        ...(name === 'idFornecedor' ? { idContato: '' } : {}),
         [name]: valorNormalizado,
-        ...(name === 'idEtapaPedido'
+        ...(name === 'idEtapaOrdemCompra'
           ? {
-            nomeEtapaPedidoSnapshot: etapasPedidoNormalizadas.find((etapa) => String(etapa.idEtapaPedido) === String(value))?.descricao || '',
+            nomeEtapaOrdemCompraSnapshot: etapasOrdemCompraNormalizadas.find((etapa) => String(etapa.idEtapaOrdemCompra) === String(value))?.descricao || '',
             ...(mudouParaEntregue ? { dataEntrega: obterDataAtualFormatoInput() } : {})
           }
           : {})
       };
 
-      if (name === 'idCliente') {
-        const fornecedor = clientesAtivos.find((item) => String(item.idCliente) === String(value));
-        if (cliente) {
-          proximoEstado.nomeClienteSnapshot = cliente.nomeFantasia || cliente.razaoSocial || '';
+      if (name === 'idFornecedor') {
+        const fornecedor = fornecedoresAtivos.find((item) => String(item.idFornecedor) === String(value));
+        if (fornecedor) {
+          proximoEstado.nomeFornecedorSnapshot = fornecedor.nomeFantasia || fornecedor.razaoSocial || '';
         }
       }
 
@@ -338,19 +337,19 @@ export function ModalOrdemCompra({
       }
 
       if (name === 'idUsuario') {
-        const vendedor = obterVendedorPadrao(
+        const comprador = obterCompradorPadrao(
           value,
           usuariosAtivos,
-          vendedoresAtivos,
-          idVendedorBloqueado
+          compradoresAtivos,
+          idCompradorBloqueado
         );
-        proximoEstado.idVendedor = vendedor.idVendedor;
-        proximoEstado.nomeVendedorSnapshot = vendedor.nomeVendedor;
+        proximoEstado.idComprador = comprador.idComprador;
+        proximoEstado.nomeCompradorSnapshot = comprador.nomeComprador;
       }
 
-      if (name === 'idVendedor' && !vendedorBloqueado) {
-        const vendedor = vendedoresAtivos.find((item) => String(item.idVendedor) === String(value));
-        proximoEstado.nomeVendedorSnapshot = vendedor?.nome || '';
+      if (name === 'idComprador' && !compradorBloqueado) {
+        const comprador = compradoresAtivos.find((item) => String(item.idComprador) === String(value));
+        proximoEstado.nomeCompradorSnapshot = comprador?.nome || '';
       }
 
       if (name === 'idPrazoPagamento') {
@@ -359,15 +358,15 @@ export function ModalOrdemCompra({
         proximoEstado.nomeMetodoPagamentoSnapshot = prazo?.nomeMetodoPagamento || '';
       }
 
-      if (name === 'idTipoPedido') {
-        const tipoPedido = tiposPedidoAtivos.find((item) => String(item.idTipoPedido) === String(value));
-        proximoEstado.nomeTipoPedidoSnapshot = tipoPedido?.descricao || '';
+      if (name === 'idTipoOrdemCompra') {
+        const tipoOrdemCompra = tiposOrdemCompraAtivos.find((item) => String(item.idTipoOrdemCompra) === String(value));
+        proximoEstado.nomeTipoOrdemCompraSnapshot = tipoOrdemCompra?.descricao || '';
       }
 
       if (name === 'dataInclusao') {
         proximoEstado.dataEntrega = somarDiasNaData(
           value,
-          Number(empresa?.diasEntregaPedido ?? 7)
+          Number(empresa?.diasEntregaOrdemCompra ?? 7)
         );
       }
 
@@ -395,8 +394,8 @@ export function ModalOrdemCompra({
       return;
     }
 
-    if (!String(formularioParaSalvar.idCliente || '').trim()) {
-      definirMensagemErro('Selecione o fornecedor do pedido.');
+    if (!String(formularioParaSalvar.idFornecedor || '').trim()) {
+      definirMensagemErro('Selecione o fornecedor do ordemCompra.');
       return;
     }
 
@@ -405,13 +404,13 @@ export function ModalOrdemCompra({
       return;
     }
 
-    if (!String(formularioParaSalvar.idVendedor || '').trim()) {
+    if (!String(formularioParaSalvar.idComprador || '').trim()) {
       definirMensagemErro('Selecione o comprador.');
       return;
     }
 
-    if (!String(formularioParaSalvar.idTipoPedido || '').trim()) {
-      definirMensagemErro('Selecione o tipo de pedido.');
+    if (!String(formularioParaSalvar.idTipoOrdemCompra || '').trim()) {
+      definirMensagemErro('Selecione o tipo de ordemCompra.');
       return;
     }
 
@@ -421,7 +420,7 @@ export function ModalOrdemCompra({
     }
 
     if (formularioParaSalvar.itens.length === 0) {
-      definirMensagemErro('Inclua ao menos um item no pedido.');
+      definirMensagemErro('Inclua ao menos um item no ordemCompra.');
       return;
     }
 
@@ -431,7 +430,7 @@ export function ModalOrdemCompra({
     try {
       await aoSalvar(formularioParaSalvar);
     } catch (erro) {
-      definirMensagemErro(erro.message || 'Nao foi possivel salvar o pedido.');
+      definirMensagemErro(erro.message || 'Nao foi possivel salvar o ordemCompra.');
       definirSalvando(false);
     }
   }
@@ -443,7 +442,7 @@ export function ModalOrdemCompra({
   }
 
   function tentarFecharModal() {
-    if (pedidoOriginadoDeOrcamento) {
+    if (ordemCompraOriginadoDeCotacao) {
       aoFechar();
       return;
     }
@@ -461,32 +460,32 @@ export function ModalOrdemCompra({
     aoFechar();
   }
 
-  function abrirModalBuscaCliente() {
+  function abrirModalBuscaFornecedor() {
     if (somenteLeitura || salvando || !modoInclusao) {
       return;
     }
 
-    definirModalBuscaClienteAberto(true);
+    definirModalBuscaFornecedorAberto(true);
   }
 
-  function abrirModalNovoCliente() {
-    if (somenteLeitura || salvando || !modoInclusao || !aoIncluirCliente) {
+  function abrirModalNovoFornecedor() {
+    if (somenteLeitura || salvando || !modoInclusao || !aoIncluirFornecedor) {
       return;
     }
 
-    definirModalClienteAberto(true);
+    definirModalFornecedorAberto(true);
   }
 
-  function fecharModalNovoCliente() {
-    definirModalClienteAberto(false);
+  function fecharModalNovoFornecedor() {
+    definirModalFornecedorAberto(false);
   }
 
-  function fecharModalBuscaCliente() {
-    definirModalBuscaClienteAberto(false);
+  function fecharModalBuscaFornecedor() {
+    definirModalBuscaFornecedorAberto(false);
   }
 
   function abrirModalBuscaContato() {
-    if (somenteLeitura || salvando || !modoInclusao || !formulario.idCliente) {
+    if (somenteLeitura || salvando || !modoInclusao || !formulario.idFornecedor) {
       return;
     }
 
@@ -497,23 +496,23 @@ export function ModalOrdemCompra({
     definirModalBuscaContatoAberto(false);
   }
 
-  function selecionarCliente(cliente) {
-    if (!cliente) {
+  function selecionarFornecedor(fornecedor) {
+    if (!fornecedor) {
       return;
     }
 
     definirFormulario((estadoAtual) => {
       return {
         ...estadoAtual,
-        idFornecedor: String(cliente.idCliente),
+        idFornecedor: String(fornecedor.idFornecedor),
         idContato: '',
-        nomeClienteSnapshot: cliente.nomeFantasia || cliente.razaoSocial || '',
+        nomeFornecedorSnapshot: fornecedor.nomeFantasia || fornecedor.razaoSocial || '',
         nomeContatoSnapshot: '',
       };
     });
 
-    fecharModalBuscaCliente();
-    agendarFocoCampo(referenciaCampoCliente);
+    fecharModalBuscaFornecedor();
+    agendarFocoCampo(referenciaCampoFornecedor);
   }
 
   function selecionarContato(contato) {
@@ -551,11 +550,11 @@ export function ModalOrdemCompra({
     definirModalPrazosPagamentoAberto(false);
   }
 
-  async function salvarNovoCliente(dadosCliente) {
-    const clienteCriado = await aoIncluirCliente(dadosCliente);
+  async function salvarNovoFornecedor(dadosFornecedor) {
+    const fornecedorCriado = await aoIncluirFornecedor(dadosFornecedor);
 
-    selecionarCliente(clienteCriado);
-    definirModalClienteAberto(false);
+    selecionarFornecedor(fornecedorCriado);
+    definirModalFornecedorAberto(false);
   }
 
   function selecionarPrazoPagamento(prazo) {
@@ -574,24 +573,24 @@ export function ModalOrdemCompra({
   return (
     <div className={`camadaModal ${camadaSecundaria ? 'camadaModalSecundaria' : ''}`} role="presentation" onMouseDown={fecharAoClicarNoFundo}>
       <form
-        className="modalCliente modalFornecedor modalClienteComAbas modalOrcamento modalPedido"
+        className="modalFornecedor modalFornecedor modalFornecedorComAbas modalCotacao modalOrdemCompra"
         role="dialog"
         aria-modal="true"
         aria-labelledby="tituloModalOrdemCompra"
         onMouseDown={(evento) => evento.stopPropagation()}
         onSubmit={submeterFormulario}
       >
-        <header className="cabecalhoModalCliente">
+        <header className="cabecalhoModalFornecedor">
           <div className="cabecalhoModalCotacao">
             <div>
               <h2 id="tituloModalOrdemCompra">
-                {somenteLeitura ? 'Consultar ordem de compra' : pedido ? 'Editar ordem de compra' : 'Incluir ordem de compra'}
+                {somenteLeitura ? 'Consultar ordem de compra' : ordemCompra ? 'Editar ordem de compra' : 'Incluir ordem de compra'}
               </h2>
             </div>
-            {pedido?.idPedido ? <CodigoRegistro valor={pedido.idPedido} /> : null}
+            {ordemCompra?.idOrdemCompra ? <CodigoRegistro valor={ordemCompra.idOrdemCompra} /> : null}
           </div>
 
-          <div className="acoesCabecalhoModalCliente">
+          <div className="acoesCabecalhoModalFornecedor">
             <Botao variante="secundario" type="button" onClick={tentarFecharModal} disabled={salvando}>
               {somenteLeitura ? 'Fechar' : 'Cancelar'}
             </Botao>
@@ -603,13 +602,13 @@ export function ModalOrdemCompra({
           </div>
         </header>
 
-        <div className="abasModalCliente" role="tablist" aria-label="Secoes da ordem de compra">
+        <div className="abasModalFornecedor" role="tablist" aria-label="Secoes da ordem de compra">
           {abasModalOrdemCompra.map((aba) => (
             <button
               key={aba.id}
               type="button"
               role="tab"
-              className={`abaModalCliente abaModalFornecedor ${abaAtiva === aba.id ? 'ativa' : ''}`}
+              className={`abaModalFornecedor abaModalFornecedor ${abaAtiva === aba.id ? 'ativa' : ''}`}
               aria-selected={abaAtiva === aba.id}
               onClick={() => definirAbaAtiva(aba.id)}
             >
@@ -618,10 +617,10 @@ export function ModalOrdemCompra({
           ))}
         </div>
 
-        <div className="corpoModalCliente corpoModalFornecedor corpoModalCotacaoAbas">
+        <div className="corpoModalFornecedor corpoModalFornecedor corpoModalCotacaoAbas">
           {abaAtiva === 'dadosGerais' ? (
             <section className="layoutModalCotacaoAba">
-              <div className="linhaOrcamentoDatas">
+              <div className="linhaCotacaoDatas">
                 <CampoFormulario label="Data de inclusao" name="dataInclusao" type="date" value={formulario.dataInclusao} onChange={alterarCampo} disabled={somenteLeitura} />
                 <CampoFormulario label="Data de entrega" name="dataEntrega" type="date" value={formulario.dataEntrega} onChange={alterarCampo} disabled={somenteLeitura} />
                 {modoInclusao ? (
@@ -641,19 +640,19 @@ export function ModalOrdemCompra({
                 )}
               </div>
 
-              <div className="linhaClienteContatoAtendimento">
+              <div className="linhaFornecedorContatoAtendimento">
                 {modoInclusao ? (
                   <>
                     <CampoSelect
                       label="Fornecedor"
-                      name="idCliente"
-                      data-atalho-busca-id="cliente"
-                      referenciaCampo={referenciaCampoCliente}
-                      value={formulario.idCliente}
+                      name="idFornecedor"
+                      data-atalho-busca-id="fornecedor"
+                      referenciaCampo={referenciaCampoFornecedor}
+                      value={formulario.idFornecedor}
                       onChange={alterarCampo}
-                        options={clientesAtivos.map((cliente) => ({
-                          valor: String(cliente.idCliente),
-                          label: montarRotuloCliente(cliente, empresa)
+                        options={fornecedoresAtivos.map((fornecedor) => ({
+                          valor: String(fornecedor.idFornecedor),
+                          label: montarRotuloFornecedor(fornecedor, empresa)
                         }))}
                         disabled={somenteLeitura}
                         acaoExtra={!somenteLeitura ? (
@@ -665,8 +664,8 @@ export function ModalOrdemCompra({
                           somenteIcone
                           title="Buscar fornecedor"
                           aria-label="Buscar fornecedor"
-                          data-atalho-busca-id="cliente"
-                          onClick={abrirModalBuscaCliente}
+                          data-atalho-busca-id="fornecedor"
+                          onClick={abrirModalBuscaFornecedor}
                         >
                           Buscar fornecedor
                         </Botao>
@@ -679,12 +678,12 @@ export function ModalOrdemCompra({
                       referenciaCampo={referenciaCampoContato}
                       value={formulario.idContato}
                       onChange={alterarCampo}
-                      options={contatosDoCliente.map((contato) => ({
+                      options={contatosDoFornecedor.map((contato) => ({
                         valor: String(contato.idContato),
                         label: formatarNomeContato(contato)
                       }))}
-                      disabled={somenteLeitura || !formulario.idCliente}
-                      acaoExtra={!somenteLeitura && formulario.idCliente ? (
+                      disabled={somenteLeitura || !formulario.idFornecedor}
+                      acaoExtra={!somenteLeitura && formulario.idFornecedor ? (
                         <Botao
                           variante="secundario"
                           type="button"
@@ -703,31 +702,31 @@ export function ModalOrdemCompra({
                   </>
                 ) : (
                   <>
-                    <CampoFormulario label="Fornecedor" name="nomeClienteSnapshot" value={formulario.nomeClienteSnapshot} disabled />
+                    <CampoFormulario label="Fornecedor" name="nomeFornecedorSnapshot" value={formulario.nomeFornecedorSnapshot} disabled />
                     <CampoFormulario label="Contato" name="nomeContatoSnapshot" value={formulario.nomeContatoSnapshot} disabled />
                   </>
                 )}
               </div>
 
-              <div className="linhaOrcamentoComercial">
+              <div className="linhaCotacaoComercial">
                 {modoInclusao ? (
                   <>
-                    {vendedorBloqueado ? (
+                    {compradorBloqueado ? (
                       <CampoFormulario
                         label="Comprador"
-                        name="nomeVendedorBloqueado"
-                        value={nomeVendedorSelecionado}
+                        name="nomeCompradorBloqueado"
+                        value={nomeCompradorSelecionado}
                         disabled
                       />
                     ) : (
                       <CampoSelect
                         label="Comprador"
-                        name="idVendedor"
-                        value={formulario.idVendedor}
+                        name="idComprador"
+                        value={formulario.idComprador}
                         onChange={alterarCampo}
-                        options={vendedoresAtivos.map((vendedor) => ({
-                          valor: String(vendedor.idVendedor),
-                          label: vendedor.nome
+                        options={compradoresAtivos.map((comprador) => ({
+                          valor: String(comprador.idComprador),
+                          label: comprador.nome
                         }))}
                         disabled={somenteLeitura}
                       />
@@ -757,46 +756,46 @@ export function ModalOrdemCompra({
                     />
                     <CampoSelect
                       label="Tipo de ordem de compra"
-                      name="idTipoPedido"
-                      value={formulario.idTipoPedido}
+                      name="idTipoOrdemCompra"
+                      value={formulario.idTipoOrdemCompra}
                       onChange={alterarCampo}
-                      options={tiposPedidoAtivos.map((tipoPedido) => ({
-                        valor: String(tipoPedido.idTipoPedido),
-                        label: tipoPedido.descricao
+                      options={tiposOrdemCompraAtivos.map((tipoOrdemCompra) => ({
+                        valor: String(tipoOrdemCompra.idTipoOrdemCompra),
+                        label: tipoOrdemCompra.descricao
                       }))}
                       disabled={somenteLeitura}
                     />
                   </>
                 ) : (
                   <>
-                    <CampoFormulario label="Comprador" name="nomeVendedorSnapshot" value={formulario.nomeVendedorSnapshot} disabled />
+                    <CampoFormulario label="Comprador" name="nomeCompradorSnapshot" value={formulario.nomeCompradorSnapshot} disabled />
                     <CampoFormulario label="Prazo de pagamento" name="nomePrazoPagamentoSnapshot" value={formulario.nomePrazoPagamentoSnapshot} disabled />
-                    <CampoFormulario label="Tipo de ordem de compra" name="nomeTipoPedidoSnapshot" value={formulario.nomeTipoPedidoSnapshot} disabled />
+                    <CampoFormulario label="Tipo de ordem de compra" name="nomeTipoOrdemCompraSnapshot" value={formulario.nomeTipoOrdemCompraSnapshot} disabled />
                   </>
                 )}
               </div>
 
-              <div className="linhaOrcamentoFechamento">
+              <div className="linhaCotacaoFechamento">
                 <CampoSelect
                   label="Etapa da ordem de compra"
-                  name="idEtapaPedido"
-                  value={formulario.idEtapaPedido}
+                  name="idEtapaOrdemCompra"
+                  value={formulario.idEtapaOrdemCompra}
                   onChange={alterarCampo}
-                  options={etapasPedidoNormalizadas.map((etapa) => ({
-                    valor: String(etapa.idEtapaPedido),
+                  options={etapasOrdemCompraNormalizadas.map((etapa) => ({
+                    valor: String(etapa.idEtapaOrdemCompra),
                     label: etapa.descricao
                   }))}
                   disabled={somenteLeitura}
                 />
-                <CampoFormulario label="Total" name="totalPedido" value={normalizarPreco(totalPedido)} disabled />
+                <CampoFormulario label="Total" name="totalOrdemCompra" value={normalizarPreco(totalOrdemCompra)} disabled />
               </div>
             </section>
           ) : null}
 
           {abaAtiva === 'itens' ? (
             <section className="layoutModalCotacaoAba layoutModalCotacaoAbaItens">
-              <section className="painelItensOrcamento">
-                <div className="cabecalhoItensOrcamento">
+              <section className="painelItensCotacao">
+                <div className="cabecalhoItensCotacao">
                   <h3>Itens da ordem de compra</h3>
                   {!somenteLeitura ? (
                     <Botao variante="secundario" type="button" onClick={() => {
@@ -808,7 +807,7 @@ export function ModalOrdemCompra({
                 </div>
 
                 <GradePadrao
-                  className="gradeContatosModal gradeItensOrcamentoRolavel"
+                  className="gradeContatosModal gradeItensCotacaoRolavel"
                   classNameTabela="tabelaContatosModal tabelaItensCotacao"
                   classNameMensagem="mensagemTabelaContatosModal"
                   cabecalho={(
@@ -828,22 +827,22 @@ export function ModalOrdemCompra({
                 >
                   {formulario.itens.map((item, indice) => {
                     const imagemItem = item.imagem || '';
-                    const apresentacaoProduto = montarApresentacaoProdutoPedido(item, empresa);
+                    const apresentacaoProduto = montarApresentacaoProdutoOrdemCompra(item, empresa);
 
                     return (
-                      <tr key={`${item.idItemPedido || indice}-${indice}`}>
+                      <tr key={`${item.idItemOrdemCompra || indice}-${indice}`}>
                         <td>
                           {imagemItem ? (
-                            <img src={imagemItem} alt={item.descricaoProdutoSnapshot || 'Item da ordem de compra'} className="miniaturaItemOrcamento" />
+                            <img src={imagemItem} alt={item.descricaoProdutoSnapshot || 'Item da ordem de compra'} className="miniaturaItemCotacao" />
                           ) : (
-                            <div className="miniaturaItemOrcamentoPlaceholder">
-                              {obterIniciaisItemPedido(item)}
+                            <div className="miniaturaItemCotacaoPlaceholder">
+                              {obterIniciaisItemOrdemCompra(item)}
                             </div>
                           )}
                         </td>
                         <td><CodigoRegistro valor={item.idProduto || 0} /></td>
                         <td>
-                          <div className="produtoGradeItemPedido">
+                          <div className="produtoGradeItemOrdemCompra">
                             <strong>{apresentacaoProduto.principal}</strong>
                             {apresentacaoProduto.secundario ? (
                               <span>{apresentacaoProduto.secundario}</span>
@@ -872,28 +871,28 @@ export function ModalOrdemCompra({
                   })}
                 </GradePadrao>
               </section>
-              <div className="resumoTotalItensCotacao resumoTotalItensOrcamentoRodape">
-                <span className="rotuloResumoTotalItensOrcamento">Total dos itens</span>
-                <strong className="valorResumoTotalItensOrcamento">{normalizarPreco(totalPedido)}</strong>
+              <div className="resumoTotalItensCotacao resumoTotalItensCotacaoRodape">
+                <span className="rotuloResumoTotalItensCotacao">Total dos itens</span>
+                <strong className="valorResumoTotalItensCotacao">{normalizarPreco(totalOrdemCompra)}</strong>
               </div>
             </section>
           ) : null}
 
           {abaAtiva === 'outros' ? (
             <section className="layoutModalCotacaoAba">
-              <div className="linhaOrcamentoComercial">
+              <div className="linhaCotacaoComercial">
                 <CampoFormulario
                   label="Cotacao vinculado"
-                  name="orcamentoOrigemPedido"
-                  value={formulario.codigoOrcamentoOrigem
-                    ? `#${String(formulario.codigoOrcamentoOrigem).padStart(4, '0')}`
+                  name="cotacaoOrigemOrdemCompra"
+                  value={formulario.codigoCotacaoOrigem
+                    ? `#${String(formulario.codigoCotacaoOrigem).padStart(4, '0')}`
                     : ''}
                   placeholder="Sem cotacao vinculado"
                   disabled
                 />
               </div>
 
-              <div className="linhaOrcamentoFechamento">
+              <div className="linhaCotacaoFechamento">
               </div>
             </section>
           ) : null}
@@ -901,9 +900,9 @@ export function ModalOrdemCompra({
           {abaAtiva === 'campos' ? (
             <section className="layoutModalCotacaoAba layoutModalCotacaoCampos">
               <div className="campoFormulario campoFormularioIntegral">
-                <label htmlFor="observacaoPedido">Observacao da ordem de compra</label>
+                <label htmlFor="observacaoOrdemCompra">Observacao da ordem de compra</label>
                 <textarea
-                  id="observacaoPedido"
+                  id="observacaoOrdemCompra"
                   name="observacao"
                   className="entradaFormulario entradaFormularioTextoCurto"
                   rows={2}
@@ -914,13 +913,13 @@ export function ModalOrdemCompra({
               </div>
 
               {formulario.camposExtras.length > 0 ? (
-                <section className="painelCamposExtrasOrcamento">
-                  <div className="listaCamposExtrasOrcamento">
+                <section className="painelCamposExtrasCotacao">
+                  <div className="listaCamposExtrasCotacao">
                     {formulario.camposExtras.map((campo, indice) => (
-                      <div key={`${campo.idCampoPedido || indice}-${indice}`} className="campoFormulario campoFormularioIntegral">
-                        <label htmlFor={`campoPedido${campo.idCampoPedido || indice}`}>{campo.tituloSnapshot || campo.titulo || `Campo ${indice + 1}`}</label>
+                      <div key={`${campo.idCampoOrdemCompra || indice}-${indice}`} className="campoFormulario campoFormularioIntegral">
+                        <label htmlFor={`campoOrdemCompra${campo.idCampoOrdemCompra || indice}`}>{campo.tituloSnapshot || campo.titulo || `Campo ${indice + 1}`}</label>
                         <textarea
-                          id={`campoPedido${campo.idCampoPedido || indice}`}
+                          id={`campoOrdemCompra${campo.idCampoOrdemCompra || indice}`}
                           className="entradaFormulario entradaFormularioTextoCurto"
                           rows={2}
                           value={campo.valor || ''}
@@ -936,7 +935,7 @@ export function ModalOrdemCompra({
           ) : null}
         </div>
 
-        <MensagemErroPopup mensagem={mensagemErro} titulo="Nao foi possivel salvar o pedido." />
+        <MensagemErroPopup mensagem={mensagemErro} titulo="Nao foi possivel salvar o ordemCompra." />
       </form>
 
       {confirmandoSaida ? (
@@ -945,11 +944,11 @@ export function ModalOrdemCompra({
               className="modalConfirmacaoAgenda"
               role="alertdialog"
               aria-modal="true"
-              aria-labelledby="tituloConfirmacaoSaidaPedido"
+              aria-labelledby="tituloConfirmacaoSaidaOrdemCompra"
               onMouseDown={(evento) => evento.stopPropagation()}
             >
               <div className="cabecalhoConfirmacaoModal">
-                <h4 id="tituloConfirmacaoSaidaPedido">Cancelar cadastro</h4>
+                <h4 id="tituloConfirmacaoSaidaOrdemCompra">Cancelar cadastro</h4>
               </div>
               <div className="corpoConfirmacaoModal">
                 <p>Se fechar agora, todas as informacoes preenchidas serao perdidas.</p>
@@ -977,46 +976,46 @@ export function ModalOrdemCompra({
           onAbrirBuscaProduto={abrirModalBuscaProduto}
           onFecharBuscaProduto={fecharModalBuscaProduto}
           onSelecionarProduto={selecionarProdutoBusca}
-          obterIniciais={obterIniciaisItemPedido}
+          obterIniciais={obterIniciaisItemOrdemCompra}
       />
 
-      <ModalCliente
-          aberto={modalClienteAberto}
-          cliente={null}
+      <ModalFornecedor
+          aberto={modalFornecedorAberto}
+          fornecedor={null}
           empresa={empresa}
-          codigoSugerido={proximoCodigoCliente}
+          codigoSugerido={proximoCodigoFornecedor}
           contatos={[]}
-          vendedores={vendedores}
+          compradores={compradores}
           ramosAtividade={ramosAtividade}
-          conceitosCliente={conceitosCliente}
+          conceitosFornecedor={conceitosFornecedor}
           modo="novo"
           classNameCamada="camadaModal camadaModalSecundaria"
-          idVendedorBloqueado={idVendedorBloqueado}
-          aoFechar={fecharModalNovoCliente}
-          aoSalvar={salvarNovoCliente}
+          idCompradorBloqueado={idCompradorBloqueado}
+          aoFechar={fecharModalNovoFornecedor}
+          aoSalvar={salvarNovoFornecedor}
       />
 
-      <ModalBuscaClientes
-          aberto={modalBuscaClienteAberto}
+      <ModalBuscaFornecedores
+          aberto={modalBuscaFornecedorAberto}
           empresa={empresa}
-          clientes={clientesAtivos}
-          rotuloAcaoPrimaria={aoIncluirCliente ? 'Incluir fornecedor' : ''}
-          tituloAcaoPrimaria={aoIncluirCliente ? 'Incluir fornecedor' : ''}
+          fornecedores={fornecedoresAtivos}
+          rotuloAcaoPrimaria={aoIncluirFornecedor ? 'Incluir fornecedor' : ''}
+          tituloAcaoPrimaria={aoIncluirFornecedor ? 'Incluir fornecedor' : ''}
           iconeAcaoPrimaria="adicionar"
-          aoAcionarPrimaria={aoIncluirCliente
+          aoAcionarPrimaria={aoIncluirFornecedor
             ? () => {
-              fecharModalBuscaCliente();
-              abrirModalNovoCliente();
+              fecharModalBuscaFornecedor();
+              abrirModalNovoFornecedor();
             }
             : null}
-          aoSelecionar={selecionarCliente}
-          aoFechar={fecharModalBuscaCliente}
+          aoSelecionar={selecionarFornecedor}
+          aoFechar={fecharModalBuscaFornecedor}
       />
 
       <ModalBuscaContatos
           aberto={modalBuscaContatoAberto}
-          idCliente={formulario.idCliente}
-          contatos={contatosDoCliente}
+          idFornecedor={formulario.idFornecedor}
+          contatos={contatosDoFornecedor}
           aoCriarContato={registrarContatoCriado}
           aoSelecionar={selecionarContato}
           aoFechar={fecharModalBuscaContato}
@@ -1049,8 +1048,8 @@ function CampoFormulario({ label, name, type = 'text', ...props }) {
   );
 }
 
-function montarApresentacaoProdutoPedido(item, empresa) {
-  const destaque = normalizarDestaqueItemOrcamentoPdf(empresa?.destaqueItemOrcamentoPdf);
+function montarApresentacaoProdutoOrdemCompra(item, empresa) {
+  const destaque = normalizarDestaqueItemCotacaoPdf(empresa?.destaqueItemCotacaoPdf);
   const referencia = String(item?.referenciaProdutoSnapshot || '').trim();
   const descricao = String(item?.descricaoProdutoSnapshot || '').trim() || 'Produto nao informado';
 
@@ -1067,7 +1066,7 @@ function montarApresentacaoProdutoPedido(item, empresa) {
   };
 }
 
-function normalizarDestaqueItemOrcamentoPdf(valor) {
+function normalizarDestaqueItemCotacaoPdf(valor) {
   return String(valor || '').trim() === 'referencia' ? 'referencia' : 'descricao';
 }
 
@@ -1102,57 +1101,57 @@ function CampoSelect({ label, name, options, acaoExtra = null, referenciaCampo =
   );
 }
 
-function criarFormularioInicialPedido(
-  pedido,
+function criarFormularioInicialOrdemCompra(
+  ordemCompra,
   usuarioLogado,
-  camposPedido,
+  camposOrdemCompra,
   empresa,
   usuarios = [],
-  vendedores = [],
-  { novo = !pedido, idVendedorBloqueado = null } = {}
+  compradores = [],
+  { novo = !ordemCompra, idCompradorBloqueado = null } = {}
 ) {
-  const pedidoOriginadoDeOrcamento = Boolean(pedido?.idOrcamento);
-  const idTipoPedidoInicial = pedido?.idTipoPedido
-    ? String(pedido.idTipoPedido)
-    : pedidoOriginadoDeOrcamento
-      ? String(ID_TIPO_PEDIDO_VENDA)
+  const ordemCompraOriginadoDeCotacao = Boolean(ordemCompra?.idCotacao);
+  const idTipoOrdemCompraInicial = ordemCompra?.idTipoOrdemCompra
+    ? String(ordemCompra.idTipoOrdemCompra)
+    : ordemCompraOriginadoDeCotacao
+      ? String(ID_TIPO_ORDEM_COMPRA_VENDA)
       : '';
-  const nomeTipoPedidoInicial = pedido?.nomeTipoPedidoSnapshot || (pedidoOriginadoDeOrcamento ? 'Ordem de compra' : '');
-  const vendedorPadraoUsuario = obterVendedorPadrao(
+  const nomeTipoOrdemCompraInicial = ordemCompra?.nomeTipoOrdemCompraSnapshot || (ordemCompraOriginadoDeCotacao ? 'Ordem de compra' : '');
+  const compradorPadraoUsuario = obterCompradorPadrao(
     usuarioLogado?.idUsuario,
     usuarios,
-    vendedores,
-    idVendedorBloqueado
+    compradores,
+    idCompradorBloqueado
   );
 
-  if (!pedido || novo) {
+  if (!ordemCompra || novo) {
     return {
       ...estadoInicialFormulario,
-      idOrcamento: pedido?.idOrcamento ? String(pedido.idOrcamento) : '',
-      idFornecedor: pedido?.idCliente ? String(pedido.idCliente) : '',
-      idContato: pedido?.idContato ? String(pedido.idContato) : '',
-      idUsuario: String(pedido?.idUsuario || usuarioLogado?.idUsuario || ''),
-      idVendedor: pedido?.idVendedor ? String(pedido.idVendedor) : vendedorPadraoUsuario.idVendedor,
-      idPrazoPagamento: pedido?.idPrazoPagamento ? String(pedido.idPrazoPagamento) : '',
-      idTipoPedido: idTipoPedidoInicial,
-      dataInclusao: pedido?.dataInclusao || obterDataAtualFormatoInput(),
-      dataEntrega: pedido?.dataEntrega || somarDiasNaData(
-        pedido?.dataInclusao || obterDataAtualFormatoInput(),
-        Number(empresa?.diasEntregaPedido ?? 7)
+      idCotacao: ordemCompra?.idCotacao ? String(ordemCompra.idCotacao) : '',
+      idFornecedor: ordemCompra?.idFornecedor ? String(ordemCompra.idFornecedor) : '',
+      idContato: ordemCompra?.idContato ? String(ordemCompra.idContato) : '',
+      idUsuario: String(ordemCompra?.idUsuario || usuarioLogado?.idUsuario || ''),
+      idComprador: ordemCompra?.idComprador ? String(ordemCompra.idComprador) : compradorPadraoUsuario.idComprador,
+      idPrazoPagamento: ordemCompra?.idPrazoPagamento ? String(ordemCompra.idPrazoPagamento) : '',
+      idTipoOrdemCompra: idTipoOrdemCompraInicial,
+      dataInclusao: ordemCompra?.dataInclusao || obterDataAtualFormatoInput(),
+      dataEntrega: ordemCompra?.dataEntrega || somarDiasNaData(
+        ordemCompra?.dataInclusao || obterDataAtualFormatoInput(),
+        Number(empresa?.diasEntregaOrdemCompra ?? 7)
       ),
-      nomeClienteSnapshot: pedido?.nomeClienteSnapshot || '',
-      nomeContatoSnapshot: pedido?.nomeContatoSnapshot || '',
-      nomeUsuarioSnapshot: pedido?.nomeUsuarioSnapshot || usuarioLogado?.nome || '',
-      nomeVendedorSnapshot: pedido?.nomeVendedorSnapshot || vendedorPadraoUsuario.nomeVendedor,
-      nomeMetodoPagamentoSnapshot: pedido?.nomeMetodoPagamentoSnapshot || '',
-      nomePrazoPagamentoSnapshot: pedido?.nomePrazoPagamentoSnapshot || '',
-      nomeTipoPedidoSnapshot: nomeTipoPedidoInicial,
-      idEtapaPedido: pedido?.idEtapaPedido ? String(pedido.idEtapaPedido) : '',
-      nomeEtapaPedidoSnapshot: pedido?.nomeEtapaPedidoSnapshot || '',
-      observacao: pedido?.observacao || '',
-      codigoOrcamentoOrigem: pedido?.codigoOrcamentoOrigem || '',
-      itens: Array.isArray(pedido?.itens) ? pedido.itens.map((item) => ({
-        idItemPedido: item.idItemPedido,
+      nomeFornecedorSnapshot: ordemCompra?.nomeFornecedorSnapshot || '',
+      nomeContatoSnapshot: ordemCompra?.nomeContatoSnapshot || '',
+      nomeUsuarioSnapshot: ordemCompra?.nomeUsuarioSnapshot || usuarioLogado?.nome || '',
+      nomeCompradorSnapshot: ordemCompra?.nomeCompradorSnapshot || compradorPadraoUsuario.nomeComprador,
+      nomeMetodoPagamentoSnapshot: ordemCompra?.nomeMetodoPagamentoSnapshot || '',
+      nomePrazoPagamentoSnapshot: ordemCompra?.nomePrazoPagamentoSnapshot || '',
+      nomeTipoOrdemCompraSnapshot: nomeTipoOrdemCompraInicial,
+      idEtapaOrdemCompra: ordemCompra?.idEtapaOrdemCompra ? String(ordemCompra.idEtapaOrdemCompra) : '',
+      nomeEtapaOrdemCompraSnapshot: ordemCompra?.nomeEtapaOrdemCompraSnapshot || '',
+      observacao: ordemCompra?.observacao || '',
+      codigoCotacaoOrigem: ordemCompra?.codigoCotacaoOrigem || '',
+      itens: Array.isArray(ordemCompra?.itens) ? ordemCompra.itens.map((item) => ({
+        idItemOrdemCompra: item.idItemOrdemCompra,
         idProduto: item.idProduto,
         descricaoProdutoSnapshot: item.descricaoProdutoSnapshot || '',
         referenciaProdutoSnapshot: item.referenciaProdutoSnapshot || '',
@@ -1163,17 +1162,17 @@ function criarFormularioInicialPedido(
         imagem: item.imagem || '',
         observacao: item.observacao || ''
       })) : [],
-      camposExtras: Array.isArray(pedido?.camposExtras) && pedido.camposExtras.length > 0
-        ? pedido.camposExtras.map((campo) => ({
-          idCampoPedido: campo.idCampoPedido || null,
+      camposExtras: Array.isArray(ordemCompra?.camposExtras) && ordemCompra.camposExtras.length > 0
+        ? ordemCompra.camposExtras.map((campo) => ({
+          idCampoOrdemCompra: campo.idCampoOrdemCompra || null,
           tituloSnapshot: campo.tituloSnapshot || campo.titulo || '',
           valor: campo.valor || ''
         }))
-        : Array.isArray(camposPedido)
-          ? camposPedido
+        : Array.isArray(camposOrdemCompra)
+          ? camposOrdemCompra
             .filter((campo) => campo.status !== 0)
             .map((campo) => ({
-              idCampoPedido: campo.idCampoPedido,
+              idCampoOrdemCompra: campo.idCampoOrdemCompra,
               tituloSnapshot: campo.titulo,
               valor: campo.descricaoPadrao || ''
             }))
@@ -1183,28 +1182,28 @@ function criarFormularioInicialPedido(
 
   return {
     ...estadoInicialFormulario,
-    idOrcamento: pedido.idOrcamento ? String(pedido.idOrcamento) : '',
-    idFornecedor: pedido.idCliente ? String(pedido.idCliente) : '',
-    idContato: pedido.idContato ? String(pedido.idContato) : '',
-    idUsuario: pedido.idUsuario ? String(pedido.idUsuario) : '',
-    idVendedor: pedido.idVendedor ? String(pedido.idVendedor) : '',
-    idPrazoPagamento: pedido.idPrazoPagamento ? String(pedido.idPrazoPagamento) : '',
-    idTipoPedido: idTipoPedidoInicial,
-    dataInclusao: pedido.dataInclusao || '',
-    dataEntrega: pedido.dataEntrega || pedido.dataValidade || '',
-    nomeClienteSnapshot: pedido.nomeClienteSnapshot || '',
-    nomeContatoSnapshot: pedido.nomeContatoSnapshot || '',
-    nomeUsuarioSnapshot: pedido.nomeUsuarioSnapshot || '',
-    nomeVendedorSnapshot: pedido.nomeVendedorSnapshot || '',
-    nomeMetodoPagamentoSnapshot: pedido.nomeMetodoPagamentoSnapshot || '',
-    nomePrazoPagamentoSnapshot: pedido.nomePrazoPagamentoSnapshot || '',
-    nomeTipoPedidoSnapshot: nomeTipoPedidoInicial,
-    idEtapaPedido: pedido.idEtapaPedido ? String(pedido.idEtapaPedido) : '',
-    nomeEtapaPedidoSnapshot: pedido.nomeEtapaPedidoSnapshot || '',
-    observacao: pedido.observacao || '',
-    codigoOrcamentoOrigem: pedido.codigoOrcamentoOrigem || '',
-    itens: Array.isArray(pedido.itens) ? pedido.itens.map((item) => ({
-      idItemPedido: item.idItemPedido,
+    idCotacao: ordemCompra.idCotacao ? String(ordemCompra.idCotacao) : '',
+    idFornecedor: ordemCompra.idFornecedor ? String(ordemCompra.idFornecedor) : '',
+    idContato: ordemCompra.idContato ? String(ordemCompra.idContato) : '',
+    idUsuario: ordemCompra.idUsuario ? String(ordemCompra.idUsuario) : '',
+    idComprador: ordemCompra.idComprador ? String(ordemCompra.idComprador) : '',
+    idPrazoPagamento: ordemCompra.idPrazoPagamento ? String(ordemCompra.idPrazoPagamento) : '',
+    idTipoOrdemCompra: idTipoOrdemCompraInicial,
+    dataInclusao: ordemCompra.dataInclusao || '',
+    dataEntrega: ordemCompra.dataEntrega || ordemCompra.dataValidade || '',
+    nomeFornecedorSnapshot: ordemCompra.nomeFornecedorSnapshot || '',
+    nomeContatoSnapshot: ordemCompra.nomeContatoSnapshot || '',
+    nomeUsuarioSnapshot: ordemCompra.nomeUsuarioSnapshot || '',
+    nomeCompradorSnapshot: ordemCompra.nomeCompradorSnapshot || '',
+    nomeMetodoPagamentoSnapshot: ordemCompra.nomeMetodoPagamentoSnapshot || '',
+    nomePrazoPagamentoSnapshot: ordemCompra.nomePrazoPagamentoSnapshot || '',
+    nomeTipoOrdemCompraSnapshot: nomeTipoOrdemCompraInicial,
+    idEtapaOrdemCompra: ordemCompra.idEtapaOrdemCompra ? String(ordemCompra.idEtapaOrdemCompra) : '',
+    nomeEtapaOrdemCompraSnapshot: ordemCompra.nomeEtapaOrdemCompraSnapshot || '',
+    observacao: ordemCompra.observacao || '',
+    codigoCotacaoOrigem: ordemCompra.codigoCotacaoOrigem || '',
+    itens: Array.isArray(ordemCompra.itens) ? ordemCompra.itens.map((item) => ({
+      idItemOrdemCompra: item.idItemOrdemCompra,
       idProduto: item.idProduto,
       descricaoProdutoSnapshot: item.descricaoProdutoSnapshot || '',
       referenciaProdutoSnapshot: item.referenciaProdutoSnapshot || '',
@@ -1215,36 +1214,36 @@ function criarFormularioInicialPedido(
       imagem: item.imagem || '',
       observacao: item.observacao || ''
     })) : [],
-    camposExtras: Array.isArray(pedido.camposExtras) ? pedido.camposExtras.map((campo) => ({
-      idCampoPedido: campo.idCampoPedido || null,
+    camposExtras: Array.isArray(ordemCompra.camposExtras) ? ordemCompra.camposExtras.map((campo) => ({
+      idCampoOrdemCompra: campo.idCampoOrdemCompra || null,
       tituloSnapshot: campo.tituloSnapshot || '',
       valor: campo.valor || ''
     })) : []
   };
 }
 
-function obterVendedorPadraoPorUsuarioId(idUsuario, usuarios = [], vendedores = []) {
+function obterCompradorPadraoPorUsuarioId(idUsuario, usuarios = [], compradores = []) {
   const usuario = usuarios.find((item) => String(item.idUsuario) === String(idUsuario || ''));
-  const idVendedor = usuario?.idVendedor ? String(usuario.idVendedor) : '';
-  const vendedor = vendedores.find((item) => String(item.idVendedor) === idVendedor);
+  const idComprador = usuario?.idComprador ? String(usuario.idComprador) : '';
+  const comprador = compradores.find((item) => String(item.idComprador) === idComprador);
 
   return {
-    idVendedor,
-    nomeVendedor: vendedor?.nome || '',
+    idComprador,
+    nomeComprador: comprador?.nome || '',
   };
 }
 
-function obterVendedorPadrao(idUsuario, usuarios = [], vendedores = [], idVendedorBloqueado = null) {
-  if (idVendedorBloqueado) {
-    const vendedor = vendedores.find((item) => String(item.idVendedor) === String(idVendedorBloqueado));
+function obterCompradorPadrao(idUsuario, usuarios = [], compradores = [], idCompradorBloqueado = null) {
+  if (idCompradorBloqueado) {
+    const comprador = compradores.find((item) => String(item.idComprador) === String(idCompradorBloqueado));
 
     return {
-      idVendedor: String(idVendedorBloqueado),
-      nomeVendedor: vendedor?.nome || '',
+      idComprador: String(idCompradorBloqueado),
+      nomeComprador: comprador?.nome || '',
       };
   }
 
-  return obterVendedorPadraoPorUsuarioId(idUsuario, usuarios, vendedores);
+  return obterCompradorPadraoPorUsuarioId(idUsuario, usuarios, compradores);
 }
 
 function obterDataAtualFormatoInput() {
@@ -1256,8 +1255,8 @@ function obterDataAtualFormatoInput() {
   return `${ano}-${mes}-${dia}`;
 }
 
-function etapaPedidoEhEntregue(idEtapaPedido) {
-  return Number(idEtapaPedido) === ID_ETAPA_PEDIDO_ENTREGUE;
+function etapaOrdemCompraEhEntregue(idEtapaOrdemCompra) {
+  return Number(idEtapaOrdemCompra) === ID_ETAPA_ORDEM_COMPRA_ENTREGUE;
 }
 
 function somarDiasNaData(dataBase, dias) {
@@ -1304,41 +1303,41 @@ function agendarFocoCampo(referenciaCampo) {
   }, 0);
 }
 
-function obterIniciaisItemPedido(item) {
+function obterIniciaisItemOrdemCompra(item) {
   const descricao = item?.descricaoProdutoSnapshot || 'Item';
   const partes = String(descricao).trim().split(/\s+/).filter(Boolean);
   const iniciais = partes.slice(0, 2).map((parte) => parte[0]).join('');
   return (iniciais || 'IT').toUpperCase();
 }
 
-function combinarContatosDoCliente(contatosBase, contatosLocais, idCliente) {
+function combinarContatosDoFornecedor(contatosBase, contatosLocais, idFornecedor) {
   return combinarContatosUnicos(
     (Array.isArray(contatosBase) ? contatosBase : []).filter(
-      (contato) => String(contato.idCliente) === String(idCliente)
+      (contato) => String(contato.idFornecedor) === String(idFornecedor)
     ),
     (Array.isArray(contatosLocais) ? contatosLocais : []).filter(
-      (contato) => String(contato.idCliente) === String(idCliente)
+      (contato) => String(contato.idFornecedor) === String(idFornecedor)
     )
   );
 }
 
-function obterProximoCodigoCliente(clientes) {
-  if (!Array.isArray(clientes) || clientes.length === 0) {
+function obterProximoCodigoFornecedor(fornecedores) {
+  if (!Array.isArray(fornecedores) || fornecedores.length === 0) {
     return 1;
   }
 
-  const maiorCodigo = clientes.reduce((maior, cliente) => {
-    const codigoAtual = Number(cliente?.idCliente);
+  const maiorCodigo = fornecedores.reduce((maior, fornecedor) => {
+    const codigoAtual = Number(fornecedor?.idFornecedor);
     return Number.isFinite(codigoAtual) && codigoAtual > maior ? codigoAtual : maior;
   }, 0);
 
   return maiorCodigo + 1;
 }
 
-function montarRotuloCliente(cliente, empresa) {
-  const codigo = formatarCodigoCliente(cliente, empresa);
-  const nome = cliente?.nomeFantasia || cliente?.razaoSocial || 'Fornecedor sem nome';
-  const localizacao = [cliente?.cidade, cliente?.estado].filter(Boolean).join('/');
+function montarRotuloFornecedor(fornecedor, empresa) {
+  const codigo = formatarCodigoFornecedor(fornecedor, empresa);
+  const nome = fornecedor?.nomeFantasia || fornecedor?.razaoSocial || 'Fornecedor sem nome';
+  const localizacao = [fornecedor?.cidade, fornecedor?.estado].filter(Boolean).join('/');
 
   return localizacao ? `${codigo} - ${nome} - ${localizacao}` : `${codigo} - ${nome}`;
 }

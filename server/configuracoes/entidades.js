@@ -354,7 +354,7 @@ const entidades = [
       'idGrupo',
       'idMarca',
       'idUnidade',
-      'preco'
+      'custo'
     ],
     camposPermitidos: [
       'idProduto',
@@ -363,9 +363,27 @@ const entidades = [
       'idGrupo',
       'idMarca',
       'idUnidade',
-      'preco',
+      'custo',
       'imagem',
       'status'
+    ]
+  },
+  {
+    nome: 'produtoFornecedor',
+    rota: '/api/produtosFornecedores',
+    chavePrimaria: 'idProdutoFornecedor',
+    camposObrigatorios: [
+      'idProduto',
+      'idFornecedor',
+      'codigoFornecedor',
+      'unidadeFornecedor'
+    ],
+    camposPermitidos: [
+      'idProdutoFornecedor',
+      'idProduto',
+      'idFornecedor',
+      'codigoFornecedor',
+      'unidadeFornecedor'
     ]
   },
   {

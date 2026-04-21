@@ -1,10 +1,10 @@
 import { ModalHistoricoGrade } from '../comuns/modalHistoricoGrade';
 import { TabelaHistoricoAtendimentos } from '../comuns/tabelaHistoricoAtendimentos';
-import '../../recursos/estilos/modalHistoricoAtendimentosCliente.css';
+import '../../recursos/estilos/modalHistoricoAtendimentosFornecedor.css';
 
 export function ModalHistoricoAtendimentosFornecedor({
   aberto,
-  cliente,
+  fornecedor,
   carregando,
   mensagemErro,
   atendimentos,
@@ -19,7 +19,7 @@ export function ModalHistoricoAtendimentosFornecedor({
     <ModalHistoricoGrade
       aberto={aberto}
       titulo="Atendimentos do fornecedor"
-      subtitulo={cliente?.nomeFantasia || cliente?.razaoSocial || 'Fornecedor nao salvo'}
+      subtitulo={fornecedor?.nomeFantasia || fornecedor?.razaoSocial || 'Fornecedor nao salvo'}
       className="ModalHistoricoAtendimentosFornecedor"
       filtrosAtivos={filtrosAtivos}
       tituloFiltro="Filtrar atendimentos"
@@ -30,13 +30,13 @@ export function ModalHistoricoAtendimentosFornecedor({
       onAbrirFiltros={onAbrirFiltros}
       onFechar={onFechar}
     >
-      <section className="painelContatosModalCliente ModalHistoricoAtendimentosFornecedorPainel">
+      <section className="painelContatosModalFornecedor ModalHistoricoAtendimentosFornecedorPainel">
         <TabelaHistoricoAtendimentos
           carregando={carregando}
           mensagemErro={mensagemErro}
           atendimentos={atendimentos}
-          contextoSalvo={Boolean(cliente?.idCliente)}
-          mensagemSemContexto="Os atendimentos ficarao disponiveis apos salvar o cliente."
+          contextoSalvo={Boolean(fornecedor?.idFornecedor)}
+          mensagemSemContexto="Os atendimentos ficarao disponiveis apos salvar o fornecedor."
           mensagemVazia="Nenhum atendimento encontrado com os filtros informados."
           exibirAcoes
           onConsultarAtendimento={onConsultarAtendimento}

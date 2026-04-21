@@ -3,11 +3,11 @@ const fs = require('node:fs');
 const sqlite3 = require('sqlite3').verbose();
 
 const ID_ETAPA_COTACAO_FECHAMENTO = 1;
-const ID_ETAPA_COTACAO_FECHADO_SEM_PEDIDO = 2;
-const ID_ETAPA_COTACAO_PEDIDO_EXCLUIDO = 3;
+const ID_ETAPA_COTACAO_FECHADA_SEM_ORDEM_COMPRA = 2;
+const ID_ETAPA_COTACAO_ORDEM_COMPRA_EXCLUIDA = 3;
 const ID_ETAPA_COTACAO_RECUSADO = 4;
-const ID_ETAPA_PEDIDO_ENTREGUE = 5;
-const ID_TIPO_PEDIDO_VENDA = 1;
+const ID_ETAPA_ORDEM_COMPRA_ENTREGUE = 5;
+const ID_TIPO_ORDEM_COMPRA_PADRAO = 1;
 const ID_CONCEITO_FORNECEDOR_SEM_CONCEITO = 1;
 const ID_STATUS_VISITA_AGENDADO = 1;
 const ID_STATUS_VISITA_CONFIRMADO = 2;
@@ -45,6 +45,17 @@ banco.serialize(() => {
   migrarNomeColuna('empresa', 'colunasGridClientes', 'colunasGridFornecedores');
   migrarNomeColuna('contato', 'idCliente', 'idFornecedor');
   migrarNomeColuna('atendimento', 'idCliente', 'idFornecedor');
+  migrarNomeColuna('produto', 'preco', 'custo');
+  executarMigracaoNome(`
+    UPDATE empresa
+    SET colunasGridProdutos = REPLACE(colunasGridProdutos, '"preco"', '"custo"')
+    WHERE colunasGridProdutos LIKE '%"preco"%'
+  `);
+  executarMigracaoNome(`
+    UPDATE empresa
+    SET colunasGridProdutos = REPLACE(colunasGridProdutos, '"rotulo":"Preco"', '"rotulo":"Custo"')
+    WHERE colunasGridProdutos LIKE '%"rotulo":"Preco"%'
+  `);
   migrarNomeTabela('etapaOrcamento', 'etapaCotacao');
   migrarNomeTabela('campoOrcamentoConfiguravel', 'campoCotacaoConfiguravel');
   migrarNomeTabela('orcamento', 'cotacao');
@@ -1401,7 +1412,7 @@ banco.serialize(() => {
   banco.run(`
     UPDATE cotacao
     SET dataFechamento = date('now')
-    WHERE idEtapaCotacao IN (${ID_ETAPA_COTACAO_FECHAMENTO}, ${ID_ETAPA_COTACAO_FECHADO_SEM_PEDIDO}, ${ID_ETAPA_COTACAO_PEDIDO_EXCLUIDO})
+    WHERE idEtapaCotacao IN (${ID_ETAPA_COTACAO_FECHAMENTO}, ${ID_ETAPA_COTACAO_FECHADA_SEM_ORDEM_COMPRA}, ${ID_ETAPA_COTACAO_ORDEM_COMPRA_EXCLUIDA})
       AND (dataFechamento IS NULL OR TRIM(dataFechamento) = '')
   `, (erro) => {
     if (erro && !String(erro.message || '').includes('no such column')) {
@@ -1861,13 +1872,27 @@ banco.serialize(() => {
       idGrupo INTEGER NOT NULL,
       idMarca INTEGER NOT NULL,
       idUnidade INTEGER NOT NULL,
-      preco DECIMAL(10,2) NOT NULL DEFAULT 0,
+      custo DECIMAL(10,2) NOT NULL DEFAULT 0,
       imagem VARCHAR(255),
       status BOOLEAN NOT NULL DEFAULT 1,
       dataCriacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (idGrupo) REFERENCES grupoProduto (idGrupo),
       FOREIGN KEY (idMarca) REFERENCES marca (idMarca),
       FOREIGN KEY (idUnidade) REFERENCES unidadeMedida (idUnidade)
+    )
+  `);
+
+  banco.run(`
+    CREATE TABLE IF NOT EXISTS produtoFornecedor (
+      idProdutoFornecedor INTEGER PRIMARY KEY AUTOINCREMENT,
+      idProduto INTEGER NOT NULL,
+      idFornecedor INTEGER NOT NULL,
+      codigoFornecedor VARCHAR(120) NOT NULL,
+      unidadeFornecedor VARCHAR(60) NOT NULL,
+      dataCriacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (idProduto) REFERENCES produto (idProduto) ON DELETE CASCADE,
+      FOREIGN KEY (idFornecedor) REFERENCES fornecedor (idFornecedor),
+      UNIQUE (idProduto, idFornecedor)
     )
   `);
 
@@ -2038,8 +2063,8 @@ async function garantirUsuarioAdministradorPadrao() {
 async function garantirEtapasCotacaoObrigatorias() {
   const etapasObrigatorias = [
     { idEtapaCotacao: ID_ETAPA_COTACAO_FECHAMENTO, descricao: 'Fechado', cor: '#A7E1B8', consideraFunilCotacoes: 1, ordem: 1, status: 1 },
-    { idEtapaCotacao: ID_ETAPA_COTACAO_FECHADO_SEM_PEDIDO, descricao: 'Fechado sem ordem de compra', cor: '#FDE68A', consideraFunilCotacoes: 1, ordem: 2, status: 1 },
-    { idEtapaCotacao: ID_ETAPA_COTACAO_PEDIDO_EXCLUIDO, descricao: 'Ordem de Compra Excluida', cor: '#E5E7EB', consideraFunilCotacoes: 0, ordem: 3, status: 1 },
+    { idEtapaCotacao: ID_ETAPA_COTACAO_FECHADA_SEM_ORDEM_COMPRA, descricao: 'Fechado sem ordem de compra', cor: '#FDE68A', consideraFunilCotacoes: 1, ordem: 2, status: 1 },
+    { idEtapaCotacao: ID_ETAPA_COTACAO_ORDEM_COMPRA_EXCLUIDA, descricao: 'Ordem de Compra Excluida', cor: '#E5E7EB', consideraFunilCotacoes: 0, ordem: 3, status: 1 },
     { idEtapaCotacao: ID_ETAPA_COTACAO_RECUSADO, descricao: 'Recusado', cor: '#E5E7EB', consideraFunilCotacoes: 0, ordem: 4, status: 1 }
   ];
 
@@ -2047,7 +2072,7 @@ async function garantirEtapasCotacaoObrigatorias() {
     `UPDATE etapaCotacao
     SET descricao = 'Ordem de Compra Excluida', cor = '#E5E7EB', consideraFunilCotacoes = 0, ordem = 3, status = 1
     WHERE idEtapaCotacao = ?`,
-    [ID_ETAPA_COTACAO_PEDIDO_EXCLUIDO]
+    [ID_ETAPA_COTACAO_ORDEM_COMPRA_EXCLUIDA]
   );
 
   const etapaRecusadoPorDescricao = await consultarUm(
@@ -2098,7 +2123,7 @@ async function garantirEtapasCotacaoObrigatorias() {
     FROM etapaCotacao
     WHERE idEtapaCotacao NOT IN (?, ?)
       AND LOWER(TRIM(descricao)) IN ('recusado', 'ordem de compra excluida')`,
-    [ID_ETAPA_COTACAO_PEDIDO_EXCLUIDO, ID_ETAPA_COTACAO_RECUSADO]
+    [ID_ETAPA_COTACAO_ORDEM_COMPRA_EXCLUIDA, ID_ETAPA_COTACAO_RECUSADO]
   );
 
   const idsEtapasLegadas = etapasCancelamentoLegadas
@@ -2125,13 +2150,13 @@ async function garantirEtapasCotacaoObrigatorias() {
 
   await executar(
     'UPDATE cotacao SET idEtapaCotacao = ? WHERE idOrdemCompraVinculado IS NULL AND idEtapaCotacao = ?',
-    [ID_ETAPA_COTACAO_FECHADO_SEM_PEDIDO, ID_ETAPA_COTACAO_FECHAMENTO]
+    [ID_ETAPA_COTACAO_FECHADA_SEM_ORDEM_COMPRA, ID_ETAPA_COTACAO_FECHAMENTO]
   );
 }
 
 async function garantirEtapasOrdemCompraObrigatorias() {
   const etapaObrigatoria = {
-    idEtapa: ID_ETAPA_PEDIDO_ENTREGUE,
+    idEtapa: ID_ETAPA_ORDEM_COMPRA_ENTREGUE,
     descricao: 'Entregue',
     cor: '#A7E1B8',
     ordem: 5,
@@ -2165,7 +2190,7 @@ async function garantirEtapasOrdemCompraObrigatorias() {
 
 async function garantirTiposOrdemCompraObrigatorios() {
   const tiposObrigatorios = [
-    { idTipoOrdemCompra: ID_TIPO_PEDIDO_VENDA, descricao: 'Ordem de compra', status: 1 }
+    { idTipoOrdemCompra: ID_TIPO_ORDEM_COMPRA_PADRAO, descricao: 'Ordem de compra', status: 1 }
   ];
 
   for (const tipoOrdemCompra of tiposObrigatorios) {
@@ -2820,10 +2845,10 @@ function erroMigracaoNomeEsperado(erro) {
 module.exports = {
   banco,
   caminhoBanco,
-  ID_ETAPA_COTACAO_PEDIDO_EXCLUIDO,
+  ID_ETAPA_COTACAO_ORDEM_COMPRA_EXCLUIDA,
   ID_ETAPA_COTACAO_RECUSADO,
-  ID_ETAPA_PEDIDO_ENTREGUE,
-  ID_TIPO_PEDIDO_VENDA,
+  ID_ETAPA_ORDEM_COMPRA_ENTREGUE,
+  ID_TIPO_ORDEM_COMPRA_PADRAO,
   consultarUm,
   consultarTodos,
   executar

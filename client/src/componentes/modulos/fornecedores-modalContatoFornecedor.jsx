@@ -42,7 +42,7 @@ export function ModalContatoFornecedor({
         </div>
 
         <div className="corpoModalContato">
-          <div className="gradeCamposModalCliente">
+          <div className="gradeCamposModalFornecedor">
             <CampoFormulario label="Nome" name="nome" value={formulario.nome} onChange={aoAlterarCampo} disabled={somenteLeitura} />
             <CampoFormulario label="Cargo" name="cargo" value={formulario.cargo} onChange={aoAlterarCampo} disabled={somenteLeitura} />
             <CampoFormulario label="E-mail" name="email" type="email" value={formulario.email} onChange={aoAlterarCampo} disabled={somenteLeitura} />

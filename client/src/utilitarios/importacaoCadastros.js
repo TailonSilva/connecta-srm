@@ -1,14 +1,14 @@
 let carregadorXlsx = null;
 
 const configuracoesImportacao = {
-  clientes: {
-    tipo: 'clientes',
+  fornecedores: {
+    tipo: 'fornecedores',
     titulo: 'Importacao de fornecedores',
     nomeArquivo: 'modelo-importacao-fornecedores.xlsx',
     nomePlanilhaDados: 'Fornecedores',
     nomePlanilhaInstrucoes: 'Instrucoes',
     colunas: [
-      { chave: 'codigo', cabecalho: 'Codigo', obrigatorio: false, tipo: 'Numero inteiro', maximoCaracteres: 10, observacao: 'Opcional. Se vazio, o CRM usa o proximo codigo livre.', exemplo: '105' },
+      { chave: 'codigo', cabecalho: 'Codigo', obrigatorio: false, tipo: 'Numero inteiro', maximoCaracteres: 10, observacao: 'Opcional. Se vazio, o SRM usa o proximo codigo livre.', exemplo: '105' },
       { chave: 'codigoAlternativo', cabecalho: 'Codigo alternativo', obrigatorio: false, tipo: 'Numero inteiro', maximoCaracteres: 10, observacao: 'Opcional. Usado quando a empresa escolher o codigo alternativo como principal.', exemplo: '9001' },
       { chave: 'razaoSocial', cabecalho: 'Razao social', obrigatorio: true, tipo: 'Texto', maximoCaracteres: 255, observacao: 'Nome juridico ou nome completo.', exemplo: 'Empresa Exemplo LTDA' },
       { chave: 'nomeFantasia', cabecalho: 'Nome fantasia', obrigatorio: true, tipo: 'Texto', maximoCaracteres: 255, observacao: 'Nome comercial exibido na operacao.', exemplo: 'Empresa Exemplo' },
@@ -17,7 +17,7 @@ const configuracoesImportacao = {
       { chave: 'inscricaoEstadual', cabecalho: 'Inscricao estadual', obrigatorio: false, tipo: 'Texto', maximoCaracteres: 20, observacao: 'Opcional.', exemplo: '123456789' },
       { chave: 'email', cabecalho: 'Email', obrigatorio: false, tipo: 'Texto', maximoCaracteres: 150, observacao: 'Opcional.', exemplo: 'contato@empresaexemplo.com.br' },
       { chave: 'telefone', cabecalho: 'Telefone', obrigatorio: false, tipo: 'Texto numerico', maximoCaracteres: 20, observacao: 'Pode ser enviado com ou sem mascara.', exemplo: '(11) 99999-9999' },
-      { chave: 'vendedor', cabecalho: 'Comprador', obrigatorio: true, tipo: 'Texto', maximoCaracteres: 150, observacao: 'Use o nome exato de um comprador ativo. Para Usuario padrao, se vazio, usa o comprador vinculado ao usuario.', exemplo: 'Tailon Silva' },
+      { chave: 'comprador', cabecalho: 'Comprador', obrigatorio: true, tipo: 'Texto', maximoCaracteres: 150, observacao: 'Use o nome exato de um comprador ativo. Para Usuario padrao, se vazio, usa o comprador vinculado ao usuario.', exemplo: 'Tailon Silva' },
       { chave: 'ramoAtividade', cabecalho: 'Ramo de atividade', obrigatorio: true, tipo: 'Texto', maximoCaracteres: 150, observacao: 'Use a descricao exata de um ramo ativo.', exemplo: 'Comercio varejista' },
       { chave: 'grupoEmpresa', cabecalho: 'Grupo de empresa', obrigatorio: false, tipo: 'Texto', maximoCaracteres: 150, observacao: 'Opcional. Use a descricao exata de um grupo ativo.', exemplo: 'Grupo Exemplo' },
       { chave: 'logradouro', cabecalho: 'Logradouro', obrigatorio: false, tipo: 'Texto', maximoCaracteres: 255, observacao: 'Opcional.', exemplo: 'Rua das Flores' },
@@ -38,13 +38,13 @@ const configuracoesImportacao = {
     nomePlanilhaDados: 'Produtos',
     nomePlanilhaInstrucoes: 'Instrucoes',
     colunas: [
-      { chave: 'codigo', cabecalho: 'Codigo', obrigatorio: false, tipo: 'Numero inteiro', maximoCaracteres: 10, observacao: 'Opcional. Se vazio, o CRM usa o proximo codigo livre.', exemplo: '250' },
+      { chave: 'codigo', cabecalho: 'Codigo', obrigatorio: false, tipo: 'Numero inteiro', maximoCaracteres: 10, observacao: 'Opcional. Se vazio, o SRM usa o proximo codigo livre.', exemplo: '250' },
       { chave: 'referencia', cabecalho: 'Referencia', obrigatorio: true, tipo: 'Texto', maximoCaracteres: 100, observacao: 'Identificador comercial do produto.', exemplo: 'CAM-001' },
-      { chave: 'descricao', cabecalho: 'Descricao', obrigatorio: true, tipo: 'Texto', maximoCaracteres: 255, observacao: 'Descricao principal exibida no CRM.', exemplo: 'Camiseta algodao premium' },
+      { chave: 'descricao', cabecalho: 'Descricao', obrigatorio: true, tipo: 'Texto', maximoCaracteres: 255, observacao: 'Descricao principal exibida no SRM.', exemplo: 'Camiseta algodao premium' },
       { chave: 'grupoProduto', cabecalho: 'Grupo de produto', obrigatorio: true, tipo: 'Texto', maximoCaracteres: 150, observacao: 'Use a descricao exata de um grupo ativo.', exemplo: 'Camisetas' },
       { chave: 'marca', cabecalho: 'Marca', obrigatorio: true, tipo: 'Texto', maximoCaracteres: 150, observacao: 'Use a descricao exata de uma marca ativa.', exemplo: 'Marca Exemplo' },
       { chave: 'unidadeMedida', cabecalho: 'Unidade de medida', obrigatorio: true, tipo: 'Texto', maximoCaracteres: 50, observacao: 'Use a descricao exata de uma unidade ativa.', exemplo: 'UN' },
-      { chave: 'preco', cabecalho: 'Preco', obrigatorio: true, tipo: 'Numero decimal', maximoCaracteres: 10, observacao: 'Pode usar virgula ou ponto como separador decimal.', exemplo: '79,90' },
+      { chave: 'custo', cabecalho: 'Custo', obrigatorio: true, tipo: 'Numero decimal', maximoCaracteres: 10, observacao: 'Pode usar virgula ou ponto como separador decimal.', exemplo: '79,90' },
       { chave: 'status', cabecalho: 'Status', obrigatorio: false, tipo: 'Texto', maximoCaracteres: 8, observacao: 'Aceita Ativo ou Inativo. Se vazio, assume Ativo.', exemplo: 'Ativo' }
     ]
   }

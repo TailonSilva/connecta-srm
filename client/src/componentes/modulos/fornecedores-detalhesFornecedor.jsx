@@ -1,15 +1,15 @@
 import { CodigoRegistro } from '../comuns/codigoRegistro';
-import { obterCodigoPrincipalCliente } from '../../utilitarios/codigoCliente';
+import { obterCodigoPrincipalFornecedor } from '../../utilitarios/codigoFornecedor';
 
-export function DetalhesFornecedor({ cliente, empresa }) {
+export function DetalhesFornecedor({ fornecedor, empresa }) {
   return (
     <div className="celulaRegistroDetalhes">
       <div className="topoRegistroDetalhes">
-        <strong>{cliente.nomeFantasia || cliente.razaoSocial}</strong>
-        <CodigoRegistro valor={obterCodigoPrincipalCliente(cliente, empresa) || 0} />
+        <strong>{fornecedor.nomeFantasia || fornecedor.razaoSocial}</strong>
+        <CodigoRegistro valor={obterCodigoPrincipalFornecedor(fornecedor, empresa) || 0} />
       </div>
 
-      <span className="textoSecundarioRegistro">{cliente.cnpj || 'CNPJ nao informado'}</span>
+      <span className="textoSecundarioRegistro">{fornecedor.cnpj || 'CNPJ nao informado'}</span>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 const express = require('express');
 const {
-  ID_ETAPA_COTACAO_PEDIDO_EXCLUIDO,
-  ID_ETAPA_PEDIDO_ENTREGUE,
+  ID_ETAPA_COTACAO_ORDEM_COMPRA_EXCLUIDA,
+  ID_ETAPA_ORDEM_COMPRA_ENTREGUE,
   consultarTodos,
   consultarUm,
   executar
@@ -679,7 +679,7 @@ async function obterEtapaOrdemCompraExcluido() {
     FROM etapaCotacao
     WHERE idEtapaCotacao = ?
     LIMIT 1`
-    , [ID_ETAPA_COTACAO_PEDIDO_EXCLUIDO]
+    , [ID_ETAPA_COTACAO_ORDEM_COMPRA_EXCLUIDA]
   );
 }
 
@@ -746,7 +746,7 @@ function desnormalizarCaminhoImagem(valorImagem) {
 }
 
 function etapaOrdemCompraEhEntregue(idEtapaOrdemCompra) {
-  return Number(idEtapaOrdemCompra) === ID_ETAPA_PEDIDO_ENTREGUE;
+  return Number(idEtapaOrdemCompra) === ID_ETAPA_ORDEM_COMPRA_ENTREGUE;
 }
 
 function obterDataAtualFormatoInput() {

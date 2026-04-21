@@ -2,13 +2,13 @@ import { exportarPdfDesktop } from '../../servicos/desktop';
 import { normalizarPreco } from '../normalizarPreco';
 
 export async function exportarRelatorioConversaoPdf({
-  orcamentos,
+  cotacoes,
   chips,
   cards,
   usuarioLogado
 }) {
   const html = gerarHtmlRelatorioConversao({
-    orcamentos,
+    cotacoes,
     chips,
     cards,
     usuarioLogado
@@ -20,7 +20,7 @@ export async function exportarRelatorioConversaoPdf({
   });
 }
 
-function gerarHtmlRelatorioConversao({ orcamentos, chips, cards, usuarioLogado }) {
+function gerarHtmlRelatorioConversao({ cotacoes, chips, cards, usuarioLogado }) {
   const geradoEm = new Intl.DateTimeFormat('pt-BR', {
     dateStyle: 'short',
     timeStyle: 'short'
@@ -37,16 +37,16 @@ function gerarHtmlRelatorioConversao({ orcamentos, chips, cards, usuarioLogado }
     </article>
   `).join('');
 
-  const linhasOrcamentos = (Array.isArray(orcamentos) ? orcamentos : []).map((orcamento) => `
+  const linhasCotacoes = (Array.isArray(cotacoes) ? cotacoes : []).map((cotacao) => `
     <tr>
-      <td>${escapeHtml(formatarData(orcamento.dataInclusao, 'Nao informada'))}</td>
-      <td>${escapeHtml(formatarData(orcamento.dataFechamento, ''))}</td>
-      <td>${escapeHtml(formatarCodigoOrcamento(orcamento.idOrcamento))}</td>
-      <td>${escapeHtml(orcamento.nomeCliente || 'Nao informado')}</td>
-      <td>${escapeHtml(orcamento.nomeContato || '')}</td>
-      <td>${escapeHtml(orcamento.nomeEtapaOrcamento || 'Sem etapa')}</td>
-      <td>${escapeHtml(orcamento.nomeVendedor || 'Nao informado')}</td>
-      <td>${escapeHtml(normalizarPreco(orcamento.totalOrcamento || 0))}</td>
+      <td>${escapeHtml(formatarData(cotacao.dataInclusao, 'Nao informada'))}</td>
+      <td>${escapeHtml(formatarData(cotacao.dataFechamento, ''))}</td>
+      <td>${escapeHtml(formatarCodigoCotacao(cotacao.idCotacao))}</td>
+      <td>${escapeHtml(cotacao.nomeFornecedor || 'Nao informado')}</td>
+      <td>${escapeHtml(cotacao.nomeContato || '')}</td>
+      <td>${escapeHtml(cotacao.nomeEtapaCotacao || 'Sem etapa')}</td>
+      <td>${escapeHtml(cotacao.nomeComprador || 'Nao informado')}</td>
+      <td>${escapeHtml(normalizarPreco(cotacao.totalCotacao || 0))}</td>
     </tr>
   `).join('');
 
@@ -231,12 +231,12 @@ function gerarHtmlRelatorioConversao({ orcamentos, chips, cards, usuarioLogado }
             </tr>
           </thead>
           <tbody>
-            ${linhasOrcamentos}
+            ${linhasCotacoes}
           </tbody>
         </table>
         <footer class="relatorioConversaoPdfRodape">
-          <span>Total de orcamentos: ${escapeHtml(String((orcamentos || []).length))}</span>
-          <span>Connecta CRM</span>
+          <span>Total de cotacoes: ${escapeHtml(String((cotacoes || []).length))}</span>
+          <span>Connecta SRM</span>
         </footer>
       </div>
     </body>
@@ -262,8 +262,8 @@ function formatarData(valor, fallback = '') {
   return new Intl.DateTimeFormat('pt-BR').format(new Date(`${valor}T00:00:00`));
 }
 
-function formatarCodigoOrcamento(idOrcamento) {
-  return `#${String(idOrcamento || '').padStart(4, '0')}`;
+function formatarCodigoCotacao(idCotacao) {
+  return `#${String(idCotacao || '').padStart(4, '0')}`;
 }
 
 function escapeHtml(valor) {

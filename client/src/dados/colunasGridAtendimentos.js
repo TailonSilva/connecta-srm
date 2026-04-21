@@ -49,7 +49,7 @@ export const colunasGridAtendimentos = [
     visivelPadrao: true
   },
   {
-    id: 'cliente',
+    id: 'fornecedor',
     rotulo: 'Fornecedor',
     classe: 'colunaGradeTexto',
     obrigatoria: false,

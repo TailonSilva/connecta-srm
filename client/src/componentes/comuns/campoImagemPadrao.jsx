@@ -121,14 +121,14 @@ export function CampoImagemPadrao({
 
   return (
     <>
-      <div className="thumbnailCliente">
+      <div className="thumbnailFornecedor">
         {codigo !== undefined ? (
-          <div className="codigoThumbnailCliente">
+          <div className="codigoThumbnailFornecedor">
             <CodigoRegistro valor={codigo} />
           </div>
         ) : null}
 
-        <div className="previewThumbnailCliente">
+        <div className="previewThumbnailFornecedor">
           {valor ? (
             <img src={valor} alt={alt} />
           ) : (

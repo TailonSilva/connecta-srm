@@ -85,7 +85,7 @@
   gap: 10px;
 }
 
-.gradeCamposModalCliente.gradeFiltrosModal {
+.gradeCamposModalFornecedor.gradeFiltrosModal {
   grid-template-columns: 1fr;
 }
 

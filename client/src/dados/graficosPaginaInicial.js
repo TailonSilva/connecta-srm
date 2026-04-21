@@ -1,9 +1,9 @@
 export const TOTAL_COLUNAS_GRAFICOS_PAGINA_INICIAL = 10;
 const BASE_LEGADA_GRAFICOS_PAGINA_INICIAL = 4;
 
-export const graficosPaginaInicialOrcamentos = [
+export const graficosPaginaInicialCotacoes = [
   {
-    id: 'funilOrcamentos',
+    id: 'funilCotacoes',
     rotulo: 'Funil de cotacoes',
     ajudaConfiguracao: 'Mostra o valor e a quantidade de itens por etapa do funil de cotacoes em aberto.',
     ordemPadrao: 1,
@@ -11,7 +11,7 @@ export const graficosPaginaInicialOrcamentos = [
     visivelPadrao: true
   },
   {
-    id: 'orcamentosGrupoProdutos',
+    id: 'cotacoesGrupoProdutos',
     rotulo: 'Cotacoes em aberto por grupo de produtos',
     ajudaConfiguracao: 'Mostra o valor e a quantidade de itens das cotacoes em aberto por grupo de produto.',
     ordemPadrao: 2,
@@ -19,7 +19,7 @@ export const graficosPaginaInicialOrcamentos = [
     visivelPadrao: true
   },
   {
-    id: 'orcamentosMarca',
+    id: 'cotacoesMarca',
     rotulo: 'Cotacoes em aberto por marca',
     ajudaConfiguracao: 'Mostra o valor e a quantidade de itens das cotacoes em aberto por marca.',
     ordemPadrao: 3,
@@ -27,7 +27,7 @@ export const graficosPaginaInicialOrcamentos = [
     visivelPadrao: true
   },
   {
-    id: 'orcamentosProdutos',
+    id: 'cotacoesProdutos',
     rotulo: 'Cotacoes em aberto por produto',
     ajudaConfiguracao: 'Mostra o valor e a quantidade de itens das cotacoes em aberto por produto.',
     ordemPadrao: 4,
@@ -38,7 +38,7 @@ export const graficosPaginaInicialOrcamentos = [
 
 export const graficosPaginaInicialOrdensCompra = [
   {
-    id: 'vendasGrupoProdutos',
+    id: 'ordensCompraGrupoProdutos',
     rotulo: 'Ordens de compra do mes por grupo de produtos',
     ajudaConfiguracao: 'Mostra o valor liquido e a quantidade de itens das ordens de compra no mes corrente por grupo de produto.',
     ordemPadrao: 1,
@@ -46,7 +46,7 @@ export const graficosPaginaInicialOrdensCompra = [
     visivelPadrao: true
   },
   {
-    id: 'vendasMarca',
+    id: 'ordensCompraMarca',
     rotulo: 'Ordens de compra do mes por marca',
     ajudaConfiguracao: 'Mostra o valor liquido e a quantidade de itens das ordens de compra no mes corrente por marca.',
     ordemPadrao: 2,
@@ -54,7 +54,7 @@ export const graficosPaginaInicialOrdensCompra = [
     visivelPadrao: true
   },
   {
-    id: 'vendasUf',
+    id: 'ordensCompraUf',
     rotulo: 'Ordens de compra do mes por UF',
     ajudaConfiguracao: 'Mostra o valor liquido e a quantidade de itens das ordens de compra no mes corrente por UF.',
     ordemPadrao: 3,
@@ -62,7 +62,7 @@ export const graficosPaginaInicialOrdensCompra = [
     visivelPadrao: true
   },
   {
-    id: 'vendasClientes',
+    id: 'ordensCompraFornecedores',
     rotulo: 'Ordens de compra do mes por fornecedor',
     ajudaConfiguracao: 'Mostra o valor liquido e a quantidade de itens das ordens de compra no mes corrente por fornecedor.',
     ordemPadrao: 4,
@@ -70,7 +70,7 @@ export const graficosPaginaInicialOrdensCompra = [
     visivelPadrao: true
   },
   {
-    id: 'vendasConceitosCliente',
+    id: 'ordensCompraConceitosFornecedor',
     rotulo: 'Ordens de compra do mes por conceito de fornecedor',
     ajudaConfiguracao: 'Mostra o valor liquido e a quantidade de itens das ordens de compra no mes corrente por conceito de fornecedor.',
     ordemPadrao: 5,
@@ -78,7 +78,7 @@ export const graficosPaginaInicialOrdensCompra = [
     visivelPadrao: true
   },
   {
-    id: 'vendasProdutos',
+    id: 'ordensCompraProdutos',
     rotulo: 'Ordens de compra do mes por produto',
     ajudaConfiguracao: 'Mostra o valor liquido e a quantidade de itens das ordens de compra no mes corrente por produto.',
     ordemPadrao: 6,
@@ -86,7 +86,7 @@ export const graficosPaginaInicialOrdensCompra = [
     visivelPadrao: true
   },
   {
-    id: 'rankingVendas',
+    id: 'rankingOrdensCompra',
     rotulo: 'Compradores em destaque',
     ajudaConfiguracao: 'Mostra o ranking de compradores por valor liquido de ordens de compra no mes corrente.',
     ordemPadrao: 7,
@@ -113,7 +113,7 @@ export const graficosPaginaInicialAtendimentos = [
     visivelPadrao: true
   },
   {
-    id: 'atendimentosCliente',
+    id: 'atendimentosFornecedor',
     rotulo: 'Atendimentos do mes por fornecedor',
     ajudaConfiguracao: 'Mostra a quantidade de atendimentos e a recorrencia por fornecedor no mes corrente.',
     ordemPadrao: 3,
@@ -138,8 +138,8 @@ export const graficosPaginaInicialAtendimentos = [
   }
 ];
 
-const idsPermitidosGraficosPaginaInicialOrcamentos = new Set(
-  graficosPaginaInicialOrcamentos.map((grafico) => grafico.id)
+const idsPermitidosGraficosPaginaInicialCotacoes = new Set(
+  graficosPaginaInicialCotacoes.map((grafico) => grafico.id)
 );
 const idsPermitidosGraficosPaginaInicialOrdensCompra = new Set(
   graficosPaginaInicialOrdensCompra.map((grafico) => grafico.id)
@@ -148,8 +148,8 @@ const idsPermitidosGraficosPaginaInicialAtendimentos = new Set(
   graficosPaginaInicialAtendimentos.map((grafico) => grafico.id)
 );
 
-const mapaGraficosPaginaInicialOrcamentos = new Map(
-  graficosPaginaInicialOrcamentos.map((grafico) => [grafico.id, grafico])
+const mapaGraficosPaginaInicialCotacoes = new Map(
+  graficosPaginaInicialCotacoes.map((grafico) => [grafico.id, grafico])
 );
 const mapaGraficosPaginaInicialOrdensCompra = new Map(
   graficosPaginaInicialOrdensCompra.map((grafico) => [grafico.id, grafico])
@@ -158,12 +158,12 @@ const mapaGraficosPaginaInicialAtendimentos = new Map(
   graficosPaginaInicialAtendimentos.map((grafico) => [grafico.id, grafico])
 );
 
-export function normalizarConfiguracoesGraficosPaginaInicialOrcamentos(valor) {
+export function normalizarConfiguracoesGraficosPaginaInicialCotacoes(valor) {
   return normalizarConfiguracoesGraficosPaginaInicial(
     valor,
-    graficosPaginaInicialOrcamentos,
-    idsPermitidosGraficosPaginaInicialOrcamentos,
-    mapaGraficosPaginaInicialOrcamentos
+    graficosPaginaInicialCotacoes,
+    idsPermitidosGraficosPaginaInicialCotacoes,
+    mapaGraficosPaginaInicialCotacoes
   );
 }
 
@@ -185,10 +185,10 @@ export function normalizarConfiguracoesGraficosPaginaInicialAtendimentos(valor) 
   );
 }
 
-export function reordenarConfiguracoesGraficosPaginaInicialOrcamentos(configuracoes) {
+export function reordenarConfiguracoesGraficosPaginaInicialCotacoes(configuracoes) {
   return reordenarConfiguracoesGraficosPaginaInicial(
     configuracoes,
-    graficosPaginaInicialOrcamentos
+    graficosPaginaInicialCotacoes
   );
 }
 
@@ -206,12 +206,12 @@ export function reordenarConfiguracoesGraficosPaginaInicialAtendimentos(configur
   );
 }
 
-export function reposicionarConfiguracaoGraficosPaginaInicialOrcamentos(configuracoes, idGrafico, ordemDesejada) {
+export function reposicionarConfiguracaoGraficosPaginaInicialCotacoes(configuracoes, idGrafico, ordemDesejada) {
   return reposicionarConfiguracaoGraficosPaginaInicial(
     configuracoes,
     idGrafico,
     ordemDesejada,
-    graficosPaginaInicialOrcamentos
+    graficosPaginaInicialCotacoes
   );
 }
 

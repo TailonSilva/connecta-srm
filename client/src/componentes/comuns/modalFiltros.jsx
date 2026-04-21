@@ -127,7 +127,7 @@ export function ModalFiltros({
   return (
     <div className="camadaModalContato" role="presentation" onMouseDown={fecharAoClicarNoFundo}>
       <form
-        className="modalContatoCliente modalFiltros"
+        className="modalContatoFornecedor modalFiltros"
         role="dialog"
         aria-modal="true"
         aria-labelledby={`titulo${titulo.replace(/\s+/g, '')}`}
@@ -174,7 +174,7 @@ export function ModalFiltros({
         </div>
 
         <div className="corpoModalContato">
-          <div className="gradeCamposModalCliente gradeFiltrosModal">
+          <div className="gradeCamposModalFornecedor gradeFiltrosModal">
             {campos.map((campo) => (
               campo.multiple ? (
                 <CampoSelecaoMultiplaModal
@@ -265,7 +265,7 @@ export function ModalFiltros({
       {campoPeriodoAberto ? (
         <div className="camadaModalContato camadaModalFiltroPeriodo" role="presentation" onMouseDown={fecharCampoPeriodo}>
           <div
-            className="modalContatoCliente modalFiltroPeriodo"
+            className="modalContatoFornecedor modalFiltroPeriodo"
             role="dialog"
             aria-modal="true"
             aria-labelledby={`titulo${campoPeriodoAberto.name}`}
@@ -308,7 +308,7 @@ export function ModalFiltros({
                       <strong>{periodo.titulo || periodo.label || 'Periodo'}</strong>
                     </div>
 
-                    <div className="gradeCamposModalCliente gradeFiltroPeriodo">
+                    <div className="gradeCamposModalFornecedor gradeFiltroPeriodo">
                       <div className="campoFormulario">
                         <label htmlFor={`${campoPeriodoAberto.name}-${periodo.nomeInicio}`}>{periodo.labelInicio || 'Data inicial'}</label>
                         <input

@@ -205,16 +205,16 @@ export function ModalGraficosPaginaInicial({
   return (
     <div className={classeCamada} role="presentation" onMouseDown={fecharAoClicarNoFundo}>
       <form
-        className="modalCliente modalGraficosPaginaInicial"
+        className="modalFornecedor modalGraficosPaginaInicial"
         role="dialog"
         aria-modal="true"
         aria-labelledby="tituloModalGraficosPaginaInicial"
         onMouseDown={(evento) => evento.stopPropagation()}
         onSubmit={submeterFormulario}
       >
-        <header className="cabecalhoModalCliente">
+        <header className="cabecalhoModalFornecedor">
           <h2 id="tituloModalGraficosPaginaInicial">{titulo}</h2>
-          <div className="acoesCabecalhoModalCliente">
+          <div className="acoesCabecalhoModalFornecedor">
             <Botao variante="secundario" type="button" onClick={aoFechar} disabled={salvando}>
               {somenteConsulta ? 'Fechar' : 'Cancelar'}
             </Botao>
@@ -226,8 +226,8 @@ export function ModalGraficosPaginaInicial({
           </div>
         </header>
 
-        <div className="corpoModalCliente">
-          <section className="gradeCamposModalCliente">
+        <div className="corpoModalFornecedor">
+          <section className="gradeCamposModalFornecedor">
             <div className="campoFormularioIntegral">
               <p className="descricaoOpcaoEmpresaPaginaInicial">
                 Marque as sessoes visiveis da aba e ajuste largura em colunas e rotulo. Cada item pode ocupar de 1 a {totalColunas} colunas por linha{permitirOrdenacao ? ', e a ordem segue a leitura da tela, de cima para baixo e da esquerda para a direita' : ''}.
@@ -307,7 +307,7 @@ export function ModalGraficosPaginaInicial({
       {graficoEmEdicao ? (
         <div className="camadaModalContato camadaModalFiltroPeriodo" role="presentation" onMouseDown={fecharModalEdicao}>
           <form
-            className="modalContatoCliente modalFiltros modalEdicaoColunaGridAtendimentos"
+            className="modalContatoFornecedor modalFiltros modalEdicaoColunaGridAtendimentos"
             role="dialog"
             aria-modal="true"
             aria-labelledby="tituloModalEdicaoGraficoPaginaInicial"

@@ -16,7 +16,7 @@ export function CabecalhoInicio({
     <header className="cabecalhoPagina inicioCabecalho">
       <div>
         <h1>Painel inicial</h1>
-        {!somenteTitulo ? <p>{descricao || 'Acompanhe os principais sinais comerciais do CRM.'}</p> : null}
+        {!somenteTitulo ? <p>{descricao || 'Acompanhe os principais sinais comerciais do SRM.'}</p> : null}
         {!somenteTitulo && resumo ? <small className="inicioCabecalhoResumo">{resumo}</small> : null}
       </div>
 

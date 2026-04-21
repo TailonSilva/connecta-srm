@@ -1,29 +1,29 @@
 import { BotaoAcaoGrade } from './botaoAcaoGrade';
 import { GradePadrao } from './gradePadrao';
-import '../../recursos/estilos/modalHistoricoAtendimentosCliente.css';
+import '../../recursos/estilos/modalHistoricoAtendimentosFornecedor.css';
 
 export function TabelaHistoricoAtendimentos({
   carregando = false,
   mensagemErro = '',
   atendimentos = [],
   contextoSalvo = true,
-  mensagemSemContexto = 'Os atendimentos ficarao disponiveis apos salvar o cliente.',
+  mensagemSemContexto = 'Os atendimentos ficarao disponiveis apos salvar o fornecedor.',
   mensagemVazia = 'Nenhum atendimento encontrado com os filtros informados.',
-  exibirCliente = false,
+  exibirFornecedor = false,
   exibirAcoes = false,
   onConsultarAtendimento
 }) {
   return (
     <GradePadrao
-      className="gradeContatosModal gradeAtendimentosCliente modalHistoricoAtendimentosClienteGrade"
-      classNameTabela="tabelaContatosModal tabelaAtendimentosCliente"
+      className="gradeContatosModal gradeAtendimentosFornecedor modalHistoricoAtendimentosFornecedorGrade"
+      classNameTabela="tabelaContatosModal tabelaAtendimentosFornecedor"
       classNameMensagem="mensagemTabelaContatosModal"
       cabecalho={(
         <tr>
           <th className="colunaHistoricoAtendimentoData">Data</th>
           <th className="colunaHistoricoAtendimentoHora">Inicio</th>
           <th className="colunaHistoricoAtendimentoHora">Fim</th>
-          {exibirCliente ? <th className="colunaHistoricoAtendimentoCliente">Fornecedor</th> : null}
+          {exibirFornecedor ? <th className="colunaHistoricoAtendimentoFornecedor">Fornecedor</th> : null}
           <th className="colunaHistoricoAtendimentoAssunto">Assunto</th>
           <th className="colunaHistoricoAtendimentoContato">Contato</th>
           <th className="colunaHistoricoAtendimentoCanal">Canal</th>
@@ -42,7 +42,7 @@ export function TabelaHistoricoAtendimentos({
           <td className="colunaHistoricoAtendimentoData">{formatarDataHistorico(atendimento.data)}</td>
           <td className="colunaHistoricoAtendimentoHora">{formatarHoraHistorico(atendimento.horaInicio)}</td>
           <td className="colunaHistoricoAtendimentoHora">{formatarHoraHistorico(atendimento.horaFim)}</td>
-          {exibirCliente ? <td className="colunaHistoricoAtendimentoCliente">{atendimento.nomeCliente || 'Fornecedor nao informado'}</td> : null}
+          {exibirFornecedor ? <td className="colunaHistoricoAtendimentoFornecedor">{atendimento.nomeFornecedor || 'Fornecedor nao informado'}</td> : null}
           <td className="colunaHistoricoAtendimentoAssunto">{atendimento.assunto || 'Sem assunto'}</td>
           <td className="colunaHistoricoAtendimentoContato">{atendimento.nomeContato || 'Contato nao informado'}</td>
           <td className="colunaHistoricoAtendimentoCanal">{atendimento.nomeCanalAtendimento || 'Nao informado'}</td>

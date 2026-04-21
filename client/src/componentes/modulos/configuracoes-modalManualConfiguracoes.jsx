@@ -6,7 +6,7 @@ export function ModalManualConfiguracoes({
   totalAtalhos = 0,
   secoes = [],
   usuarios = [],
-  vendedores = [],
+  compradores = [],
   gruposEmpresa = [],
   usuarioLogado
 }) {
@@ -15,20 +15,20 @@ export function ModalManualConfiguracoes({
       aberto={aberto}
       aoFechar={aoFechar}
       titulo="Manual de Configuracoes"
-      descricao="Guia visual dos cadastros base do CRM, atalhos por secao e regras de permissao da pagina de configuracoes."
+      descricao="Guia visual dos cadastros base do SRM, atalhos por secao e regras de permissao da pagina de configuracoes."
       eyebrow="Base estrutural"
       heroTitulo="Como a pagina de Configuracoes sustenta o restante do sistema"
-      heroDescricao="A tela de Configuracoes centraliza cadastros auxiliares, parametros da empresa, layout da cotacao, colunas visiveis de grids, atualizacao do sistema e a base inicial da area de relatorios. Tudo o que e mantido aqui abastece formularios e regras das demais paginas do CRM."
+      heroDescricao="A tela de Configuracoes centraliza cadastros auxiliares, parametros da empresa, layout da cotacao, colunas visiveis de grids, atualizacao do sistema e a base inicial da area de relatorios. Tudo o que e mantido aqui abastece formularios e regras das demais paginas do SRM."
       painelHeroi={[
         { valor: secoes.length, rotulo: 'Secoes disponiveis' },
         { valor: totalAtalhos, rotulo: 'Atalhos de configuracao' },
-        { valor: usuarios.length + vendedores.length, rotulo: 'Usuarios e compradores carregados' }
+        { valor: usuarios.length + compradores.length, rotulo: 'Usuarios e compradores carregados' }
       ]}
       cardsResumo={[
         {
           titulo: 'Cadastros base',
-          descricao: 'A pagina concentra empresa, usuarios, compradores, grupos de empresa e tabelas auxiliares do CRM.',
-          detalhe: 'Esses dados alimentam agenda, atendimentos, fornecedores, produtos, orcamentos e ordens de compra.',
+          descricao: 'A pagina concentra empresa, usuarios, compradores, grupos de empresa e tabelas auxiliares do SRM.',
+          detalhe: 'Esses dados alimentam agenda, atendimentos, fornecedores, produtos, cotacoes e ordens de compra.',
           icone: 'configuracoes'
         },
         {
@@ -48,7 +48,7 @@ export function ModalManualConfiguracoes({
           descricao: usuarioLogado?.tipo === 'Usuario padrao'
             ? 'Usuario padrao entra com restricoes em configuracoes sensiveis, principalmente empresa, usuarios, layout da cotacao e atualizacao do sistema.'
             : 'Administrador e Gestor podem manter toda a estrutura do sistema, incluindo a atualizacao do sistema.',
-          detalhe: 'A permissao tambem e refletida nos atalhos internos de outros modais do CRM.',
+          detalhe: 'A permissao tambem e refletida nos atalhos internos de outros modais do SRM.',
           icone: 'usuarios'
         }
       ]}
@@ -71,7 +71,7 @@ export function ModalManualConfiguracoes({
         {
           titulo: 'Voltar ao fluxo comercial',
           descricao: 'Os cadastros criados aqui reaparecem nas paginas operacionais sem exigir navegacao extra do usuario.',
-          icone: 'pedido'
+          icone: 'ordemCompra'
         }
       ]}
       blocosTexto={[
@@ -83,7 +83,7 @@ export function ModalManualConfiguracoes({
             'A atualizacao do sistema aparece para todos os perfis, mas fica desabilitada apenas para Usuario padrao.',
             'A nova secao de Relatorios fica disponivel com atalhos para Ordens de compra, Conversao e Atendimentos, mas esses atalhos tambem ficam desabilitados para Usuario padrao.',
             'Ordens de compra ja abre um relatorio funcional com cards de resumo, grade de ordens de compra, filtro por fornecedor, um ou mais compradores, uma ou mais etapas, grupo de empresa, grupo de produto, marca, data de inclusao e data de entrega, alem de busca dedicada para fornecedor; por padrao, o periodo inicia no mes corrente.',
-            'Conversao usa uma grade simples de orcamentos com colunas separadas de inclusao, fechamento, fornecedor e contato, filtros por fornecedor, usuario, compradores, etapas, grupo de empresa, grupo de produto, marca e datas, exportacao em PDF e cards com orcamentos gerados, fechados, percentual de conversao, cancelados na etapa Recusado, percentual de perca e quantidade ainda em aberto; Ordem de Compra Excluido fica separado como etapa obrigatoria de controle tecnico quando um ordem de compra vinculado e removido.',
+            'Conversao usa uma grade simples de cotacoes com colunas separadas de inclusao, fechamento, fornecedor e contato, filtros por fornecedor, usuario, compradores, etapas, grupo de empresa, grupo de produto, marca e datas, exportacao em PDF e cards com cotacoes gerados, fechados, percentual de conversao, cancelados na etapa Recusado, percentual de perca e quantidade ainda em aberto; Ordem de Compra Excluido fica separado como etapa obrigatoria de controle tecnico quando um ordem de compra vinculado e removido.',
             'Atendimentos tambem ja abre um relatorio funcional com a mesma base visual, cards de total, fornecedores atendidos, canal lider e origem lider, alem da grade de historico com o fornecedor exibido junto nas linhas, botao de filtros e exportacao em PDF; os filtros de usuario, canal e origem aceitam selecao multipla.',
             'Os cadastros de Ramo de atividade e Grupo de empresa seguem liberados tambem na propria pagina de Configuracoes para alimentar o fluxo comercial.',
             'Conceitos de fornecedor tambem ficam em cadastro proprio para classificar a base comercial; o registro obrigatorio Sem Conceito nasce no banco com id 1 e nao pode ser inativado.',
@@ -94,21 +94,21 @@ export function ModalManualConfiguracoes({
         },
         {
           tag: 'Impacto',
-          titulo: 'Como as configuracoes se refletem no CRM',
+          titulo: 'Como as configuracoes se refletem no SRM',
           itens: [
             'Locais, recursos, tipos e status alimentam a Agenda.',
             'Tipos, canais e origens entram no fluxo comercial, incluindo o novo tipo obrigatorio do formulario de atendimentos.',
             'Tipos de ordem de compra abastecem o campo de classificacao do modal de Ordens de Compra e deixam o fluxo preparado para personalizacoes futuras.',
             'Grupos de empresa e seus contatos abastecem o cadastro de fornecedores com heranca de contatos.',
             'Conceitos de fornecedor abastecem o novo campo Conceito dentro do cadastro de fornecedores e novos registros nascem apontando para Sem Conceito ate que o usuario refine essa classificacao.',
-            'A empresa define se o CRM usa o codigo padrao do fornecedor ou o Codigo alternativo como identificador principal nos grids que exibem codigo.',
+            'A empresa define se o SRM usa o codigo padrao do fornecedor ou o Codigo alternativo como identificador principal nos grids que exibem codigo.',
             'A empresa tambem pode escolher quais colunas aparecem nos grids configuraveis, ajustar ordem, espaco e definir o rotulo que sera exibido no cabecalho de cada coluna.',
-            'Clientes, Orcamentos e Ordens de Compra agora tambem aceitam a coluna Conceito dentro dessa configuracao de grade.',
-            'A nova aba E-mail da empresa guarda assunto, corpo e assinatura padrao do envio comercial de orcamentos, com suporte a tags dinamicas para fornecedor, empresa, comprador, observacao, campos personalizados e total.',
+            'Fornecedores, Cotacoes e Ordens de Compra agora tambem aceitam a coluna Conceito dentro dessa configuracao de grade.',
+            'A nova aba E-mail da empresa guarda assunto, corpo e assinatura padrao do envio comercial de cotacoes, com suporte a tags dinamicas para fornecedor, empresa, comprador, observacao, campos personalizados e total.',
             'As etapas obrigatorias Fechado sem ordem de compra e Ordem de Compra Excluido continuam cadastradas em Configuracoes, mas sao de uso automatico e nao aparecem nos selects manuais do fluxo comercial.',
             'As grades de configuracao, historico e relatorio priorizam leitura sem rolagem horizontal, com colunas curtas mais contidas e colunas textuais mais flexiveis.',
-            'Metodos, prazos, etapas e campos personalizados abastecem Orcamentos e Ordens de Compra.',
-            'Parametros da empresa influenciam layout de PDF, expediente, regras operacionais do cadastro, templates de e-mail comercial e agora tambem a composicao da pagina inicial nas abas Orcamentos e Ordens de compra.',
+            'Metodos, prazos, etapas e campos personalizados abastecem Cotacoes e Ordens de Compra.',
+            'Parametros da empresa influenciam layout de PDF, expediente, regras operacionais do cadastro, templates de e-mail comercial e agora tambem a composicao da pagina inicial nas abas Cotacoes e Ordens de compra.',
             'O campo Primeiro plano dos itens fica na aba Cotacoes/Ordens de Compra do cadastro da Empresa e define se descricao ou referencia aparece primeiro nos itens do fluxo comercial e no PDF da cotacao.',
             'Nos modais com abas, `Alt + Seta para a esquerda` volta para a aba anterior e `Alt + Seta para a direita` avanca para a proxima, reposicionando o foco no primeiro campo da nova aba.'
           ]
@@ -129,7 +129,7 @@ export function ModalManualConfiguracoes({
         },
         {
           titulo: 'Home configuravel',
-          descricao: 'A aba Pagina inicial dentro da Empresa agora permite definir quais sessoes aparecem em Orcamentos e Ordens de compra, a ordem de leitura, quantas colunas cada bloco ocupa e qual titulo sera exibido em cada sessao, alem dos cards resumo do topo.',
+          descricao: 'A aba Pagina inicial dentro da Empresa agora permite definir quais sessoes aparecem em Cotacoes e Ordens de compra, a ordem de leitura, quantas colunas cada bloco ocupa e qual titulo sera exibido em cada sessao, alem dos cards resumo do topo.',
           detalhe: 'A malha dos graficos usa base de 10 colunas, e os cards resumo tambem respeitam essa base, com validacao para caber em no maximo duas linhas.',
           icone: 'inicio'
         },
@@ -137,7 +137,7 @@ export function ModalManualConfiguracoes({
           titulo: 'Relatorios padronizados',
           descricao: 'A area de relatorios usa modal amplo com cards de resumo no topo, grade principal e filtro no cabecalho.',
           detalhe: 'Ordens de compra, Conversao e Atendimentos ja seguem esse padrao, reaproveitando grades operacionais e cards executivos no mesmo layout.',
-          icone: 'pedido'
+          icone: 'ordemCompra'
         },
         {
           titulo: 'Contato herdado sincronizado',

@@ -15,7 +15,7 @@ const estadoInicialUsuario = {
   usuario: '',
   senha: '',
   tipo: 'Usuario padrao',
-  idVendedor: '',
+  idComprador: '',
   ativo: true
 };
 
@@ -28,13 +28,13 @@ const tiposUsuario = [
 export function ModalUsuarios({
   aberto,
   usuarios,
-  vendedores,
+  compradores,
   somenteConsulta = false,
   aoFechar,
   aoSalvar,
   aoInativar
 }) {
-  const vendedoresAtivos = vendedores.filter((vendedor) => registroEstaAtivo(vendedor.status));
+  const compradoresAtivos = compradores.filter((comprador) => registroEstaAtivo(comprador.status));
   const [modalFormularioAberto, definirModalFormularioAberto] = useState(false);
   const [modoFormulario, definirModoFormulario] = useState('novo');
   const [usuarioSelecionado, definirUsuarioSelecionado] = useState(null);
@@ -160,7 +160,7 @@ export function ModalUsuarios({
       return;
     }
 
-    if (formulario.tipo === 'Usuario padrao' && !formulario.idVendedor) {
+    if (formulario.tipo === 'Usuario padrao' && !formulario.idComprador) {
       definirMensagemErro('Selecione o comprador vinculado ao usuario padrao.');
       return;
     }
@@ -195,16 +195,16 @@ export function ModalUsuarios({
   return (
     <div className="camadaModal" role="presentation" onMouseDown={fecharAoClicarNoFundo}>
       <section
-        className="modalCliente"
+        className="modalFornecedor"
         role="dialog"
         aria-modal="true"
         aria-labelledby="tituloModalUsuarios"
         onMouseDown={(evento) => evento.stopPropagation()}
       >
-        <header className="cabecalhoModalCliente">
+        <header className="cabecalhoModalFornecedor">
           <h2 id="tituloModalUsuarios">Usuarios</h2>
 
-          <div className="acoesCabecalhoModalCliente">
+          <div className="acoesCabecalhoModalFornecedor">
             <Botao
               variante="secundario"
               type="button"
@@ -243,8 +243,8 @@ export function ModalUsuarios({
           </div>
         </header>
 
-        <div className="corpoModalCliente corpoModalUsuarios corpoModalUsuariosConfiguracao">
-          <section className="painelContatosModalCliente painelContatosConfiguracao">
+        <div className="corpoModalFornecedor corpoModalUsuarios corpoModalUsuariosConfiguracao">
+          <section className="painelContatosModalFornecedor painelContatosConfiguracao">
             <GradePadrao
               className="gradeContatosModal"
               classNameTabela="tabelaContatosModal tabelaUsuariosModal"
@@ -266,11 +266,11 @@ export function ModalUsuarios({
               {usuariosFiltrados.map((usuario) => (
                 <tr key={usuario.idUsuario}>
                   <td>
-                    <div className="celulaAvatarCliente">
+                    <div className="celulaAvatarFornecedor">
                       {usuario.imagem ? (
-                        <img className="avatarClienteImagem" src={usuario.imagem} alt={`Foto de ${usuario.nome}`} />
+                        <img className="avatarFornecedorImagem" src={usuario.imagem} alt={`Foto de ${usuario.nome}`} />
                       ) : (
-                        <span className="avatarClientePlaceholder">
+                        <span className="avatarFornecedorPlaceholder">
                           {obterIniciaisUsuario(usuario.nome)}
                         </span>
                       )}
@@ -285,7 +285,7 @@ export function ModalUsuarios({
                     <CodigoRegistro valor={usuario.idUsuario} />
                   </td>
                   <td>{usuario.tipo}</td>
-                  <td>{usuario.nomeVendedor || 'Nao vinculado'}</td>
+                  <td>{usuario.nomeComprador || 'Nao vinculado'}</td>
                   <td>
                     <span className={`etiquetaStatus ${usuario.ativo ? 'ativo' : 'inativo'}`}>
                       {usuario.ativo ? 'Ativo' : 'Inativo'}
@@ -333,7 +333,7 @@ export function ModalUsuarios({
         {modalFormularioAberto ? (
           <div className="camadaModalContato" role="presentation" onMouseDown={fecharFormularioNoFundo}>
             <form
-              className="modalContatoCliente"
+              className="modalContatoFornecedor"
               role="dialog"
               aria-modal="true"
               aria-labelledby="tituloModalFormularioUsuario"
@@ -361,7 +361,7 @@ export function ModalUsuarios({
               </div>
 
               <div className="corpoModalContato">
-                <div className="painelDadosGeraisCliente">
+                <div className="painelDadosGeraisFornecedor">
                   <CampoImagemPadrao
                     valor={formulario.imagem}
                     alt={`Imagem de ${formulario.nome || 'usuario'}`}
@@ -373,19 +373,19 @@ export function ModalUsuarios({
                     }))}
                   />
 
-                  <div className="gradeCamposModalCliente">
+                  <div className="gradeCamposModalFornecedor">
                     <CampoFormulario label="Nome" name="nome" value={formulario.nome} onChange={alterarCampo} disabled={modoFormulario === 'consulta'} required />
                     <CampoFormulario label="Usuario" name="usuario" value={formulario.usuario} onChange={alterarCampo} disabled={modoFormulario === 'consulta'} required />
                     <CampoFormulario label="Senha" name="senha" type="password" value={formulario.senha} onChange={alterarCampo} disabled={modoFormulario === 'consulta'} required />
                     <CampoSelect label="Tipo" name="tipo" value={formulario.tipo} onChange={alterarCampo} options={tiposUsuario} disabled={modoFormulario === 'consulta'} required />
                     <CampoSelect
                       label="Comprador"
-                      name="idVendedor"
-                      value={formulario.idVendedor}
+                      name="idComprador"
+                      value={formulario.idComprador}
                       onChange={alterarCampo}
-                      options={vendedoresAtivos.map((vendedor) => ({
-                        valor: String(vendedor.idVendedor),
-                        label: vendedor.nome
+                      options={compradoresAtivos.map((comprador) => ({
+                        valor: String(comprador.idComprador),
+                        label: comprador.nome
                       }))}
                       disabled={modoFormulario === 'consulta' || formulario.tipo !== 'Usuario padrao'}
                     />
@@ -455,7 +455,7 @@ function criarFormularioUsuario(usuario) {
     usuario: usuario.usuario || '',
     senha: usuario.senha || '',
     tipo: usuario.tipo || 'Usuario padrao',
-    idVendedor: String(usuario.idVendedor || ''),
+    idComprador: String(usuario.idComprador || ''),
     ativo: Boolean(usuario.ativo)
   };
 }

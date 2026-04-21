@@ -36,7 +36,7 @@ export function filtrarProdutos(produtos, pesquisa, filtros = {}) {
       produto.nomeGrupo,
       produto.nomeMarca,
       produto.nomeUnidade,
-      normalizarPreco(produto.preco),
+      normalizarPreco(produto.custo),
       registroEstaAtivo(produto.status) ? 'ativo' : 'inativo'
     ];
 

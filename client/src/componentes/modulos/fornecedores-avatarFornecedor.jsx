@@ -1,5 +1,5 @@
-function obterIniciais(cliente) {
-  const nomeBase = cliente.nomeFantasia || cliente.razaoSocial || 'Cliente';
+function obterIniciais(fornecedor) {
+  const nomeBase = fornecedor.nomeFantasia || fornecedor.razaoSocial || 'Fornecedor';
   const partesNome = nomeBase
     .split(' ')
     .map((parte) => parte.trim())
@@ -13,14 +13,14 @@ function obterIniciais(cliente) {
   return partesNome.map((parte) => parte[0].toUpperCase()).join('');
 }
 
-export function AvatarFornecedor({ cliente }) {
-  if (cliente.imagem) {
+export function AvatarFornecedor({ fornecedor }) {
+  if (fornecedor.imagem) {
     return (
       <div className="celulaAvatarFornecedor">
         <img
           className="AvatarFornecedorImagem"
-          src={cliente.imagem}
-          alt={`Imagem de ${cliente.nomeFantasia || cliente.razaoSocial}`}
+          src={fornecedor.imagem}
+          alt={`Imagem de ${fornecedor.nomeFantasia || fornecedor.razaoSocial}`}
         />
       </div>
     );
@@ -28,7 +28,7 @@ export function AvatarFornecedor({ cliente }) {
 
   return (
     <div className="celulaAvatarFornecedor" aria-hidden="true">
-      <span className="AvatarFornecedorPlaceholder">{obterIniciais(cliente)}</span>
+      <span className="AvatarFornecedorPlaceholder">{obterIniciais(fornecedor)}</span>
     </div>
   );
 }

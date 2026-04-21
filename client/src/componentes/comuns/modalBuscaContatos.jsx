@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { incluirContato } from '../../servicos/clientes';
-import { ModalContatoFornecedor as ModalContatoCliente } from '../modulos/fornecedores-modalContatoFornecedor';
+import { incluirContato } from '../../servicos/fornecedores';
+import { ModalContatoFornecedor as ModalContatoFornecedor } from '../modulos/fornecedores-modalContatoFornecedor';
 import { ModalBuscaTabela } from './modalBuscaTabela';
 
 const estadoInicialContato = {
@@ -15,7 +15,7 @@ const estadoInicialContato = {
 
 export function ModalBuscaContatos({
   aberto,
-  idCliente = '',
+  idFornecedor = '',
   contatos = [],
   placeholder = 'Pesquisar contatos',
   ariaLabelPesquisa = 'Pesquisar contatos',
@@ -33,10 +33,10 @@ export function ModalBuscaContatos({
 
   useEffect(() => {
     definirContatosCriadosLocalmente([]);
-  }, [idCliente]);
+  }, [idFornecedor]);
 
   function abrirModalNovoContato() {
-    if (!idCliente) {
+    if (!idFornecedor) {
       return;
     }
 
@@ -65,7 +65,7 @@ export function ModalBuscaContatos({
 
     const contatoCriado = await incluirContato({
       ...formularioContato,
-      idFornecedor: Number(idCliente),
+      idFornecedor: Number(idFornecedor),
       status: formularioContato.status ? 1 : 0,
       principal: formularioContato.principal ? 1 : 0
     });
@@ -74,7 +74,7 @@ export function ModalBuscaContatos({
       ...formularioContato,
       ...contatoCriado,
       idContato: contatoCriado?.idContato || contatoCriado?.id || null,
-      idFornecedor: Number(idCliente),
+      idFornecedor: Number(idFornecedor),
       status: contatoCriado?.status ?? (formularioContato.status ? 1 : 0),
       principal: contatoCriado?.principal ?? (formularioContato.principal ? 1 : 0)
     };
@@ -123,13 +123,13 @@ export function ModalBuscaContatos({
         obterChaveRegistro={(contato) => contato.idContato}
         aoSelecionar={aoSelecionar}
         aoFechar={aoFechar}
-        rotuloAcaoPrimaria={idCliente ? 'Adicionar' : ''}
+        rotuloAcaoPrimaria={idFornecedor ? 'Adicionar' : ''}
         tituloAcaoPrimaria="Adicionar contato"
-        aoAcionarPrimaria={idCliente ? abrirModalNovoContato : null}
+        aoAcionarPrimaria={idFornecedor ? abrirModalNovoContato : null}
         mensagemVazio="Nenhum contato encontrado."
       />
 
-      <ModalContatoCliente
+      <ModalContatoFornecedor
         aberto={modalContatoAberto}
         modo="novo"
         formulario={formularioContato}

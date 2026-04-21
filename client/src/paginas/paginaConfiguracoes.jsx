@@ -3,61 +3,61 @@ import { Icone } from '../componentes/comuns/icone';
 import { useEffect, useState } from 'react';
 import '../recursos/estilos/cabecalhoPagina.css';
 import {
-  atualizarEtapaPedido,
-  atualizarEtapaOrcamento,
+  atualizarEtapaOrdemCompra,
+  atualizarEtapaCotacao,
   atualizarContatoGrupoEmpresa,
   atualizarGrupoProduto,
   atualizarGrupoEmpresa,
   atualizarCanalAtendimento,
-  atualizarCampoOrcamento,
-  atualizarCampoPedido,
-  atualizarConceitoCliente,
+  atualizarCampoCotacao,
+  atualizarCampoOrdemCompra,
+  atualizarConceitoFornecedor,
   atualizarLocalAgenda,
   atualizarMarca,
   atualizarMetodoPagamento,
   atualizarOrigemAtendimento,
   atualizarPrazoPagamento,
   atualizarTipoAtendimento,
-  atualizarTipoPedido,
+  atualizarTipoOrdemCompra,
   atualizarRecurso,
   atualizarRamoAtividade,
   atualizarStatusVisita,
   atualizarTipoAgenda,
   atualizarTipoRecurso,
   atualizarUnidadeMedida,
-  atualizarVendedor,
-  incluirEtapaPedido,
-  incluirEtapaOrcamento,
+  atualizarComprador,
+  incluirEtapaOrdemCompra,
+  incluirEtapaCotacao,
   incluirContatoGrupoEmpresa,
   incluirGrupoProduto,
   incluirGrupoEmpresa,
   incluirCanalAtendimento,
-  incluirCampoOrcamento,
-  incluirCampoPedido,
-  incluirConceitoCliente,
+  incluirCampoCotacao,
+  incluirCampoOrdemCompra,
+  incluirConceitoFornecedor,
   incluirLocalAgenda,
   incluirMarca,
   incluirMetodoPagamento,
   incluirOrigemAtendimento,
   incluirPrazoPagamento,
   incluirTipoAtendimento,
-  incluirTipoPedido,
+  incluirTipoOrdemCompra,
   incluirRecurso,
   incluirRamoAtividade,
   incluirStatusVisita,
   incluirTipoAgenda,
   incluirTipoRecurso,
   incluirUnidadeMedida,
-  incluirVendedor,
-  listarEtapasPedidoConfiguracao,
-  listarEtapasOrcamentoConfiguracao,
+  incluirComprador,
+  listarEtapasOrdemCompraConfiguracao,
+  listarEtapasCotacaoConfiguracao,
   listarContatosGruposEmpresaConfiguracao,
   listarGruposProdutoConfiguracao,
   listarGruposEmpresaConfiguracao,
   listarCanaisAtendimentoConfiguracao,
-  listarCamposOrcamentoConfiguracao,
-  listarCamposPedidoConfiguracao,
-  listarConceitosClienteConfiguracao,
+  listarCamposCotacaoConfiguracao,
+  listarCamposOrdemCompraConfiguracao,
+  listarConceitosFornecedorConfiguracao,
   listarLocaisAgendaConfiguracao,
   listarMarcasConfiguracao,
   listarMetodosPagamentoConfiguracao,
@@ -65,7 +65,7 @@ import {
   listarOrigensAtendimentoConfiguracao,
   listarPrazosPagamentoConfiguracao,
   listarTiposAtendimentoConfiguracao,
-  listarTiposPedidoConfiguracao,
+  listarTiposOrdemCompraConfiguracao,
   listarRecursosConfiguracao,
   listarRamosAtividadeConfiguracao,
   listarStatusVisitaConfiguracao,
@@ -73,27 +73,27 @@ import {
   listarTiposAgendaConfiguracao,
   listarTiposRecursoConfiguracao,
   listarUnidadesMedidaConfiguracao,
-  listarVendedoresConfiguracao,
+  listarCompradoresConfiguracao,
   salvarConfiguracaoAtualizacaoSistema,
   atualizarTamanho,
   incluirTamanho
 } from '../servicos/configuracoes';
 import { atualizarEmpresa, incluirEmpresa, listarEmpresas } from '../servicos/empresa';
-import { normalizarConfiguracoesColunasGridClientes } from '../dados/colunasGridClientes';
-import { normalizarConfiguracoesColunasGridOrcamentos } from '../dados/colunasGridOrcamentos';
+import { normalizarConfiguracoesColunasGridFornecedores } from '../dados/colunasGridFornecedores';
+import { normalizarConfiguracoesColunasGridCotacoes } from '../dados/colunasGridCotacoes';
 import { normalizarConfiguracoesColunasGridProdutos } from '../dados/colunasGridProdutos';
-import { normalizarConfiguracoesColunasGridPedidos } from '../dados/colunasGridPedidos';
+import { normalizarConfiguracoesColunasGridOrdensCompra } from '../dados/colunasGridOrdensCompra';
 import { atualizarUsuario, incluirUsuario, listarUsuarios } from '../servicos/usuarios';
 import { normalizarConfiguracoesColunasGridAtendimentos } from '../dados/colunasGridAtendimentos';
 import {
-  normalizarConfiguracoesGraficosPaginaInicialOrcamentos,
+  normalizarConfiguracoesGraficosPaginaInicialCotacoes,
   normalizarConfiguracoesGraficosPaginaInicialAtendimentos,
   normalizarConfiguracoesGraficosPaginaInicialOrdensCompra,
   reordenarConfiguracoesGraficosPaginaInicialAtendimentos,
-  reordenarConfiguracoesGraficosPaginaInicialOrcamentos,
+  reordenarConfiguracoesGraficosPaginaInicialCotacoes,
   reordenarConfiguracoesGraficosPaginaInicialOrdensCompra,
   reposicionarConfiguracaoGraficosPaginaInicialAtendimentos,
-  reposicionarConfiguracaoGraficosPaginaInicialOrcamentos,
+  reposicionarConfiguracaoGraficosPaginaInicialCotacoes,
   reposicionarConfiguracaoGraficosPaginaInicialOrdensCompra,
   TOTAL_COLUNAS_GRAFICOS_PAGINA_INICIAL
 } from '../dados/graficosPaginaInicial';
@@ -111,11 +111,11 @@ import { ModalEmpresa } from '../componentes/modulos/configuracoes-modalEmpresa'
 import { ModalGraficosPaginaInicial } from '../componentes/modulos/configuracoes-modalGraficosPaginaInicial';
 import { ModalGruposProduto } from '../componentes/modulos/configuracoes-modalGruposProduto';
 import { ModalGruposEmpresa } from '../componentes/modulos/configuracoes-modalGruposEmpresa';
-import { ModalLayoutOrcamento } from '../componentes/modulos/configuracoes-modalLayoutOrcamento';
-import { ModalColunasGridClientes } from '../componentes/modulos/configuracoes-modalColunasGridClientes';
-import { ModalColunasGridOrcamentos } from '../componentes/modulos/configuracoes-modalColunasGridOrcamentos';
+import { ModalLayoutCotacao } from '../componentes/modulos/configuracoes-modalLayoutCotacao';
+import { ModalColunasGridFornecedores } from '../componentes/modulos/configuracoes-modalColunasGridFornecedores';
+import { ModalColunasGridCotacoes } from '../componentes/modulos/configuracoes-modalColunasGridCotacoes';
 import { ModalColunasGridProdutos } from '../componentes/modulos/configuracoes-modalColunasGridProdutos';
-import { ModalColunasGridPedidos } from '../componentes/modulos/configuracoes-modalColunasGridPedidos';
+import { ModalColunasGridOrdensCompra } from '../componentes/modulos/configuracoes-modalColunasGridOrdensCompra';
 import { ModalColunasGridAtendimentos } from '../componentes/modulos/configuracoes-modalColunasGridAtendimentos';
 import { ModalSelecaoColunasGrid } from '../componentes/modulos/configuracoes-modalSelecaoColunasGrid';
 import { ModalManualConfiguracoes } from '../componentes/modulos/configuracoes-modalManualConfiguracoes';
@@ -138,12 +138,12 @@ const atalhosConfiguracao = [
     icone: 'cadastro'
   },
   {
-    id: 'conceitosCliente',
+    id: 'conceitosFornecedor',
     titulo: 'Conceitos de fornecedor',
     icone: 'cadastro'
   },
   {
-    id: 'vendedores',
+    id: 'compradores',
     titulo: 'Compradores',
     icone: 'usuarios'
   },
@@ -178,9 +178,9 @@ const atalhosConfiguracao = [
     icone: 'pagamento'
   },
   {
-    id: 'tiposPedido',
+    id: 'tiposOrdemCompra',
     titulo: 'Tipos de ordem de compra',
-    icone: 'pedido'
+    icone: 'ordemCompra'
   },
   {
     id: 'locaisAgenda',
@@ -200,7 +200,7 @@ const atalhosConfiguracao = [
   {
     id: 'tiposAgenda',
     titulo: 'Tipos de agenda',
-    icone: 'orcamento'
+    icone: 'cotacao'
   },
   {
     id: 'colunasGridAtendimentos',
@@ -228,29 +228,29 @@ const atalhosConfiguracao = [
     icone: 'cadastro'
   },
   {
-    id: 'orcamentos',
+    id: 'cotacoes',
     titulo: 'Campos da cotacao',
-    icone: 'orcamento'
+    icone: 'cotacao'
   },
   {
-    id: 'pedidos',
+    id: 'ordensCompra',
     titulo: 'Campos da ordem de compra',
-    icone: 'pedido'
+    icone: 'ordemCompra'
   },
   {
-    id: 'layoutOrcamento',
+    id: 'layoutCotacao',
     titulo: 'Layout Cotacao',
-    icone: 'orcamento'
+    icone: 'cotacao'
   },
   {
-    id: 'etapasPedido',
+    id: 'etapasOrdemCompra',
     titulo: 'Etapas da ordem de compra',
-    icone: 'orcamento'
+    icone: 'cotacao'
   },
   {
-    id: 'etapasOrcamento',
+    id: 'etapasCotacao',
     titulo: 'Etapas da cotacao',
-    icone: 'orcamento'
+    icone: 'cotacao'
   },
   {
     id: 'tamanhos',
@@ -268,14 +268,14 @@ const atalhosConfiguracao = [
     icone: 'importar'
   },
   {
-    id: 'relatorioPedidosFechados',
+    id: 'relatorioOrdensCompraFechados',
     titulo: 'Ordens de compra',
-    icone: 'pedido'
+    icone: 'ordemCompra'
   },
   {
-    id: 'relatorioPedidosEntregues',
+    id: 'relatorioOrdensCompraEntregues',
     titulo: 'Conversao',
-    icone: 'orcamento'
+    icone: 'cotacao'
   },
   {
     id: 'relatorioAtendimentos',
@@ -288,7 +288,7 @@ const secoesConfiguracao = [
   {
     id: 'gerais',
     titulo: 'Gerais',
-    atalhos: ['empresa', 'usuarios', 'vendedores', 'colunasGridAtendimentos', 'atualizacaoSistema']
+    atalhos: ['empresa', 'usuarios', 'compradores', 'colunasGridAtendimentos', 'atualizacaoSistema']
   },
   {
     id: 'paginaInicial',
@@ -310,24 +310,24 @@ const secoesConfiguracao = [
     titulo: 'Cadastros',
     atalhos: [
       'ramosAtividade',
-      'conceitosCliente',
+      'conceitosFornecedor',
       'gruposEmpresa',
       'gruposProduto',
       'marcas',
-      'tiposPedido',
+      'tiposOrdemCompra',
       'unidadesMedida',
       'tamanhos'
     ]
   },
   {
-    id: 'orcamentosPedidos',
+    id: 'cotacoesOrdensCompra',
     titulo: 'Cotacoes/Ordens de Compra',
     atalhos: atalhosConfiguracao
       .map((atalho) => atalho.id)
       .filter((id) => ![
         'empresa',
         'usuarios',
-        'vendedores',
+        'compradores',
         'colunasGridAtendimentos',
         'locaisAgenda',
         'tiposRecurso',
@@ -337,12 +337,13 @@ const secoesConfiguracao = [
         'canaisAtendimento',
         'origensAtendimento',
         'ramosAtividade',
+        'conceitosFornecedor',
         'gruposEmpresa',
         'gruposProduto',
         'marcas',
         'atualizacaoSistema',
-        'relatorioPedidosFechados',
-        'relatorioPedidosEntregues',
+        'relatorioOrdensCompraFechados',
+        'relatorioOrdensCompraEntregues',
         'relatorioAtendimentos',
         'unidadesMedida',
         'tamanhos'
@@ -351,38 +352,38 @@ const secoesConfiguracao = [
   {
     id: 'relatorios',
     titulo: 'Relatorios',
-    atalhos: ['relatorioPedidosFechados', 'relatorioPedidosEntregues', 'relatorioAtendimentos']
+    atalhos: ['relatorioOrdensCompraFechados', 'relatorioOrdensCompraEntregues', 'relatorioAtendimentos']
   }
 ];
 const IDS_STATUS_VISITA_CRITICOS = new Set([1, 2, 3, 4, 5]);
-const IDS_ETAPAS_PEDIDO_OBRIGATORIAS = new Set([5]);
-const IDS_ETAPAS_ORCAMENTO_OBRIGATORIAS = new Set([1, 2, 3, 4]);
-const IDS_TIPOS_PEDIDO_OBRIGATORIOS = new Set([1, 2]);
-const IDS_CONCEITOS_CLIENTE_OBRIGATORIOS = new Set([1]);
+const IDS_ETAPAS_ORDEM_COMPRA_OBRIGATORIAS = new Set([5]);
+const IDS_ETAPAS_COTACAO_OBRIGATORIAS = new Set([1, 2, 3, 4]);
+const IDS_TIPOS_ORDEM_COMPRA_OBRIGATORIOS = new Set([1, 2]);
+const IDS_CONCEITOS_FORNECEDOR_OBRIGATORIOS = new Set([1]);
 
 function statusVisitaEhCritico(registro) {
   const idStatusVisita = Number(registro?.idStatusVisita);
   return Number.isFinite(idStatusVisita) && IDS_STATUS_VISITA_CRITICOS.has(idStatusVisita);
 }
 
-function etapaOrcamentoEhObrigatoria(registro) {
-  const idEtapaOrcamento = Number(registro?.idEtapaOrcamento);
-  return Number.isFinite(idEtapaOrcamento) && IDS_ETAPAS_ORCAMENTO_OBRIGATORIAS.has(idEtapaOrcamento);
+function etapaCotacaoEhObrigatoria(registro) {
+  const idEtapaCotacao = Number(registro?.idEtapaCotacao);
+  return Number.isFinite(idEtapaCotacao) && IDS_ETAPAS_COTACAO_OBRIGATORIAS.has(idEtapaCotacao);
 }
 
-function etapaPedidoEhObrigatoria(registro) {
-  const idEtapaPedido = Number(registro?.idEtapa);
-  return Number.isFinite(idEtapaPedido) && IDS_ETAPAS_PEDIDO_OBRIGATORIAS.has(idEtapaPedido);
+function etapaOrdemCompraEhObrigatoria(registro) {
+  const idEtapaOrdemCompra = Number(registro?.idEtapa);
+  return Number.isFinite(idEtapaOrdemCompra) && IDS_ETAPAS_ORDEM_COMPRA_OBRIGATORIAS.has(idEtapaOrdemCompra);
 }
 
-function tipoPedidoEhObrigatorio(registro) {
-  const idTipoPedido = Number(registro?.idTipoPedido);
-  return Number.isFinite(idTipoPedido) && IDS_TIPOS_PEDIDO_OBRIGATORIOS.has(idTipoPedido);
+function tipoOrdemCompraEhObrigatorio(registro) {
+  const idTipoOrdemCompra = Number(registro?.idTipoOrdemCompra);
+  return Number.isFinite(idTipoOrdemCompra) && IDS_TIPOS_ORDEM_COMPRA_OBRIGATORIOS.has(idTipoOrdemCompra);
 }
 
-function conceitoClienteEhObrigatorio(registro) {
+function conceitoFornecedorEhObrigatorio(registro) {
   const idConceito = Number(registro?.idConceito);
-  return Number.isFinite(idConceito) && IDS_CONCEITOS_CLIENTE_OBRIGATORIOS.has(idConceito);
+  return Number.isFinite(idConceito) && IDS_CONCEITOS_FORNECEDOR_OBRIGATORIOS.has(idConceito);
 }
 
 export function PaginaConfiguracoes({ usuarioLogado }) {
@@ -393,12 +394,12 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
   const [contatosGruposEmpresa, definirContatosGruposEmpresa] = useState([]);
   const [marcas, definirMarcas] = useState([]);
   const [ramosAtividade, definirRamosAtividade] = useState([]);
-  const [conceitosCliente, definirConceitosCliente] = useState([]);
-  const [vendedores, definirVendedores] = useState([]);
+  const [conceitosFornecedor, definirConceitosFornecedor] = useState([]);
+  const [compradores, definirCompradores] = useState([]);
   const [unidadesMedida, definirUnidadesMedida] = useState([]);
   const [metodosPagamento, definirMetodosPagamento] = useState([]);
   const [prazosPagamento, definirPrazosPagamento] = useState([]);
-  const [tiposPedido, definirTiposPedido] = useState([]);
+  const [tiposOrdemCompra, definirTiposOrdemCompra] = useState([]);
   const [locaisAgenda, definirLocaisAgenda] = useState([]);
   const [tiposRecurso, definirTiposRecurso] = useState([]);
   const [recursos, definirRecursos] = useState([]);
@@ -407,20 +408,20 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
   const [origensAtendimento, definirOrigensAtendimento] = useState([]);
   const [tiposAtendimento, definirTiposAtendimento] = useState([]);
   const [statusVisita, definirStatusVisita] = useState([]);
-  const [etapasPedido, definirEtapasPedido] = useState([]);
-  const [etapasOrcamento, definirEtapasOrcamento] = useState([]);
-  const [camposOrcamento, definirCamposOrcamento] = useState([]);
-  const [camposPedido, definirCamposPedido] = useState([]);
+  const [etapasOrdemCompra, definirEtapasOrdemCompra] = useState([]);
+  const [etapasCotacao, definirEtapasCotacao] = useState([]);
+  const [camposCotacao, definirCamposCotacao] = useState([]);
+  const [camposOrdemCompra, definirCamposOrdemCompra] = useState([]);
   const [tamanhos, definirTamanhos] = useState([]);
   const [configuracaoAtualizacaoSistema, definirConfiguracaoAtualizacaoSistema] = useState(null);
   const [modalManualAberto, definirModalManualAberto] = useState(false);
   const [modalEmpresaAberto, definirModalEmpresaAberto] = useState(false);
-  const [modalLayoutOrcamentoAberto, definirModalLayoutOrcamentoAberto] = useState(false);
+  const [modalLayoutCotacaoAberto, definirModalLayoutCotacaoAberto] = useState(false);
   const [modalSelecaoColunasGridAberto, definirModalSelecaoColunasGridAberto] = useState(false);
-  const [modalColunasGridClientesAberto, definirModalColunasGridClientesAberto] = useState(false);
-  const [modalColunasGridOrcamentosAberto, definirModalColunasGridOrcamentosAberto] = useState(false);
+  const [modalColunasGridFornecedoresAberto, definirModalColunasGridFornecedoresAberto] = useState(false);
+  const [modalColunasGridCotacoesAberto, definirModalColunasGridCotacoesAberto] = useState(false);
   const [modalColunasGridProdutosAberto, definirModalColunasGridProdutosAberto] = useState(false);
-  const [modalColunasGridPedidosAberto, definirModalColunasGridPedidosAberto] = useState(false);
+  const [modalColunasGridOrdensCompraAberto, definirModalColunasGridOrdensCompraAberto] = useState(false);
   const [modalColunasGridAtendimentosAberto, definirModalColunasGridAtendimentosAberto] = useState(false);
   const [modalGraficosPaginaInicialAberto, definirModalGraficosPaginaInicialAberto] = useState(null);
   const [modalUsuariosAberto, definirModalUsuariosAberto] = useState(false);
@@ -438,7 +439,7 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
 
   useEffect(() => {
     carregarUsuarios();
-  }, [vendedores]);
+  }, [compradores]);
 
   useEffect(() => {
     function tratarAtalhosConfiguracoes(evento) {
@@ -451,12 +452,12 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
       if (
         !modalManualAberto
         && !modalEmpresaAberto
-        && !modalLayoutOrcamentoAberto
+        && !modalLayoutCotacaoAberto
         && !modalSelecaoColunasGridAberto
-        && !modalColunasGridClientesAberto
-        && !modalColunasGridOrcamentosAberto
+        && !modalColunasGridFornecedoresAberto
+        && !modalColunasGridCotacoesAberto
         && !modalColunasGridProdutosAberto
-        && !modalColunasGridPedidosAberto
+        && !modalColunasGridOrdensCompraAberto
         && !modalColunasGridAtendimentosAberto
         && !modalGraficosPaginaInicialAberto
         && !modalUsuariosAberto
@@ -478,14 +479,14 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
     relatorioConfiguracaoAberto,
     modalAtualizacaoSistemaAberto,
     modalSelecaoColunasGridAberto,
-    modalColunasGridClientesAberto,
-    modalColunasGridOrcamentosAberto,
+    modalColunasGridFornecedoresAberto,
+    modalColunasGridCotacoesAberto,
     modalColunasGridProdutosAberto,
-    modalColunasGridPedidosAberto,
+    modalColunasGridOrdensCompraAberto,
     modalColunasGridAtendimentosAberto,
     modalGraficosPaginaInicialAberto,
     modalEmpresaAberto,
-    modalLayoutOrcamentoAberto,
+    modalLayoutCotacaoAberto,
     modalManualAberto,
     modalUsuariosAberto
   ]);
@@ -513,7 +514,7 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
     definirModoModalEmpresa('edicao');
   }
 
-  async function salvarLayoutOrcamento(dadosLayout) {
+  async function salvarLayoutCotacao(dadosLayout) {
     if (!empresa?.idEmpresa) {
       throw new Error('Cadastre a empresa antes de configurar o layout da cotacao.');
     }
@@ -526,7 +527,7 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
     await atualizarEmpresa(empresa.idEmpresa, payload);
     await carregarEmpresa();
     window.dispatchEvent(new CustomEvent('empresa-atualizada'));
-    definirModalLayoutOrcamentoAberto(false);
+    definirModalLayoutCotacaoAberto(false);
   }
 
   async function salvarColunasGridAtendimentos(dadosColunas) {
@@ -545,7 +546,7 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
     definirModalColunasGridAtendimentosAberto(false);
   }
 
-  async function salvarColunasGridClientes(dadosColunas) {
+  async function salvarColunasGridFornecedores(dadosColunas) {
     if (!empresa?.idEmpresa) {
       throw new Error('Cadastre a empresa antes de configurar as colunas do grid.');
     }
@@ -558,10 +559,10 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
     await atualizarEmpresa(empresa.idEmpresa, payload);
     await carregarEmpresa();
     window.dispatchEvent(new CustomEvent('empresa-atualizada'));
-    definirModalColunasGridClientesAberto(false);
+    definirModalColunasGridFornecedoresAberto(false);
   }
 
-  async function salvarColunasGridOrcamentos(dadosColunas) {
+  async function salvarColunasGridCotacoes(dadosColunas) {
     if (!empresa?.idEmpresa) {
       throw new Error('Cadastre a empresa antes de configurar as colunas do grid.');
     }
@@ -574,7 +575,7 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
     await atualizarEmpresa(empresa.idEmpresa, payload);
     await carregarEmpresa();
     window.dispatchEvent(new CustomEvent('empresa-atualizada'));
-    definirModalColunasGridOrcamentosAberto(false);
+    definirModalColunasGridCotacoesAberto(false);
   }
 
   async function salvarColunasGridProdutos(dadosColunas) {
@@ -593,7 +594,7 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
     definirModalColunasGridProdutosAberto(false);
   }
 
-  async function salvarColunasGridPedidos(dadosColunas) {
+  async function salvarColunasGridOrdensCompra(dadosColunas) {
     if (!empresa?.idEmpresa) {
       throw new Error('Cadastre a empresa antes de configurar as colunas do grid.');
     }
@@ -606,17 +607,17 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
     await atualizarEmpresa(empresa.idEmpresa, payload);
     await carregarEmpresa();
     window.dispatchEvent(new CustomEvent('empresa-atualizada'));
-    definirModalColunasGridPedidosAberto(false);
+    definirModalColunasGridOrdensCompraAberto(false);
   }
 
-  async function salvarGraficosPaginaInicialOrcamentos(graficos) {
+  async function salvarGraficosPaginaInicialCotacoes(graficos) {
     if (!empresa?.idEmpresa) {
       throw new Error('Cadastre a empresa antes de configurar os graficos da pagina inicial.');
     }
 
     const payload = normalizarPayloadEmpresa({
       ...empresa,
-      graficosPaginaInicialOrcamentos: graficos
+      graficosPaginaInicialCotacoes: graficos
     });
 
     await atualizarEmpresa(empresa.idEmpresa, payload);
@@ -675,14 +676,14 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
 
   async function carregarUsuarios() {
     const usuariosCarregados = await listarUsuarios({ incluirInativos: true });
-    const vendedoresPorId = new Map(
-      vendedores.map((vendedor) => [vendedor.idVendedor, vendedor.nome])
+    const compradoresPorId = new Map(
+      compradores.map((comprador) => [comprador.idComprador, comprador.nome])
     );
 
     definirUsuarios(
       usuariosCarregados.map((usuario) => ({
         ...usuario,
-        nomeVendedor: vendedoresPorId.get(usuario.idVendedor) || ''
+        nomeComprador: compradoresPorId.get(usuario.idComprador) || ''
       }))
     );
   }
@@ -703,12 +704,12 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
       listarContatosGruposEmpresaConfiguracao({ incluirInativos: true }),
       listarMarcasConfiguracao({ incluirInativos: true }),
       listarRamosAtividadeConfiguracao({ incluirInativos: true }),
-      listarConceitosClienteConfiguracao({ incluirInativos: true }),
-      listarVendedoresConfiguracao({ incluirInativos: true }),
+      listarConceitosFornecedorConfiguracao({ incluirInativos: true }),
+      listarCompradoresConfiguracao({ incluirInativos: true }),
       listarUnidadesMedidaConfiguracao({ incluirInativos: true }),
       listarMetodosPagamentoConfiguracao({ incluirInativos: true }),
       listarPrazosPagamentoConfiguracao({ incluirInativos: true }),
-      listarTiposPedidoConfiguracao({ incluirInativos: true }),
+      listarTiposOrdemCompraConfiguracao({ incluirInativos: true }),
       listarLocaisAgendaConfiguracao({ incluirInativos: true }),
       listarTiposRecursoConfiguracao({ incluirInativos: true }),
       listarRecursosConfiguracao({ incluirInativos: true }),
@@ -717,10 +718,10 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
       listarOrigensAtendimentoConfiguracao({ incluirInativos: true }),
       listarTiposAtendimentoConfiguracao({ incluirInativos: true }),
         listarStatusVisitaConfiguracao({ incluirInativos: true }),
-        listarEtapasPedidoConfiguracao({ incluirInativos: true }),
-        listarEtapasOrcamentoConfiguracao({ incluirInativos: true }),
-        listarCamposOrcamentoConfiguracao({ incluirInativos: true }),
-        listarCamposPedidoConfiguracao({ incluirInativos: true }),
+        listarEtapasOrdemCompraConfiguracao({ incluirInativos: true }),
+        listarEtapasCotacaoConfiguracao({ incluirInativos: true }),
+        listarCamposCotacaoConfiguracao({ incluirInativos: true }),
+        listarCamposOrdemCompraConfiguracao({ incluirInativos: true }),
         listarTamanhosConfiguracao({ incluirInativos: true })
       ]);
 
@@ -729,12 +730,12 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
     definirContatosGruposEmpresa(obterResultadoLista(resultados[2]));
     definirMarcas(obterResultadoLista(resultados[3]));
     definirRamosAtividade(obterResultadoLista(resultados[4]));
-    definirConceitosCliente(obterResultadoLista(resultados[5]));
-    definirVendedores(obterResultadoLista(resultados[6]));
+    definirConceitosFornecedor(obterResultadoLista(resultados[5]));
+    definirCompradores(obterResultadoLista(resultados[6]));
     definirUnidadesMedida(obterResultadoLista(resultados[7]));
     definirMetodosPagamento(obterResultadoLista(resultados[8]));
     definirPrazosPagamento(obterResultadoLista(resultados[9]));
-    definirTiposPedido(obterResultadoLista(resultados[10]));
+    definirTiposOrdemCompra(obterResultadoLista(resultados[10]));
     definirLocaisAgenda(obterResultadoLista(resultados[11]));
     definirTiposRecurso(obterResultadoLista(resultados[12]));
     definirRecursos(obterResultadoLista(resultados[13]));
@@ -743,20 +744,20 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
     definirOrigensAtendimento(obterResultadoLista(resultados[16]));
     definirTiposAtendimento(obterResultadoLista(resultados[17]));
     definirStatusVisita(ordenarRegistrosPorOrdem(obterResultadoLista(resultados[18]), 'idStatusVisita'));
-    definirEtapasPedido(ordenarRegistrosPorOrdem(obterResultadoLista(resultados[19]), 'idEtapa'));
-    definirEtapasOrcamento(ordenarRegistrosPorOrdem(obterResultadoLista(resultados[20]), 'idEtapaOrcamento'));
-    definirCamposOrcamento(obterResultadoLista(resultados[21]));
-    definirCamposPedido(obterResultadoLista(resultados[22]));
+    definirEtapasOrdemCompra(ordenarRegistrosPorOrdem(obterResultadoLista(resultados[19]), 'idEtapa'));
+    definirEtapasCotacao(ordenarRegistrosPorOrdem(obterResultadoLista(resultados[20]), 'idEtapaCotacao'));
+    definirCamposCotacao(obterResultadoLista(resultados[21]));
+    definirCamposOrdemCompra(obterResultadoLista(resultados[22]));
     definirTamanhos(obterResultadoLista(resultados[23]));
   }
 
   async function salvarUsuario(dadosUsuario) {
-    if (dadosUsuario.tipo === 'Usuario padrao' && dadosUsuario.idVendedor) {
-      const vendedorAtivo = vendedores.find(
-        (vendedor) => String(vendedor.idVendedor) === String(dadosUsuario.idVendedor) && vendedor.status
+    if (dadosUsuario.tipo === 'Usuario padrao' && dadosUsuario.idComprador) {
+      const compradorAtivo = compradores.find(
+        (comprador) => String(comprador.idComprador) === String(dadosUsuario.idComprador) && comprador.status
       );
 
-      if (!vendedorAtivo) {
+      if (!compradorAtivo) {
         throw new Error('Selecione um comprador ativo para vincular ao usuario.');
       }
     }
@@ -886,17 +887,17 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
     await carregarCadastrosConfiguracao();
   }
 
-  async function salvarVendedor(dadosVendedor) {
+  async function salvarComprador(dadosComprador) {
     const payload = {
-      nome: dadosVendedor.nome.trim(),
-      email: dadosVendedor.email.trim(),
-      status: dadosVendedor.status ? 1 : 0
+      nome: dadosComprador.nome.trim(),
+      email: dadosComprador.email.trim(),
+      status: dadosComprador.status ? 1 : 0
     };
 
-    if (dadosVendedor.idVendedor) {
-      await atualizarVendedor(dadosVendedor.idVendedor, payload);
+    if (dadosComprador.idComprador) {
+      await atualizarComprador(dadosComprador.idComprador, payload);
     } else {
-      await incluirVendedor(payload);
+      await incluirComprador(payload);
     }
 
     await carregarCadastrosConfiguracao();
@@ -944,31 +945,31 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
     await carregarCadastrosConfiguracao();
   }
 
-  async function salvarTipoPedido(dadosTipoPedido) {
+  async function salvarTipoOrdemCompra(dadosTipoOrdemCompra) {
     const payload = {
-      descricao: dadosTipoPedido.descricao.trim(),
-      status: dadosTipoPedido.status ? 1 : 0
+      descricao: dadosTipoOrdemCompra.descricao.trim(),
+      status: dadosTipoOrdemCompra.status ? 1 : 0
     };
 
-    if (dadosTipoPedido.idTipoPedido) {
-      await atualizarTipoPedido(dadosTipoPedido.idTipoPedido, payload);
+    if (dadosTipoOrdemCompra.idTipoOrdemCompra) {
+      await atualizarTipoOrdemCompra(dadosTipoOrdemCompra.idTipoOrdemCompra, payload);
     } else {
-      await incluirTipoPedido(payload);
+      await incluirTipoOrdemCompra(payload);
     }
 
     await carregarCadastrosConfiguracao();
   }
 
-  async function salvarConceitoCliente(dadosConceito) {
+  async function salvarConceitoFornecedor(dadosConceito) {
     const payload = {
       descricao: String(dadosConceito.descricao || '').trim(),
       status: dadosConceito.status ? 1 : 0
     };
 
     if (dadosConceito.idConceito) {
-      await atualizarConceitoCliente(dadosConceito.idConceito, payload);
+      await atualizarConceitoFornecedor(dadosConceito.idConceito, payload);
     } else {
-      await incluirConceitoCliente(payload);
+      await incluirConceitoFornecedor(payload);
     }
 
     await carregarCadastrosConfiguracao();
@@ -1102,7 +1103,7 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
     await carregarCadastrosConfiguracao();
   }
 
-  async function salvarEtapaPedido(dadosEtapa) {
+  async function salvarEtapaOrdemCompra(dadosEtapa) {
     const payload = {
       descricao: dadosEtapa.descricao.trim(),
       cor: dadosEtapa.cor.trim(),
@@ -1111,15 +1112,15 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
     };
 
     if (dadosEtapa.idEtapa) {
-      await atualizarEtapaPedido(dadosEtapa.idEtapa, payload);
+      await atualizarEtapaOrdemCompra(dadosEtapa.idEtapa, payload);
     } else {
-      await incluirEtapaPedido(payload);
+      await incluirEtapaOrdemCompra(payload);
     }
 
     await carregarCadastrosConfiguracao();
   }
 
-  async function salvarEtapaOrcamento(dadosEtapa) {
+  async function salvarEtapaCotacao(dadosEtapa) {
     const payload = {
       descricao: dadosEtapa.descricao.trim(),
       cor: dadosEtapa.cor.trim(),
@@ -1128,42 +1129,42 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
       status: dadosEtapa.status ? 1 : 0
     };
 
-    if (dadosEtapa.idEtapaOrcamento) {
-      await atualizarEtapaOrcamento(dadosEtapa.idEtapaOrcamento, payload);
+    if (dadosEtapa.idEtapaCotacao) {
+      await atualizarEtapaCotacao(dadosEtapa.idEtapaCotacao, payload);
     } else {
-      await incluirEtapaOrcamento(payload);
+      await incluirEtapaCotacao(payload);
     }
 
     await carregarCadastrosConfiguracao();
   }
 
-  async function salvarCampoOrcamento(dadosCampo) {
+  async function salvarCampoCotacao(dadosCampo) {
     const payload = {
       titulo: dadosCampo.titulo.trim(),
       descricaoPadrao: limparTextoOpcional(dadosCampo.descricaoPadrao),
       status: dadosCampo.status ? 1 : 0
     };
 
-    if (dadosCampo.idCampoOrcamento) {
-      await atualizarCampoOrcamento(dadosCampo.idCampoOrcamento, payload);
+    if (dadosCampo.idCampoCotacao) {
+      await atualizarCampoCotacao(dadosCampo.idCampoCotacao, payload);
     } else {
-      await incluirCampoOrcamento(payload);
+      await incluirCampoCotacao(payload);
     }
 
     await carregarCadastrosConfiguracao();
   }
 
-  async function salvarCampoPedido(dadosCampo) {
+  async function salvarCampoOrdemCompra(dadosCampo) {
     const payload = {
       titulo: dadosCampo.titulo.trim(),
       descricaoPadrao: limparTextoOpcional(dadosCampo.descricaoPadrao),
       status: dadosCampo.status ? 1 : 0
     };
 
-    if (dadosCampo.idCampoPedido) {
-      await atualizarCampoPedido(dadosCampo.idCampoPedido, payload);
+    if (dadosCampo.idCampoOrdemCompra) {
+      await atualizarCampoOrdemCompra(dadosCampo.idCampoOrdemCompra, payload);
     } else {
-      await incluirCampoPedido(payload);
+      await incluirCampoOrdemCompra(payload);
     }
 
     await carregarCadastrosConfiguracao();
@@ -1202,13 +1203,13 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
     await carregarCadastrosConfiguracao();
   }
 
-  async function inativarConceitoCliente(registro) {
-    await atualizarConceitoCliente(registro.idConceito, { status: 0 });
+  async function inativarConceitoFornecedor(registro) {
+    await atualizarConceitoFornecedor(registro.idConceito, { status: 0 });
     await carregarCadastrosConfiguracao();
   }
 
-  async function inativarVendedor(registro) {
-    await atualizarVendedor(registro.idVendedor, { status: 0 });
+  async function inativarComprador(registro) {
+    await atualizarComprador(registro.idComprador, { status: 0 });
     await carregarCadastrosConfiguracao();
   }
 
@@ -1227,8 +1228,8 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
     await carregarCadastrosConfiguracao();
   }
 
-  async function inativarTipoPedido(registro) {
-    await atualizarTipoPedido(registro.idTipoPedido, { status: 0 });
+  async function inativarTipoOrdemCompra(registro) {
+    await atualizarTipoOrdemCompra(registro.idTipoOrdemCompra, { status: 0 });
     await carregarCadastrosConfiguracao();
   }
 
@@ -1272,18 +1273,18 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
     await carregarCadastrosConfiguracao();
   }
 
-  async function inativarEtapaPedido(registro) {
-    await atualizarEtapaPedido(registro.idEtapa, { status: 0 });
+  async function inativarEtapaOrdemCompra(registro) {
+    await atualizarEtapaOrdemCompra(registro.idEtapa, { status: 0 });
     await carregarCadastrosConfiguracao();
   }
 
-  async function inativarEtapaOrcamento(registro) {
-    await atualizarEtapaOrcamento(registro.idEtapaOrcamento, { status: 0 });
+  async function inativarEtapaCotacao(registro) {
+    await atualizarEtapaCotacao(registro.idEtapaCotacao, { status: 0 });
     await carregarCadastrosConfiguracao();
   }
 
-  async function inativarCampoOrcamento(registro) {
-    await atualizarCampoOrcamento(registro.idCampoOrcamento, { status: 0 });
+  async function inativarCampoCotacao(registro) {
+    await atualizarCampoCotacao(registro.idCampoCotacao, { status: 0 });
     await carregarCadastrosConfiguracao();
   }
 
@@ -1296,7 +1297,7 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
   }
 
   function abrirConfiguracao(atalho) {
-    if (usuarioSomenteConsulta && ['empresa', 'usuarios', 'vendedores', 'layoutOrcamento', 'colunasGridAtendimentos'].includes(atalho.id)) {
+    if (usuarioSomenteConsulta && ['empresa', 'usuarios', 'compradores', 'layoutCotacao', 'colunasGridAtendimentos'].includes(atalho.id)) {
       return;
     }
 
@@ -1306,12 +1307,12 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
       return;
     }
 
-    if (atalho.id === 'layoutOrcamento') {
+    if (atalho.id === 'layoutCotacao') {
       if (!empresa?.idEmpresa) {
         return;
       }
 
-      definirModalLayoutOrcamentoAberto(true);
+      definirModalLayoutCotacaoAberto(true);
       return;
     }
 
@@ -1339,8 +1340,8 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
     }
 
     if ([
-      'relatorioPedidosFechados',
-      'relatorioPedidosEntregues',
+      'relatorioOrdensCompraFechados',
+      'relatorioOrdensCompraEntregues',
       'relatorioAtendimentos'
     ].includes(atalho.id)) {
       if (usuarioSomenteConsulta) {
@@ -1354,24 +1355,25 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
     if ([
       'gruposProduto',
       'gruposEmpresa',
-      'etapasPedido',
-      'etapasOrcamento',
+      'etapasOrdemCompra',
+      'etapasCotacao',
       'marcas',
       'metodosPagamento',
       'locaisAgenda',
-      'orcamentos',
-      'pedidos',
+      'cotacoes',
+      'ordensCompra',
       'prazosPagamento',
-      'tiposPedido',
+      'tiposOrdemCompra',
       'recursos',
       'ramosAtividade',
+      'conceitosFornecedor',
       'canaisAtendimento',
       'origensAtendimento',
       'tiposAtendimento',
       'statusVisita',
       'tiposAgenda',
       'tiposRecurso',
-      'vendedores',
+      'compradores',
       'unidadesMedida',
       'tamanhos'
     ].includes(atalho.id)) {
@@ -1388,28 +1390,28 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
     definirModalUsuariosAberto(false);
   }
 
-  function fecharModalLayoutOrcamento() {
-    definirModalLayoutOrcamentoAberto(false);
+  function fecharModalLayoutCotacao() {
+    definirModalLayoutCotacaoAberto(false);
   }
 
   function fecharModalColunasGridAtendimentos() {
     definirModalColunasGridAtendimentosAberto(false);
   }
 
-  function fecharModalColunasGridClientes() {
-    definirModalColunasGridClientesAberto(false);
+  function fecharModalColunasGridFornecedores() {
+    definirModalColunasGridFornecedoresAberto(false);
   }
 
-  function fecharModalColunasGridOrcamentos() {
-    definirModalColunasGridOrcamentosAberto(false);
+  function fecharModalColunasGridCotacoes() {
+    definirModalColunasGridCotacoesAberto(false);
   }
 
   function fecharModalColunasGridProdutos() {
     definirModalColunasGridProdutosAberto(false);
   }
 
-  function fecharModalColunasGridPedidos() {
-    definirModalColunasGridPedidosAberto(false);
+  function fecharModalColunasGridOrdensCompra() {
+    definirModalColunasGridOrdensCompraAberto(false);
   }
 
   function fecharModalSelecaoColunasGrid() {
@@ -1417,15 +1419,15 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
   }
 
   function selecionarModuloColunasGrid(idModulo) {
-    if (idModulo === 'clientes') {
+    if (idModulo === 'fornecedores') {
       definirModalSelecaoColunasGridAberto(false);
-      definirModalColunasGridClientesAberto(true);
+      definirModalColunasGridFornecedoresAberto(true);
       return;
     }
 
-    if (idModulo === 'orcamentos') {
+    if (idModulo === 'cotacoes') {
       definirModalSelecaoColunasGridAberto(false);
-      definirModalColunasGridOrcamentosAberto(true);
+      definirModalColunasGridCotacoesAberto(true);
       return;
     }
 
@@ -1435,9 +1437,9 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
       return;
     }
 
-    if (idModulo === 'pedidos') {
+    if (idModulo === 'ordensCompra') {
       definirModalSelecaoColunasGridAberto(false);
-      definirModalColunasGridPedidosAberto(true);
+      definirModalColunasGridOrdensCompraAberto(true);
       return;
     }
 
@@ -1470,7 +1472,7 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
       <header className="cabecalhoPagina">
         <div>
           <h1>Configuracoes</h1>
-          <p>Cadastros base e parametros para manter o CRM organizado.</p>
+          <p>Cadastros base e parametros para manter o SRM organizado.</p>
         </div>
       </header>
 
@@ -1497,15 +1499,15 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
                           (usuarioSomenteConsulta && [
                             'empresa',
                             'usuarios',
-                            'vendedores',
-                            'layoutOrcamento',
+                            'compradores',
+                            'layoutCotacao',
                             'colunasGridAtendimentos',
                             'atualizacaoSistema',
-                            'relatorioPedidosFechados',
-                            'relatorioPedidosEntregues',
+                            'relatorioOrdensCompraFechados',
+                            'relatorioOrdensCompraEntregues',
                             'relatorioAtendimentos'
                           ].includes(atalho.id))
-                          || (['layoutOrcamento', 'colunasGridAtendimentos'].includes(atalho.id) && !empresa?.idEmpresa)
+                          || (['layoutCotacao', 'colunasGridAtendimentos'].includes(atalho.id) && !empresa?.idEmpresa)
                         }
                         onClick={() => abrirConfiguracao(atalho)}
                       >
@@ -1544,11 +1546,11 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
                         type="button"
                         className="cartaoConfiguracao"
                         disabled={usuarioSomenteConsulta || !empresa?.idEmpresa}
-                        onClick={() => definirModalGraficosPaginaInicialAberto('orcamentos')}
+                        onClick={() => definirModalGraficosPaginaInicialAberto('cotacoes')}
                       >
                         <span className="iconeCartaoConfiguracao" aria-hidden="true">
                           <span className="circuloIconeConfiguracao">
-                            <Icone nome="orcamento" />
+                            <Icone nome="cotacao" />
                           </span>
                         </span>
                         <span className="conteudoCartaoConfiguracao">
@@ -1560,11 +1562,11 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
                         type="button"
                         className="cartaoConfiguracao"
                         disabled={usuarioSomenteConsulta || !empresa?.idEmpresa}
-                        onClick={() => definirModalGraficosPaginaInicialAberto('vendas')}
+                        onClick={() => definirModalGraficosPaginaInicialAberto('ordensCompra')}
                       >
                         <span className="iconeCartaoConfiguracao" aria-hidden="true">
                           <span className="circuloIconeConfiguracao">
-                            <Icone nome="pedido" />
+                            <Icone nome="ordemCompra" />
                           </span>
                         </span>
                         <span className="conteudoCartaoConfiguracao">
@@ -1608,7 +1610,7 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
       <ModalEmpresa
         aberto={modalEmpresaAberto}
         empresa={empresa}
-        etapasOrcamento={etapasOrcamento}
+        etapasCotacao={etapasCotacao}
         modo={modoModalEmpresa}
         aoFechar={fecharModalEmpresa}
         aoSalvar={salvarEmpresa}
@@ -1631,21 +1633,21 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
         aoSalvar={salvarCardsPaginaInicial}
       />
       <ModalGraficosPaginaInicial
-        aberto={modalGraficosPaginaInicialAberto === 'orcamentos'}
+        aberto={modalGraficosPaginaInicialAberto === 'cotacoes'}
         titulo="Graficos Cotacoes"
         empresa={empresa}
-        configuracoesAtuais={empresa?.graficosPaginaInicialOrcamentos}
-        normalizarConfiguracoes={normalizarConfiguracoesGraficosPaginaInicialOrcamentos}
-        reordenarConfiguracoes={reordenarConfiguracoesGraficosPaginaInicialOrcamentos}
-        reposicionarConfiguracao={reposicionarConfiguracaoGraficosPaginaInicialOrcamentos}
+        configuracoesAtuais={empresa?.graficosPaginaInicialCotacoes}
+        normalizarConfiguracoes={normalizarConfiguracoesGraficosPaginaInicialCotacoes}
+        reordenarConfiguracoes={reordenarConfiguracoesGraficosPaginaInicialCotacoes}
+        reposicionarConfiguracao={reposicionarConfiguracaoGraficosPaginaInicialCotacoes}
         totalColunas={TOTAL_COLUNAS_GRAFICOS_PAGINA_INICIAL}
         somenteConsulta={usuarioSomenteConsulta}
         camadaSecundaria={modalEmpresaAberto}
         aoFechar={() => definirModalGraficosPaginaInicialAberto(null)}
-        aoSalvar={salvarGraficosPaginaInicialOrcamentos}
+        aoSalvar={salvarGraficosPaginaInicialCotacoes}
       />
       <ModalGraficosPaginaInicial
-        aberto={modalGraficosPaginaInicialAberto === 'vendas'}
+        aberto={modalGraficosPaginaInicialAberto === 'ordensCompra'}
         titulo="Graficos Ordens de compra"
         empresa={empresa}
         configuracoesAtuais={empresa?.graficosPaginaInicialOrdensCompra}
@@ -1672,31 +1674,31 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
         aoFechar={() => definirModalGraficosPaginaInicialAberto(null)}
         aoSalvar={salvarGraficosPaginaInicialAtendimentos}
       />
-      <ModalLayoutOrcamento
-        aberto={modalLayoutOrcamentoAberto}
+      <ModalLayoutCotacao
+        aberto={modalLayoutCotacaoAberto}
         empresa={empresa}
         somenteConsulta={usuarioSomenteConsulta}
-        aoFechar={fecharModalLayoutOrcamento}
-        aoSalvar={salvarLayoutOrcamento}
+        aoFechar={fecharModalLayoutCotacao}
+        aoSalvar={salvarLayoutCotacao}
       />
       <ModalSelecaoColunasGrid
         aberto={modalSelecaoColunasGridAberto}
         aoFechar={fecharModalSelecaoColunasGrid}
         aoSelecionar={selecionarModuloColunasGrid}
       />
-      <ModalColunasGridClientes
-        aberto={modalColunasGridClientesAberto}
+      <ModalColunasGridFornecedores
+        aberto={modalColunasGridFornecedoresAberto}
         empresa={empresa}
         somenteConsulta={usuarioSomenteConsulta}
-        aoFechar={fecharModalColunasGridClientes}
-        aoSalvar={salvarColunasGridClientes}
+        aoFechar={fecharModalColunasGridFornecedores}
+        aoSalvar={salvarColunasGridFornecedores}
       />
-      <ModalColunasGridOrcamentos
-        aberto={modalColunasGridOrcamentosAberto}
+      <ModalColunasGridCotacoes
+        aberto={modalColunasGridCotacoesAberto}
         empresa={empresa}
         somenteConsulta={usuarioSomenteConsulta}
-        aoFechar={fecharModalColunasGridOrcamentos}
-        aoSalvar={salvarColunasGridOrcamentos}
+        aoFechar={fecharModalColunasGridCotacoes}
+        aoSalvar={salvarColunasGridCotacoes}
       />
       <ModalColunasGridProdutos
         aberto={modalColunasGridProdutosAberto}
@@ -1705,12 +1707,12 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
         aoFechar={fecharModalColunasGridProdutos}
         aoSalvar={salvarColunasGridProdutos}
       />
-      <ModalColunasGridPedidos
-        aberto={modalColunasGridPedidosAberto}
+      <ModalColunasGridOrdensCompra
+        aberto={modalColunasGridOrdensCompraAberto}
         empresa={empresa}
         somenteConsulta={usuarioSomenteConsulta}
-        aoFechar={fecharModalColunasGridPedidos}
-        aoSalvar={salvarColunasGridPedidos}
+        aoFechar={fecharModalColunasGridOrdensCompra}
+        aoSalvar={salvarColunasGridOrdensCompra}
       />
       <ModalColunasGridAtendimentos
         aberto={modalColunasGridAtendimentosAberto}
@@ -1722,7 +1724,7 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
       <ModalUsuarios
         aberto={modalUsuariosAberto}
         usuarios={usuarios}
-        vendedores={vendedores}
+        compradores={compradores}
         somenteConsulta={usuarioSomenteConsulta}
         aoFechar={fecharModalUsuarios}
         aoSalvar={salvarUsuario}
@@ -1745,7 +1747,7 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
         totalAtalhos={atalhosConfiguracao.length}
         secoes={secoesConfiguracao}
         usuarios={usuarios}
-        vendedores={vendedores}
+        compradores={compradores}
         gruposEmpresa={gruposEmpresa}
         usuarioLogado={usuarioLogado}
       />
@@ -1801,10 +1803,10 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
         aoInativar={inativarRamoAtividade}
       />
       <ModalCadastroConfiguracao
-        aberto={cadastroConfiguracaoAberto === 'conceitosCliente'}
+        aberto={cadastroConfiguracaoAberto === 'conceitosFornecedor'}
         titulo="Conceitos de fornecedor"
         rotuloIncluir="Incluir conceito"
-        registros={conceitosCliente}
+        registros={conceitosFornecedor}
         chavePrimaria="idConceito"
         somenteConsulta={usuarioSomenteConsulta}
         colunas={[
@@ -1817,20 +1819,20 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
             label: 'Registro ativo',
             type: 'checkbox',
             defaultValue: true,
-            disabled: ({ registroSelecionado }) => conceitoClienteEhObrigatorio(registroSelecionado)
+            disabled: ({ registroSelecionado }) => conceitoFornecedorEhObrigatorio(registroSelecionado)
           }
         ]}
         aoFechar={fecharCadastroConfiguracao}
-        aoSalvar={salvarConceitoCliente}
-        aoInativar={inativarConceitoCliente}
-        podeInativarRegistro={(registro) => !conceitoClienteEhObrigatorio(registro)}
+        aoSalvar={salvarConceitoFornecedor}
+        aoInativar={inativarConceitoFornecedor}
+        podeInativarRegistro={(registro) => !conceitoFornecedorEhObrigatorio(registro)}
       />
       <ModalCadastroConfiguracao
-        aberto={cadastroConfiguracaoAberto === 'vendedores'}
+        aberto={cadastroConfiguracaoAberto === 'compradores'}
         titulo="Compradores"
         rotuloIncluir="Incluir comprador"
-        registros={vendedores}
-        chavePrimaria="idVendedor"
+        registros={compradores}
+        chavePrimaria="idComprador"
         exibirConsulta={false}
         somenteConsulta={usuarioSomenteConsulta}
         colunas={[
@@ -1843,8 +1845,8 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
           { name: 'status', label: 'Registro ativo', type: 'checkbox', defaultValue: true }
         ]}
         aoFechar={fecharCadastroConfiguracao}
-        aoSalvar={salvarVendedor}
-        aoInativar={inativarVendedor}
+        aoSalvar={salvarComprador}
+        aoInativar={inativarComprador}
       />
       <ModalUnidadesMedida
         aberto={cadastroConfiguracaoAberto === 'unidadesMedida'}
@@ -1882,11 +1884,11 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
         aoInativar={inativarPrazoPagamento}
       />
       <ModalCadastroConfiguracao
-        aberto={cadastroConfiguracaoAberto === 'tiposPedido'}
+        aberto={cadastroConfiguracaoAberto === 'tiposOrdemCompra'}
         titulo="Tipos de ordem de compra"
         rotuloIncluir="Incluir tipo"
-        registros={tiposPedido}
-        chavePrimaria="idTipoPedido"
+        registros={tiposOrdemCompra}
+        chavePrimaria="idTipoOrdemCompra"
         somenteConsulta={usuarioSomenteConsulta}
         colunas={[
           { key: 'descricao', label: 'Descricao' }
@@ -1898,13 +1900,13 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
             label: 'Registro ativo',
             type: 'checkbox',
             defaultValue: true,
-            disabled: ({ registroSelecionado }) => tipoPedidoEhObrigatorio(registroSelecionado)
+            disabled: ({ registroSelecionado }) => tipoOrdemCompraEhObrigatorio(registroSelecionado)
           }
         ]}
         aoFechar={fecharCadastroConfiguracao}
-        aoSalvar={salvarTipoPedido}
-        aoInativar={inativarTipoPedido}
-        podeInativarRegistro={(registro) => !tipoPedidoEhObrigatorio(registro)}
+        aoSalvar={salvarTipoOrdemCompra}
+        aoInativar={inativarTipoOrdemCompra}
+        podeInativarRegistro={(registro) => !tipoOrdemCompraEhObrigatorio(registro)}
       />
       <ModalCadastroConfiguracao
         aberto={cadastroConfiguracaoAberto === 'locaisAgenda'}
@@ -1978,7 +1980,7 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
         rotuloIncluir="Incluir tipo"
         registros={tiposAgenda}
         chavePrimaria="idTipoAgenda"
-        classeTabela="tabelaEtapasPedido"
+        classeTabela="tabelaEtapasOrdemCompra"
         classeFormulario="gradeFormularioTiposAgenda"
         somenteConsulta={usuarioSomenteConsulta}
         colunas={[
@@ -1991,7 +1993,7 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
           { name: 'ordem', label: 'Ordem', type: 'number', required: true, defaultValue: 1, min: 1, max: 999, step: 1, inputMode: 'numeric' },
           { name: 'descricao', label: 'Descricao', required: true },
           { name: 'cor', label: 'Cor', type: 'color', required: true, defaultValue: '#9506F4' },
-          { name: 'obrigarCliente', label: 'Exigir fornecedor', type: 'checkbox', defaultValue: false },
+          { name: 'obrigarFornecedor', label: 'Exigir fornecedor', type: 'checkbox', defaultValue: false },
           { name: 'obrigarLocal', label: 'Exigir local', type: 'checkbox', defaultValue: false },
           { name: 'obrigarRecurso', label: 'Exigir recurso', type: 'checkbox', defaultValue: false },
           { name: 'status', label: 'Registro ativo', type: 'checkbox', defaultValue: true }
@@ -2080,13 +2082,13 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
         podeInativarRegistro={(registro) => !statusVisitaEhCritico(registro)}
       />
       <ModalCadastroConfiguracao
-        aberto={cadastroConfiguracaoAberto === 'etapasPedido'}
+        aberto={cadastroConfiguracaoAberto === 'etapasOrdemCompra'}
         titulo="Etapas da ordem de compra"
         rotuloIncluir="Incluir etapa"
-        registros={etapasPedido}
+        registros={etapasOrdemCompra}
         chavePrimaria="idEtapa"
-        classeTabela="tabelaEtapasPedido"
-        classeFormulario="gradeFormularioEtapasPedidoLinha"
+        classeTabela="tabelaEtapasOrdemCompra"
+        classeFormulario="gradeFormularioEtapasOrdemCompraLinha"
         somenteConsulta={usuarioSomenteConsulta}
         colunas={[
           { key: 'ordem', label: 'Ordem' },
@@ -2102,26 +2104,26 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
             label: 'Registro ativo',
             type: 'checkbox',
             defaultValue: true,
-            disabled: ({ registroSelecionado }) => etapaPedidoEhObrigatoria(registroSelecionado)
+            disabled: ({ registroSelecionado }) => etapaOrdemCompraEhObrigatoria(registroSelecionado)
           }
         ]}
         aoFechar={fecharCadastroConfiguracao}
-        aoSalvar={salvarEtapaPedido}
-        aoInativar={inativarEtapaPedido}
-        podeInativarRegistro={(registro) => !etapaPedidoEhObrigatoria(registro)}
+        aoSalvar={salvarEtapaOrdemCompra}
+        aoInativar={inativarEtapaOrdemCompra}
+        podeInativarRegistro={(registro) => !etapaOrdemCompraEhObrigatoria(registro)}
       />
       <ModalCadastroConfiguracao
-        aberto={cadastroConfiguracaoAberto === 'etapasOrcamento'}
+        aberto={cadastroConfiguracaoAberto === 'etapasCotacao'}
         titulo="Etapas da cotacao"
         rotuloIncluir="Incluir etapa"
-        registros={etapasOrcamento}
-        chavePrimaria="idEtapaOrcamento"
-        classeModal="modalClienteEtapasOrcamentoAmplo"
-        classeTabela="tabelaEtapasOrcamentoConfiguracao"
-        classeFormulario="gradeFormularioEtapasOrcamentoLinha"
-        classeModalFormulario="modalContatoEtapasOrcamentoLinha"
+        registros={etapasCotacao}
+        chavePrimaria="idEtapaCotacao"
+        classeModal="modalFornecedorEtapasCotacaoAmplo"
+        classeTabela="tabelaEtapasCotacaoConfiguracao"
+        classeFormulario="gradeFormularioEtapasCotacaoLinha"
+        classeModalFormulario="modalContatoEtapasCotacaoLinha"
         agruparCheckboxes
-        classeGrupoCheckboxes="grupoCheckboxesEtapasOrcamento"
+        classeGrupoCheckboxes="grupoCheckboxesEtapasCotacao"
         somenteConsulta={usuarioSomenteConsulta}
         colunas={[
           { key: 'ordem', label: 'Ordem' },
@@ -2141,16 +2143,16 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
           { name: 'status', label: 'Registro ativo', type: 'checkbox', defaultValue: true }
         ]}
         aoFechar={fecharCadastroConfiguracao}
-        aoSalvar={salvarEtapaOrcamento}
-        aoInativar={inativarEtapaOrcamento}
-        podeInativarRegistro={(registro) => !etapaOrcamentoEhObrigatoria(registro)}
+        aoSalvar={salvarEtapaCotacao}
+        aoInativar={inativarEtapaCotacao}
+        podeInativarRegistro={(registro) => !etapaCotacaoEhObrigatoria(registro)}
       />
       <ModalCadastroConfiguracao
-        aberto={cadastroConfiguracaoAberto === 'orcamentos'}
+        aberto={cadastroConfiguracaoAberto === 'cotacoes'}
         titulo="Campos da cotacao"
         rotuloIncluir="Incluir campo"
-        registros={camposOrcamento}
-        chavePrimaria="idCampoOrcamento"
+        registros={camposCotacao}
+        chavePrimaria="idCampoCotacao"
         somenteConsulta={usuarioSomenteConsulta}
         colunas={[
           { key: 'titulo', label: 'Titulo' }
@@ -2161,15 +2163,15 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
           { name: 'status', label: 'Registro ativo', type: 'checkbox', defaultValue: true }
         ]}
         aoFechar={fecharCadastroConfiguracao}
-        aoSalvar={salvarCampoOrcamento}
-        aoInativar={inativarCampoOrcamento}
+        aoSalvar={salvarCampoCotacao}
+        aoInativar={inativarCampoCotacao}
       />
       <ModalCadastroConfiguracao
-        aberto={cadastroConfiguracaoAberto === 'pedidos'}
+        aberto={cadastroConfiguracaoAberto === 'ordensCompra'}
         titulo="Campos da ordem de compra"
         rotuloIncluir="Incluir campo"
-        registros={camposPedido}
-        chavePrimaria="idCampoPedido"
+        registros={camposOrdemCompra}
+        chavePrimaria="idCampoOrdemCompra"
         somenteConsulta={usuarioSomenteConsulta}
         colunas={[
           { key: 'titulo', label: 'Titulo' }
@@ -2180,9 +2182,9 @@ export function PaginaConfiguracoes({ usuarioLogado }) {
           { name: 'status', label: 'Registro ativo', type: 'checkbox', defaultValue: true }
         ]}
         aoFechar={fecharCadastroConfiguracao}
-        aoSalvar={salvarCampoPedido}
+        aoSalvar={salvarCampoOrdemCompra}
         aoInativar={async (registro) => {
-          await atualizarCampoPedido(registro.idCampoPedido, { status: 0 });
+          await atualizarCampoOrdemCompra(registro.idCampoOrdemCompra, { status: 0 });
           await carregarCadastrosConfiguracao();
         }}
       />
@@ -2208,18 +2210,18 @@ function normalizarPayloadEmpresa(dadosEmpresa) {
     horaInicioSabado: dadosEmpresa.trabalhaSabado ? limparTextoOpcional(dadosEmpresa.horaInicioSabado) : null,
     horaFimSabado: dadosEmpresa.trabalhaSabado ? limparTextoOpcional(dadosEmpresa.horaFimSabado) : null,
     exibirFunilPaginaInicial: dadosEmpresa.exibirFunilPaginaInicial ? 1 : 0,
-    diasValidadeOrcamento: normalizarNumeroInteiro(dadosEmpresa.diasValidadeOrcamento, 7),
-    diasEntregaPedido: normalizarNumeroInteiro(dadosEmpresa.diasEntregaPedido, 7),
+    diasValidadeCotacao: normalizarNumeroInteiro(dadosEmpresa.diasValidadeCotacao, 7),
+    diasEntregaOrdemCompra: normalizarNumeroInteiro(dadosEmpresa.diasEntregaOrdemCompra, 7),
     codigoPrincipalFornecedor: String(dadosEmpresa.codigoPrincipalFornecedor || '').trim() === 'codigoAlternativo'
       ? 'codigoAlternativo'
       : 'codigo',
-    etapasFiltroPadraoOrcamento: JSON.stringify(
-      Array.isArray(dadosEmpresa.etapasFiltroPadraoOrcamento)
-        ? dadosEmpresa.etapasFiltroPadraoOrcamento.map(String)
+    etapasFiltroPadraoCotacao: JSON.stringify(
+      Array.isArray(dadosEmpresa.etapasFiltroPadraoCotacao)
+        ? dadosEmpresa.etapasFiltroPadraoCotacao.map(String)
         : []
     ),
-    colunasGridClientes: JSON.stringify(
-      normalizarConfiguracoesColunasGridClientes(dadosEmpresa.colunasGridClientes).map((coluna) => ({
+    colunasGridFornecedores: JSON.stringify(
+      normalizarConfiguracoesColunasGridFornecedores(dadosEmpresa.colunasGridFornecedores).map((coluna) => ({
         id: coluna.id,
         base: coluna.base,
         rotulo: coluna.rotulo,
@@ -2228,8 +2230,8 @@ function normalizarPayloadEmpresa(dadosEmpresa) {
         span: coluna.span
       }))
     ),
-    colunasGridOrcamentos: JSON.stringify(
-      normalizarConfiguracoesColunasGridOrcamentos(dadosEmpresa.colunasGridOrcamentos).map((coluna) => ({
+    colunasGridCotacoes: JSON.stringify(
+      normalizarConfiguracoesColunasGridCotacoes(dadosEmpresa.colunasGridCotacoes).map((coluna) => ({
         id: coluna.id,
         base: coluna.base,
         rotulo: coluna.rotulo,
@@ -2248,8 +2250,8 @@ function normalizarPayloadEmpresa(dadosEmpresa) {
         span: coluna.span
       }))
     ),
-    colunasGridPedidos: JSON.stringify(
-      normalizarConfiguracoesColunasGridPedidos(dadosEmpresa.colunasGridPedidos).map((coluna) => ({
+    colunasGridOrdensCompra: JSON.stringify(
+      normalizarConfiguracoesColunasGridOrdensCompra(dadosEmpresa.colunasGridOrdensCompra).map((coluna) => ({
         id: coluna.id,
         base: coluna.base,
         rotulo: coluna.rotulo,
@@ -2268,8 +2270,8 @@ function normalizarPayloadEmpresa(dadosEmpresa) {
         span: coluna.span
       }))
     ),
-    graficosPaginaInicialOrcamentos: JSON.stringify(
-      normalizarConfiguracoesGraficosPaginaInicialOrcamentos(dadosEmpresa.graficosPaginaInicialOrcamentos).map((grafico) => ({
+    graficosPaginaInicialCotacoes: JSON.stringify(
+      normalizarConfiguracoesGraficosPaginaInicialCotacoes(dadosEmpresa.graficosPaginaInicialCotacoes).map((grafico) => ({
         id: grafico.id,
         base: grafico.base,
         rotulo: grafico.rotulo,
@@ -2308,15 +2310,15 @@ function normalizarPayloadEmpresa(dadosEmpresa) {
         span: card.span
       }))
     ),
-    corPrimariaOrcamento: limparTextoOpcional(dadosEmpresa.corPrimariaOrcamento) || '#111827',
-    corSecundariaOrcamento: limparTextoOpcional(dadosEmpresa.corSecundariaOrcamento) || '#ef4444',
-    corDestaqueOrcamento: limparTextoOpcional(dadosEmpresa.corDestaqueOrcamento) || '#f59e0b',
-    destaqueItemOrcamentoPdf: String(dadosEmpresa.destaqueItemOrcamentoPdf || '').trim() === 'referencia'
+    corPrimariaCotacao: limparTextoOpcional(dadosEmpresa.corPrimariaCotacao) || '#111827',
+    corSecundariaCotacao: limparTextoOpcional(dadosEmpresa.corSecundariaCotacao) || '#ef4444',
+    corDestaqueCotacao: limparTextoOpcional(dadosEmpresa.corDestaqueCotacao) || '#f59e0b',
+    destaqueItemCotacaoPdf: String(dadosEmpresa.destaqueItemCotacaoPdf || '').trim() === 'referencia'
       ? 'referencia'
       : 'descricao',
-    assuntoEmailOrcamento: limparTextoOpcional(dadosEmpresa.assuntoEmailOrcamento),
-    corpoEmailOrcamento: limparTextoOpcional(dadosEmpresa.corpoEmailOrcamento),
-    assinaturaEmailOrcamento: limparTextoOpcional(dadosEmpresa.assinaturaEmailOrcamento),
+    assuntoEmailCotacao: limparTextoOpcional(dadosEmpresa.assuntoEmailCotacao),
+    corpoEmailCotacao: limparTextoOpcional(dadosEmpresa.corpoEmailCotacao),
+    assinaturaEmailCotacao: limparTextoOpcional(dadosEmpresa.assinaturaEmailCotacao),
     logradouro: limparTextoOpcional(dadosEmpresa.logradouro),
     numero: limparTextoOpcional(dadosEmpresa.numero),
     complemento: limparTextoOpcional(dadosEmpresa.complemento),
@@ -2372,8 +2374,8 @@ function normalizarPayloadUsuario(dadosUsuario) {
     tipo: dadosUsuario.tipo.trim(),
     ativo: dadosUsuario.ativo ? 1 : 0,
     imagem: limparTextoOpcional(dadosUsuario.imagem),
-    idVendedor: dadosUsuario.tipo === 'Usuario padrao' && dadosUsuario.idVendedor
-      ? Number(dadosUsuario.idVendedor)
+    idComprador: dadosUsuario.tipo === 'Usuario padrao' && dadosUsuario.idComprador
+      ? Number(dadosUsuario.idComprador)
       : null
   };
 }
@@ -2480,8 +2482,8 @@ function renderizarCorConfiguracao(registro) {
 function renderizarObrigatoriosTipoAgenda(registro) {
   const chips = [];
 
-  if (registro.obrigarCliente) {
-    chips.push('Cliente');
+  if (registro.obrigarFornecedor) {
+    chips.push('Fornecedor');
   }
 
   if (registro.obrigarLocal) {

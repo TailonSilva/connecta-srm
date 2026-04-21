@@ -2,24 +2,24 @@ import { useEffect, useMemo, useState } from 'react';
 import { CabecalhoFornecedores } from '../componentes/modulos/fornecedores-cabecalhoFornecedores';
 import { CorpoFornecedores } from '../componentes/modulos/fornecedores-corpoFornecedores';
 import {
-  atualizarCliente,
-  atualizarConceitoCliente,
+  atualizarFornecedor,
+  atualizarConceitoFornecedor,
   atualizarContato,
   atualizarGrupoEmpresa,
   atualizarRamoAtividade,
-  incluirConceitoCliente,
+  incluirConceitoFornecedor,
   incluirGrupoEmpresa,
   incluirRamoAtividade,
-  incluirCliente,
+  incluirFornecedor,
   incluirContato,
-  importarClientesPlanilha,
-  listarClientesGrid,
-  listarConceitosCliente,
+  importarFornecedoresPlanilha,
+  listarFornecedoresGrid,
+  listarConceitosFornecedor,
   listarContatos,
   listarGruposEmpresa,
   listarRamosAtividade,
-  listarVendedores
-} from '../servicos/clientes';
+  listarCompradores
+} from '../servicos/fornecedores';
 import { atualizarEmpresa, criarPayloadAtualizacaoColunasGrid, listarEmpresas } from '../servicos/empresa';
 import {
   atualizarContatoGrupoEmpresa,
@@ -38,28 +38,28 @@ import { ModalFiltros } from '../componentes/comuns/modalFiltros';
 import { ModalFornecedor } from '../componentes/modulos/fornecedores-modalFornecedor';
 import { ModalImportacaoCadastro } from '../componentes/comuns/modalImportacaoCadastro';
 import { ModalManualFornecedores } from '../componentes/modulos/fornecedores-modalManualFornecedores';
-import { ModalColunasGridClientes } from '../componentes/modulos/configuracoes-modalColunasGridClientes';
+import { ModalColunasGridFornecedores } from '../componentes/modulos/configuracoes-modalColunasGridFornecedores';
 
-const filtrosIniciaisClientes = {
+const filtrosIniciaisFornecedores = {
   estado: [],
   cidade: '',
   idGrupoEmpresa: '',
   idRamo: [],
-  idVendedor: [],
+  idComprador: [],
   tipo: [],
   status: []
 };
 
 export function PaginaFornecedores({ usuarioLogado }) {
   const [pesquisa, definirPesquisa] = useState('');
-  const [fornecedores, definirClientes] = useState([]);
+  const [fornecedores, definirFornecedores] = useState([]);
   const [contatos, definirContatos] = useState([]);
   const [gruposEmpresa, definirGruposEmpresa] = useState([]);
   const [contatosGruposEmpresa, definirContatosGruposEmpresa] = useState([]);
   const [empresa, definirEmpresa] = useState(null);
-  const [vendedores, definirVendedores] = useState([]);
+  const [compradores, definirCompradores] = useState([]);
   const [ramosAtividade, definirRamosAtividade] = useState([]);
-  const [conceitosCliente, definirConceitosCliente] = useState([]);
+  const [conceitosFornecedor, definirConceitosFornecedor] = useState([]);
   const [carregandoContexto, definirCarregandoContexto] = useState(true);
   const [carregandoGrade, definirCarregandoGrade] = useState(true);
   const [mensagemErro, definirMensagemErro] = useState('');
@@ -70,17 +70,17 @@ export function PaginaFornecedores({ usuarioLogado }) {
   const [modalColunasGridAberto, definirModalColunasGridAberto] = useState(false);
   const [resultadoImportacao, definirResultadoImportacao] = useState(null);
   const [importando, definirImportando] = useState(false);
-  const [clienteEmEdicao, definirClienteEmEdicao] = useState(null);
+  const [fornecedorEmEdicao, definirFornecedorEmEdicao] = useState(null);
   const [modoModalFornecedor, definirModoModalFornecedor] = useState('novo');
   const filtrosIniciais = useMemo(() => ({
-    ...filtrosIniciaisClientes,
-    idVendedor: []
+    ...filtrosIniciaisFornecedores,
+    idComprador: []
   }), []);
   const [filtros, definirFiltros] = useFiltrosPersistidos({
     chave: 'paginaFornecedores',
     usuario: usuarioLogado,
     filtrosPadrao: filtrosIniciais,
-    normalizarFiltros: normalizarFiltrosClientes
+    normalizarFiltros: normalizarFiltrosFornecedores
   });
 
   useEffect(() => {
@@ -88,13 +88,13 @@ export function PaginaFornecedores({ usuarioLogado }) {
   }, []);
 
   useEffect(() => {
-    carregarGradeClientes();
+    carregarGradeFornecedores();
   }, [pesquisa, JSON.stringify(filtros)]);
 
   useEffect(() => {
     function tratarGrupoEmpresaAtualizado() {
       carregarContexto();
-      carregarGradeClientes();
+      carregarGradeFornecedores();
     }
 
     window.addEventListener('grupo-empresa-atualizado', tratarGrupoEmpresaAtualizado);
@@ -107,7 +107,7 @@ export function PaginaFornecedores({ usuarioLogado }) {
   useEffect(() => {
     function tratarEmpresaAtualizada() {
       carregarContexto();
-      carregarGradeClientes();
+      carregarGradeFornecedores();
     }
 
     window.addEventListener('empresa-atualizada', tratarEmpresaAtualizada);
@@ -118,7 +118,7 @@ export function PaginaFornecedores({ usuarioLogado }) {
   }, [pesquisa, JSON.stringify(filtros)]);
 
   useEffect(() => {
-    function tratarAtalhosClientes(evento) {
+    function tratarAtalhosFornecedores(evento) {
       if (evento.key !== 'F1') {
         return;
       }
@@ -130,10 +130,10 @@ export function PaginaFornecedores({ usuarioLogado }) {
       }
     }
 
-    window.addEventListener('keydown', tratarAtalhosClientes);
+    window.addEventListener('keydown', tratarAtalhosFornecedores);
 
     return () => {
-      window.removeEventListener('keydown', tratarAtalhosClientes);
+      window.removeEventListener('keydown', tratarAtalhosFornecedores);
     };
   }, [modalAberto, modalManualAberto, modalFiltrosAberto, modalImportacaoAberto]);
 
@@ -145,9 +145,9 @@ export function PaginaFornecedores({ usuarioLogado }) {
         listarGruposEmpresa({ incluirInativos: true }),
         listarContatosGruposEmpresaConfiguracao({ incluirInativos: true }),
         listarEmpresas(),
-        listarVendedores(),
+        listarCompradores(),
         listarRamosAtividade(),
-        listarConceitosCliente({ incluirInativos: true })
+        listarConceitosFornecedor({ incluirInativos: true })
       ]);
 
       const [
@@ -155,7 +155,7 @@ export function PaginaFornecedores({ usuarioLogado }) {
         gruposEmpresaResultado,
         contatosGrupoResultado,
         empresasResultado,
-        vendedoresResultado,
+        compradoresResultado,
         ramosResultado,
         conceitosResultado
       ] = resultados;
@@ -168,29 +168,29 @@ export function PaginaFornecedores({ usuarioLogado }) {
           ? (empresasResultado.value[0] || null)
           : null
       );
-      definirVendedores(vendedoresResultado.status === 'fulfilled' ? vendedoresResultado.value : []);
+      definirCompradores(compradoresResultado.status === 'fulfilled' ? compradoresResultado.value : []);
       definirRamosAtividade(ramosResultado.status === 'fulfilled' ? ramosResultado.value : []);
-      definirConceitosCliente(conceitosResultado.status === 'fulfilled' ? conceitosResultado.value : []);
+      definirConceitosFornecedor(conceitosResultado.status === 'fulfilled' ? conceitosResultado.value : []);
     } finally {
       definirCarregandoContexto(false);
     }
   }
 
-  async function carregarGradeClientes() {
+  async function carregarGradeFornecedores() {
     definirCarregandoGrade(true);
     definirMensagemErro('');
 
     try {
-      const clientesCarregados = await listarClientesGrid({
+      const fornecedoresCarregados = await listarFornecedoresGrid({
         pesquisa,
         filtros
       });
 
-      definirClientes(
-        enriquecerClientes(
-          clientesCarregados,
+      definirFornecedores(
+        enriquecerFornecedores(
+          fornecedoresCarregados,
           contatos,
-          vendedores,
+          compradores,
           gruposEmpresa,
           ramosAtividade
         )
@@ -203,17 +203,17 @@ export function PaginaFornecedores({ usuarioLogado }) {
   }
 
   async function recarregarPagina() {
-    await Promise.all([carregarContexto(), carregarGradeClientes()]);
+    await Promise.all([carregarContexto(), carregarGradeFornecedores()]);
   }
 
-  async function salvarColunasGridClientes(dadosColunas) {
+  async function salvarColunasGridFornecedores(dadosColunas) {
     if (!empresa?.idEmpresa) {
       throw new Error('Cadastre a empresa antes de configurar as colunas do grid.');
     }
 
     await atualizarEmpresa(
       empresa.idEmpresa,
-      criarPayloadAtualizacaoColunasGrid('colunasGridClientes', dadosColunas.colunasGridClientes)
+      criarPayloadAtualizacaoColunasGrid('colunasGridFornecedores', dadosColunas.colunasGridFornecedores)
     );
 
     const empresasAtualizadas = await listarEmpresas();
@@ -222,37 +222,37 @@ export function PaginaFornecedores({ usuarioLogado }) {
     definirModalColunasGridAberto(false);
   }
 
-  async function salvarCliente(dadosCliente) {
-    const payload = normalizarPayloadCliente({
-      ...dadosCliente,
-      idVendedor: dadosCliente.idVendedor,
-      idFornecedor: clienteEmEdicao?.idCliente || proximoCodigoCliente
+  async function salvarFornecedor(dadosFornecedor) {
+    const payload = normalizarPayloadFornecedor({
+      ...dadosFornecedor,
+      idComprador: dadosFornecedor.idComprador,
+      idFornecedor: fornecedorEmEdicao?.idFornecedor || proximoCodigoFornecedor
     });
-    let clienteSalvo;
+    let fornecedorSalvo;
 
-    if (clienteEmEdicao?.idCliente) {
-      clienteSalvo = await atualizarCliente(clienteEmEdicao.idCliente, payload);
+    if (fornecedorEmEdicao?.idFornecedor) {
+      fornecedorSalvo = await atualizarFornecedor(fornecedorEmEdicao.idFornecedor, payload);
     } else {
-      clienteSalvo = await incluirCliente(payload);
+      fornecedorSalvo = await incluirFornecedor(payload);
     }
 
-    await salvarContatosCliente(
-      clienteSalvo.idCliente,
-      dadosCliente.contatos || []
+    await salvarContatosFornecedor(
+      fornecedorSalvo.idFornecedor,
+      dadosFornecedor.contatos || []
     );
 
     await recarregarPagina();
     definirModalAberto(false);
-    definirClienteEmEdicao(null);
+    definirFornecedorEmEdicao(null);
   }
 
-  async function importarClientes(linhas) {
+  async function importarFornecedores(linhas) {
     definirImportando(true);
 
     try {
-      const resultado = await importarClientesPlanilha({
+      const resultado = await importarFornecedoresPlanilha({
         linhas,
-        idVendedorPadrao: null
+        idCompradorPadrao: null
       });
 
       definirResultadoImportacao(resultado);
@@ -282,7 +282,7 @@ export function PaginaFornecedores({ usuarioLogado }) {
     return ramoSalvo;
   }
 
-  async function salvarConceitoCliente(dadosConceito) {
+  async function salvarConceitoFornecedor(dadosConceito) {
     const payload = {
       descricao: String(dadosConceito.descricao || '').trim(),
       status: dadosConceito.status ? 1 : 0
@@ -291,13 +291,13 @@ export function PaginaFornecedores({ usuarioLogado }) {
     let conceitoSalvo;
 
     if (dadosConceito.idConceito) {
-      conceitoSalvo = await atualizarConceitoCliente(dadosConceito.idConceito, payload);
+      conceitoSalvo = await atualizarConceitoFornecedor(dadosConceito.idConceito, payload);
     } else {
-      conceitoSalvo = await incluirConceitoCliente(payload);
+      conceitoSalvo = await incluirConceitoFornecedor(payload);
     }
 
-    const conceitosAtualizados = await listarConceitosCliente({ incluirInativos: true });
-    definirConceitosCliente(conceitosAtualizados);
+    const conceitosAtualizados = await listarConceitosFornecedor({ incluirInativos: true });
+    definirConceitosFornecedor(conceitosAtualizados);
 
     return conceitoSalvo;
   }
@@ -331,19 +331,19 @@ export function PaginaFornecedores({ usuarioLogado }) {
     return grupoSalvo;
   }
 
-  async function inativarRamoAtividadeCliente(registro) {
+  async function inativarRamoAtividadeFornecedor(registro) {
     await atualizarRamoAtividade(registro.idRamo, { status: 0 });
     const ramosAtualizados = await listarRamosAtividade();
     definirRamosAtividade(ramosAtualizados);
   }
 
-  async function inativarConceitoClienteCadastro(registro) {
-    await atualizarConceitoCliente(registro.idConceito, { status: 0 });
-    const conceitosAtualizados = await listarConceitosCliente({ incluirInativos: true });
-    definirConceitosCliente(conceitosAtualizados);
+  async function inativarConceitoFornecedorCadastro(registro) {
+    await atualizarConceitoFornecedor(registro.idConceito, { status: 0 });
+    const conceitosAtualizados = await listarConceitosFornecedor({ incluirInativos: true });
+    definirConceitosFornecedor(conceitosAtualizados);
   }
 
-  async function inativarGrupoEmpresaCliente(registro) {
+  async function inativarGrupoEmpresaFornecedor(registro) {
     const contatosDoGrupo = contatosGruposEmpresa.filter(
       (contato) => String(contato.idGrupoEmpresa) === String(registro.idGrupoEmpresa)
     );
@@ -361,48 +361,48 @@ export function PaginaFornecedores({ usuarioLogado }) {
     window.dispatchEvent(new CustomEvent('grupo-empresa-atualizado'));
   }
 
-  function abrirNovoCliente() {
-    definirClienteEmEdicao(null);
+  function abrirNovoFornecedor() {
+    definirFornecedorEmEdicao(null);
     definirModoModalFornecedor('novo');
     definirModalAberto(true);
   }
 
-  function abrirEdicaoCliente(cliente) {
-    definirClienteEmEdicao(cliente);
+  function abrirEdicaoFornecedor(fornecedor) {
+    definirFornecedorEmEdicao(fornecedor);
     definirModoModalFornecedor('edicao');
     definirModalAberto(true);
   }
 
-  function abrirConsultaCliente(cliente) {
-    definirClienteEmEdicao(cliente);
+  function abrirConsultaFornecedor(fornecedor) {
+    definirFornecedorEmEdicao(fornecedor);
     definirModoModalFornecedor('consulta');
     definirModalAberto(true);
   }
 
-  async function inativarCliente(cliente) {
-    await atualizarCliente(cliente.idCliente, { status: 0 });
+  async function inativarFornecedor(fornecedor) {
+    await atualizarFornecedor(fornecedor.idFornecedor, { status: 0 });
     await recarregarPagina();
   }
 
   function fecharModalFornecedor() {
     definirModalAberto(false);
-    definirClienteEmEdicao(null);
+    definirFornecedorEmEdicao(null);
     definirModoModalFornecedor('novo');
   }
 
   const carregando = carregandoContexto || carregandoGrade;
-  const proximoCodigoCliente = obterPrimeiroCodigoDisponivel(fornecedores, 'idCliente');
+  const proximoCodigoFornecedor = obterPrimeiroCodigoDisponivel(fornecedores, 'idFornecedor');
   const filtrosAtivos = Object.values(filtros).some((valor) => (
     Array.isArray(valor) ? valor.length > 0 : Boolean(valor)
   ));
   const opcoesEstado = obterOpcoesTexto(fornecedores, 'estado');
   const opcoesCidade = obterOpcoesTexto(fornecedores, 'cidade');
-  const vendedoresDisponiveis = vendedores;
-  const referenciasImportacaoClientes = useMemo(() => ({
-    vendedor: {
-      opcoes: vendedoresDisponiveis.map((vendedor) => ({
-        valor: vendedor.nome || '',
-        label: vendedor.nome || '-'
+  const compradoresDisponiveis = compradores;
+  const referenciasImportacaoFornecedores = useMemo(() => ({
+    comprador: {
+      opcoes: compradoresDisponiveis.map((comprador) => ({
+        valor: comprador.nome || '',
+        label: comprador.nome || '-'
       }))
     },
     ramoAtividade: {
@@ -419,7 +419,7 @@ export function PaginaFornecedores({ usuarioLogado }) {
           label: grupo.descricao || '-'
         }))
     }
-  }), [gruposEmpresa, ramosAtividade, vendedoresDisponiveis]);
+  }), [gruposEmpresa, ramosAtividade, compradoresDisponiveis]);
 
   return (
     <>
@@ -432,7 +432,7 @@ export function PaginaFornecedores({ usuarioLogado }) {
           definirResultadoImportacao(null);
           definirModalImportacaoAberto(true);
         }}
-        aoNovoCliente={abrirNovoCliente}
+        aoNovoFornecedor={abrirNovoFornecedor}
         filtrosAtivos={filtrosAtivos}
         configuracaoGridBloqueada={usuarioLogado?.tipo === 'Usuario padrao' || !empresa?.idEmpresa}
       />
@@ -441,9 +441,9 @@ export function PaginaFornecedores({ usuarioLogado }) {
         fornecedores={fornecedores}
         carregando={carregando}
         mensagemErro={mensagemErro}
-        aoEditarCliente={abrirEdicaoCliente}
-        aoConsultarCliente={abrirConsultaCliente}
-        aoInativarCliente={inativarCliente}
+        aoEditarFornecedor={abrirEdicaoFornecedor}
+        aoConsultarFornecedor={abrirConsultaFornecedor}
+        aoInativarFornecedor={inativarFornecedor}
       />
       <ModalFiltros
         aberto={modalFiltrosAberto}
@@ -477,13 +477,13 @@ export function PaginaFornecedores({ usuarioLogado }) {
             }))
           },
           {
-            name: 'idVendedor',
+            name: 'idComprador',
             label: 'Comprador',
             multiple: true,
             placeholder: 'Todos os compradores',
-            options: vendedoresDisponiveis.map((vendedor) => ({
-              valor: String(vendedor.idVendedor),
-              label: vendedor.nome
+            options: compradoresDisponiveis.map((comprador) => ({
+              valor: String(comprador.idComprador),
+              label: comprador.nome
             }))
           },
           {
@@ -516,73 +516,73 @@ export function PaginaFornecedores({ usuarioLogado }) {
       />
       <ModalFornecedor
         aberto={modalAberto}
-        cliente={clienteEmEdicao}
+        fornecedor={fornecedorEmEdicao}
         usuarioLogado={usuarioLogado}
-        codigoSugerido={proximoCodigoCliente}
-        contatos={obterContatosDoCliente(contatos, clienteEmEdicao?.idCliente)}
-        contatosEditaveis={obterContatosEditaveisDoCliente(contatos, clienteEmEdicao?.idCliente)}
+        codigoSugerido={proximoCodigoFornecedor}
+        contatos={obterContatosDoFornecedor(contatos, fornecedorEmEdicao?.idFornecedor)}
+        contatosEditaveis={obterContatosEditaveisDoFornecedor(contatos, fornecedorEmEdicao?.idFornecedor)}
         gruposEmpresa={gruposEmpresa}
         contatosGruposEmpresa={contatosGruposEmpresa}
-        vendedores={vendedoresDisponiveis}
+        compradores={compradoresDisponiveis}
         ramosAtividade={ramosAtividade}
-        conceitosCliente={conceitosCliente}
+        conceitosFornecedor={conceitosFornecedor}
         modo={modoModalFornecedor}
         empresa={empresa}
         somenteConsultaRamos={false}
         somenteConsultaGrupos={false}
-        idVendedorBloqueado={null}
+        idCompradorBloqueado={null}
         aoFechar={fecharModalFornecedor}
         aoSalvarRamoAtividade={salvarRamoAtividade}
-        aoSalvarConceitoCliente={salvarConceitoCliente}
-        aoInativarRamoAtividade={inativarRamoAtividadeCliente}
-        aoInativarConceitoCliente={inativarConceitoClienteCadastro}
+        aoSalvarConceitoFornecedor={salvarConceitoFornecedor}
+        aoInativarRamoAtividade={inativarRamoAtividadeFornecedor}
+        aoInativarConceitoFornecedor={inativarConceitoFornecedorCadastro}
         aoSalvarGrupoEmpresa={salvarGrupoEmpresa}
-        aoInativarGrupoEmpresa={inativarGrupoEmpresaCliente}
-        aoSalvar={salvarCliente}
+        aoInativarGrupoEmpresa={inativarGrupoEmpresaFornecedor}
+        aoSalvar={salvarFornecedor}
       />
       <ModalManualFornecedores
         aberto={modalManualAberto}
         aoFechar={() => definirModalManualAberto(false)}
-        clientes={fornecedores}
+        fornecedores={fornecedores}
         contatos={contatos}
         gruposEmpresa={gruposEmpresa}
-        vendedores={vendedoresDisponiveis}
+        compradores={compradoresDisponiveis}
         ramosAtividade={ramosAtividade}
         filtros={filtros}
         usuarioLogado={usuarioLogado}
       />
-      <ModalColunasGridClientes
+      <ModalColunasGridFornecedores
         aberto={modalColunasGridAberto}
         empresa={empresa}
         aoFechar={() => definirModalColunasGridAberto(false)}
-        aoSalvar={salvarColunasGridClientes}
+        aoSalvar={salvarColunasGridFornecedores}
       />
       <ModalImportacaoCadastro
         aberto={modalImportacaoAberto}
-        tipo="clientes"
+        tipo="fornecedores"
         carregando={importando}
         resultado={resultadoImportacao}
-        referenciasRelacionais={referenciasImportacaoClientes}
+        referenciasRelacionais={referenciasImportacaoFornecedores}
         onFechar={() => {
           definirModalImportacaoAberto(false);
           definirResultadoImportacao(null);
         }}
-        onImportar={importarClientes}
+        onImportar={importarFornecedores}
       />
     </>
   );
 }
 
-function normalizarFiltrosClientes(filtros, filtrosPadrao) {
+function normalizarFiltrosFornecedores(filtros, filtrosPadrao) {
   const filtrosNormalizados = normalizarFiltrosPorPadrao(filtros, filtrosPadrao);
 
   return {
     ...filtrosNormalizados,
     estado: normalizarListaFiltroPersistido(filtrosNormalizados.estado),
     idRamo: normalizarListaFiltroPersistido(filtrosNormalizados.idRamo),
-    idVendedor: filtrosPadrao.idVendedor?.length > 0
-      ? [...filtrosPadrao.idVendedor]
-      : normalizarListaFiltroPersistido(filtrosNormalizados.idVendedor),
+    idComprador: filtrosPadrao.idComprador?.length > 0
+      ? [...filtrosPadrao.idComprador]
+      : normalizarListaFiltroPersistido(filtrosNormalizados.idComprador),
     tipo: normalizarListaFiltroPersistido(filtrosNormalizados.tipo),
     status: normalizarListaFiltroPersistido(filtrosNormalizados.status)
   };
@@ -601,8 +601,8 @@ function obterOpcoesTexto(registros, campo) {
     }));
 }
 
-async function salvarContatosCliente(idFornecedor, contatos) {
-  const contatosNormalizados = normalizarContatos(contatos, idCliente);
+async function salvarContatosFornecedor(idFornecedor, contatos) {
+  const contatosNormalizados = normalizarContatos(contatos, idFornecedor);
 
   for (const contato of contatosNormalizados) {
     if (contato.idContato) {
@@ -613,10 +613,10 @@ async function salvarContatosCliente(idFornecedor, contatos) {
   }
 }
 
-function enriquecerClientes(fornecedores, contatos, vendedores, gruposEmpresa, ramosAtividade) {
-  const contatosPrincipaisPorCliente = new Map();
-  const vendedoresPorId = new Map(
-    vendedores.map((vendedor) => [String(vendedor.idVendedor), vendedor.nome])
+function enriquecerFornecedores(fornecedores, contatos, compradores, gruposEmpresa, ramosAtividade) {
+  const contatosPrincipaisPorFornecedor = new Map();
+  const compradoresPorId = new Map(
+    compradores.map((comprador) => [String(comprador.idComprador), comprador.nome])
   );
   const gruposEmpresaPorId = new Map(
     (gruposEmpresa || []).map((grupo) => [String(grupo.idGrupoEmpresa), grupo.descricao])
@@ -627,71 +627,71 @@ function enriquecerClientes(fornecedores, contatos, vendedores, gruposEmpresa, r
 
   contatos.forEach((contato) => {
     if (contato.principal) {
-      contatosPrincipaisPorCliente.set(String(contato.idCliente), contato);
+      contatosPrincipaisPorFornecedor.set(String(contato.idFornecedor), contato);
     }
   });
 
-  return fornecedores.map((cliente) => ({
-    ...cliente,
+  return fornecedores.map((fornecedor) => ({
+    ...fornecedor,
     nomeGrupoEmpresa: obterValorGrid(
-      cliente.nomeGrupoEmpresa || gruposEmpresaPorId.get(String(cliente.idGrupoEmpresa))
+      fornecedor.nomeGrupoEmpresa || gruposEmpresaPorId.get(String(fornecedor.idGrupoEmpresa))
     ),
     nomeRamo: obterValorGrid(
-      cliente.nomeRamo || ramosPorId.get(String(cliente.idRamo))
+      fornecedor.nomeRamo || ramosPorId.get(String(fornecedor.idRamo))
     ),
-    nomeVendedor: obterValorGrid(
-      cliente.nomeVendedor || vendedoresPorId.get(String(cliente.idVendedor))
+    nomeComprador: obterValorGrid(
+      fornecedor.nomeComprador || compradoresPorId.get(String(fornecedor.idComprador))
     ),
     nomeContatoPrincipal: obterValorGrid(
-      cliente.nomeContatoPrincipal || contatosPrincipaisPorCliente.get(String(cliente.idCliente))?.nome
+      fornecedor.nomeContatoPrincipal || contatosPrincipaisPorFornecedor.get(String(fornecedor.idFornecedor))?.nome
     ),
     emailContatoPrincipal: obterValorGrid(
-      cliente.emailContatoPrincipal || contatosPrincipaisPorCliente.get(String(cliente.idCliente))?.email
+      fornecedor.emailContatoPrincipal || contatosPrincipaisPorFornecedor.get(String(fornecedor.idFornecedor))?.email
     )
   }));
 }
 
-function obterContatosDoCliente(contatos, idCliente) {
-  if (!idCliente) {
+function obterContatosDoFornecedor(contatos, idFornecedor) {
+  if (!idFornecedor) {
     return [];
   }
 
-  return contatos.filter((contato) => contato.idCliente === idCliente);
+  return contatos.filter((contato) => contato.idFornecedor === idFornecedor);
 }
 
-function obterContatosEditaveisDoCliente(contatos, idCliente) {
-  return obterContatosDoCliente(contatos, idCliente)
+function obterContatosEditaveisDoFornecedor(contatos, idFornecedor) {
+  return obterContatosDoFornecedor(contatos, idFornecedor)
     .filter((contato) => !Boolean(contato.contatoVinculadoGrupo));
 }
 
-function normalizarPayloadCliente(dadosCliente) {
+function normalizarPayloadFornecedor(dadosFornecedor) {
   const payload = {
-    idVendedor: Number(dadosCliente.idVendedor),
-    idConceito: Number(dadosCliente.idConceito),
-    idGrupoEmpresa: dadosCliente.idGrupoEmpresa ? Number(dadosCliente.idGrupoEmpresa) : null,
-    idRamo: Number(dadosCliente.idRamo),
-    razaoSocial: dadosCliente.razaoSocial.trim(),
-    nomeFantasia: dadosCliente.nomeFantasia.trim(),
-    tipo: dadosCliente.tipo.trim(),
-    cnpj: dadosCliente.cnpj.trim(),
-    inscricaoEstadual: limparTextoOpcional(dadosCliente.inscricaoEstadual),
-    status: dadosCliente.status ? 1 : 0,
-    email: limparTextoOpcional(dadosCliente.email),
-    telefone: limparTextoOpcional(normalizarTelefone(dadosCliente.telefone)),
-    logradouro: limparTextoOpcional(dadosCliente.logradouro),
-    numero: limparTextoOpcional(dadosCliente.numero),
-    complemento: limparTextoOpcional(dadosCliente.complemento),
-    bairro: limparTextoOpcional(dadosCliente.bairro),
-    cidade: limparTextoOpcional(dadosCliente.cidade),
-    estado: limparTextoOpcional(dadosCliente.estado)?.toUpperCase(),
-    cep: limparTextoOpcional(dadosCliente.cep),
-    observacao: limparTextoOpcional(dadosCliente.observacao),
-    codigoAlternativo: normalizarCodigoAlternativo(dadosCliente.codigoAlternativo),
-    imagem: limparTextoOpcional(dadosCliente.imagem)
+    idComprador: Number(dadosFornecedor.idComprador),
+    idConceito: Number(dadosFornecedor.idConceito),
+    idGrupoEmpresa: dadosFornecedor.idGrupoEmpresa ? Number(dadosFornecedor.idGrupoEmpresa) : null,
+    idRamo: Number(dadosFornecedor.idRamo),
+    razaoSocial: dadosFornecedor.razaoSocial.trim(),
+    nomeFantasia: dadosFornecedor.nomeFantasia.trim(),
+    tipo: dadosFornecedor.tipo.trim(),
+    cnpj: dadosFornecedor.cnpj.trim(),
+    inscricaoEstadual: limparTextoOpcional(dadosFornecedor.inscricaoEstadual),
+    status: dadosFornecedor.status ? 1 : 0,
+    email: limparTextoOpcional(dadosFornecedor.email),
+    telefone: limparTextoOpcional(normalizarTelefone(dadosFornecedor.telefone)),
+    logradouro: limparTextoOpcional(dadosFornecedor.logradouro),
+    numero: limparTextoOpcional(dadosFornecedor.numero),
+    complemento: limparTextoOpcional(dadosFornecedor.complemento),
+    bairro: limparTextoOpcional(dadosFornecedor.bairro),
+    cidade: limparTextoOpcional(dadosFornecedor.cidade),
+    estado: limparTextoOpcional(dadosFornecedor.estado)?.toUpperCase(),
+    cep: limparTextoOpcional(dadosFornecedor.cep),
+    observacao: limparTextoOpcional(dadosFornecedor.observacao),
+    codigoAlternativo: normalizarCodigoAlternativo(dadosFornecedor.codigoAlternativo),
+    imagem: limparTextoOpcional(dadosFornecedor.imagem)
   };
 
-  if (dadosCliente.idCliente) {
-    payload.idCliente = Number(dadosCliente.idCliente);
+  if (dadosFornecedor.idFornecedor) {
+    payload.idFornecedor = Number(dadosFornecedor.idFornecedor);
   }
 
   return payload;
@@ -707,10 +707,10 @@ function normalizarCodigoAlternativo(valor) {
   return digitos ? Number(digitos) : null;
 }
 
-function normalizarContatos(contatos, idCliente) {
+function normalizarContatos(contatos, idFornecedor) {
   return contatos.map((contato) => ({
     idContato: typeof contato.idContato === 'number' ? contato.idContato : undefined,
-    idCliente,
+    idFornecedor,
     nome: contato.nome.trim(),
     cargo: limparTextoOpcional(contato.cargo),
     email: limparTextoOpcional(contato.email),

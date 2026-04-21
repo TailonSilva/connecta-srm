@@ -33,6 +33,36 @@ export function atualizarProduto(idProduto, payload) {
   });
 }
 
+export function listarProdutosFornecedores() {
+  return requisitarApi('/produtosFornecedores');
+}
+
+export function incluirProdutoFornecedor(payload) {
+  return requisitarApi('/produtosFornecedores', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+}
+
+export function atualizarProdutoFornecedor(idProdutoFornecedor, payload) {
+  return requisitarApi(`/produtosFornecedores/${idProdutoFornecedor}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+}
+
+export function excluirProdutoFornecedor(idProdutoFornecedor) {
+  return requisitarApi(`/produtosFornecedores/${idProdutoFornecedor}`, {
+    method: 'DELETE'
+  });
+}
+
 export function importarProdutosPlanilha(payload) {
   return requisitarApi('/importacao/produtos', {
     method: 'POST',

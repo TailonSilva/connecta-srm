@@ -19,8 +19,8 @@ export function ModalBuscaTabela({
   tituloAcaoPrimaria = '',
   iconeAcaoPrimaria = 'adicionar',
   aoAcionarPrimaria = null,
-  classNameModal = 'modalContatoCliente modalBuscaClienteAtendimento',
-  classNameTabela = 'tabelaContatosModal tabelaBuscaClienteAtendimento',
+  classNameModal = 'modalContatoFornecedor modalBuscaFornecedorAtendimento',
+  classNameTabela = 'tabelaContatosModal tabelaBuscaFornecedorAtendimento',
   filtrarInativos = true,
   mensagemVazio = 'Nenhum registro encontrado.'
 }) {
@@ -155,7 +155,7 @@ export function ModalBuscaTabela({
           </div>
         </div>
 
-        <div className="corpoModalContato corpoModalBuscaClienteAtendimento">
+        <div className="corpoModalContato corpoModalBuscaFornecedorAtendimento">
           <CampoPesquisa
             ref={referenciaPesquisa}
             valor={pesquisa}
@@ -165,7 +165,7 @@ export function ModalBuscaTabela({
           />
 
           <GradePadrao
-            className="gradeContatosModal gradeBuscaClienteAtendimento"
+            className="gradeContatosModal gradeBuscaFornecedorAtendimento"
             classNameTabela={classNameTabela}
             classNameMensagem="mensagemTabelaContatosModal"
             cabecalho={(
@@ -181,7 +181,7 @@ export function ModalBuscaTabela({
             {registrosFiltrados.map((registro, indice) => (
               <tr
                 key={obterChaveRegistro(registro)}
-                className={indice === indiceAtivo ? 'linhaBuscaClienteAtiva' : ''}
+                className={indice === indiceAtivo ? 'linhaBuscaFornecedorAtiva' : ''}
                 onMouseEnter={() => definirIndiceAtivo(indice)}
                 onClick={() => aoSelecionar(registro)}
                 onDoubleClick={() => aoSelecionar(registro)}

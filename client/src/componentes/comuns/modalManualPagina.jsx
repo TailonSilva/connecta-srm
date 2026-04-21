@@ -42,7 +42,7 @@ export function ModalManualPagina({
   return (
     <div className="camadaModalContato" role="presentation" onMouseDown={aoFechar}>
       <div
-        className="modalContatoCliente modalManualPagina"
+        className="modalContatoFornecedor modalManualPagina"
         role="dialog"
         aria-modal="true"
         aria-labelledby="tituloModalManualPagina"

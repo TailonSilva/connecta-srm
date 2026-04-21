@@ -2,10 +2,10 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Botao } from '../comuns/botao';
 import { MensagemErroPopup } from '../comuns/mensagemErroPopup';
 import { CampoSelecaoMultiplaModal } from '../comuns/campoSelecaoMultiplaModal';
-import { ModalBuscaClientes } from '../comuns/modalBuscaClientes';
+import { ModalBuscaFornecedores } from '../comuns/modalBuscaFornecedores';
 import { ModalBuscaContatos } from '../comuns/modalBuscaContatos';
-import { ModalFornecedor as ModalCliente } from './fornecedores-modalFornecedor';
-import { formatarCodigoCliente } from '../../utilitarios/codigoCliente';
+import { ModalFornecedor as ModalFornecedor } from './fornecedores-modalFornecedor';
+import { formatarCodigoFornecedor } from '../../utilitarios/codigoFornecedor';
 import { formatarNomeContato } from '../../utilitarios/formatarNomeContato';
 import { normalizarValorEntradaFormulario } from '../../utilitarios/normalizarTextoFormulario';
 import { registroEstaAtivo } from '../../utilitarios/statusRegistro';
@@ -31,20 +31,19 @@ export function ModalAgendamento({
   dadosIniciais,
   locais = [],
   recursos = [],
-  fornecedores,
-  clientes = [],
+  fornecedores = [],
   contatos = [],
   usuarios = [],
-  vendedores = [],
+  compradores = [],
   ramosAtividade = [],
-  conceitosCliente = [],
+  conceitosFornecedor = [],
   tiposAgenda = [],
   statusVisita = [],
   empresa = null,
   usuarioLogado,
-  idVendedorBloqueado = null,
+  idCompradorBloqueado = null,
   permitirExcluir = true,
-  aoIncluirCliente,
+  aoIncluirFornecedor,
   aoFechar,
   aoSalvar,
   aoExcluir
@@ -54,15 +53,15 @@ export function ModalAgendamento({
   const [mensagemErro, definirMensagemErro] = useState('');
   const [confirmandoExclusao, definirConfirmandoExclusao] = useState(false);
   const [confirmandoSaida, definirConfirmandoSaida] = useState(false);
-  const [modalClienteAberto, definirModalClienteAberto] = useState(false);
-  const [modalBuscaClienteAberto, definirModalBuscaClienteAberto] = useState(false);
+  const [modalFornecedorAberto, definirModalFornecedorAberto] = useState(false);
+  const [modalBuscaFornecedorAberto, definirModalBuscaFornecedorAberto] = useState(false);
   const [modalBuscaContatoAberto, definirModalBuscaContatoAberto] = useState(false);
-  const referenciaCampoCliente = useRef(null);
+  const referenciaCampoFornecedor = useRef(null);
   const referenciaCampoContato = useRef(null);
-  const listaFornecedores = Array.isArray(fornecedores) ? fornecedores : clientes;
+  const listaFornecedores = Array.isArray(fornecedores) ? fornecedores : fornecedores;
   const locaisAtivos = locais.filter((local) => registroEstaAtivo(local.status));
   const recursosAtivos = recursos.filter((recurso) => registroEstaAtivo(recurso.status));
-  const clientesAtivos = listaFornecedores.filter((cliente) => registroEstaAtivo(cliente.status));
+  const fornecedoresAtivos = listaFornecedores.filter((fornecedor) => registroEstaAtivo(fornecedor.status));
   const contatosAtivos = contatos.filter((contato) => registroEstaAtivo(contato.status));
   const usuariosAtivos = usuarios.filter((usuario) => registroEstaAtivo(usuario.ativo));
   const tiposAgendaAtivos = tiposAgenda.filter((tipoAgenda) => registroEstaAtivo(tipoAgenda.status));
@@ -81,8 +80,8 @@ export function ModalAgendamento({
     definirMensagemErro('');
     definirConfirmandoExclusao(false);
     definirConfirmandoSaida(false);
-    definirModalClienteAberto(false);
-    definirModalBuscaClienteAberto(false);
+    definirModalFornecedorAberto(false);
+    definirModalBuscaFornecedorAberto(false);
     definirModalBuscaContatoAberto(false);
   }, [aberto, dadosIniciais, statusAtivos, usuarioLogado]);
 
@@ -93,13 +92,13 @@ export function ModalAgendamento({
 
     function tratarTecla(evento) {
       if (evento.key === 'Escape' && !salvando) {
-        if (modalClienteAberto) {
-          definirModalClienteAberto(false);
+        if (modalFornecedorAberto) {
+          definirModalFornecedorAberto(false);
           return;
         }
 
-        if (modalBuscaClienteAberto) {
-          definirModalBuscaClienteAberto(false);
+        if (modalBuscaFornecedorAberto) {
+          definirModalBuscaFornecedorAberto(false);
           return;
         }
 
@@ -127,17 +126,17 @@ export function ModalAgendamento({
     return () => {
       window.removeEventListener('keydown', tratarTecla);
     };
-  }, [aberto, aoFechar, confirmandoExclusao, confirmandoSaida, modalBuscaClienteAberto, modalBuscaContatoAberto, modalClienteAberto, salvando]);
+  }, [aberto, aoFechar, confirmandoExclusao, confirmandoSaida, modalBuscaFornecedorAberto, modalBuscaContatoAberto, modalFornecedorAberto, salvando]);
 
   if (!aberto) {
     return null;
   }
 
   const modoEdicao = Boolean(formulario.idAgendamento);
-  const contatosDoCliente = contatosAtivos.filter(
-    (contato) => String(contato.idCliente) === String(formulario.idCliente)
+  const contatosDoFornecedor = contatosAtivos.filter(
+    (contato) => String(contato.idFornecedor) === String(formulario.idFornecedor)
   );
-  const proximoCodigoCliente = obterProximoCodigoCliente(listaFornecedores);
+  const proximoCodigoFornecedor = obterProximoCodigoFornecedor(listaFornecedores);
   const recursosSelecionados = recursosAtivos.filter((recurso) => (
     formulario.idsRecursos.includes(String(recurso.idRecurso))
   ));
@@ -147,7 +146,7 @@ export function ModalAgendamento({
   const tipoAgendaSelecionado = tiposAgendaAtivos.find(
     (tipoAgenda) => String(tipoAgenda.idTipoAgenda) === String(formulario.idTipoAgenda)
   );
-  const clienteObrigatorio = Boolean(tipoAgendaSelecionado?.obrigarCliente);
+  const fornecedorObrigatorio = Boolean(tipoAgendaSelecionado?.obrigarFornecedor);
   const localObrigatorio = Boolean(tipoAgendaSelecionado?.obrigarLocal);
   const recursoObrigatorio = Boolean(tipoAgendaSelecionado?.obrigarRecurso);
 
@@ -157,7 +156,7 @@ export function ModalAgendamento({
 
     definirFormulario((estadoAtual) => ({
       ...estadoAtual,
-      ...(name === 'idCliente' ? { idContato: '' } : {}),
+      ...(name === 'idFornecedor' ? { idContato: '' } : {}),
       [name]: valorNormalizado
     }));
   }
@@ -175,12 +174,12 @@ export function ModalAgendamento({
       ['idStatusVisita', 'Selecione o status da visita.']
     ];
 
-    if (clienteObrigatorio) {
-      camposObrigatorios.push(['idCliente', 'Selecione o fornecedor.']);
+    if (fornecedorObrigatorio) {
+      camposObrigatorios.push(['idFornecedor', 'Selecione o fornecedor.']);
       camposObrigatorios.push(['idContato', 'Selecione o contato do fornecedor.']);
     }
 
-    if (formulario.idCliente && !clienteObrigatorio) {
+    if (formulario.idFornecedor && !fornecedorObrigatorio) {
       camposObrigatorios.push(['idContato', 'Selecione o contato do fornecedor.']);
     }
 
@@ -281,32 +280,32 @@ export function ModalAgendamento({
     aoFechar();
   }
 
-  function abrirModalNovoCliente() {
-    if (salvando || !aoIncluirCliente) {
+  function abrirModalNovoFornecedor() {
+    if (salvando || !aoIncluirFornecedor) {
       return;
     }
 
-    definirModalClienteAberto(true);
+    definirModalFornecedorAberto(true);
   }
 
-  function fecharModalNovoCliente() {
-    definirModalClienteAberto(false);
+  function fecharModalNovoFornecedor() {
+    definirModalFornecedorAberto(false);
   }
 
-  function abrirModalBuscaCliente() {
+  function abrirModalBuscaFornecedor() {
     if (salvando) {
       return;
     }
 
-    definirModalBuscaClienteAberto(true);
+    definirModalBuscaFornecedorAberto(true);
   }
 
-  function fecharModalBuscaCliente() {
-    definirModalBuscaClienteAberto(false);
+  function fecharModalBuscaFornecedor() {
+    definirModalBuscaFornecedorAberto(false);
   }
 
   function abrirModalBuscaContato() {
-    if (salvando || !formulario.idCliente) {
+    if (salvando || !formulario.idFornecedor) {
       return;
     }
 
@@ -317,18 +316,18 @@ export function ModalAgendamento({
     definirModalBuscaContatoAberto(false);
   }
 
-  function selecionarCliente(cliente) {
-    if (!cliente) {
+  function selecionarFornecedor(fornecedor) {
+    if (!fornecedor) {
       return;
     }
 
     definirFormulario((estadoAtual) => ({
       ...estadoAtual,
-      idFornecedor: String(cliente.idCliente),
+      idFornecedor: String(fornecedor.idFornecedor),
       idContato: ''
     }));
-    fecharModalBuscaCliente();
-    agendarFocoCampo(referenciaCampoCliente);
+    fecharModalBuscaFornecedor();
+    agendarFocoCampo(referenciaCampoFornecedor);
   }
 
   function selecionarContato(contato) {
@@ -344,17 +343,17 @@ export function ModalAgendamento({
     agendarFocoCampo(referenciaCampoContato);
   }
 
-  async function salvarNovoCliente(dadosCliente) {
-    const clienteCriado = await aoIncluirCliente(dadosCliente);
+  async function salvarNovoFornecedor(dadosFornecedor) {
+    const fornecedorCriado = await aoIncluirFornecedor(dadosFornecedor);
 
-    selecionarCliente(clienteCriado);
-    definirModalClienteAberto(false);
+    selecionarFornecedor(fornecedorCriado);
+    definirModalFornecedorAberto(false);
   }
 
   return (
     <div className="camadaModalContato" role="presentation" onMouseDown={fecharAoClicarNoFundo}>
       <form
-        className="modalContatoCliente modalAgendamento"
+        className="modalContatoFornecedor modalAgendamento"
         role="dialog"
         aria-modal="true"
         aria-labelledby="tituloModalAgendamento"
@@ -406,7 +405,7 @@ export function ModalAgendamento({
         </div>
 
         <div className="corpoModalContato">
-          <div className="gradeCamposModalCliente gradeCamposModalAgendamento">
+          <div className="gradeCamposModalFornecedor gradeCamposModalAgendamento">
             <CampoFormulario className="campoAgendamentoAssunto" label="Assunto" name="assunto" value={formulario.assunto} onChange={alterarCampo} required />
             <CampoFormulario label="Dia" name="data" type="date" value={formulario.data} onChange={alterarCampo} required />
             <CampoSelect
@@ -436,16 +435,16 @@ export function ModalAgendamento({
             <CampoSelect
               className="campoAgendamentoMetade"
               label="Fornecedor"
-              name="idCliente"
-              data-atalho-busca-id="cliente"
-              referenciaCampo={referenciaCampoCliente}
-                value={formulario.idCliente}
+              name="idFornecedor"
+              data-atalho-busca-id="fornecedor"
+              referenciaCampo={referenciaCampoFornecedor}
+                value={formulario.idFornecedor}
                 onChange={alterarCampo}
-                options={clientesAtivos.map((cliente) => ({
-                  valor: String(cliente.idCliente),
-                  label: montarRotuloCliente(cliente, empresa)
+                options={fornecedoresAtivos.map((fornecedor) => ({
+                  valor: String(fornecedor.idFornecedor),
+                  label: montarRotuloFornecedor(fornecedor, empresa)
                 }))}
-                required={clienteObrigatorio}
+                required={fornecedorObrigatorio}
                 acaoExtra={(
                 <Botao
                   variante="secundario"
@@ -455,8 +454,8 @@ export function ModalAgendamento({
                   somenteIcone
                   title="Buscar fornecedor"
                   aria-label="Buscar fornecedor"
-                  data-atalho-busca-id="cliente"
-                  onClick={abrirModalBuscaCliente}
+                  data-atalho-busca-id="fornecedor"
+                  onClick={abrirModalBuscaFornecedor}
                   disabled={salvando}
                 >
                   Buscar fornecedor
@@ -471,13 +470,13 @@ export function ModalAgendamento({
               referenciaCampo={referenciaCampoContato}
               value={formulario.idContato}
               onChange={alterarCampo}
-              options={contatosDoCliente.map((contato) => ({
+              options={contatosDoFornecedor.map((contato) => ({
                 valor: String(contato.idContato),
                 label: formatarNomeContato(contato)
               }))}
-              disabled={!formulario.idCliente}
-              required={clienteObrigatorio}
-              acaoExtra={formulario.idCliente ? (
+              disabled={!formulario.idFornecedor}
+              required={fornecedorObrigatorio}
+              acaoExtra={formulario.idFornecedor ? (
                 <Botao
                   variante="secundario"
                   type="button"
@@ -619,45 +618,45 @@ export function ModalAgendamento({
           </div>
         ) : null}
 
-        <ModalCliente
-          aberto={modalClienteAberto}
-          cliente={null}
+        <ModalFornecedor
+          aberto={modalFornecedorAberto}
+          fornecedor={null}
           empresa={empresa}
-          codigoSugerido={proximoCodigoCliente}
+          codigoSugerido={proximoCodigoFornecedor}
           contatos={[]}
-          vendedores={vendedores}
+          compradores={compradores}
           ramosAtividade={ramosAtividade}
-          conceitosCliente={conceitosCliente}
+          conceitosFornecedor={conceitosFornecedor}
           modo="novo"
           classNameCamada="camadaModal camadaModalSecundaria"
-          idVendedorBloqueado={idVendedorBloqueado}
-          aoFechar={fecharModalNovoCliente}
-          aoSalvar={salvarNovoCliente}
+          idCompradorBloqueado={idCompradorBloqueado}
+          aoFechar={fecharModalNovoFornecedor}
+          aoSalvar={salvarNovoFornecedor}
         />
 
-        <ModalBuscaClientes
-          aberto={modalBuscaClienteAberto}
+        <ModalBuscaFornecedores
+          aberto={modalBuscaFornecedorAberto}
           empresa={empresa}
-          clientes={clientesAtivos}
+          fornecedores={fornecedoresAtivos}
           placeholder="Pesquisar fornecedores"
           ariaLabelPesquisa="Pesquisar fornecedores"
-          rotuloAcaoPrimaria={aoIncluirCliente ? 'Incluir fornecedor' : ''}
-          tituloAcaoPrimaria={aoIncluirCliente ? 'Incluir fornecedor' : ''}
+          rotuloAcaoPrimaria={aoIncluirFornecedor ? 'Incluir fornecedor' : ''}
+          tituloAcaoPrimaria={aoIncluirFornecedor ? 'Incluir fornecedor' : ''}
           iconeAcaoPrimaria="adicionar"
-          aoAcionarPrimaria={aoIncluirCliente
+          aoAcionarPrimaria={aoIncluirFornecedor
             ? () => {
-              fecharModalBuscaCliente();
-              abrirModalNovoCliente();
+              fecharModalBuscaFornecedor();
+              abrirModalNovoFornecedor();
             }
             : null}
-          aoSelecionar={selecionarCliente}
-          aoFechar={fecharModalBuscaCliente}
+          aoSelecionar={selecionarFornecedor}
+          aoFechar={fecharModalBuscaFornecedor}
         />
 
         <ModalBuscaContatos
           aberto={modalBuscaContatoAberto}
-          idCliente={formulario.idCliente}
-          contatos={contatosDoCliente}
+          idFornecedor={formulario.idFornecedor}
+          contatos={contatosDoFornecedor}
           placeholder="Pesquisar contatos do fornecedor"
           ariaLabelPesquisa="Pesquisar contatos do fornecedor"
           aoSelecionar={selecionarContato}
@@ -710,7 +709,7 @@ function criarFormularioInicial(dadosIniciais, usuarioLogado, statusAtivos) {
     ...estadoInicialFormulario,
     ...dadosIniciais,
     idTipoAgenda: normalizarValorFormularioAgendamento(dadosIniciais?.idTipoAgenda),
-    idFornecedor: normalizarValorFormularioAgendamento(dadosIniciais?.idCliente),
+    idFornecedor: normalizarValorFormularioAgendamento(dadosIniciais?.idFornecedor),
     idContato: normalizarValorFormularioAgendamento(dadosIniciais?.idContato),
     idLocal: normalizarValorFormularioAgendamento(dadosIniciais?.idLocal),
     idStatusVisita,
@@ -768,23 +767,23 @@ function normalizarValorFormularioAgendamento(valor) {
   return String(valor);
 }
 
-function obterProximoCodigoCliente(clientes) {
-  if (!Array.isArray(clientes) || clientes.length === 0) {
+function obterProximoCodigoFornecedor(fornecedores) {
+  if (!Array.isArray(fornecedores) || fornecedores.length === 0) {
     return 1;
   }
 
-  const maiorCodigo = clientes.reduce((maior, cliente) => {
-    const codigoAtual = Number(cliente?.idCliente);
+  const maiorCodigo = fornecedores.reduce((maior, fornecedor) => {
+    const codigoAtual = Number(fornecedor?.idFornecedor);
     return Number.isFinite(codigoAtual) && codigoAtual > maior ? codigoAtual : maior;
   }, 0);
 
   return maiorCodigo + 1;
 }
 
-function montarRotuloCliente(cliente, empresa) {
-  const codigo = formatarCodigoCliente(cliente, empresa);
-  const nome = cliente?.nomeFantasia || cliente?.razaoSocial || 'Fornecedor sem nome';
-  const localizacao = [cliente?.cidade, cliente?.estado].filter(Boolean).join('/');
+function montarRotuloFornecedor(fornecedor, empresa) {
+  const codigo = formatarCodigoFornecedor(fornecedor, empresa);
+  const nome = fornecedor?.nomeFantasia || fornecedor?.razaoSocial || 'Fornecedor sem nome';
+  const localizacao = [fornecedor?.cidade, fornecedor?.estado].filter(Boolean).join('/');
 
   return localizacao ? `${codigo} - ${nome} - ${localizacao}` : `${codigo} - ${nome}`;
 }

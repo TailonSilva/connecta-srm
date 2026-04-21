@@ -3,7 +3,7 @@ export const TOTAL_COLUNAS_MAXIMO_CARDS_PAGINA_INICIAL = 20;
 
 export const cardsPaginaInicial = [
   {
-    id: 'orcamentosAbertos',
+    id: 'cotacoesAbertos',
     rotulo: 'Cotacoes em aberto',
     ajudaConfiguracao: 'Mostra quantas cotacoes estao em aberto e o valor total em negociacao.',
     ordemPadrao: 1,
@@ -11,7 +11,7 @@ export const cardsPaginaInicial = [
     visivelPadrao: true
   },
   {
-    id: 'pedidosMes',
+    id: 'ordensCompraMes',
     rotulo: 'Ordens de Compra no mes',
     ajudaConfiguracao: 'Mostra a quantidade de ordens de compra do mes corrente e o valor liquido total.',
     ordemPadrao: 2,
@@ -53,7 +53,7 @@ export const cardsPaginaInicial = [
   {
     id: 'positivacaoMes',
     rotulo: 'Positivacao no mes',
-    ajudaConfiguracao: 'Mostra quantos clientes diferentes fizeram ordens de compra no mes corrente.',
+    ajudaConfiguracao: 'Mostra quantos fornecedores diferentes fizeram ordens de compra no mes corrente.',
     ordemPadrao: 9,
     spanPadrao: 2,
     visivelPadrao: true

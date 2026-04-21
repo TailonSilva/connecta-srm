@@ -3,23 +3,23 @@ import { ModalManualPagina } from '../comuns/modalManualPagina';
 export function ModalManualCotacoes({
   aberto,
   aoFechar,
-  orcamentos = [],
-  etapasOrcamento = [],
+  cotacoes = [],
+  etapasCotacao = [],
   prazosPagamento = [],
   filtros = {},
   empresa,
   usuarioLogado
 }) {
   const filtrosAtivos = [
-    filtros.idCliente,
+    filtros.idFornecedor,
     filtros.idUsuario,
-    filtros.idVendedorCliente,
-    filtros.idVendedor,
+    filtros.idCompradorFornecedor,
+    filtros.idComprador,
     filtros.dataInclusaoInicio,
     filtros.dataInclusaoFim,
     filtros.dataFechamentoInicio,
     filtros.dataFechamentoFim,
-    ...(Array.isArray(filtros.idsEtapaOrcamento) ? filtros.idsEtapaOrcamento : [])
+    ...(Array.isArray(filtros.idsEtapaCotacao) ? filtros.idsEtapaCotacao : [])
   ].filter(Boolean).length;
 
   return (
@@ -27,26 +27,26 @@ export function ModalManualCotacoes({
       aberto={aberto}
       aoFechar={aoFechar}
       titulo="Manual de Cotacoes"
-      descricao="Guia visual do fluxo de propostas comerciais, etapas do funil, perda, fechamento e abertura de pedido."
+      descricao="Guia visual do fluxo de propostas comerciais, etapas do funil, perda, fechamento e abertura de ordemCompra."
       eyebrow="Propostas comerciais"
-      heroTitulo="Como a pagina de Cotacoes conduz o funil de vendas"
-      heroDescricao="A tela de Orcamentos concentra a criacao de propostas, o andamento por etapa comercial e o fechamento em pedido. Ela usa as configuracoes da empresa para montar o recorte inicial da operacao."
+      heroTitulo="Como a pagina de Cotacoes conduz o funil de ordensCompra"
+      heroDescricao="A tela de Cotacoes concentra a criacao de propostas, o andamento por etapa comercial e o fechamento em ordemCompra. Ela usa as configuracoes da empresa para montar o recorte inicial da operacao."
       painelHeroi={[
-        { valor: orcamentos.length, rotulo: 'Cotacoes na grade atual' },
-        { valor: etapasOrcamento.length, rotulo: 'Etapas configuradas' },
+        { valor: cotacoes.length, rotulo: 'Cotacoes na grade atual' },
+        { valor: etapasCotacao.length, rotulo: 'Etapas configuradas' },
         { valor: prazosPagamento.length, rotulo: 'Prazos de pagamento carregados' }
       ]}
       cardsResumo={[
         {
           titulo: 'Carteira visivel',
-          descricao: `${orcamentos.length} proposta(s) aparecem na grade conforme o filtro atual.`,
+          descricao: `${cotacoes.length} proposta(s) aparecem na grade conforme o filtro atual.`,
           detalhe: 'Usuario padrao ve na grade apenas os cotacoes em que ele proprio e o comprador do registro.',
-          icone: 'orcamento'
+          icone: 'cotacao'
         },
         {
           titulo: 'Funil configurado',
-          descricao: `${etapasOrcamento.length} etapa(s) ordenadas controlam o fluxo da cotacao.`,
-          detalhe: empresa?.etapasFiltroPadraoOrcamento
+          descricao: `${etapasCotacao.length} etapa(s) ordenadas controlam o fluxo da cotacao.`,
+          detalhe: empresa?.etapasFiltroPadraoCotacao
             ? 'A empresa define etapas padrao para o filtro inicial da pagina.'
             : 'Sem etapas padrao definidas na empresa para abertura da tela.',
           icone: 'cadastro'
@@ -55,7 +55,7 @@ export function ModalManualCotacoes({
           titulo: 'Fechamento',
           descricao: 'No fechamento, o sistema pode abrir a inclusao da ordem de compra no mesmo fluxo.',
           detalhe: 'Etapas finais continuam registrando a data de fechamento da cotacao.',
-          icone: 'pedido'
+          icone: 'ordemCompra'
         },
         {
           titulo: 'Filtros ativos',
@@ -69,7 +69,7 @@ export function ModalManualCotacoes({
       cardsFluxo={[
         {
           titulo: 'Criar proposta',
-          descricao: 'Abra o modal para montar cliente, itens, valores, pagamento e etapa comercial da cotacao.',
+          descricao: 'Abra o modal para montar fornecedor, itens, valores, pagamento e etapa comercial da cotacao.',
           icone: 'adicionar'
         },
         {
@@ -79,7 +79,7 @@ export function ModalManualCotacoes({
         },
         {
           titulo: 'Fechar em ordem de compra',
-          descricao: 'Ao fechar o orcamento, o sistema pode perguntar se deve abrir imediatamente a ordem de compra com dados herdados.',
+          descricao: 'Ao fechar o cotacao, o sistema pode perguntar se deve abrir imediatamente a ordem de compra com dados herdados.',
           icone: 'confirmar'
         }
       ]}
@@ -130,19 +130,19 @@ export function ModalManualCotacoes({
         },
         {
           titulo: 'Ordem de Compra a partir do fechamento',
-          descricao: 'Quando uma etapa entra em fechamento e ainda nao ha ordem de compra vinculado, o sistema prepara automaticamente os dados iniciais do pedido.',
+          descricao: 'Quando uma etapa entra em fechamento e ainda nao ha ordem de compra vinculado, o sistema prepara automaticamente os dados iniciais do ordemCompra.',
           detalhe: 'O usuario pode aceitar agora ou deixar a pendencia para depois.',
-          icone: 'pedido'
+          icone: 'ordemCompra'
         },
         {
           titulo: 'Comprador do registro',
-          descricao: 'Em novos orcamentos, o comprador inicial segue o usuario do registro e nao o comprador cadastrado no fornecedor.',
+          descricao: 'Em novos cotacoes, o comprador inicial segue o usuario do registro e nao o comprador cadastrado no fornecedor.',
           detalhe: 'Trocar o fornecedor nao sobrescreve mais o comprador automaticamente.',
           icone: 'usuarios'
         },
         {
           titulo: 'Data de fechamento',
-          descricao: 'Ao entrar nas etapas Fechado, Fechado sem ordem de compra, Ordem de Compra Excluido ou Recusado, o orcamento passa a usar uma data de fechamento propria e obrigatoria.',
+          descricao: 'Ao entrar nas etapas Fechado, Fechado sem ordem de compra, Ordem de Compra Excluido ou Recusado, o cotacao passa a usar uma data de fechamento propria e obrigatoria.',
           detalhe: 'No modal, a data pode ser ajustada antes do salvamento; no grid, a troca usa a data atual automaticamente.',
           icone: 'confirmar'
         },
@@ -160,8 +160,8 @@ export function ModalManualCotacoes({
         },
         {
           titulo: 'Consulta em etapas finais',
-          descricao: 'Orcamentos na etapa Recusado ou com ordem de compra vinculado ficam somente para consulta por qualquer usuario.',
-          detalhe: 'A edicao volta a ser permitida apenas quando a ordem de compra vinculado e excluido, levando o orcamento para a etapa tecnica Ordem de Compra Excluido.',
+          descricao: 'Cotacoes na etapa Recusado ou com ordem de compra vinculado ficam somente para consulta por qualquer usuario.',
+          detalhe: 'A edicao volta a ser permitida apenas quando a ordem de compra vinculado e excluido, levando o cotacao para a etapa tecnica Ordem de Compra Excluido.',
           icone: 'usuarios'
         }
       ]}

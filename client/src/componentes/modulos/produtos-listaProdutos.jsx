@@ -182,10 +182,10 @@ function renderizarCelulaProduto({ coluna, produto, aoConsultar, aoEditar, aoIna
     );
   }
 
-  if (coluna.id === 'preco') {
+  if (coluna.id === 'custo') {
     return (
       <CelulaLayoutProduto coluna={coluna} {...propriedadesCelula}>
-        {normalizarPreco(produto.preco)}
+        {normalizarPreco(produto.custo)}
       </CelulaLayoutProduto>
     );
   }

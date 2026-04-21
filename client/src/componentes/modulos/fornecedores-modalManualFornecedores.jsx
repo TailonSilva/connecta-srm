@@ -6,7 +6,7 @@ export function ModalManualFornecedores({
   fornecedores = [],
   contatos = [],
   gruposEmpresa = [],
-  vendedores = [],
+  compradores = [],
   ramosAtividade = [],
   filtros = {},
   usuarioLogado
@@ -36,7 +36,7 @@ export function ModalManualFornecedores({
         },
         {
           titulo: 'Carteira comercial',
-          descricao: `${vendedores.length} comprador(es) disponivel(is) para vinculacao.`,
+          descricao: `${compradores.length} comprador(es) disponivel(is) para vinculacao.`,
           detalhe: 'Usuario padrao com comprador vinculado trabalha sobre a propria carteira.',
           icone: 'usuarios'
         },
@@ -85,7 +85,7 @@ export function ModalManualFornecedores({
         {
           titulo: 'Abrir historicos amplos',
           descricao: 'Atendimento e Ordens de compra agora abrem modais amplos separados para priorizar a leitura dos grids sem comprimir o restante do cadastro.',
-          icone: 'pedido'
+          icone: 'ordemCompra'
         },
         {
           titulo: 'Inativar sem perder historico',
@@ -103,8 +103,8 @@ export function ModalManualFornecedores({
             'O comprador pode vir bloqueado para Usuario padrao quando a carteira e restrita ao proprio comprador.',
             'O fornecedor pode ser vinculado a um Grupo de empresa, herdando os contatos cadastrados nesse grupo.',
             'O novo campo Conceito classifica o fornecedor em uma tabela auxiliar mantida pelo proprio usuario; quando nada for definido manualmente, o cadastro nasce com Sem Conceito.',
-            'O cadastro de contatos diretos e salvo junto com o cliente, mantendo o vinculo por idCliente.',
-            'Quando o usuario abrir a busca de contatos a partir de Atendimento, Orcamento ou Ordem de Compra com um fornecedor ja definido, esse mesmo formulario de contato pode ser aberto de dentro da busca e o novo contato volta selecionado automaticamente no registro comercial.',
+            'O cadastro de contatos diretos e salvo junto com o fornecedor, mantendo o vinculo por idFornecedor.',
+            'Quando o usuario abrir a busca de contatos a partir de Atendimento, Cotacao ou Ordem de Compra com um fornecedor ja definido, esse mesmo formulario de contato pode ser aberto de dentro da busca e o novo contato volta selecionado automaticamente no registro comercial.',
             'Ramos de atividade e grupos de empresa podem ser mantidos sem sair do modal, sem perder o preenchimento ja feito no fornecedor.',
             'Conceitos de fornecedor seguem o mesmo padrao e podem ser mantidos dentro do proprio modal do fornecedor, sem perder o restante do formulario.',
             'A descricao do conceito respeita a digitacao original do usuario e nao sofre capitalizacao automatica.',
@@ -124,7 +124,7 @@ export function ModalManualFornecedores({
             'Os filtros incluem estado, cidade, grupo de empresa, ramo, comprador, tipo e status do cadastro.',
             'O cabecalho da pagina tambem oferece um atalho direto de Configurar grid para ajustar colunas sem precisar entrar na tela de Configuracoes.',
             'A busca tambem considera o Codigo alternativo quando ele estiver preenchido.',
-            'A grade prioriza leitura sem rolagem horizontal e agora separa codigo, cliente, documento, contato e e-mail em colunas proprias.',
+            'A grade prioriza leitura sem rolagem horizontal e agora separa codigo, fornecedor, documento, contato e e-mail em colunas proprias.',
             'A configuracao do grid tambem pode incluir a coluna Conceito para exibir a classificacao comercial do fornecedor direto na listagem.',
             'Quando um texto passa de duas linhas, a propria celula aplica reticencias para manter a altura da listagem mais previsivel.',
             'O contato principal e enriquecido para aparecer diretamente na grade.',

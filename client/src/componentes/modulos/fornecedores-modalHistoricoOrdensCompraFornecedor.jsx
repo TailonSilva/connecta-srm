@@ -1,31 +1,31 @@
 import { ModalHistoricoOrdensCompraCadastro } from '../comuns/modalHistoricoOrdensCompraCadastro';
 
 const abasOrdensCompraHistoricoFornecedor = [
-  { id: 'pedidos', label: 'Ordens de Compra' },
+  { id: 'ordensCompra', label: 'Ordens de Compra' },
   { id: 'itens', label: 'Itens da ordem de compra' }
 ];
 
 export function ModalHistoricoOrdensCompraFornecedor({
   aberto,
-  cliente,
+  fornecedor,
   abaAtiva,
   onSelecionarAba,
   carregando,
   mensagemErro,
-  pedidos,
-  itensPedidos,
+  ordensCompra,
+  itensOrdensCompra,
   filtrosAtivos,
   valorPesquisa = '',
   onAlterarPesquisa,
   onFechar,
   onAbrirFiltros,
-  onConsultarPedido
+  onConsultarOrdemCompra
 }) {
   return (
     <ModalHistoricoOrdensCompraCadastro
       aberto={aberto}
       titulo="Ordens de compra do fornecedor"
-      subtitulo={cliente?.nomeFantasia || cliente?.razaoSocial || 'Fornecedor nao salvo'}
+      subtitulo={fornecedor?.nomeFantasia || fornecedor?.razaoSocial || 'Fornecedor nao salvo'}
       filtrosAtivos={filtrosAtivos}
       tituloFiltro="Filtrar ordens de compra"
       ariaFiltro="Filtrar ordens de compra"
@@ -40,16 +40,16 @@ export function ModalHistoricoOrdensCompraFornecedor({
       abasNoCabecalho
       carregando={carregando}
       mensagemErro={mensagemErro}
-      pedidos={pedidos}
-      itensPedidos={itensPedidos}
-      exibirPedidos
-      contextoSalvo={Boolean(cliente?.idCliente)}
-      mensagemSemContextoPedidos="Os ordens de compra ficarao disponiveis apos salvar o cliente."
-      mensagemSemContextoItens="Os itens das ordens de compra ficarao disponiveis apos salvar o cliente."
-      mensagemVazioPedidos="Nenhum ordem de compra encontrado com os filtros informados."
+      ordensCompra={ordensCompra}
+      itensOrdensCompra={itensOrdensCompra}
+      exibirOrdensCompra
+      contextoSalvo={Boolean(fornecedor?.idFornecedor)}
+      mensagemSemContextoOrdensCompra="Os ordens de compra ficarao disponiveis apos salvar o fornecedor."
+      mensagemSemContextoItens="Os itens das ordens de compra ficarao disponiveis apos salvar o fornecedor."
+      mensagemVazioOrdensCompra="Nenhum ordem de compra encontrado com os filtros informados."
       mensagemVazioItens="Nenhum item de ordem de compra encontrado com os filtros informados."
       exibirProdutoNosItens
-      onConsultarPedido={onConsultarPedido}
+      onConsultarOrdemCompra={onConsultarOrdemCompra}
     />
   );
 }

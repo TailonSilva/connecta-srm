@@ -16,8 +16,8 @@ export function SecaoAtendimentosTipoInicio({ itens, titulo = 'Atendimentos do m
         colunasPainel={2}
         obterValorTexto={(item) => `${item.quantidadeAtendimentos} atend.`}
         obterValorPercentual={(item) => item.percentualAtendimentos}
-        obterQuantidadeTexto={(item) => `${item.quantidadeClientes} clientes`}
-        obterQuantidadePercentual={(item) => item.percentualClientes}
+        obterQuantidadeTexto={(item) => `${item.quantidadeFornecedores} fornecedores`}
+        obterQuantidadePercentual={(item) => item.percentualFornecedores}
         ariaAcao="Abrir lista completa de atendimentos por tipo no mes"
       />
     </div>

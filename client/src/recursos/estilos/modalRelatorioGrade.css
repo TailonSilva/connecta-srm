@@ -1,4 +1,4 @@
-.modalCliente.modalRelatorioGrade {
+.modalFornecedor.modalRelatorioGrade {
   width: min(1720px, calc(100vw - 24px));
   max-width: calc(100vw - 24px);
 }
@@ -54,40 +54,40 @@
   overflow: hidden;
 }
 
-.modalCliente.modalRelatorioGrade .modalRelatorioGradePainelTabela .gradeContatosModal {
+.modalFornecedor.modalRelatorioGrade .modalRelatorioGradePainelTabela .gradeContatosModal {
   flex: 1 1 auto;
   min-height: 0;
   overflow: auto;
 }
 
-.modalCliente.modalRelatorioGrade .modalRelatorioGradePainelTabela .corpoGradePadrao {
+.modalFornecedor.modalRelatorioGrade .modalRelatorioGradePainelTabela .corpoGradePadrao {
   overflow-x: auto;
 }
 
-.modalCliente.modalRelatorioGrade .modalHistoricoOrdensCompraFornecedorGrade {
+.modalFornecedor.modalRelatorioGrade .modalHistoricoOrdensCompraFornecedorGrade {
   border-radius: 22px;
 }
 
-.modalCliente.modalRelatorioGrade .tabelaContatosModal {
+.modalFornecedor.modalRelatorioGrade .tabelaContatosModal {
   min-width: 1480px;
   table-layout: fixed;
 }
 
-.modalCliente.modalRelatorioGrade .tabelaContatosModal th,
-.modalCliente.modalRelatorioGrade .tabelaContatosModal td {
+.modalFornecedor.modalRelatorioGrade .tabelaContatosModal th,
+.modalFornecedor.modalRelatorioGrade .tabelaContatosModal td {
   padding: 14px 16px;
   vertical-align: middle;
 }
 
-.modalCliente.modalRelatorioGrade .colunaHistoricoData {
+.modalFornecedor.modalRelatorioGrade .colunaHistoricoData {
   width: 118px;
 }
 
-.modalCliente.modalRelatorioGrade .colunaHistoricoPedido {
+.modalFornecedor.modalRelatorioGrade .colunaHistoricoOrdemCompra {
   width: 96px;
 }
 
-.modalCliente.modalRelatorioGrade .codigoHistoricoPedido {
+.modalFornecedor.modalRelatorioGrade .codigoHistoricoOrdemCompra {
   display: inline;
   min-width: 0;
   padding: 0;
@@ -100,94 +100,94 @@
   white-space: nowrap;
 }
 
-.modalCliente.modalRelatorioGrade .colunaHistoricoCliente {
+.modalFornecedor.modalRelatorioGrade .colunaHistoricoFornecedor {
   width: 280px;
   white-space: normal;
 }
 
-.modalCliente.modalRelatorioGrade .colunaHistoricoEtapa {
+.modalFornecedor.modalRelatorioGrade .colunaHistoricoEtapa {
   width: 190px;
 }
 
-.modalCliente.modalRelatorioGrade .colunaHistoricoVendedor {
+.modalFornecedor.modalRelatorioGrade .colunaHistoricoComprador {
   width: 190px;
 }
 
-.modalCliente.modalRelatorioGrade .colunaHistoricoPrazoPagamento {
+.modalFornecedor.modalRelatorioGrade .colunaHistoricoPrazoPagamento {
   width: 220px;
   white-space: normal;
 }
 
-.modalCliente.modalRelatorioGrade .colunaHistoricoValorTotal {
+.modalFornecedor.modalRelatorioGrade .colunaHistoricoValorTotal {
   width: 140px;
 }
 
-.modalCliente.modalRelatorioGrade .colunaHistoricoAtendimentoData {
+.modalFornecedor.modalRelatorioGrade .colunaHistoricoAtendimentoData {
   width: 120px;
 }
 
-.modalCliente.modalRelatorioGrade .colunaHistoricoAtendimentoHora {
+.modalFornecedor.modalRelatorioGrade .colunaHistoricoAtendimentoHora {
   width: 96px;
 }
 
-.modalCliente.modalRelatorioGrade .colunaHistoricoAtendimentoCliente {
+.modalFornecedor.modalRelatorioGrade .colunaHistoricoAtendimentoFornecedor {
   width: 260px;
   white-space: normal;
 }
 
-.modalCliente.modalRelatorioGrade .colunaHistoricoAtendimentoAssunto {
+.modalFornecedor.modalRelatorioGrade .colunaHistoricoAtendimentoAssunto {
   width: 260px;
   white-space: normal;
 }
 
-.modalCliente.modalRelatorioGrade .colunaHistoricoAtendimentoContato {
+.modalFornecedor.modalRelatorioGrade .colunaHistoricoAtendimentoContato {
   width: 240px;
   white-space: normal;
 }
 
-.modalCliente.modalRelatorioGrade .colunaHistoricoAtendimentoCanal {
+.modalFornecedor.modalRelatorioGrade .colunaHistoricoAtendimentoCanal {
   width: 180px;
 }
 
-.modalCliente.modalRelatorioGrade .colunaHistoricoAtendimentoUsuario {
+.modalFornecedor.modalRelatorioGrade .colunaHistoricoAtendimentoUsuario {
   width: 200px;
 }
 
-.modalCliente.modalRelatorioGrade .modalHistoricoOrcamentosGrade {
+.modalFornecedor.modalRelatorioGrade .modalHistoricoCotacoesGrade {
   border-radius: 22px;
 }
 
-.modalCliente.modalRelatorioGrade .tabelaHistoricoOrcamentos {
+.modalFornecedor.modalRelatorioGrade .tabelaHistoricoCotacoes {
   min-width: 1540px;
 }
 
-.modalCliente.modalRelatorioGrade .colunaHistoricoOrcamentoData {
+.modalFornecedor.modalRelatorioGrade .colunaHistoricoCotacaoData {
   width: 120px;
 }
 
-.modalCliente.modalRelatorioGrade .colunaHistoricoOrcamentoCodigo {
+.modalFornecedor.modalRelatorioGrade .colunaHistoricoCotacaoCodigo {
   width: 110px;
 }
 
-.modalCliente.modalRelatorioGrade .colunaHistoricoOrcamentoCliente {
+.modalFornecedor.modalRelatorioGrade .colunaHistoricoCotacaoFornecedor {
   width: 260px;
   white-space: normal;
 }
 
-.modalCliente.modalRelatorioGrade .colunaHistoricoOrcamentoContato {
+.modalFornecedor.modalRelatorioGrade .colunaHistoricoCotacaoContato {
   width: 240px;
   white-space: normal;
 }
 
-.modalCliente.modalRelatorioGrade .colunaHistoricoOrcamentoEtapa {
+.modalFornecedor.modalRelatorioGrade .colunaHistoricoCotacaoEtapa {
   width: 200px;
 }
 
-.modalCliente.modalRelatorioGrade .colunaHistoricoOrcamentoVendedor {
+.modalFornecedor.modalRelatorioGrade .colunaHistoricoCotacaoComprador {
   width: 190px;
 }
 
-.modalCliente.modalRelatorioGrade .colunaHistoricoOrcamentoTotal {
+.modalFornecedor.modalRelatorioGrade .colunaHistoricoCotacaoTotal {
   width: 160px;
 }
 
@@ -220,30 +220,30 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .modalCliente.modalRelatorioGrade .tabelaContatosModal {
+  .modalFornecedor.modalRelatorioGrade .tabelaContatosModal {
     min-width: 1280px;
   }
 
-  .modalCliente.modalRelatorioGrade .tabelaHistoricoOrcamentos {
+  .modalFornecedor.modalRelatorioGrade .tabelaHistoricoCotacoes {
     min-width: 1320px;
   }
 
-  .modalCliente.modalRelatorioGrade .colunaHistoricoCliente,
-  .modalCliente.modalRelatorioGrade .colunaHistoricoAtendimentoCliente,
-  .modalCliente.modalRelatorioGrade .colunaHistoricoAtendimentoAssunto,
-  .modalCliente.modalRelatorioGrade .colunaHistoricoAtendimentoContato,
-  .modalCliente.modalRelatorioGrade .colunaHistoricoOrcamentoCliente,
-  .modalCliente.modalRelatorioGrade .colunaHistoricoOrcamentoContato {
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoFornecedor,
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoAtendimentoFornecedor,
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoAtendimentoAssunto,
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoAtendimentoContato,
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoCotacaoFornecedor,
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoCotacaoContato {
     width: 220px;
   }
 
-  .modalCliente.modalRelatorioGrade .colunaHistoricoEtapa,
-  .modalCliente.modalRelatorioGrade .colunaHistoricoVendedor,
-  .modalCliente.modalRelatorioGrade .colunaHistoricoPrazoPagamento,
-  .modalCliente.modalRelatorioGrade .colunaHistoricoAtendimentoCanal,
-  .modalCliente.modalRelatorioGrade .colunaHistoricoAtendimentoUsuario,
-  .modalCliente.modalRelatorioGrade .colunaHistoricoOrcamentoEtapa,
-  .modalCliente.modalRelatorioGrade .colunaHistoricoOrcamentoVendedor {
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoEtapa,
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoComprador,
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoPrazoPagamento,
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoAtendimentoCanal,
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoAtendimentoUsuario,
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoCotacaoEtapa,
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoCotacaoComprador {
     width: 170px;
   }
 }
@@ -253,55 +253,55 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .modalCliente.modalRelatorioGrade .tabelaContatosModal {
+  .modalFornecedor.modalRelatorioGrade .tabelaContatosModal {
     min-width: 1040px;
   }
 
-  .modalCliente.modalRelatorioGrade .tabelaHistoricoOrcamentos {
+  .modalFornecedor.modalRelatorioGrade .tabelaHistoricoCotacoes {
     min-width: 1100px;
   }
 
-  .modalCliente.modalRelatorioGrade .tabelaContatosModal th,
-  .modalCliente.modalRelatorioGrade .tabelaContatosModal td {
+  .modalFornecedor.modalRelatorioGrade .tabelaContatosModal th,
+  .modalFornecedor.modalRelatorioGrade .tabelaContatosModal td {
     padding: 12px 12px;
   }
 
-  .modalCliente.modalRelatorioGrade .colunaHistoricoData,
-  .modalCliente.modalRelatorioGrade .colunaHistoricoAtendimentoData,
-  .modalCliente.modalRelatorioGrade .colunaHistoricoOrcamentoData {
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoData,
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoAtendimentoData,
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoCotacaoData {
     width: 102px;
   }
 
-  .modalCliente.modalRelatorioGrade .colunaHistoricoPedido,
-  .modalCliente.modalRelatorioGrade .colunaHistoricoOrcamentoCodigo,
-  .modalCliente.modalRelatorioGrade .colunaHistoricoAtendimentoHora,
-  .modalCliente.modalRelatorioGrade .colunaHistoricoValorTotal,
-  .modalCliente.modalRelatorioGrade .colunaHistoricoOrcamentoTotal {
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoOrdemCompra,
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoCotacaoCodigo,
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoAtendimentoHora,
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoValorTotal,
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoCotacaoTotal {
     width: 120px;
   }
 
-  .modalCliente.modalRelatorioGrade .colunaHistoricoCliente,
-  .modalCliente.modalRelatorioGrade .colunaHistoricoAtendimentoCliente,
-  .modalCliente.modalRelatorioGrade .colunaHistoricoAtendimentoAssunto,
-  .modalCliente.modalRelatorioGrade .colunaHistoricoAtendimentoContato,
-  .modalCliente.modalRelatorioGrade .colunaHistoricoOrcamentoCliente,
-  .modalCliente.modalRelatorioGrade .colunaHistoricoOrcamentoContato {
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoFornecedor,
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoAtendimentoFornecedor,
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoAtendimentoAssunto,
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoAtendimentoContato,
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoCotacaoFornecedor,
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoCotacaoContato {
     width: 190px;
   }
 
-  .modalCliente.modalRelatorioGrade .colunaHistoricoEtapa,
-  .modalCliente.modalRelatorioGrade .colunaHistoricoVendedor,
-  .modalCliente.modalRelatorioGrade .colunaHistoricoPrazoPagamento,
-  .modalCliente.modalRelatorioGrade .colunaHistoricoAtendimentoCanal,
-  .modalCliente.modalRelatorioGrade .colunaHistoricoAtendimentoUsuario,
-  .modalCliente.modalRelatorioGrade .colunaHistoricoOrcamentoEtapa,
-  .modalCliente.modalRelatorioGrade .colunaHistoricoOrcamentoVendedor {
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoEtapa,
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoComprador,
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoPrazoPagamento,
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoAtendimentoCanal,
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoAtendimentoUsuario,
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoCotacaoEtapa,
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoCotacaoComprador {
     width: 150px;
   }
 }
 
 @media (max-width: 640px) {
-  .modalCliente.modalRelatorioGrade {
+  .modalFornecedor.modalRelatorioGrade {
     width: min(100%, calc(100vw - 12px));
   }
 
@@ -309,33 +309,33 @@
     grid-template-columns: 1fr;
   }
 
-  .modalCliente.modalRelatorioGrade .tabelaContatosModal {
+  .modalFornecedor.modalRelatorioGrade .tabelaContatosModal {
     min-width: 760px;
   }
 
-  .modalCliente.modalRelatorioGrade .tabelaHistoricoOrcamentos {
+  .modalFornecedor.modalRelatorioGrade .tabelaHistoricoCotacoes {
     min-width: 800px;
   }
 
-  .modalCliente.modalRelatorioGrade .tabelaContatosModal th,
-  .modalCliente.modalRelatorioGrade .tabelaContatosModal td {
+  .modalFornecedor.modalRelatorioGrade .tabelaContatosModal th,
+  .modalFornecedor.modalRelatorioGrade .tabelaContatosModal td {
     padding: 10px 10px;
     font-size: 0.92rem;
   }
 
-  .modalCliente.modalRelatorioGrade .colunaHistoricoCliente,
-  .modalCliente.modalRelatorioGrade .colunaHistoricoAtendimentoCliente,
-  .modalCliente.modalRelatorioGrade .colunaHistoricoAtendimentoAssunto,
-  .modalCliente.modalRelatorioGrade .colunaHistoricoAtendimentoContato,
-  .modalCliente.modalRelatorioGrade .colunaHistoricoOrcamentoCliente,
-  .modalCliente.modalRelatorioGrade .colunaHistoricoOrcamentoContato,
-  .modalCliente.modalRelatorioGrade .colunaHistoricoEtapa,
-  .modalCliente.modalRelatorioGrade .colunaHistoricoVendedor,
-  .modalCliente.modalRelatorioGrade .colunaHistoricoPrazoPagamento,
-  .modalCliente.modalRelatorioGrade .colunaHistoricoAtendimentoCanal,
-  .modalCliente.modalRelatorioGrade .colunaHistoricoAtendimentoUsuario,
-  .modalCliente.modalRelatorioGrade .colunaHistoricoOrcamentoEtapa,
-  .modalCliente.modalRelatorioGrade .colunaHistoricoOrcamentoVendedor {
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoFornecedor,
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoAtendimentoFornecedor,
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoAtendimentoAssunto,
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoAtendimentoContato,
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoCotacaoFornecedor,
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoCotacaoContato,
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoEtapa,
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoComprador,
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoPrazoPagamento,
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoAtendimentoCanal,
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoAtendimentoUsuario,
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoCotacaoEtapa,
+  .modalFornecedor.modalRelatorioGrade .colunaHistoricoCotacaoComprador {
     width: auto;
   }
 }

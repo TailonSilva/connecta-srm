@@ -147,7 +147,7 @@ export function ModalManualAgenda({
       titulo="Manual da Agenda"
       descricao="Guia visual com fluxo, configuracoes, regras e obrigatoriedades reais da tela."
       eyebrow="Operacao diaria"
-      heroTitulo="Como a Agenda funciona no Connecta CRM"
+      heroTitulo="Como a Agenda funciona no Connecta SRM"
       heroDescricao="A Agenda foi desenhada para planejar compromissos por semana, controlar disponibilidade, acelerar lancamentos e transformar visitas concluidas em atendimento comercial quando fizer sentido."
       painelHeroi={[
         { valor: configuracaoExpediente.trabalhaSabado ? 'Seg a sab' : 'Seg a sex', rotulo: 'Dias exibidos na grade base' },
@@ -224,7 +224,7 @@ function criarResumoObrigatoriedades(tiposAgenda) {
       nome: tipoAgenda.descricao || 'Tipo sem descricao',
       cor: tipoAgenda.cor || '#9506F4',
       tags: [
-        { rotulo: 'Fornecedor', obrigatorio: Boolean(tipoAgenda.obrigarCliente) },
+        { rotulo: 'Fornecedor', obrigatorio: Boolean(tipoAgenda.obrigarFornecedor) },
         { rotulo: 'Local', obrigatorio: Boolean(tipoAgenda.obrigarLocal) },
         { rotulo: 'Recurso', obrigatorio: Boolean(tipoAgenda.obrigarRecurso) }
       ]

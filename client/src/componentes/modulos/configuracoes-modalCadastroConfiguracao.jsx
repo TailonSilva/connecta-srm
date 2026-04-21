@@ -278,16 +278,16 @@ export function ModalCadastroConfiguracao({
   return (
     <div className={`camadaModal ${camadaSecundaria ? 'camadaModalSecundaria' : ''}`.trim()} role="presentation" onMouseDown={fecharAoClicarNoFundo}>
       <section
-        className={`modalCliente ${classeModal}`.trim()}
+        className={`modalFornecedor ${classeModal}`.trim()}
         role="dialog"
         aria-modal="true"
         aria-labelledby={`tituloModal${titulo}`}
         onMouseDown={(evento) => evento.stopPropagation()}
       >
-        <header className="cabecalhoModalCliente">
+        <header className="cabecalhoModalFornecedor">
           <h2 id={`tituloModal${titulo}`}>{titulo}</h2>
 
-          <div className="acoesCabecalhoModalCliente">
+          <div className="acoesCabecalhoModalFornecedor">
             <Botao
               variante="secundario"
               type="button"
@@ -326,8 +326,8 @@ export function ModalCadastroConfiguracao({
           </div>
         </header>
 
-        <div className="corpoModalCliente corpoModalUsuarios corpoModalUsuariosConfiguracao">
-          <section className="painelContatosModalCliente painelContatosConfiguracao">
+        <div className="corpoModalFornecedor corpoModalUsuarios corpoModalUsuariosConfiguracao">
+          <section className="painelContatosModalFornecedor painelContatosConfiguracao">
             <GradePadrao
               className="gradeContatosModal"
               classNameTabela={`tabelaContatosModal tabelaCadastrosConfiguracao ${classeTabela}`.trim()}
@@ -416,7 +416,7 @@ export function ModalCadastroConfiguracao({
         {modalFormularioAberto ? (
           <div className="camadaModalContato" role="presentation" onMouseDown={fecharFormularioNoFundo}>
             <form
-              className={`modalContatoCliente ${classeModalFormulario}`.trim()}
+              className={`modalContatoFornecedor ${classeModalFormulario}`.trim()}
               role="dialog"
               aria-modal="true"
               aria-labelledby={`tituloFormulario${titulo}`}
@@ -444,7 +444,7 @@ export function ModalCadastroConfiguracao({
               </div>
 
               <div className="corpoModalContato">
-                <div className={`gradeCamposModalCliente ${classeFormulario}`.trim()}>
+                <div className={`gradeCamposModalFornecedor ${classeFormulario}`.trim()}>
                   {(agruparCheckboxes ? camposNaoCheckbox : camposFormulario).map(renderizarCampo)}
                 </div>
 

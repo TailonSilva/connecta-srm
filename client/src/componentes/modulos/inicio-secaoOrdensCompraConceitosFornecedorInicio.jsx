@@ -13,8 +13,8 @@ export function SecaoOrdensCompraConceitosFornecedorInicio({
         itens={itens}
         colunasPainel={2}
         composicao="Valor liquido e quantidade de itens por conceito de fornecedor."
-        periodo="Mes corrente pela data de entrada do pedido."
-        mensagemVazia="Nenhuma venda registrada no mes atual para conceitos de fornecedor."
+        periodo="Mes corrente pela data de entrada do ordemCompra."
+        mensagemVazia="Nenhuma ordemCompra registrada no mes atual para conceitos de fornecedor."
         modalTitulo={titulo}
         modalSubtitulo="Lista completa por conceito de fornecedor no mes corrente."
         ariaAcao="Abrir lista completa das ordens de compra por conceito de fornecedor no mes"

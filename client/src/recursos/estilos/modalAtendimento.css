@@ -42,13 +42,13 @@
   grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.95fr) minmax(0, 0.95fr) minmax(0, 0.95fr);
 }
 
-.linhaClienteContatoAtendimento {
+.linhaFornecedorContatoAtendimento {
   display: grid;
   grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr);
   gap: 16px;
 }
 
-.linhaOrcamentoAtendimento {
+.linhaCotacaoAtendimento {
   display: grid;
   grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);
   gap: 16px;
@@ -62,8 +62,8 @@
 
 @media (max-width: 640px) {
   .layoutModalAtendimento,
-  .linhaClienteContatoAtendimento,
-  .linhaOrcamentoAtendimento,
+  .linhaFornecedorContatoAtendimento,
+  .linhaCotacaoAtendimento,
   .linhaUsuarioCanalOrigemAtendimento,
   .linhaHorariosAtendimento {
     grid-template-columns: 1fr;

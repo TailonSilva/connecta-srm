@@ -24,7 +24,7 @@ export function LinhaProduto({
       <td className="colunaGradeTexto"><TextoGradeClamp>{obterValorGrid(produto.nomeGrupo)}</TextoGradeClamp></td>
       <td className="colunaGradeTexto"><TextoGradeClamp>{obterValorGrid(produto.nomeMarca)}</TextoGradeClamp></td>
       <td className="colunaGradeTextoCurto"><TextoGradeClamp>{obterValorGrid(produto.nomeUnidade)}</TextoGradeClamp></td>
-      <td className="colunaGradeValor">{normalizarPreco(produto.preco)}</td>
+      <td className="colunaGradeValor">{normalizarPreco(produto.custo)}</td>
       <td className="colunaGradeStatus">
         <span className={`etiquetaStatus ${ativo ? 'ativo' : 'inativo'}`}>
           {ativo ? 'Ativo' : 'Inativo'}

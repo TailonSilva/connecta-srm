@@ -1,74 +1,74 @@
-.gradePainelClientes {
+.gradePainelFornecedores {
   display: block;
 }
 
-.cabecalhoGradeClientes th:nth-child(1),
-.linhaCliente td:nth-child(1) {
+.cabecalhoGradeFornecedores th:nth-child(1),
+.linhaFornecedor td:nth-child(1) {
   width: 64px;
 }
 
-.cabecalhoGradeClientes th:nth-child(2),
-.linhaCliente td:nth-child(2) {
+.cabecalhoGradeFornecedores th:nth-child(2),
+.linhaFornecedor td:nth-child(2) {
   width: 32%;
 }
 
-.cabecalhoGradeClientes th:nth-child(3),
-.linhaCliente td:nth-child(3) {
+.cabecalhoGradeFornecedores th:nth-child(3),
+.linhaFornecedor td:nth-child(3) {
   width: 10%;
 }
 
-.cabecalhoGradeClientes th:nth-child(4),
-.linhaCliente td:nth-child(4) {
+.cabecalhoGradeFornecedores th:nth-child(4),
+.linhaFornecedor td:nth-child(4) {
   width: 6%;
 }
 
-.cabecalhoGradeClientes th:nth-child(5),
-.linhaCliente td:nth-child(5) {
+.cabecalhoGradeFornecedores th:nth-child(5),
+.linhaFornecedor td:nth-child(5) {
   width: 18%;
 }
 
-.cabecalhoGradeClientes th:nth-child(6),
-.linhaCliente td:nth-child(6) {
+.cabecalhoGradeFornecedores th:nth-child(6),
+.linhaFornecedor td:nth-child(6) {
   width: 12%;
 }
 
-.cabecalhoGradeClientes th:nth-child(7),
-.linhaCliente td:nth-child(7) {
+.cabecalhoGradeFornecedores th:nth-child(7),
+.linhaFornecedor td:nth-child(7) {
   width: 7%;
 }
 
-.cabecalhoGradeClientes th:nth-child(8),
-.linhaCliente td:nth-child(8) {
+.cabecalhoGradeFornecedores th:nth-child(8),
+.linhaFornecedor td:nth-child(8) {
   width: 124px;
 }
 
 @media (max-width: 1360px) {
-  .cabecalhoGradeClientes th:nth-child(4),
-  .linhaCliente td:nth-child(4) {
+  .cabecalhoGradeFornecedores th:nth-child(4),
+  .linhaFornecedor td:nth-child(4) {
     display: none;
   }
 }
 
 @media (max-width: 1120px) {
-  .cabecalhoGradeClientes th:nth-child(3),
-  .cabecalhoGradeClientes th:nth-child(6),
-  .cabecalhoGradeClientes th:nth-child(8),
-  .linhaCliente td:nth-child(3),
-  .linhaCliente td:nth-child(6),
-  .linhaCliente td:nth-child(8) {
+  .cabecalhoGradeFornecedores th:nth-child(3),
+  .cabecalhoGradeFornecedores th:nth-child(6),
+  .cabecalhoGradeFornecedores th:nth-child(8),
+  .linhaFornecedor td:nth-child(3),
+  .linhaFornecedor td:nth-child(6),
+  .linhaFornecedor td:nth-child(8) {
     display: none;
   }
 }
 
 @media (max-width: 980px) {
-  .cabecalhoGradeClientes th:nth-child(5),
-  .cabecalhoGradeClientes th:nth-child(6),
-  .cabecalhoGradeClientes th:nth-child(7),
-  .cabecalhoGradeClientes th:nth-child(8),
-  .linhaCliente td:nth-child(5),
-  .linhaCliente td:nth-child(6),
-  .linhaCliente td:nth-child(7),
-  .linhaCliente td:nth-child(8) {
+  .cabecalhoGradeFornecedores th:nth-child(5),
+  .cabecalhoGradeFornecedores th:nth-child(6),
+  .cabecalhoGradeFornecedores th:nth-child(7),
+  .cabecalhoGradeFornecedores th:nth-child(8),
+  .linhaFornecedor td:nth-child(5),
+  .linhaFornecedor td:nth-child(6),
+  .linhaFornecedor td:nth-child(7),
+  .linhaFornecedor td:nth-child(8) {
     display: none;
   }
 }
