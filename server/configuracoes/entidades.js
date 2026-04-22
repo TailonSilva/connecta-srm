@@ -376,14 +376,22 @@ const entidades = [
       'idProduto',
       'idFornecedor',
       'codigoFornecedor',
-      'unidadeFornecedor'
+      'idUnidadeFornecedor',
+      'unidadeFornecedor',
+      'fator',
+      'pedidoMinimo',
+      'quantidadeMultipla'
     ],
     camposPermitidos: [
       'idProdutoFornecedor',
       'idProduto',
       'idFornecedor',
       'codigoFornecedor',
-      'unidadeFornecedor'
+      'idUnidadeFornecedor',
+      'unidadeFornecedor',
+      'fator',
+      'pedidoMinimo',
+      'quantidadeMultipla'
     ]
   },
   {

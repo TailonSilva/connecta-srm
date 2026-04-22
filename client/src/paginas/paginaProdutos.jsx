@@ -232,7 +232,11 @@ export function PaginaProdutos({ usuarioLogado }) {
         idProduto: Number(idProduto),
         idFornecedor: Number(fornecedorProduto.idFornecedor),
         codigoFornecedor: String(fornecedorProduto.codigoFornecedor || '').trim(),
-        unidadeFornecedor: String(fornecedorProduto.unidadeFornecedor || '').trim()
+        idUnidadeFornecedor: Number(fornecedorProduto.idUnidadeFornecedor),
+        unidadeFornecedor: String(fornecedorProduto.unidadeFornecedor || '').trim(),
+        fator: Number(fornecedorProduto.fator || 1),
+        pedidoMinimo: Number(fornecedorProduto.pedidoMinimo || 0),
+        quantidadeMultipla: Number(fornecedorProduto.quantidadeMultipla || 1)
       });
     }
   }

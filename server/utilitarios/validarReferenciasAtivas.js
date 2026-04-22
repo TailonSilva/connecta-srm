@@ -95,6 +95,13 @@ const validacoesPorEntidade = {
       chavePrimaria: 'idFornecedor',
       colunaAtiva: 'status',
       mensagem: 'Selecione um fornecedor ativo.'
+    },
+    {
+      campo: 'idUnidadeFornecedor',
+      tabela: 'unidadeMedida',
+      chavePrimaria: 'idUnidade',
+      colunaAtiva: 'status',
+      mensagem: 'Selecione uma unidade de medida ativa.'
     }
   ],
   grupoProdutoTamanho: [

@@ -1888,10 +1888,15 @@ banco.serialize(() => {
       idProduto INTEGER NOT NULL,
       idFornecedor INTEGER NOT NULL,
       codigoFornecedor VARCHAR(120) NOT NULL,
+      idUnidadeFornecedor INTEGER NOT NULL,
       unidadeFornecedor VARCHAR(60) NOT NULL,
+      fator DECIMAL(12,4) NOT NULL DEFAULT 1,
+      pedidoMinimo DECIMAL(12,4) NOT NULL DEFAULT 0,
+      quantidadeMultipla DECIMAL(12,4) NOT NULL DEFAULT 1,
       dataCriacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (idProduto) REFERENCES produto (idProduto) ON DELETE CASCADE,
       FOREIGN KEY (idFornecedor) REFERENCES fornecedor (idFornecedor),
+      FOREIGN KEY (idUnidadeFornecedor) REFERENCES unidadeMedida (idUnidade),
       UNIQUE (idProduto, idFornecedor)
     )
   `);
@@ -1953,6 +1958,7 @@ async function garantirRegistrosObrigatorios() {
   await removerColunaAbreviacaoDasEtapas();
   await removerColunaSiglaDosRecursos();
   await garantirPrazosPagamentoComDiasOpcionais();
+  await garantirProdutoFornecedorComUnidadeMedida();
   await garantirUsuarioAdministradorPadrao();
   await garantirConceitosFornecedorObrigatorios();
   await garantirTiposOrdemCompraObrigatorios();
@@ -2340,6 +2346,101 @@ async function garantirPrazosPagamentoComDiasOpcionais() {
   } finally {
     await executar('PRAGMA foreign_keys = ON');
   }
+}
+
+async function garantirProdutoFornecedorComUnidadeMedida() {
+  const tabelas = await consultarTodos(`
+    SELECT name
+    FROM sqlite_master
+    WHERE type = 'table'
+      AND name = 'produtoFornecedor'
+  `);
+
+  if (tabelas.length === 0) {
+    return;
+  }
+
+  const colunas = await consultarTodos('PRAGMA table_info(produtoFornecedor)');
+  const possuiIdUnidadeFornecedor = colunas.some((coluna) => coluna.name === 'idUnidadeFornecedor');
+
+  if (!possuiIdUnidadeFornecedor) {
+    await executar('ALTER TABLE produtoFornecedor ADD COLUMN idUnidadeFornecedor INTEGER');
+  }
+
+  await garantirColunaProdutoFornecedor(colunas, 'fator', 'DECIMAL(12,4) NOT NULL DEFAULT 1');
+  await garantirColunaProdutoFornecedor(colunas, 'pedidoMinimo', 'DECIMAL(12,4) NOT NULL DEFAULT 0');
+  await garantirColunaProdutoFornecedor(colunas, 'quantidadeMultipla', 'DECIMAL(12,4) NOT NULL DEFAULT 1');
+
+  await executar(`
+    UPDATE produtoFornecedor
+    SET idUnidadeFornecedor = (
+      SELECT unidadeMedida.idUnidade
+      FROM unidadeMedida
+      WHERE LOWER(TRIM(unidadeMedida.descricao)) = LOWER(TRIM(produtoFornecedor.unidadeFornecedor))
+        AND unidadeMedida.status <> 0
+      ORDER BY unidadeMedida.idUnidade
+      LIMIT 1
+    )
+    WHERE idUnidadeFornecedor IS NULL
+      AND unidadeFornecedor IS NOT NULL
+      AND TRIM(unidadeFornecedor) <> ''
+  `);
+
+  await executar(`
+    UPDATE produtoFornecedor
+    SET idUnidadeFornecedor = (
+      SELECT idUnidade
+      FROM unidadeMedida
+      WHERE status <> 0
+      ORDER BY idUnidade
+      LIMIT 1
+    )
+    WHERE idUnidadeFornecedor IS NULL
+  `);
+
+  await executar(`
+    UPDATE produtoFornecedor
+    SET idUnidadeFornecedor = (
+      SELECT unidadeAtiva.idUnidade
+      FROM unidadeMedida AS unidadeAtual
+      INNER JOIN unidadeMedida AS unidadeAtiva
+        ON LOWER(TRIM(unidadeAtiva.descricao)) = LOWER(TRIM(unidadeAtual.descricao))
+       AND unidadeAtiva.status <> 0
+      WHERE unidadeAtual.idUnidade = produtoFornecedor.idUnidadeFornecedor
+      ORDER BY unidadeAtiva.idUnidade
+      LIMIT 1
+    )
+    WHERE idUnidadeFornecedor IN (
+      SELECT idUnidade
+      FROM unidadeMedida
+      WHERE status = 0
+    )
+  `);
+
+  await executar(`
+    UPDATE produtoFornecedor
+    SET unidadeFornecedor = COALESCE((
+      SELECT unidadeMedida.descricao
+      FROM unidadeMedida
+      WHERE unidadeMedida.idUnidade = produtoFornecedor.idUnidadeFornecedor
+      LIMIT 1
+    ), unidadeFornecedor)
+    WHERE idUnidadeFornecedor IS NOT NULL
+  `);
+
+  await executar('UPDATE produtoFornecedor SET fator = 1 WHERE fator IS NULL OR fator <= 0');
+  await executar('UPDATE produtoFornecedor SET pedidoMinimo = 0 WHERE pedidoMinimo IS NULL OR pedidoMinimo < 0');
+  await executar('UPDATE produtoFornecedor SET quantidadeMultipla = 1 WHERE quantidadeMultipla IS NULL OR quantidadeMultipla <= 0');
+}
+
+async function garantirColunaProdutoFornecedor(colunas, nomeColuna, definicaoColuna) {
+  const possuiColuna = colunas.some((coluna) => coluna.name === nomeColuna);
+
+  if (possuiColuna) {
+    return;
+  }
+
+  await executar(`ALTER TABLE produtoFornecedor ADD COLUMN ${nomeColuna} ${definicaoColuna}`);
 }
 
 async function removerColunaSiglaDosRecursos() {

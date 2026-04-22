@@ -18,7 +18,7 @@ export function AvatarFornecedor({ fornecedor }) {
     return (
       <div className="celulaAvatarFornecedor">
         <img
-          className="AvatarFornecedorImagem"
+          className="avatarFornecedorImagem"
           src={fornecedor.imagem}
           alt={`Imagem de ${fornecedor.nomeFantasia || fornecedor.razaoSocial}`}
         />
@@ -28,8 +28,7 @@ export function AvatarFornecedor({ fornecedor }) {
 
   return (
     <div className="celulaAvatarFornecedor" aria-hidden="true">
-      <span className="AvatarFornecedorPlaceholder">{obterIniciais(fornecedor)}</span>
+      <span className="avatarFornecedorPlaceholder">{obterIniciais(fornecedor)}</span>
     </div>
   );
 }
-

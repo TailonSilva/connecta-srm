@@ -64,7 +64,11 @@ const estadoInicialFornecedorProduto = {
   idTemporario: '',
   idFornecedor: '',
   codigoFornecedor: '',
-  unidadeFornecedor: ''
+  idUnidadeFornecedor: '',
+  unidadeFornecedor: '',
+  fator: '1',
+  pedidoMinimo: '0',
+  quantidadeMultipla: '1'
 };
 
 export function ModalProduto({
@@ -456,7 +460,11 @@ export function ModalProduto({
       idTemporario: vinculo.idTemporario || '',
       idFornecedor: String(vinculo.idFornecedor || ''),
       codigoFornecedor: vinculo.codigoFornecedor || '',
-      unidadeFornecedor: vinculo.unidadeFornecedor || ''
+      idUnidadeFornecedor: String(vinculo.idUnidadeFornecedor || obterIdUnidadeFornecedorPorDescricao(vinculo.unidadeFornecedor, unidadesMedida) || ''),
+      unidadeFornecedor: vinculo.unidadeFornecedor || '',
+      fator: normalizarNumeroFornecedorProdutoParaFormulario(vinculo.fator, '1'),
+      pedidoMinimo: normalizarNumeroFornecedorProdutoParaFormulario(vinculo.pedidoMinimo, '0'),
+      quantidadeMultipla: normalizarNumeroFornecedorProdutoParaFormulario(vinculo.quantidadeMultipla, '1')
     });
     definirMensagemErroFornecedorProduto('');
     definirModalFornecedorProdutoAberto(true);
@@ -591,11 +599,20 @@ export function ModalProduto({
       idProduto: produto?.idProduto ? Number(produto.idProduto) : null,
       idFornecedor: Number(formularioFornecedorProduto.idFornecedor),
       codigoFornecedor: String(formularioFornecedorProduto.codigoFornecedor || '').trim(),
-      unidadeFornecedor: String(formularioFornecedorProduto.unidadeFornecedor || '').trim()
+      idUnidadeFornecedor: Number(formularioFornecedorProduto.idUnidadeFornecedor),
+      unidadeFornecedor: obterDescricaoUnidadePorId(formularioFornecedorProduto.idUnidadeFornecedor, unidadesMedida),
+      fator: normalizarNumeroFornecedorProduto(formularioFornecedorProduto.fator, 1),
+      pedidoMinimo: normalizarNumeroFornecedorProduto(formularioFornecedorProduto.pedidoMinimo, 0),
+      quantidadeMultipla: normalizarNumeroFornecedorProduto(formularioFornecedorProduto.quantidadeMultipla, 1)
     };
 
-    if (!payload.idFornecedor || !payload.codigoFornecedor || !payload.unidadeFornecedor) {
+    if (!payload.idFornecedor || !payload.codigoFornecedor || !payload.idUnidadeFornecedor) {
       definirMensagemErroFornecedorProduto('Informe fornecedor, codigo do fornecedor e unidade do fornecedor.');
+      return;
+    }
+
+    if (payload.fator <= 0 || payload.pedidoMinimo < 0 || payload.quantidadeMultipla <= 0) {
+      definirMensagemErroFornecedorProduto('Informe fator maior que zero, pedido minimo igual ou maior que zero e quantidade multipla maior que zero.');
       return;
     }
 
@@ -727,8 +744,8 @@ export function ModalProduto({
   );
   const filtrosOrdensCompraAtivos = filtrosHistoricoEstaoAtivos(filtrosOrdensCompra, criarFiltrosIniciaisOrdensCompraProduto());
   const fornecedoresProdutoEnriquecidos = useMemo(
-    () => enriquecerFornecedoresProduto(fornecedoresProduto, fornecedoresOrdensCompra),
-    [fornecedoresProduto, fornecedoresOrdensCompra]
+    () => enriquecerFornecedoresProduto(fornecedoresProduto, fornecedoresOrdensCompra, unidadesMedida),
+    [fornecedoresProduto, fornecedoresOrdensCompra, unidadesMedida]
   );
 
   if (!aberto) {
@@ -942,13 +959,16 @@ export function ModalProduto({
 
                 <GradePadrao
                   className="gradeContatosModal"
-                  classNameTabela="tabelaContatosModal"
+                  classNameTabela="tabelaContatosModal tabelaFornecedoresProdutoPadrao"
                   classNameMensagem="mensagemTabelaContatosModal"
                   cabecalho={(
                     <tr>
                       <th>Fornecedor</th>
                       <th>Codigo do fornecedor</th>
                       <th>Unidade</th>
+                      <th>Fator</th>
+                      <th>Pedido minimo</th>
+                      <th>Qtd. multipla</th>
                       <th className="cabecalhoAcoesContato">Acoes</th>
                     </tr>
                   )}
@@ -965,6 +985,9 @@ export function ModalProduto({
                       </td>
                       <td>{vinculo.codigoFornecedor}</td>
                       <td>{vinculo.unidadeFornecedor}</td>
+                      <td>{formatarNumeroFornecedorProduto(vinculo.fator)}</td>
+                      <td>{formatarNumeroFornecedorProduto(vinculo.pedidoMinimo)}</td>
+                      <td>{formatarNumeroFornecedorProduto(vinculo.quantidadeMultipla)}</td>
                       <td>
                         <div className="acoesContatoModal">
                           <BotaoAcaoGrade
@@ -1085,12 +1108,50 @@ export function ModalProduto({
                   onChange={alterarCampoFornecedorProduto}
                   disabled={somenteLeitura || salvandoFornecedorProduto}
                 />
-                <CampoFormulario
+                <CampoSelect
                   label="Unidade do fornecedor"
-                  name="unidadeFornecedor"
-                  value={formularioFornecedorProduto.unidadeFornecedor}
+                  name="idUnidadeFornecedor"
+                  value={formularioFornecedorProduto.idUnidadeFornecedor}
+                  onChange={alterarCampoFornecedorProduto}
+                  options={unidadesAtivas.map((unidade) => ({
+                    valor: String(unidade.idUnidade),
+                    label: unidade.descricao
+                  }))}
+                  disabled={somenteLeitura || salvandoFornecedorProduto}
+                  required
+                />
+                <CampoFormulario
+                  label="Fator"
+                  name="fator"
+                  type="number"
+                  min="0.0001"
+                  step="0.0001"
+                  value={formularioFornecedorProduto.fator}
                   onChange={alterarCampoFornecedorProduto}
                   disabled={somenteLeitura || salvandoFornecedorProduto}
+                  required
+                />
+                <CampoFormulario
+                  label="Pedido minimo"
+                  name="pedidoMinimo"
+                  type="number"
+                  min="0"
+                  step="0.0001"
+                  value={formularioFornecedorProduto.pedidoMinimo}
+                  onChange={alterarCampoFornecedorProduto}
+                  disabled={somenteLeitura || salvandoFornecedorProduto}
+                  required
+                />
+                <CampoFormulario
+                  label="Qtd. multipla"
+                  name="quantidadeMultipla"
+                  type="number"
+                  min="0.0001"
+                  step="0.0001"
+                  value={formularioFornecedorProduto.quantidadeMultipla}
+                  onChange={alterarCampoFornecedorProduto}
+                  disabled={somenteLeitura || salvandoFornecedorProduto}
+                  required
                 />
               </section>
             </div>
@@ -1358,7 +1419,7 @@ function obterIniciaisProduto(produto) {
   return textoBase.slice(0, 2).toUpperCase();
 }
 
-function enriquecerFornecedoresProduto(vinculos, fornecedores) {
+function enriquecerFornecedoresProduto(vinculos, fornecedores, unidadesMedida) {
   const fornecedoresPorId = new Map(
     (fornecedores || []).map((fornecedor) => [
       String(fornecedor.idFornecedor),
@@ -1368,8 +1429,58 @@ function enriquecerFornecedoresProduto(vinculos, fornecedores) {
 
   return (vinculos || []).map((vinculo) => ({
     ...vinculo,
-    nomeFornecedor: fornecedoresPorId.get(String(vinculo.idFornecedor)) || `Fornecedor #${vinculo.idFornecedor}`
+    nomeFornecedor: fornecedoresPorId.get(String(vinculo.idFornecedor)) || `Fornecedor #${vinculo.idFornecedor}`,
+    unidadeFornecedor: obterDescricaoUnidadePorId(vinculo.idUnidadeFornecedor, unidadesMedida) || vinculo.unidadeFornecedor || '-'
   }));
+}
+
+function obterDescricaoUnidadePorId(idUnidade, unidadesMedida) {
+  if (!idUnidade) {
+    return '';
+  }
+
+  const unidade = (unidadesMedida || []).find((item) => String(item.idUnidade) === String(idUnidade));
+  return unidade?.descricao || '';
+}
+
+function obterIdUnidadeFornecedorPorDescricao(descricao, unidadesMedida) {
+  const descricaoNormalizada = String(descricao || '').trim().toLowerCase();
+
+  if (!descricaoNormalizada) {
+    return '';
+  }
+
+  const unidade = (unidadesMedida || []).find((item) => (
+    String(item.descricao || '').trim().toLowerCase() === descricaoNormalizada
+  ));
+
+  return unidade?.idUnidade || '';
+}
+
+function normalizarNumeroFornecedorProduto(valor, valorPadrao = 0) {
+  const numero = Number(String(valor ?? '').replace(',', '.'));
+  return Number.isFinite(numero) ? numero : valorPadrao;
+}
+
+function normalizarNumeroFornecedorProdutoParaFormulario(valor, valorPadrao = '') {
+  if (valor === undefined || valor === null || valor === '') {
+    return valorPadrao;
+  }
+
+  return String(valor).replace(',', '.');
+}
+
+function formatarNumeroFornecedorProduto(valor) {
+  const numero = Number(String(valor ?? '').replace(',', '.'));
+
+  if (!Number.isFinite(numero)) {
+    return '-';
+  }
+
+  return new Intl.NumberFormat('pt-BR', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 4
+  }).format(numero);
 }
 
 function obterNomeFornecedorPorId(idFornecedor, fornecedores) {

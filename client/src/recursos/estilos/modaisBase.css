@@ -132,12 +132,58 @@
 }
 
 .modalFornecedorProdutoPadrao {
-  width: min(1040px, calc(100vw - 48px));
+  width: min(1480px, calc(100vw - 24px));
+  max-width: calc(100vw - 24px);
 }
 
 .gradeFornecedorProdutoPadrao {
-  grid-template-columns: minmax(360px, 3fr) minmax(120px, 1fr) minmax(120px, 1fr);
+  grid-template-columns: minmax(320px, 2.2fr) minmax(150px, 1fr) minmax(150px, 1fr) repeat(3, minmax(120px, 0.8fr));
   align-items: end;
+}
+
+.modalFornecedorProdutoPadrao .corpoModalFornecedor {
+  overflow-x: hidden;
+}
+
+.modalFornecedorProdutoPadrao .gradeContatosModal {
+  overflow-x: auto;
+}
+
+.tabelaFornecedoresProdutoPadrao {
+  min-width: 1040px;
+}
+
+.tabelaFornecedoresProdutoPadrao th,
+.tabelaFornecedoresProdutoPadrao td {
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.tabelaFornecedoresProdutoPadrao th:nth-child(1),
+.tabelaFornecedoresProdutoPadrao td:nth-child(1) {
+  width: 28%;
+}
+
+.tabelaFornecedoresProdutoPadrao th:nth-child(2),
+.tabelaFornecedoresProdutoPadrao td:nth-child(2) {
+  width: 17%;
+}
+
+.tabelaFornecedoresProdutoPadrao th:nth-child(3),
+.tabelaFornecedoresProdutoPadrao td:nth-child(3),
+.tabelaFornecedoresProdutoPadrao th:nth-child(4),
+.tabelaFornecedoresProdutoPadrao td:nth-child(4),
+.tabelaFornecedoresProdutoPadrao th:nth-child(5),
+.tabelaFornecedoresProdutoPadrao td:nth-child(5),
+.tabelaFornecedoresProdutoPadrao th:nth-child(6),
+.tabelaFornecedoresProdutoPadrao td:nth-child(6) {
+  width: 11%;
+}
+
+.tabelaFornecedoresProdutoPadrao th:nth-child(7),
+.tabelaFornecedoresProdutoPadrao td:nth-child(7) {
+  width: 10%;
+  text-align: right;
 }
 
 .gradeCamposModalAgendamento {
